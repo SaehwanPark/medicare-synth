@@ -44,13 +44,13 @@ Exit criteria:
 
 ## 2. Baseline and Evidence
 
-Status: Active
+Status: Complete
 
 Outputs:
 
-- checksummed source manifest and immutable raw baseline inventory
-- pinned evidence snapshot for beneficiary, carrier, and outpatient files
-- coverage and conflict report for required fields and relationships
+- checksummed source manifest and immutable raw baseline inventory [Completed]
+- pinned evidence snapshot for beneficiary, carrier, and outpatient files [Completed]
+- coverage and conflict report for required fields and relationships [Completed]
 
 Exit criteria:
 
@@ -59,7 +59,8 @@ Exit criteria:
 
 ## 3. Executable Model and Validation
 
-Status: Planned
+Status: Active
+
 
 Outputs:
 

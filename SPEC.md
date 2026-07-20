@@ -31,7 +31,19 @@ Completed Foundation Decisions:
 - **First Five Deterministic Scenarios**: Specified 3 valid baseline scenarios (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`) and 2 intentional anomaly scenarios (`invalid_orphaned_claim`, `invalid_temporal_inversion`) with expected validator findings.
 - **Licensing & Artifact Policy**: Codebase licensed under **Apache-2.0**. CMS synthetic data is public domain, acquired via manifest-based checksums rather than stored in git. Release artifacts package Parquet/CSV tables, Pydantic schemas, SHA256 manifests, validation reports, and fidelity profiles.
 
+### Baseline and Evidence
+
+Status: Complete
+
+Completed Baseline and Evidence Deliverables:
+
+- **Checksummed Source Manifest**: Defined `data/manifests/cms_2021_syn_claims_manifest.json` for CMS 2021 Synthetic Claims spanning Beneficiary Summary, Carrier Claims, and Outpatient Claims files.
+- **Pinned RKB Evidence Snapshot**: Created `data/rkb_snapshots/rkb-v1.0-20211231.json` capturing CCW variable definitions, data types, formats, constraints, and valid value contracts.
+- **Python Core Package**: Established `src/medicare_synth/` with Pydantic v2 validation models (`SourceManifest`, `FileManifest`, `RKBEvidenceSnapshot`, `VariableContract`, domain entity records).
+- **Behavioral Test Suite**: Added 10 passing unit tests under `tests/` for manifest validation, checksum verification logic, evidence snapshot lookups, and domain record constraints.
+
 Verification requires each decision to cite evidence, state assumptions, and be
+
 reflected in `ARCHITECTURE.md` and `ROADMAP.md`. No synthesis or release may be
 presented as verified before its applicable constraints and tests exist.
 
