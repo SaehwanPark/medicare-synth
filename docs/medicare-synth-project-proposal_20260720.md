@@ -366,7 +366,7 @@ Every release should pin the software version, CMS synthetic baseline release, r
 
 # 14. High-Level Implementation Roadmap
 
-The detailed, phase-by-phase project roadmap is maintained as a separate companion document. The proposal intentionally summarizes the implementation sequence rather than duplicating that operational plan.
+The detailed, phase-by-phase project roadmap is maintained in the companion [ROADMAP](../ROADMAP.md). The proposal intentionally summarizes the implementation sequence rather than duplicating that operational plan.
 
 | **Stage**                | **High-level outcome**                                                                                             |
 |--------------------------|--------------------------------------------------------------------------------------------------------------------|
