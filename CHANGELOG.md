@@ -14,6 +14,8 @@
 - Established immutable RKB evidence bundle snapshot contract (`data/rkb_snapshots/`).
 - Selected Pydantic v2 and Polars / PyArrow as canonical hybrid schema and validation runtime stack.
 - Added `pydantic`, `polars`, and `pyarrow` core dependencies to `pyproject.toml`.
+- Formalized 5-category minimum validation constraint set (Field, Record, Relational, Temporal, Administrative).
+- Specified initial 5 deterministic scenarios (3 valid baseline fixtures, 2 intentional anomaly fixtures).
 
 ### Changed
 

@@ -27,11 +27,11 @@ Completed Foundation Decisions:
 - **Provenance Status Taxonomy**: Preserved, normalized, re-keyed, derived, imputed, synthesized, externally calibrated, and scenario-generated.
 - **RKB Evidence Contract**: Immutable versioned JSON snapshots (`data/rkb_snapshots/rkb-v{MAJOR}.{MINOR}-{YYYYMMDD}.json`) capturing CCW variable definitions, data types, valid value sets, source URLs, and SHA256 checksums.
 - **Canonical Schema & Validation Stack**: Hybrid approach using **Pydantic v2** (`pydantic`) for record-level contracts and scalar validation + **Polars** (`polars`) & **PyArrow** (`pyarrow`) for high-performance tabular relational validation, file I/O, and Parquet export.
+- **Minimum Validation Constraint Set**: Formalized 5 validation categories: Field-level (type/format/value set), Record-level (uniqueness/nullability), Relational (foreign key `CLM_ID` -> `BENE_ID`), Temporal (`CLM_FROM_DT` <= `CLM_THRU_DT` <= Death Date), and Administrative (enrollment compatibility).
+- **First Five Deterministic Scenarios**: Specified 3 valid baseline scenarios (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`) and 2 intentional anomaly scenarios (`invalid_orphaned_claim`, `invalid_temporal_inversion`) with expected validator findings.
 
 Remaining Foundation Decisions:
 
-- define minimum provenance, field, record, relational, and temporal constraints
-- specify the first deterministic scenarios and expected analytic outputs
 - resolve licensing, source-data redistribution, and artifact publication rules
 
 Verification requires each decision to cite evidence, state assumptions, and be

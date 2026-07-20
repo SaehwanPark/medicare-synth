@@ -31,8 +31,8 @@ Outputs:
 - pinned official CMS synthetic baseline (CMS 2021 Synthetic Claims) and target schema year (2021) [Completed]
 - RKB evidence-bundle contract and snapshot policy [Completed]
 - canonical schema language and runtime validation decision (Pydantic v2 + Polars / PyArrow) [Completed]
-- minimum validation constraint set
-- first five scenarios with expected analytic outputs
+- minimum validation constraint set (Field, Record, Relational, Temporal, Administrative) [Completed]
+- first five scenarios with expected analytic outputs (3 valid, 2 invalid) [Completed]
 - licensing, redistribution, and artifact publication policy
 
 Exit criteria:

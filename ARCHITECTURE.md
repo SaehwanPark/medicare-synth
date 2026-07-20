@@ -27,8 +27,7 @@ claimed to implement them.
   baseline anomalies.
 - **Generation** applies deterministic rules and transparent conditional models
   only after applicable validation gates pass.
-- **Scenario compiler** creates small named valid and intentionally invalid
-  fixtures with stable expected analytic outputs.
+- **Scenario compiler** creates small named valid (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`) and intentionally invalid (`invalid_orphaned_claim`, `invalid_temporal_inversion`) fixtures with stable expected analytic outputs.
 - **Interfaces and exporters** will expose a focused Python API and CLI and emit
   versioned CSV, Parquet, SQL fixtures, manifests, and fidelity reports.
 
