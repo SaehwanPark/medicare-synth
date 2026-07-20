@@ -16,6 +16,7 @@ Temporary or archived datasets (incl. data-related artifacts): `data/`
 ## Tooling Consideration
 
 - Use `uv` to manage Python runtime and packages always (e.g., `uv add`, `uv run`)
+- Other CLI tools you may consider (you can also use what are not listed.): `gh`, `hf`
 - Preferred Python tooling: `pytest`, `basedpyright`, `pydantic`, `comp-builders`, `ruff`
 - Strictly use 2 spaces of tabsize throughout (codes and documents)
 - Be ready for the cases where spawned terminals or agents may suffer from path issues (e.g., path environments might not be well-inherted). Always try to search for the necessary/required CLI tools even when they are not found in the current path configuration.
