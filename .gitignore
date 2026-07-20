@@ -9,5 +9,8 @@ wheels/
 # Datasets
 data/
 
+# Agent harness handoffs
+_workspace/
+
 # Virtual environments
 .venv
