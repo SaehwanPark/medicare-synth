@@ -18,14 +18,17 @@
 Status: Active
 
 The current repository provides contributor guidance, a reusable domain harness,
-project bookkeeping, and a canonical roadmap. It does not yet implement a CLI,
-Python API, schemas, validators, or data generation.
+project bookkeeping, and a canonical roadmap. Baseline pinning and evidence snapshot contracts are established.
 
-The active foundation milestone must:
+Completed Foundation Decisions:
 
-- select and pin one official CMS synthetic baseline release and target schema
-  year
-- define the RKB evidence-bundle and snapshot contract
+- **Canonical Baseline Pinned**: CMS 2021 Synthetic Claims collection (`CMS-2021-SYN-CLAIMS`) with target schema year **2021** (CCW contemporary file layout).
+- **First Release Scope**: Beneficiary Summary File (Beneficiary-Year grain), Carrier Claims File (Claim Line/Header grain), and Outpatient Claims File (Claim Line/Header grain).
+- **Provenance Status Taxonomy**: Preserved, normalized, re-keyed, derived, imputed, synthesized, externally calibrated, and scenario-generated.
+- **RKB Evidence Contract**: Immutable versioned JSON snapshots (`data/rkb_snapshots/rkb-v{MAJOR}.{MINOR}-{YYYYMMDD}.json`) capturing CCW variable definitions, data types, valid value sets, source URLs, and SHA256 checksums.
+
+Remaining Foundation Decisions:
+
 - select the canonical schema language and runtime validation approach
 - define minimum provenance, field, record, relational, and temporal constraints
 - specify the first deterministic scenarios and expected analytic outputs

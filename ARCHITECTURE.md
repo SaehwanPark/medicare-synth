@@ -13,8 +13,9 @@ claimed to implement them.
 
 ## Proposed Components
 
-- **Source and evidence adapters** acquire pinned CMS synthetic source material
-  and consume versioned RKB evidence bundles without duplicating archival tools.
+- **Source and evidence adapters** acquire pinned `CMS-2021-SYN-CLAIMS` baseline material
+  and consume versioned RKB evidence snapshots (`data/rkb_snapshots/rkb-v{MAJOR}.{MINOR}-{YYYYMMDD}.json`)
+  without duplicating archival tools.
 - **Executable specifications** own file-year schemas, grains, types, keys,
   null semantics, provenance statuses, and documented constraints.
 - **Canonical model** represents beneficiaries, enrollment, providers, plans,
