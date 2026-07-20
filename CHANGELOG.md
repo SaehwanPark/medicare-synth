@@ -16,6 +16,8 @@
 - Added `pydantic`, `polars`, and `pyarrow` core dependencies to `pyproject.toml`.
 - Formalized 5-category minimum validation constraint set (Field, Record, Relational, Temporal, Administrative).
 - Specified initial 5 deterministic scenarios (3 valid baseline fixtures, 2 intentional anomaly fixtures).
+- Established Apache-2.0 open-source license, manifest-based raw data acquisition rules, and release artifact publication paths.
+- Completed Milestone 1 (Foundation Decisions) across all 6 core deliverables.
 
 ### Changed
 
