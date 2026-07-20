@@ -16,13 +16,13 @@ claimed to implement them.
 - **Source and evidence adapters** acquire pinned `CMS-2021-SYN-CLAIMS` baseline material
   and consume versioned RKB evidence snapshots (`data/rkb_snapshots/rkb-v{MAJOR}.{MINOR}-{YYYYMMDD}.json`)
   without duplicating archival tools.
-- **Executable specifications** own file-year schemas, grains, types, keys,
+- **Executable specifications** own file-year schemas (defined via Pydantic v2 models), grains, types, keys,
   null semantics, provenance statuses, and documented constraints.
 - **Canonical model** represents beneficiaries, enrollment, providers, plans,
   claims, lines, prescriptions, and care events independently of export layout.
 - **Normalization** preserves recoverable raw values and lineage while converting
   official baseline records into canonical typed entities.
-- **Validation** evaluates field, record, relational, administrative, scenario,
+- **Validation** evaluates field (Pydantic), record, relational (Polars lazy frames), administrative, scenario,
   and distributional properties and reports findings without silently repairing
   baseline anomalies.
 - **Generation** applies deterministic rules and transparent conditional models

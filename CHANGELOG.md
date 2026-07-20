@@ -12,6 +12,8 @@
 - Pinned CMS 2021 Synthetic Claims collection (`CMS-2021-SYN-CLAIMS`) as canonical baseline and 2021 CCW layout as target schema year.
 - Defined 8-tag provenance status taxonomy for field-level lineage tracking.
 - Established immutable RKB evidence bundle snapshot contract (`data/rkb_snapshots/`).
+- Selected Pydantic v2 and Polars / PyArrow as canonical hybrid schema and validation runtime stack.
+- Added `pydantic`, `polars`, and `pyarrow` core dependencies to `pyproject.toml`.
 
 ### Changed
 
