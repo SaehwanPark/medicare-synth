@@ -24,12 +24,12 @@ Exit criteria:
 
 ## 1. Foundation Decisions
 
-Status: Next
+Status: Active
 
 Outputs:
 
-- pinned official CMS synthetic baseline and target schema year
-- RKB evidence-bundle contract and snapshot policy
+- pinned official CMS synthetic baseline (CMS 2021 Synthetic Claims) and target schema year (2021) [Completed]
+- RKB evidence-bundle contract and snapshot policy [Completed]
 - canonical schema language and runtime validation decision
 - minimum validation constraint set
 - first five scenarios with expected analytic outputs
