@@ -15,10 +15,10 @@
 
 ### Foundation
 
-Status: Active
+Status: Complete
 
 The current repository provides contributor guidance, a reusable domain harness,
-project bookkeeping, and a canonical roadmap. Baseline pinning and evidence snapshot contracts are established.
+project bookkeeping, pinned baseline specifications, canonical validation stack decisions, minimum constraint sets, deterministic scenario definitions, and licensing policies.
 
 Completed Foundation Decisions:
 
@@ -29,10 +29,7 @@ Completed Foundation Decisions:
 - **Canonical Schema & Validation Stack**: Hybrid approach using **Pydantic v2** (`pydantic`) for record-level contracts and scalar validation + **Polars** (`polars`) & **PyArrow** (`pyarrow`) for high-performance tabular relational validation, file I/O, and Parquet export.
 - **Minimum Validation Constraint Set**: Formalized 5 validation categories: Field-level (type/format/value set), Record-level (uniqueness/nullability), Relational (foreign key `CLM_ID` -> `BENE_ID`), Temporal (`CLM_FROM_DT` <= `CLM_THRU_DT` <= Death Date), and Administrative (enrollment compatibility).
 - **First Five Deterministic Scenarios**: Specified 3 valid baseline scenarios (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`) and 2 intentional anomaly scenarios (`invalid_orphaned_claim`, `invalid_temporal_inversion`) with expected validator findings.
-
-Remaining Foundation Decisions:
-
-- resolve licensing, source-data redistribution, and artifact publication rules
+- **Licensing & Artifact Policy**: Codebase licensed under **Apache-2.0**. CMS synthetic data is public domain, acquired via manifest-based checksums rather than stored in git. Release artifacts package Parquet/CSV tables, Pydantic schemas, SHA256 manifests, validation reports, and fidelity profiles.
 
 Verification requires each decision to cite evidence, state assumptions, and be
 reflected in `ARCHITECTURE.md` and `ROADMAP.md`. No synthesis or release may be

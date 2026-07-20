@@ -69,8 +69,9 @@ These are responsibility boundaries, not an approved Python package layout.
 
 ## External Boundaries
 
-- `rkb-rust` or `resdac-knowledge-base` supplies versioned evidence artifacts.
+- `rkb-rust` or `resdac-knowledge-base` supplies versioned evidence artifacts (`data/rkb_snapshots/`).
 - `tabdat-synth` may supply within-table conditional synthesis through a pinned,
   stable interface after the validation-first core exists.
-- Exact contracts, versions, schema technology, and artifact publication paths
-  remain foundation decisions tracked in `ROADMAP.md`.
+- **Licensing**: Codebase licensed under Apache License 2.0 (`Apache-2.0`).
+- **Data Redistribution**: Raw CMS synthetic data is public domain, acquired via CLI manifest checksum verification into ignored `data/` directories.
+- **Artifact Publication**: Release bundles publish versioned Parquet/CSV tables, Pydantic schemas, SHA256 manifests, validation reports, and fidelity profiles.
