@@ -150,6 +150,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       carrier_df=scenario_slice.carrier_df,
       outpatient_df=scenario_slice.outpatient_df,
       inpatient_df=scenario_slice.inpatient_df,
+      pde_df=scenario_slice.pde_df,
     )
     print(f"Scenario: {args.scenario}")
     print(f"Valid: {report.is_valid}")
@@ -170,6 +171,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  Carrier Claims: {scenario_slice.carrier_df.height} rows")
     print(f"  Outpatient Claims: {scenario_slice.outpatient_df.height} rows")
     print(f"  Inpatient Claims: {scenario_slice.inpatient_df.height} rows")
+    print(f"  Prescription Drug Events: {scenario_slice.pde_df.height} rows")
     return 0
 
   elif args.command == "manifest":
@@ -199,6 +201,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       outpatient_df=scenario_slice.outpatient_df,
       fmt=args.format,
       inpatient_df=scenario_slice.inpatient_df,
+      pde_df=scenario_slice.pde_df,
     )
 
     print(f"Exported Release Bundle: {manifest.release_id}")
@@ -219,6 +222,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       "carrier_claims": scenario_slice.carrier_df,
       "outpatient_claims": scenario_slice.outpatient_df,
       "inpatient_claims": scenario_slice.inpatient_df,
+      "pde_events": scenario_slice.pde_df,
     }
 
     if args.mode == "vertical":
@@ -234,6 +238,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       print(f"  Carrier Claims: {expanded['carrier_claims'].height} rows")
       print(f"  Outpatient Claims: {expanded['outpatient_claims'].height} rows")
       print(f"  Inpatient Claims: {expanded['inpatient_claims'].height} rows")
+      print(f"  Prescription Drug Events: {expanded['pde_events'].height} rows")
     return 0
 
   elif args.command == "catalog":
@@ -280,7 +285,9 @@ def main(argv: Optional[list[str]] = None) -> int:
       "carrier": scenario_slice.carrier_df,
       "outpatient": scenario_slice.outpatient_df,
       "inpatient": scenario_slice.inpatient_df,
+      "pde": scenario_slice.pde_df,
     }
+
 
     engine = AuditEngine(dataset=tables, scenario_name=args.scenario)
     report = engine.run_audit()

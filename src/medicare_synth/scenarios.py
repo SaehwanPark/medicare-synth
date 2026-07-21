@@ -16,6 +16,7 @@ class ScenarioSlice(NamedTuple):
   carrier_df: pl.DataFrame
   outpatient_df: pl.DataFrame
   inpatient_df: pl.DataFrame
+  pde_df: pl.DataFrame
 
 
 class ScenarioCompiler:
@@ -117,8 +118,37 @@ class ScenarioCompiler:
       ]
     )
 
+    pde_df = pl.DataFrame(
+      [
+        {
+          "pde_id": "PDE_P001",
+          "bene_id": "BENE_001",
+          "srvc_dt": date(2021, 3, 10),
+          "prod_srvc_id": "00093015001",
+          "qty_dspnsd_num": 30.0,
+          "days_suply_num": 30,
+          "ptnt_pay_amt": 10.00,
+          "tot_rx_cst_amt": 45.50,
+        },
+        {
+          "pde_id": "PDE_P002",
+          "bene_id": "BENE_002",
+          "srvc_dt": date(2021, 4, 15),
+          "prod_srvc_id": "60505132301",
+          "qty_dspnsd_num": 60.0,
+          "days_suply_num": 90,
+          "ptnt_pay_amt": 15.00,
+          "tot_rx_cst_amt": 120.00,
+        },
+      ]
+    )
+
     return ScenarioSlice(
-      bene_df=bene_df, carrier_df=carrier_df, outpatient_df=outpatient_df, inpatient_df=inpatient_df
+      bene_df=bene_df,
+      carrier_df=carrier_df,
+      outpatient_df=outpatient_df,
+      inpatient_df=inpatient_df,
+      pde_df=pde_df,
     )
 
   @staticmethod
@@ -129,8 +159,13 @@ class ScenarioCompiler:
     carrier_sub = slice_data.carrier_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     outpatient_sub = slice_data.outpatient_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     inpatient_sub = slice_data.inpatient_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
+    pde_sub = slice_data.pde_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     return ScenarioSlice(
-      bene_df=bene_sub, carrier_df=carrier_sub, outpatient_df=outpatient_sub, inpatient_df=inpatient_sub
+      bene_df=bene_sub,
+      carrier_df=carrier_sub,
+      outpatient_df=outpatient_sub,
+      inpatient_df=inpatient_sub,
+      pde_df=pde_sub,
     )
 
   @staticmethod
@@ -164,6 +199,7 @@ class ScenarioCompiler:
       carrier_df=carrier_df,
       outpatient_df=slice_data.outpatient_df,
       inpatient_df=slice_data.inpatient_df,
+      pde_df=slice_data.pde_df,
     )
 
   @staticmethod
@@ -188,6 +224,7 @@ class ScenarioCompiler:
       carrier_df=orphaned_carrier,
       outpatient_df=slice_data.outpatient_df,
       inpatient_df=slice_data.inpatient_df,
+      pde_df=slice_data.pde_df,
     )
 
   @staticmethod
@@ -211,6 +248,7 @@ class ScenarioCompiler:
       carrier_df=slice_data.carrier_df,
       outpatient_df=inverted_outpatient,
       inpatient_df=slice_data.inpatient_df,
+      pde_df=slice_data.pde_df,
     )
 
   @staticmethod
@@ -235,6 +273,33 @@ class ScenarioCompiler:
       carrier_df=slice_data.carrier_df,
       outpatient_df=slice_data.outpatient_df,
       inpatient_df=inverted_inpatient,
+      pde_df=slice_data.pde_df,
+    )
+
+  @staticmethod
+  def invalid_pde_days_supply() -> ScenarioSlice:
+    """Creates an anomaly scenario containing a PDE event with invalid negative days supply."""
+    slice_data = ScenarioCompiler.valid_baseline_cohort()
+    invalid_pde = pl.DataFrame(
+      [
+        {
+          "pde_id": "PDE_ERR_001",
+          "bene_id": "BENE_001",
+          "srvc_dt": date(2021, 9, 1),
+          "prod_srvc_id": "00093015001",
+          "qty_dspnsd_num": 30.0,
+          "days_suply_num": -10,  # Negative days supply
+          "ptnt_pay_amt": 5.00,
+          "tot_rx_cst_amt": 25.00,
+        }
+      ]
+    )
+    return ScenarioSlice(
+      bene_df=slice_data.bene_df,
+      carrier_df=slice_data.carrier_df,
+      outpatient_df=slice_data.outpatient_df,
+      inpatient_df=slice_data.inpatient_df,
+      pde_df=invalid_pde,
     )
 
   @classmethod
@@ -247,6 +312,7 @@ class ScenarioCompiler:
       "invalid_orphaned_claim": cls.invalid_orphaned_claim,
       "invalid_temporal_inversion": cls.invalid_temporal_inversion,
       "invalid_inpatient_admission": cls.invalid_inpatient_admission,
+      "invalid_pde_days_supply": cls.invalid_pde_days_supply,
     }
     if name not in scenarios:
       raise ValueError(f"Unknown scenario name: '{name}'. Available: {list(scenarios.keys())}")

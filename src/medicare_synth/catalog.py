@@ -81,6 +81,15 @@ class ScenarioCatalog:
       sample_bene_count=1,
       sample_claim_count=1,
     ),
+    "invalid_pde_days_supply": ScenarioEntry(
+      name="invalid_pde_days_supply",
+      description="Intentional anomaly fixture containing a PDE event with invalid negative days supply.",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "pde_events"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
 
   @classmethod
@@ -115,6 +124,7 @@ class ScenarioCatalog:
       "invalid_orphaned_claim": ScenarioCompiler.invalid_orphaned_claim,
       "invalid_temporal_inversion": ScenarioCompiler.invalid_temporal_inversion,
       "invalid_inpatient_admission": ScenarioCompiler.invalid_inpatient_admission,
+      "invalid_pde_days_supply": ScenarioCompiler.invalid_pde_days_supply,
     }
 
     for name, method in compiler_methods.items():
@@ -127,7 +137,9 @@ class ScenarioCatalog:
         ("carrier_claims", slice_data.carrier_df),
         ("outpatient_claims", slice_data.outpatient_df),
         ("inpatient_claims", slice_data.inpatient_df),
+        ("pde_events", slice_data.pde_df),
       ]
+
 
       for table_name, df in tables:
         if df.is_empty():

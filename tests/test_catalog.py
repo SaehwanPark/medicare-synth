@@ -7,11 +7,13 @@ from medicare_synth.catalog import ScenarioCatalog
 
 def test_scenario_catalog_entries():
   catalog = ScenarioCatalog.get_catalog()
-  assert len(catalog) == 6
+  assert len(catalog) == 7
   names = [e.name for e in catalog]
   assert "valid_baseline_cohort" in names
   assert "invalid_orphaned_claim" in names
   assert "invalid_inpatient_admission" in names
+  assert "invalid_pde_days_supply" in names
+
 
 
 def test_scenario_info_lookup():

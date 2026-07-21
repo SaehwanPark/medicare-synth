@@ -91,8 +91,10 @@ Completed Adoption and Maintenance Deliverables:
 - **Explicit Dataset Limitations Disclosure Profile**: Created `src/medicare_synth/profile.py` formalizing structural, relational, temporal, accounting, distributional, and inferential boundaries (`medicare-synth profile`).
 - **Cross-Language Reference Examples**: Added `examples/python_reference.py` and `examples/sql_reference.sql` illustrating downstream Polars/DuckDB analytical queries on synthetic release artifacts.
 - **Data Quality & Privacy Audit Suite**: Created `src/medicare_synth/audit.py` establishing `AuditEngine` and `AuditReport` for join coverage, k-anonymity privacy scoring, and column metrics.
+- **Part D Prescription Drug Event (PDE) Domain Extension**: Implemented `PrescriptionDrugEventRecord` domain model, updated source manifest and RKB evidence snapshot with Part D variables/constraints (`PDE_ID`, `SRVC_DT`, `PROD_SRVC_ID`, `QTY_DSPNSD_NUM`, `DAYS_SUPLY_NUM`, `PTNT_PAY_AMT`, `TOT_RX_CST_AMT`, `VAL_NUM_01`), extended `RelationalValidator` with `check_pde_field_constraints`, updated `ScenarioCompiler` and added `invalid_pde_days_supply` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
 - **CLI Subcommand Extensions**: Added `catalog`, `diff`, `profile`, `export-ci`, and `audit` subcommands to `src/medicare_synth/cli.py`.
-- **Adoption & Maintenance Test Suite**: Added 11 unit tests across `tests/test_catalog.py`, `tests/test_diff.py`, `tests/test_profile.py`, and `tests/test_audit.py` (44 total passing unit tests).
+- **Adoption & Maintenance Test Suite**: Added 11 unit tests across `tests/test_catalog.py`, `tests/test_diff.py`, `tests/test_profile.py`, `tests/test_audit.py`, and `tests/test_pde.py` (56 total passing unit tests).
+
 
 
 

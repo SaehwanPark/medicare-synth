@@ -75,3 +75,18 @@ class InpatientClaimHeaderRecord(BaseModel):
   clm_pmt_amt: float = Field(default=0.0, ge=0.0, description="Claim Payment Amount")
   clm_utlztn_day_cnt: int = Field(default=1, ge=0, description="Utilization Day Count")
   clm_drg_cd: Optional[str] = Field(default=None, max_length=3, description="Diagnosis Related Group Code")
+
+
+class PrescriptionDrugEventRecord(BaseModel):
+  """Domain record representation for a Part D Prescription Drug Event (PDE)."""
+
+  model_config = ConfigDict(frozen=True)
+
+  pde_id: str = Field(..., max_length=15, description="Prescription Drug Event ID")
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  srvc_dt: date = Field(..., description="Prescription Fill Date")
+  prod_srvc_id: Optional[str] = Field(default=None, max_length=11, description="National Drug Code (NDC)")
+  qty_dspnsd_num: float = Field(default=30.0, ge=0.0, description="Quantity Dispensed")
+  days_suply_num: int = Field(default=30, ge=0, description="Days Supply")
+  ptnt_pay_amt: float = Field(default=0.0, ge=0.0, description="Patient Paid Amount")
+  tot_rx_cst_amt: float = Field(default=0.0, ge=0.0, description="Total Prescription Cost Amount")
