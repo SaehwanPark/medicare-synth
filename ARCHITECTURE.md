@@ -25,7 +25,8 @@ The component model below records the implemented and planned boundaries.
   and distributional properties and reports findings without silently repairing
   baseline anomalies.
 - **Generation and Expansion** applies deterministic rules, `TabDatSynthAdapter` vertical feature synthesis, and `HorizontalExpander` connected-subgraph scaling with deterministic re-keying after validation gates pass.
-- **Scenario catalog & CI exporter** provides `ScenarioCatalog` for inspecting named fixtures (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`, `invalid_orphaned_claim`, `invalid_temporal_inversion`) and automated `export-ci` generation.
+- **Scenario catalog & CI exporter** provides `ScenarioCatalog` for inspecting named fixtures (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`, `invalid_orphaned_claim`, `invalid_temporal_inversion`, `invalid_inpatient_admission`, `invalid_pde_days_supply`, `invalid_snf_utilization_days`) and automated `export-ci` generation.
+
 - **Schema & evidence snapshot diff engine** (`SchemaDiffer`) compares RKB evidence snapshots or schema models to detect added, removed, and breaking field modifications (`medicare-synth diff`).
 - **Limitations & dataset boundary profiler** (`LimitationsProfiler`) generates explicit 6-category disclosures covering structural, relational, temporal, accounting, distributional, and inferential boundaries (`limitations_profile.json`).
 - **Data Quality & Privacy Audit Suite** (`AuditEngine`) evaluates relational join coverage, k-anonymity scores over quasi-identifiers, and column-level nullity/uniqueness metrics (`audit_report.json`).

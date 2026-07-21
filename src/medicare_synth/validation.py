@@ -180,6 +180,30 @@ class RelationalValidator:
       ]
     return []
 
+  @staticmethod
+  def check_snf_field_constraints(snf_df: pl.DataFrame) -> list[Finding]:
+
+    """Identifies SNF claims with negative utilization days or non-covered days."""
+    if snf_df.is_empty() or "clm_utlztn_day_cnt" not in snf_df.columns or "ncvd_days_cnt" not in snf_df.columns:
+      return []
+
+    invalid = snf_df.filter((pl.col("clm_utlztn_day_cnt") < 0) | (pl.col("ncvd_days_cnt") < 0))
+    invalid_count = invalid.height
+
+    if invalid_count > 0:
+      sample_ids = invalid.select("clm_id").slice(0, 5).to_series().to_list() if "clm_id" in invalid.columns else []
+      return [
+        Finding(
+          rule_id="FLD-002",
+          category=FindingCategory.FIELD,
+          severity=Severity.HIGH,
+          message=f"Found {invalid_count} SNF claims with invalid negative utilization days or non-covered days count.",
+          count=invalid_count,
+          details={"table_name": "SNF Claims", "sample_clm_ids": sample_ids},
+        )
+      ]
+    return []
+
   def validate_slice(
     self,
     bene_df: pl.DataFrame,
@@ -187,6 +211,7 @@ class RelationalValidator:
     outpatient_df: Optional[pl.DataFrame] = None,
     inpatient_df: Optional[pl.DataFrame] = None,
     pde_df: Optional[pl.DataFrame] = None,
+    snf_df: Optional[pl.DataFrame] = None,
   ) -> ValidationReport:
     """Executes full suite of relational, temporal, field, and record-level checks over a dataset slice."""
     findings: list[Finding] = []
@@ -214,5 +239,11 @@ class RelationalValidator:
       findings.extend(self.check_orphaned_claims(bene_df, pde_df, "Prescription Drug Events"))
       findings.extend(self.check_pde_field_constraints(pde_df))
       findings.extend(self.check_record_uniqueness(pde_df, ["pde_id"], "Prescription Drug Events"))
+
+    if snf_df is not None and not snf_df.is_empty():
+      findings.extend(self.check_orphaned_claims(bene_df, snf_df, "SNF Claims"))
+      findings.extend(self.check_admission_temporal_inversions(snf_df, "SNF Claims"))
+      findings.extend(self.check_snf_field_constraints(snf_df))
+      findings.extend(self.check_record_uniqueness(snf_df, ["clm_id"], "SNF Claims"))
 
     return ValidationReport(findings=findings)

@@ -17,6 +17,8 @@ class ScenarioSlice(NamedTuple):
   outpatient_df: pl.DataFrame
   inpatient_df: pl.DataFrame
   pde_df: pl.DataFrame
+  snf_df: pl.DataFrame
+
 
 
 class ScenarioCompiler:
@@ -143,12 +145,36 @@ class ScenarioCompiler:
       ]
     )
 
+    snf_df = pl.DataFrame(
+      [
+        {
+          "clm_id": "CLM_S001",
+          "bene_id": "BENE_001",
+          "clm_admsn_dt": date(2021, 6, 1),
+          "nch_bene_dschrg_dt": date(2021, 6, 15),
+          "clm_pmt_amt": 8500.00,
+          "clm_utlztn_day_cnt": 14,
+          "ncvd_days_cnt": 0,
+        },
+        {
+          "clm_id": "CLM_S002",
+          "bene_id": "BENE_002",
+          "clm_admsn_dt": date(2021, 8, 5),
+          "nch_bene_dschrg_dt": date(2021, 8, 12),
+          "clm_pmt_amt": 4200.00,
+          "clm_utlztn_day_cnt": 7,
+          "ncvd_days_cnt": 0,
+        },
+      ]
+    )
+
     return ScenarioSlice(
       bene_df=bene_df,
       carrier_df=carrier_df,
       outpatient_df=outpatient_df,
       inpatient_df=inpatient_df,
       pde_df=pde_df,
+      snf_df=snf_df,
     )
 
   @staticmethod
@@ -160,12 +186,14 @@ class ScenarioCompiler:
     outpatient_sub = slice_data.outpatient_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     inpatient_sub = slice_data.inpatient_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     pde_sub = slice_data.pde_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
+    snf_sub = slice_data.snf_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     return ScenarioSlice(
       bene_df=bene_sub,
       carrier_df=carrier_sub,
       outpatient_df=outpatient_sub,
       inpatient_df=inpatient_sub,
       pde_df=pde_sub,
+      snf_df=snf_sub,
     )
 
   @staticmethod
@@ -200,6 +228,7 @@ class ScenarioCompiler:
       outpatient_df=slice_data.outpatient_df,
       inpatient_df=slice_data.inpatient_df,
       pde_df=slice_data.pde_df,
+      snf_df=slice_data.snf_df,
     )
 
   @staticmethod
@@ -225,6 +254,7 @@ class ScenarioCompiler:
       outpatient_df=slice_data.outpatient_df,
       inpatient_df=slice_data.inpatient_df,
       pde_df=slice_data.pde_df,
+      snf_df=slice_data.snf_df,
     )
 
   @staticmethod
@@ -249,6 +279,7 @@ class ScenarioCompiler:
       outpatient_df=inverted_outpatient,
       inpatient_df=slice_data.inpatient_df,
       pde_df=slice_data.pde_df,
+      snf_df=slice_data.snf_df,
     )
 
   @staticmethod
@@ -274,6 +305,7 @@ class ScenarioCompiler:
       outpatient_df=slice_data.outpatient_df,
       inpatient_df=inverted_inpatient,
       pde_df=slice_data.pde_df,
+      snf_df=slice_data.snf_df,
     )
 
   @staticmethod
@@ -300,6 +332,33 @@ class ScenarioCompiler:
       outpatient_df=slice_data.outpatient_df,
       inpatient_df=slice_data.inpatient_df,
       pde_df=invalid_pde,
+      snf_df=slice_data.snf_df,
+    )
+
+  @staticmethod
+  def invalid_snf_utilization_days() -> ScenarioSlice:
+    """Creates an anomaly scenario containing a SNF claim with invalid negative utilization days."""
+    slice_data = ScenarioCompiler.valid_baseline_cohort()
+    invalid_snf = pl.DataFrame(
+      [
+        {
+          "clm_id": "CLM_SNF_ERR_001",
+          "bene_id": "BENE_001",
+          "clm_admsn_dt": date(2021, 6, 1),
+          "nch_bene_dschrg_dt": date(2021, 6, 15),
+          "clm_pmt_amt": 8500.00,
+          "clm_utlztn_day_cnt": -5,  # Negative utilization days
+          "ncvd_days_cnt": 0,
+        }
+      ]
+    )
+    return ScenarioSlice(
+      bene_df=slice_data.bene_df,
+      carrier_df=slice_data.carrier_df,
+      outpatient_df=slice_data.outpatient_df,
+      inpatient_df=slice_data.inpatient_df,
+      pde_df=slice_data.pde_df,
+      snf_df=invalid_snf,
     )
 
   @classmethod
@@ -313,6 +372,7 @@ class ScenarioCompiler:
       "invalid_temporal_inversion": cls.invalid_temporal_inversion,
       "invalid_inpatient_admission": cls.invalid_inpatient_admission,
       "invalid_pde_days_supply": cls.invalid_pde_days_supply,
+      "invalid_snf_utilization_days": cls.invalid_snf_utilization_days,
     }
     if name not in scenarios:
       raise ValueError(f"Unknown scenario name: '{name}'. Available: {list(scenarios.keys())}")

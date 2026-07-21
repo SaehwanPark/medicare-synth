@@ -151,6 +151,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       outpatient_df=scenario_slice.outpatient_df,
       inpatient_df=scenario_slice.inpatient_df,
       pde_df=scenario_slice.pde_df,
+      snf_df=scenario_slice.snf_df,
     )
     print(f"Scenario: {args.scenario}")
     print(f"Valid: {report.is_valid}")
@@ -172,6 +173,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  Outpatient Claims: {scenario_slice.outpatient_df.height} rows")
     print(f"  Inpatient Claims: {scenario_slice.inpatient_df.height} rows")
     print(f"  Prescription Drug Events: {scenario_slice.pde_df.height} rows")
+    print(f"  SNF Claims: {scenario_slice.snf_df.height} rows")
     return 0
 
   elif args.command == "manifest":
@@ -202,6 +204,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       fmt=args.format,
       inpatient_df=scenario_slice.inpatient_df,
       pde_df=scenario_slice.pde_df,
+      snf_df=scenario_slice.snf_df,
     )
 
     print(f"Exported Release Bundle: {manifest.release_id}")
@@ -223,6 +226,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       "outpatient_claims": scenario_slice.outpatient_df,
       "inpatient_claims": scenario_slice.inpatient_df,
       "pde_events": scenario_slice.pde_df,
+      "snf_claims": scenario_slice.snf_df,
     }
 
     if args.mode == "vertical":
@@ -239,6 +243,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       print(f"  Outpatient Claims: {expanded['outpatient_claims'].height} rows")
       print(f"  Inpatient Claims: {expanded['inpatient_claims'].height} rows")
       print(f"  Prescription Drug Events: {expanded['pde_events'].height} rows")
+      print(f"  SNF Claims: {expanded['snf_claims'].height} rows")
     return 0
 
   elif args.command == "catalog":
@@ -286,6 +291,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       "outpatient": scenario_slice.outpatient_df,
       "inpatient": scenario_slice.inpatient_df,
       "pde": scenario_slice.pde_df,
+      "snf": scenario_slice.snf_df,
     }
 
 
@@ -304,6 +310,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  K-Anonymity Metrics: {list(report.k_anonymity.keys())}")
     print(f"  Column Metrics Tables: {list(report.column_metrics.keys())}")
     return 0
+
 
   else:
     parser.print_help()

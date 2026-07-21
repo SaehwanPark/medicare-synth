@@ -16,6 +16,8 @@ from medicare_synth.models import (
   CarrierClaimLineRecord,
   InpatientClaimHeaderRecord,
   OutpatientClaimHeaderRecord,
+  PrescriptionDrugEventRecord,
+  SkilledNursingFacilityClaimRecord,
   ProvenanceStatus,
 )
 from medicare_synth.normalizer import BaselineNormalizer
@@ -42,6 +44,7 @@ __all__ = [
   "LimitationsProfile",
   "LimitationsProfiler",
   "OutpatientClaimHeaderRecord",
+  "PrescriptionDrugEventRecord",
   "ProvenanceStatus",
   "RKBEvidenceSnapshot",
   "RelationalValidator",
@@ -52,6 +55,7 @@ __all__ = [
   "ScenarioEntry",
   "SchemaDiffer",
   "Severity",
+  "SkilledNursingFacilityClaimRecord",
   "SourceManifest",
   "TabDatSynthAdapter",
   "ValidationReport",

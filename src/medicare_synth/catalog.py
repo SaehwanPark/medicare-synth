@@ -90,6 +90,15 @@ class ScenarioCatalog:
       sample_bene_count=1,
       sample_claim_count=1,
     ),
+    "invalid_snf_utilization_days": ScenarioEntry(
+      name="invalid_snf_utilization_days",
+      description="Intentional anomaly fixture containing a SNF claim with invalid negative utilization days.",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "snf_claims"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
 
   @classmethod
@@ -125,6 +134,7 @@ class ScenarioCatalog:
       "invalid_temporal_inversion": ScenarioCompiler.invalid_temporal_inversion,
       "invalid_inpatient_admission": ScenarioCompiler.invalid_inpatient_admission,
       "invalid_pde_days_supply": ScenarioCompiler.invalid_pde_days_supply,
+      "invalid_snf_utilization_days": ScenarioCompiler.invalid_snf_utilization_days,
     }
 
     for name, method in compiler_methods.items():
@@ -138,7 +148,9 @@ class ScenarioCatalog:
         ("outpatient_claims", slice_data.outpatient_df),
         ("inpatient_claims", slice_data.inpatient_df),
         ("pde_events", slice_data.pde_df),
+        ("snf_claims", slice_data.snf_df),
       ]
+
 
 
       for table_name, df in tables:
