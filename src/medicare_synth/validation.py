@@ -182,7 +182,6 @@ class RelationalValidator:
 
   @staticmethod
   def check_snf_field_constraints(snf_df: pl.DataFrame) -> list[Finding]:
-
     """Identifies SNF claims with negative utilization days or non-covered days."""
     if snf_df.is_empty() or "clm_utlztn_day_cnt" not in snf_df.columns or "ncvd_days_cnt" not in snf_df.columns:
       return []
@@ -204,6 +203,29 @@ class RelationalValidator:
       ]
     return []
 
+  @staticmethod
+  def check_hha_field_constraints(hha_df: pl.DataFrame) -> list[Finding]:
+    """Identifies HHA claims with negative utilization days count."""
+    if hha_df.is_empty() or "clm_utlztn_day_cnt" not in hha_df.columns:
+      return []
+
+    invalid = hha_df.filter(pl.col("clm_utlztn_day_cnt") < 0)
+    invalid_count = invalid.height
+
+    if invalid_count > 0:
+      sample_ids = invalid.select("clm_id").slice(0, 5).to_series().to_list() if "clm_id" in invalid.columns else []
+      return [
+        Finding(
+          rule_id="FLD-003",
+          category=FindingCategory.FIELD,
+          severity=Severity.HIGH,
+          message=f"Found {invalid_count} HHA claims with invalid negative utilization days count.",
+          count=invalid_count,
+          details={"table_name": "HHA Claims", "sample_clm_ids": sample_ids},
+        )
+      ]
+    return []
+
   def validate_slice(
     self,
     bene_df: pl.DataFrame,
@@ -212,6 +234,7 @@ class RelationalValidator:
     inpatient_df: Optional[pl.DataFrame] = None,
     pde_df: Optional[pl.DataFrame] = None,
     snf_df: Optional[pl.DataFrame] = None,
+    hha_df: Optional[pl.DataFrame] = None,
   ) -> ValidationReport:
     """Executes full suite of relational, temporal, field, and record-level checks over a dataset slice."""
     findings: list[Finding] = []
@@ -245,5 +268,11 @@ class RelationalValidator:
       findings.extend(self.check_admission_temporal_inversions(snf_df, "SNF Claims"))
       findings.extend(self.check_snf_field_constraints(snf_df))
       findings.extend(self.check_record_uniqueness(snf_df, ["clm_id"], "SNF Claims"))
+
+    if hha_df is not None and not hha_df.is_empty():
+      findings.extend(self.check_orphaned_claims(bene_df, hha_df, "HHA Claims"))
+      findings.extend(self.check_admission_temporal_inversions(hha_df, "HHA Claims"))
+      findings.extend(self.check_hha_field_constraints(hha_df))
+      findings.extend(self.check_record_uniqueness(hha_df, ["clm_id"], "HHA Claims"))
 
     return ValidationReport(findings=findings)

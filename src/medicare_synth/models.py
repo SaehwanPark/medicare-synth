@@ -104,3 +104,17 @@ class SkilledNursingFacilityClaimRecord(BaseModel):
   clm_pmt_amt: float = Field(default=0.0, ge=0.0, description="Claim Payment Amount")
   clm_utlztn_day_cnt: int = Field(default=1, ge=0, description="Utilization Day Count")
   ncvd_days_cnt: int = Field(default=0, ge=0, description="Non-Covered Days Count")
+
+
+class HomeHealthAgencyClaimRecord(BaseModel):
+  """Domain record representation for a Home Health Agency (HHA) Claim header."""
+
+  model_config = ConfigDict(frozen=True)
+
+  clm_id: str = Field(..., max_length=15, description="Claim Control Number")
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  clm_admsn_dt: date = Field(..., description="Claim Admission Date")
+  nch_bene_dschrg_dt: date = Field(..., description="Beneficiary Discharge Date")
+  clm_pmt_amt: float = Field(default=0.0, ge=0.0, description="Claim Payment Amount")
+  clm_utlztn_day_cnt: int = Field(default=1, ge=0, description="Utilization Day Count")
+  clm_hha_lupa_ind: Optional[str] = Field(default="0", max_length=1, description="HHA Low Utilization Payment Adjustment Indicator")

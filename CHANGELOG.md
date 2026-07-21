@@ -4,6 +4,12 @@
 
 ### Added
 
+- Implemented `HomeHealthAgencyClaimRecord` domain model in `src/medicare_synth/models.py`.
+- Added Home Health Agency (HHA) Claims file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`CLM_ADMSN_DT`, `NCH_BENE_DSCHRG_DT`, `CLM_UTLZTN_DAY_CNT`, `CLM_HHA_LUPA_IND`, `VAL_HHA_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_hha_field_constraints` and updated `validate_slice` to validate HHA foreign key integrity, admission temporal order, and field constraints (`FLD-003`).
+- Updated `ScenarioCompiler` to compile HHA claim data frames across all scenarios and added `invalid_hha_utilization_days` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle HHA Claims.
+- Added comprehensive unit test suite in `tests/test_hha.py` (69 total passing unit tests).
 - Implemented `SkilledNursingFacilityClaimRecord` domain model in `src/medicare_synth/models.py`.
 - Added Skilled Nursing Facility (SNF) Claims file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`CLM_ADMSN_DT`, `NCH_BENE_DSCHRG_DT`, `CLM_UTLZTN_DAY_CNT`, `NCVD_DAYS_CNT`, `CLM_PMT_AMT`, `VAL_SNF_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_snf_field_constraints` and updated `validate_slice` to validate SNF foreign key integrity, admission temporal order, and field constraints (`FLD-002`).
