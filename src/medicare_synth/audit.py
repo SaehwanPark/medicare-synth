@@ -204,6 +204,46 @@ class AuditEngine:
       if res is not None:
         k_anon_map["mbsf_oc"] = res
 
+    if "mbsf_cu" in self.dataset:
+      res = self.compute_k_anonymity("mbsf_cu", ["BENE_MDCR_PAY_AMT", "BENE_TOT_PAY_AMT"])
+      if res is not None:
+        k_anon_map["mbsf_cu"] = res
+
+    if "mbsf_d" in self.dataset:
+      res = self.compute_k_anonymity("mbsf_d", ["PTD_CNTRCT_ID_01", "PTD_PBP_ID_01"])
+      if res is not None:
+        k_anon_map["mbsf_d"] = res
+
+    if "mbsf_base" in self.dataset:
+      res = self.compute_k_anonymity("mbsf_base", ["MDCR_ENTLMT_BUYIN_IND_01", "DUAL_STUS_CD_01"])
+      if res is not None:
+        k_anon_map["mbsf_base"] = res
+
+    if "mbsf_ndi" in self.dataset:
+      res = self.compute_k_anonymity("mbsf_ndi", ["NDI_MATCH_IND"])
+      if res is not None:
+        k_anon_map["mbsf_ndi"] = res
+
+    if "mbsf_ra" in self.dataset:
+      res = self.compute_k_anonymity("mbsf_ra", ["CMS_HCC_RISK_SCORE", "RXHCC_RISK_SCORE"])
+      if res is not None:
+        k_anon_map["mbsf_ra"] = res
+
+    if "mbsf_c" in self.dataset:
+      res = self.compute_k_anonymity("mbsf_c", ["PTC_CNTRCT_ID_01", "PTC_PBP_ID_01"])
+      if res is not None:
+        k_anon_map["mbsf_c"] = res
+
+    if "mbsf_ffs" in self.dataset:
+      res = self.compute_k_anonymity("mbsf_ffs", ["IP_ADM_CNT", "OP_VIST_CNT"])
+      if res is not None:
+        k_anon_map["mbsf_ffs"] = res
+
+    if "mbsf_pde_util" in self.dataset:
+      res = self.compute_k_anonymity("mbsf_pde_util", ["PDE_TOT_FILL_CNT", "PDE_TOT_CST_AMT"])
+      if res is not None:
+        k_anon_map["mbsf_pde_util"] = res
+
 
     col_metrics_map: dict[str, list[ColumnAuditMetric]] = {}
     for table_name in self.dataset:

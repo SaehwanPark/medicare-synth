@@ -82,6 +82,14 @@ def test_extended_k_anonymity_calculation() -> None:
     "pde": scenario_slice.pde_df,
     "mbsf_cc": scenario_slice.mbsf_cc_df,
     "mbsf_oc": scenario_slice.mbsf_oc_df,
+    "mbsf_cu": scenario_slice.mbsf_cu_df,
+    "mbsf_d": scenario_slice.mbsf_d_df,
+    "mbsf_base": scenario_slice.mbsf_base_df,
+    "mbsf_ndi": scenario_slice.mbsf_ndi_df,
+    "mbsf_ra": scenario_slice.mbsf_ra_df,
+    "mbsf_c": scenario_slice.mbsf_c_df,
+    "mbsf_ffs": scenario_slice.mbsf_ffs_df,
+    "mbsf_pde_util": scenario_slice.mbsf_pde_util_df,
   }
 
   engine = AuditEngine(dataset=dataset, scenario_name="valid_baseline_cohort")
@@ -98,6 +106,14 @@ def test_extended_k_anonymity_calculation() -> None:
   assert "pde" in report.k_anonymity
   assert "mbsf_cc" in report.k_anonymity
   assert "mbsf_oc" in report.k_anonymity
+  assert "mbsf_cu" in report.k_anonymity
+  assert "mbsf_d" in report.k_anonymity
+  assert "mbsf_base" in report.k_anonymity
+  assert "mbsf_ndi" in report.k_anonymity
+  assert "mbsf_ra" in report.k_anonymity
+  assert "mbsf_c" in report.k_anonymity
+  assert "mbsf_ffs" in report.k_anonymity
+  assert "mbsf_pde_util" in report.k_anonymity
 
   # Verify quasi-identifiers
   assert "bene_birth_dt" in report.k_anonymity["beneficiary"].qi_columns
@@ -110,4 +126,12 @@ def test_extended_k_anonymity_calculation() -> None:
   assert "prod_srvc_id" in report.k_anonymity["pde"].qi_columns
   assert "sp_diabetes" in report.k_anonymity["mbsf_cc"].qi_columns
   assert "sp_hypert" in report.k_anonymity["mbsf_oc"].qi_columns
+  assert "bene_mdcr_pay_amt" in report.k_anonymity["mbsf_cu"].qi_columns
+  assert "ptd_cntrct_id_01" in report.k_anonymity["mbsf_d"].qi_columns
+  assert "mdcr_entlmt_buyin_ind_01" in report.k_anonymity["mbsf_base"].qi_columns
+  assert "ndi_match_ind" in report.k_anonymity["mbsf_ndi"].qi_columns
+  assert "cms_hcc_risk_score" in report.k_anonymity["mbsf_ra"].qi_columns
+  assert "ptc_cntrct_id_01" in report.k_anonymity["mbsf_c"].qi_columns
+  assert "ip_adm_cnt" in report.k_anonymity["mbsf_ffs"].qi_columns
+  assert "pde_tot_fill_cnt" in report.k_anonymity["mbsf_pde_util"].qi_columns
 
