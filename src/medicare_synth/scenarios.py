@@ -28,6 +28,7 @@ class ScenarioSlice(NamedTuple):
   mbsf_oc_df: pl.DataFrame
   mbsf_ndi_df: pl.DataFrame
   mbsf_ra_df: pl.DataFrame
+  mbsf_c_df: pl.DataFrame
 
 
 
@@ -492,6 +493,38 @@ class ScenarioCompiler:
       ]
     )
 
+    mbsf_c_df = pl.DataFrame(
+      [
+        {
+          "bene_id": "BENE_001",
+          "rfrnc_yr": 2021,
+          "ptc_cntrct_id_01": "H0001",
+          "ptc_pbp_id_01": "001",
+          "ptc_plan_type_cd_01": "01",
+          "bene_ma_cvrage_tot_mons": 12,
+          "val_mbsf_c_01": 1.0,
+        },
+        {
+          "bene_id": "BENE_002",
+          "rfrnc_yr": 2021,
+          "ptc_cntrct_id_01": "H0002",
+          "ptc_pbp_id_01": "002",
+          "ptc_plan_type_cd_01": "02",
+          "bene_ma_cvrage_tot_mons": 12,
+          "val_mbsf_c_01": 1.0,
+        },
+        {
+          "bene_id": "BENE_003",
+          "rfrnc_yr": 2021,
+          "ptc_cntrct_id_01": "H0003",
+          "ptc_pbp_id_01": "003",
+          "ptc_plan_type_cd_01": "04",
+          "bene_ma_cvrage_tot_mons": 12,
+          "val_mbsf_c_01": 1.0,
+        },
+      ]
+    )
+
     return ScenarioSlice(
       bene_df=bene_df,
       carrier_df=carrier_df,
@@ -509,6 +542,7 @@ class ScenarioCompiler:
       mbsf_oc_df=mbsf_oc_df,
       mbsf_ndi_df=mbsf_ndi_df,
       mbsf_ra_df=mbsf_ra_df,
+      mbsf_c_df=mbsf_c_df,
     )
 
 
@@ -533,6 +567,7 @@ class ScenarioCompiler:
     mbsf_oc_sub = slice_data.mbsf_oc_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     mbsf_ndi_sub = slice_data.mbsf_ndi_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     mbsf_ra_sub = slice_data.mbsf_ra_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
+    mbsf_c_sub = slice_data.mbsf_c_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     return ScenarioSlice(
       bene_df=bene_sub,
       carrier_df=carrier_sub,
@@ -550,6 +585,7 @@ class ScenarioCompiler:
       mbsf_oc_df=mbsf_oc_sub,
       mbsf_ndi_df=mbsf_ndi_sub,
       mbsf_ra_df=mbsf_ra_sub,
+      mbsf_c_df=mbsf_c_sub,
     )
 
 
@@ -596,6 +632,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -632,6 +669,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -667,6 +705,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -703,6 +742,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -740,6 +780,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -776,6 +817,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -812,6 +854,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -849,6 +892,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -885,6 +929,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -924,6 +969,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -959,6 +1005,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -997,6 +1044,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -1035,6 +1083,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -1074,6 +1123,7 @@ class ScenarioCompiler:
       mbsf_oc_df=invalid_oc,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -1108,6 +1158,7 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=invalid_ndi,
       mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=slice_data.mbsf_c_df,
     )
 
   @staticmethod
@@ -1143,6 +1194,44 @@ class ScenarioCompiler:
       mbsf_oc_df=slice_data.mbsf_oc_df,
       mbsf_ndi_df=slice_data.mbsf_ndi_df,
       mbsf_ra_df=invalid_ra,
+      mbsf_c_df=slice_data.mbsf_c_df,
+    )
+
+  @staticmethod
+  def invalid_mbsf_part_c_contract() -> ScenarioSlice:
+    """Creates an anomaly scenario containing an MBSF Part C record with coverage months out of bounds (15)."""
+    slice_data = ScenarioCompiler.valid_baseline_cohort()
+    invalid_c = pl.DataFrame(
+      [
+        {
+          "bene_id": "BENE_001",
+          "rfrnc_yr": 2021,
+          "ptc_cntrct_id_01": "H0001",
+          "ptc_pbp_id_01": "001",
+          "ptc_plan_type_cd_01": "01",
+          "bene_ma_cvrage_tot_mons": 15,  # Invalid coverage months (> 12)
+          "val_mbsf_c_01": 1.0,
+        }
+      ]
+    )
+    return ScenarioSlice(
+      bene_df=slice_data.bene_df,
+      carrier_df=slice_data.carrier_df,
+      outpatient_df=slice_data.outpatient_df,
+      inpatient_df=slice_data.inpatient_df,
+      pde_df=slice_data.pde_df,
+      snf_df=slice_data.snf_df,
+      hha_df=slice_data.hha_df,
+      dme_df=slice_data.dme_df,
+      hospice_df=slice_data.hospice_df,
+      mbsf_cc_df=slice_data.mbsf_cc_df,
+      mbsf_cu_df=slice_data.mbsf_cu_df,
+      mbsf_d_df=slice_data.mbsf_d_df,
+      mbsf_base_df=slice_data.mbsf_base_df,
+      mbsf_oc_df=slice_data.mbsf_oc_df,
+      mbsf_ndi_df=slice_data.mbsf_ndi_df,
+      mbsf_ra_df=slice_data.mbsf_ra_df,
+      mbsf_c_df=invalid_c,
     )
 
   @classmethod
@@ -1167,6 +1256,7 @@ class ScenarioCompiler:
       "invalid_mbsf_other_chronic_condition_indicator": cls.invalid_mbsf_other_chronic_condition_indicator,
       "invalid_mbsf_ndi_match_indicator": cls.invalid_mbsf_ndi_match_indicator,
       "invalid_mbsf_risk_adjustment_score": cls.invalid_mbsf_risk_adjustment_score,
+      "invalid_mbsf_part_c_contract": cls.invalid_mbsf_part_c_contract,
     }
     if name not in scenarios:
       raise ValueError(f"Unknown scenario name: '{name}'. Available: {list(scenarios.keys())}")

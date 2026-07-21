@@ -189,6 +189,15 @@ class ScenarioCatalog:
       sample_bene_count=1,
       sample_claim_count=1,
     ),
+    "invalid_mbsf_part_c_contract": ScenarioEntry(
+      name="invalid_mbsf_part_c_contract",
+      description="Intentional anomaly fixture containing an MBSF Part C record with coverage months out of bounds (15).",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "mbsf_part_c"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
 
 
@@ -236,6 +245,7 @@ class ScenarioCatalog:
       "invalid_mbsf_other_chronic_condition_indicator": ScenarioCompiler.invalid_mbsf_other_chronic_condition_indicator,
       "invalid_mbsf_ndi_match_indicator": ScenarioCompiler.invalid_mbsf_ndi_match_indicator,
       "invalid_mbsf_risk_adjustment_score": ScenarioCompiler.invalid_mbsf_risk_adjustment_score,
+      "invalid_mbsf_part_c_contract": ScenarioCompiler.invalid_mbsf_part_c_contract,
     }
 
     for name, method in compiler_methods.items():
@@ -260,6 +270,7 @@ class ScenarioCatalog:
         ("mbsf_other_chronic_conditions", slice_data.mbsf_oc_df),
         ("mbsf_ndi", slice_data.mbsf_ndi_df),
         ("mbsf_risk_adjustment", slice_data.mbsf_ra_df),
+        ("mbsf_part_c", slice_data.mbsf_c_df),
       ]
 
 

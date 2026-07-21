@@ -20,6 +20,7 @@ from medicare_synth.models import (
   MBSFOtherChronicConditionsRecord,
   MBSFNDIRecord,
   MBSFRiskAdjustmentRecord,
+  MBSFPartCRecord,
   OutpatientClaimHeaderRecord,
 
   PrescriptionDrugEventRecord,
@@ -505,6 +506,35 @@ class BaselineNormalizer:
         pl.col("rxhcc_risk_score").cast(pl.Float64),
         pl.col("payment_count").cast(pl.Int64),
         pl.col("val_mbsf_ra_01").cast(pl.Float64),
+      ]
+    )
+
+  @staticmethod
+  def normalize_mbsf_part_c(records: Sequence[dict[str, Any]]) -> pl.DataFrame:
+    """Normalizes raw MBSF Part C / Medicare Advantage dictionary records into a canonical Polars DataFrame."""
+    validated = [MBSFPartCRecord(**r) for r in records]
+    df = pl.DataFrame([v.model_dump() for v in validated])
+    if df.is_empty():
+      return pl.DataFrame(
+        schema={
+          "bene_id": pl.String,
+          "rfrnc_yr": pl.Int64,
+          "ptc_cntrct_id_01": pl.String,
+          "ptc_pbp_id_01": pl.String,
+          "ptc_plan_type_cd_01": pl.String,
+          "bene_ma_cvrage_tot_mons": pl.Int64,
+          "val_mbsf_c_01": pl.Float64,
+        }
+      )
+    return df.with_columns(
+      [
+        pl.col("bene_id").cast(pl.String),
+        pl.col("rfrnc_yr").cast(pl.Int64),
+        pl.col("ptc_cntrct_id_01").cast(pl.String),
+        pl.col("ptc_pbp_id_01").cast(pl.String),
+        pl.col("ptc_plan_type_cd_01").cast(pl.String),
+        pl.col("bene_ma_cvrage_tot_mons").cast(pl.Int64),
+        pl.col("val_mbsf_c_01").cast(pl.Float64),
       ]
     )
 

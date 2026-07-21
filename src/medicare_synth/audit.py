@@ -73,7 +73,7 @@ class AuditEngine:
     if total_bene == 0:
       return coverage
 
-    for table_name in ("carrier", "outpatient", "inpatient", "pde", "snf", "hha", "dme", "hospice", "mbsf_cc", "mbsf_cu", "mbsf_d", "mbsf_base", "mbsf_oc", "mbsf_ndi", "mbsf_ra"):
+    for table_name in ("carrier", "outpatient", "inpatient", "pde", "snf", "hha", "dme", "hospice", "mbsf_cc", "mbsf_cu", "mbsf_d", "mbsf_base", "mbsf_oc", "mbsf_ndi", "mbsf_ra", "mbsf_c"):
       claims_df = self.dataset.get(table_name)
 
       if claims_df is not None and not claims_df.is_empty():
