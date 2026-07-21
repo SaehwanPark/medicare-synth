@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added `pyrightconfig.json` to configure basedpyright type-checking rules for clean static analysis.
+
 - Implemented `MBSFPartDPDEUtilizationRecord` domain model in `src/medicare_synth/models.py`.
 - Added Master Beneficiary Summary File (MBSF) Part D PDE Cost & Utilization Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`PDE_TOT_FILL_CNT`, `PDE_BRAND_FILL_CNT`, `PDE_GENERIC_FILL_CNT`, `PDE_TOT_CST_AMT`, `PDE_PTNT_PAY_AMT`, `PDE_LIS_PAY_AMT`, `VAL_MBSF_PDE_UTIL_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_mbsf_pde_util_field_constraints` and updated `validate_slice` to validate MBSF Part D PDE Utilization foreign key integrity and count/amount non-negativity (`FLD-015`).
