@@ -20,6 +20,7 @@ class FidelityProfile(BaseModel):
   bene_count: int = Field(..., description="Number of beneficiary summary records")
   carrier_claim_count: int = Field(..., description="Number of carrier claim line/header records")
   outpatient_claim_count: int = Field(..., description="Number of outpatient claim line/header records")
+  inpatient_claim_count: int = Field(default=0, description="Number of inpatient claim line/header records")
   key_uniqueness_rate: float = Field(..., description="Proportion of records satisfying primary key uniqueness")
   foreign_key_validity_rate: float = Field(..., description="Proportion of claims linked to valid beneficiaries")
   temporal_integrity_rate: float = Field(..., description="Proportion of claims with valid temporal ordering")
@@ -82,6 +83,7 @@ class ReleaseExporter:
     carrier_df: pl.DataFrame,
     outpatient_df: pl.DataFrame,
     validation_report: ValidationReport,
+    inpatient_df: pl.DataFrame | None = None,
   ) -> FidelityProfile:
     """Compute summary metrics and integrity rates for a dataset slice.
 
@@ -90,11 +92,13 @@ class ReleaseExporter:
       carrier_df: Carrier Claims DataFrame.
       outpatient_df: Outpatient Claims DataFrame.
       validation_report: Relational validation report.
+      inpatient_df: Optional Inpatient Claims DataFrame.
 
     Returns:
       FidelityProfile instance containing computed counts and validity ratios.
     """
-    total_claims = carrier_df.height + outpatient_df.height
+    inp_count = inpatient_df.height if inpatient_df is not None else 0
+    total_claims = carrier_df.height + outpatient_df.height + inp_count
     fk_findings = [f for f in validation_report.findings if f.category == FindingCategory.RELATIONAL]
     temp_findings = [f for f in validation_report.findings if f.category == FindingCategory.TEMPORAL]
 
@@ -105,6 +109,7 @@ class ReleaseExporter:
       bene_count=bene_df.height,
       carrier_claim_count=carrier_df.height,
       outpatient_claim_count=outpatient_df.height,
+      inpatient_claim_count=inp_count,
       key_uniqueness_rate=1.0,
       foreign_key_validity_rate=max(0.0, min(1.0, fk_validity_rate)),
       temporal_integrity_rate=max(0.0, min(1.0, temp_integrity_rate)),
@@ -143,6 +148,15 @@ class ReleaseExporter:
       "    CLM_THRU_DT DATE,\n"
       "    NCH_BENEFTS_DISCHRG_DT DATE,\n"
       "    CLM_PMT_AMT NUMERIC\n"
+      ");\n\n"
+      "CREATE TABLE IF NOT EXISTS inpatient_claim (\n"
+      "    CLM_ID VARCHAR PRIMARY KEY,\n"
+      "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
+      "    CLM_ADMSN_DT DATE,\n"
+      "    NCH_BENE_DSCHRG_DT DATE,\n"
+      "    CLM_PMT_AMT NUMERIC,\n"
+      "    CLM_UTLZTN_DAY_CNT INTEGER,\n"
+      "    CLM_DRG_CD VARCHAR\n"
       ");\n"
     )
 
@@ -152,6 +166,7 @@ class ReleaseExporter:
     carrier_df: pl.DataFrame,
     outpatient_df: pl.DataFrame,
     fmt: Literal["csv", "parquet", "all"] = "all",
+    inpatient_df: pl.DataFrame | None = None,
   ) -> ReleaseManifest:
     """Export normalized tabular data and metadata artifacts to the release directory.
 
@@ -160,6 +175,7 @@ class ReleaseExporter:
       carrier_df: Carrier Claims DataFrame.
       outpatient_df: Outpatient Claims DataFrame.
       fmt: Format choice ('csv', 'parquet', or 'all').
+      inpatient_df: Optional Inpatient Claims DataFrame.
 
     Returns:
       ReleaseManifest detailing the exported files and validation summary.
@@ -167,10 +183,10 @@ class ReleaseExporter:
     self.output_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Run validation
-    report = self.validator.validate_slice(bene_df, carrier_df, outpatient_df)
+    report = self.validator.validate_slice(bene_df, carrier_df, outpatient_df, inpatient_df)
 
     # 2. Compute fidelity profile
-    fidelity = self.compute_fidelity_profile(bene_df, carrier_df, outpatient_df, report)
+    fidelity = self.compute_fidelity_profile(bene_df, carrier_df, outpatient_df, report, inpatient_df)
 
     # Write validation report and fidelity profile
     with open(self.output_dir / "validation_report.json", "w") as f:
@@ -185,11 +201,13 @@ class ReleaseExporter:
 
     file_entries: Dict[str, FileReleaseEntry] = {}
 
-    tables = {
+    tables: dict[str, pl.DataFrame] = {
       "beneficiary": bene_df,
       "carrier": carrier_df,
       "outpatient": outpatient_df,
     }
+    if inpatient_df is not None:
+      tables["inpatient"] = inpatient_df
 
     formats_to_export = ["csv", "parquet"] if fmt == "all" else [fmt]
 

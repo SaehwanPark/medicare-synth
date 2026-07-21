@@ -61,3 +61,17 @@ class OutpatientClaimHeaderRecord(BaseModel):
   clm_thru_dt: date = Field(..., description="Claim Through Date")
   prvdr_npi: Optional[str] = Field(default=None, max_length=10, description="National Provider Identifier")
   icd_dgns_cd1: Optional[str] = Field(default=None, max_length=7, description="Primary ICD-10 Diagnosis Code")
+
+
+class InpatientClaimHeaderRecord(BaseModel):
+  """Domain record representation for an Inpatient Claim header."""
+
+  model_config = ConfigDict(frozen=True)
+
+  clm_id: str = Field(..., max_length=15, description="Claim Control Number")
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  clm_admsn_dt: date = Field(..., description="Claim Admission Date")
+  nch_bene_dschrg_dt: date = Field(..., description="Beneficiary Discharge Date")
+  clm_pmt_amt: float = Field(default=0.0, ge=0.0, description="Claim Payment Amount")
+  clm_utlztn_day_cnt: int = Field(default=1, ge=0, description="Utilization Day Count")
+  clm_drg_cd: Optional[str] = Field(default=None, max_length=3, description="Diagnosis Related Group Code")

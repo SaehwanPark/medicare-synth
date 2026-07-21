@@ -113,6 +113,29 @@ class RelationalValidator:
     return []
 
   @staticmethod
+  def check_admission_temporal_inversions(claim_df: pl.DataFrame, claim_type: str) -> list[Finding]:
+    """Identifies claims where admission date (clm_admsn_dt) exceeds discharge date (nch_bene_dschrg_dt)."""
+    if claim_df.is_empty() or "clm_admsn_dt" not in claim_df.columns or "nch_bene_dschrg_dt" not in claim_df.columns:
+      return []
+
+    inverted = claim_df.filter(pl.col("clm_admsn_dt") > pl.col("nch_bene_dschrg_dt"))
+    inversion_count = inverted.height
+
+    if inversion_count > 0:
+      sample_ids = inverted.select("clm_id").slice(0, 5).to_series().to_list() if "clm_id" in inverted.columns else []
+      return [
+        Finding(
+          rule_id="TMP-002",
+          category=FindingCategory.TEMPORAL,
+          severity=Severity.HIGH,
+          message=f"Found {inversion_count} claims in {claim_type} with admission temporal inversion (clm_admsn_dt > nch_bene_dschrg_dt).",
+          count=inversion_count,
+          details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+        )
+      ]
+    return []
+
+  @staticmethod
   def check_record_uniqueness(df: pl.DataFrame, keys: list[str], table_name: str) -> list[Finding]:
     """Verifies uniqueness of specified primary or composite key columns."""
     if df.is_empty() or not set(keys).issubset(set(df.columns)):
@@ -139,6 +162,7 @@ class RelationalValidator:
     bene_df: pl.DataFrame,
     carrier_df: Optional[pl.DataFrame] = None,
     outpatient_df: Optional[pl.DataFrame] = None,
+    inpatient_df: Optional[pl.DataFrame] = None,
   ) -> ValidationReport:
     """Executes full suite of relational, temporal, and record-level checks over a dataset slice."""
     findings: list[Finding] = []
@@ -156,5 +180,10 @@ class RelationalValidator:
       findings.extend(self.check_orphaned_claims(bene_df, outpatient_df, "Outpatient Claims"))
       findings.extend(self.check_temporal_inversions(outpatient_df, "Outpatient Claims"))
       findings.extend(self.check_record_uniqueness(outpatient_df, ["clm_id"], "Outpatient Claims"))
+
+    if inpatient_df is not None and not inpatient_df.is_empty():
+      findings.extend(self.check_orphaned_claims(bene_df, inpatient_df, "Inpatient Claims"))
+      findings.extend(self.check_admission_temporal_inversions(inpatient_df, "Inpatient Claims"))
+      findings.extend(self.check_record_uniqueness(inpatient_df, ["clm_id"], "Inpatient Claims"))
 
     return ValidationReport(findings=findings)

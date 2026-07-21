@@ -73,7 +73,7 @@ class AuditEngine:
     if total_bene == 0:
       return coverage
 
-    for table_name in ("carrier", "outpatient"):
+    for table_name in ("carrier", "outpatient", "inpatient"):
       claims_df = self.dataset.get(table_name)
       if claims_df is not None and not claims_df.is_empty():
         claim_bene_col = _find_col(claims_df, "BENE_ID")
@@ -155,6 +155,11 @@ class AuditEngine:
       res = self.compute_k_anonymity("carrier", ["ICD_DGNS_CD1"])
       if res is not None:
         k_anon_map["carrier"] = res
+
+    if "inpatient" in self.dataset:
+      res = self.compute_k_anonymity("inpatient", ["CLM_DRG_CD"])
+      if res is not None:
+        k_anon_map["inpatient"] = res
 
     col_metrics_map: dict[str, list[ColumnAuditMetric]] = {}
     for table_name in self.dataset:
