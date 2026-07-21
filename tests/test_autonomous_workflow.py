@@ -161,3 +161,24 @@ def test_run_autonomous_workflow_git_clean_check(mock_run, tmp_path):
     assert data["git_clean_check"] is True
 
 
+@patch("subprocess.run")
+def test_run_autonomous_workflow_html_report(mock_run, tmp_path):
+    """Test that run_autonomous_workflow produces a valid HTML report file."""
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report.html"
+    res_code = run_autonomous_workflow(dry_run=True, html_report_path=str(report_file))
+    assert res_code == 0
+    assert report_file.exists()
+
+    content = report_file.read_text(encoding="utf-8")
+    assert "<!DOCTYPE html>" in content
+    assert "<title>Autonomous Workflow Execution Report</title>" in content
+    assert "<td>feat/test-branch</td>" in content
+
