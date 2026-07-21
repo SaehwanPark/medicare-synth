@@ -96,23 +96,23 @@ Exit criteria:
 
 ## 5. Expansion and Scenarios
 
-Status: Active
+Status: Complete
 
 Outputs:
 
-- one evidence-graded vertical expansion proving `tabdat-synth` integration
-- connected-subgraph horizontal expansion with deterministic re-keying
-- five named valid and invalid scenarios with expected analytic results
+- one evidence-graded vertical expansion proving `tabdat-synth` integration [Completed]
+- connected-subgraph horizontal expansion with deterministic re-keying [Completed]
+- five named valid and invalid scenarios with expected analytic results [Completed]
 
 Exit criteria:
 
 - expansion preserves keys, temporal order, enrollment compatibility, and event
-  coherence
-- scenarios reproduce expected results and intentional failures deterministically
+  coherence [Completed]
+- scenarios reproduce expected results and intentional failures deterministically [Completed]
 
 ## 6. Adoption and Maintenance
 
-Status: Planned
+Status: Active
 
 Outputs:
 

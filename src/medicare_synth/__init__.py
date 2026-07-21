@@ -6,6 +6,7 @@ Provenance-backed contemporary Medicare synthetic data and research fixtures.
 __version__ = "0.1.0"
 
 from medicare_synth.evidence import RKBEvidenceSnapshot, VariableContract
+from medicare_synth.expansion import HorizontalExpander, TabDatSynthAdapter, VerticalExpander
 from medicare_synth.manifest import FileManifest, SourceManifest
 from medicare_synth.models import ProvenanceStatus
 from medicare_synth.normalizer import BaselineNormalizer
@@ -19,6 +20,7 @@ __all__ = [
   "FileManifest",
   "Finding",
   "FindingCategory",
+  "HorizontalExpander",
   "ProvenanceStatus",
   "RKBEvidenceSnapshot",
   "RelationalValidator",
@@ -27,6 +29,8 @@ __all__ = [
   "ScenarioCompiler",
   "Severity",
   "SourceManifest",
+  "TabDatSynthAdapter",
   "ValidationReport",
   "VariableContract",
+  "VerticalExpander",
 ]

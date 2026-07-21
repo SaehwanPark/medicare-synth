@@ -3,10 +3,9 @@
 
 import json
 from pathlib import Path
-import pytest
 
+from medicare_synth import FidelityProfile, ReleaseExporter, ScenarioCompiler
 from medicare_synth.cli import main as cli_main
-from medicare_synth import FidelityProfile, ReleaseExporter, ReleaseManifest, ScenarioCompiler
 
 
 def test_release_exporter_export_all(tmp_path: Path):
