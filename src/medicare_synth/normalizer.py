@@ -14,6 +14,7 @@ from medicare_synth.models import (
   HospiceClaimHeaderRecord,
   InpatientClaimHeaderRecord,
   MBSFChronicConditionsRecord,
+  MBSFCostAndUseRecord,
   OutpatientClaimHeaderRecord,
   PrescriptionDrugEventRecord,
   ProvenanceStatus,
@@ -318,6 +319,33 @@ class BaselineNormalizer:
         pl.col("sp_ischdmt").cast(pl.String),
         pl.col("sp_strketia").cast(pl.String),
         pl.col("val_mbsf_01").cast(pl.Float64),
+      ]
+    )
+
+  @staticmethod
+  def normalize_mbsf_cost_and_use(records: Sequence[dict[str, Any]]) -> pl.DataFrame:
+    """Normalizes raw MBSF Cost & Use dictionary records into a canonical Polars DataFrame."""
+    validated = [MBSFCostAndUseRecord(**r) for r in records]
+    df = pl.DataFrame([v.model_dump() for v in validated])
+    if df.is_empty():
+      return pl.DataFrame(
+        schema={
+          "bene_id": pl.String,
+          "rfrnc_yr": pl.Int64,
+          "bene_mdcr_pay_amt": pl.Float64,
+          "bene_tot_pay_amt": pl.Float64,
+          "bene_ip_ddctbl_amt": pl.Float64,
+          "bene_cvrd_dys_cnt": pl.Int64,
+        }
+      )
+    return df.with_columns(
+      [
+        pl.col("bene_id").cast(pl.String),
+        pl.col("rfrnc_yr").cast(pl.Int64),
+        pl.col("bene_mdcr_pay_amt").cast(pl.Float64),
+        pl.col("bene_tot_pay_amt").cast(pl.Float64),
+        pl.col("bene_ip_ddctbl_amt").cast(pl.Float64),
+        pl.col("bene_cvrd_dys_cnt").cast(pl.Int64),
       ]
     )
 

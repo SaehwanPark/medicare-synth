@@ -4,6 +4,13 @@
 
 ### Added
 
+- Implemented `MBSFCostAndUseRecord` domain model in `src/medicare_synth/models.py`.
+- Added Master Beneficiary Summary File (MBSF) Cost & Use Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`BENE_MDCR_PAY_AMT`, `BENE_TOT_PAY_AMT`, `BENE_IP_DDCTBL_AMT`, `BENE_CVRD_DYS_CNT`, `VAL_MBSF_CU_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_mbsf_cu_field_constraints` and updated `validate_slice` to validate MBSF Cost & Use foreign key integrity and payment field constraints (`FLD-007`).
+- Updated `ScenarioCompiler` to compile MBSF Cost & Use data frames across all scenarios and added `invalid_mbsf_cost_use_payment` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle MBSF Cost & Use Segment.
+- Added comprehensive unit test suite in `tests/test_mbsf_cu.py` (99 total passing unit tests).
+
 - Implemented `MBSFChronicConditionsRecord` domain model in `src/medicare_synth/models.py`.
 - Added Master Beneficiary Summary File (MBSF) Chronic Conditions Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`SP_ALZHMD`, `SP_CHF`, `SP_CHRNKIDN`, `SP_CNCR`, `SP_DIABETES`, `SP_ISCHDMT`, `SP_STRKETIA`, `VAL_MBSF_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_mbsf_cc_field_constraints` and updated `validate_slice` to validate MBSF Chronic Conditions foreign key integrity and field constraints (`FLD-006`).

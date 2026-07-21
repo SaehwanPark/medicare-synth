@@ -164,3 +164,16 @@ class MBSFChronicConditionsRecord(BaseModel):
   sp_ischdmt: str = Field(default="0", max_length=1, description="Ischemic Heart Disease Indicator")
   sp_strketia: str = Field(default="0", max_length=1, description="Stroke/TIA Indicator")
   val_mbsf_01: float = Field(default=0.0, ge=0.0, description="MBSF Chronic Conditions Validation Metric")
+
+
+class MBSFCostAndUseRecord(BaseModel):
+  """Domain record representation for Master Beneficiary Summary File Cost & Use Segment."""
+
+  model_config = ConfigDict(frozen=True)
+
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  rfrnc_yr: int = Field(default=2021, ge=2000, le=2099, description="Reference Year")
+  bene_mdcr_pay_amt: float = Field(default=0.0, ge=0.0, description="Beneficiary Annual Medicare Payment Total Amount")
+  bene_tot_pay_amt: float = Field(default=0.0, ge=0.0, description="Beneficiary Annual Total Payment Amount")
+  bene_ip_ddctbl_amt: float = Field(default=0.0, ge=0.0, description="Beneficiary Inpatient Deductible Paid Amount")
+  bene_cvrd_dys_cnt: int = Field(default=0, ge=0, description="Beneficiary Total Covered Inpatient/SNF Days Count")
