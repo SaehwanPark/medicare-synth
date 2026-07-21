@@ -4,6 +4,14 @@
 
 ### Added
 
+- Implemented `MBSFOtherChronicConditionsRecord` domain model in `src/medicare_synth/models.py`.
+- Added Master Beneficiary Summary File (MBSF) Other Chronic Conditions Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`SP_ARTHGLAU`, `SP_ASTHMA`, `SP_ATRIALF`, `SP_HYPERL`, `SP_HYPERT`, `SP_HYPOT`, `SP_OSTEOP`, `VAL_MBSF_OC_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_mbsf_oc_field_constraints` and updated `validate_slice` to validate MBSF Other Chronic Conditions foreign key integrity and condition indicator constraints (`FLD-010`).
+- Updated `ScenarioCompiler` to compile MBSF Other Chronic Conditions data frames across all scenarios and added `invalid_mbsf_other_chronic_condition_indicator` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle MBSF Other Chronic Conditions Segment.
+- Added comprehensive unit test suite in `tests/test_mbsf_oc.py` (118 total passing unit tests).
+
+
 - Implemented `MBSFBaseEnrollmentRecord` domain model in `src/medicare_synth/models.py`.
 - Added Master Beneficiary Summary File (MBSF) Base / Enrollment Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`BENE_HI_CVRAGE_TOT_MONS`, `BENE_SMI_CVRAGE_TOT_MONS`, `BENE_HMO_CVRAGE_TOT_MONS`, `BENE_PTD_CVRAGE_TOT_MONS`, `MDCR_ENTLMT_BUYIN_IND_01`, `DUAL_STUS_CD_01`, `VAL_MBSF_BASE_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_mbsf_base_field_constraints` and updated `validate_slice` to validate MBSF Base Enrollment foreign key integrity and coverage month bounds (`FLD-009`).
