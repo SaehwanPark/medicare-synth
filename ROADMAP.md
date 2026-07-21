@@ -79,24 +79,24 @@ Exit criteria:
 
 ## 4. Validation-First Release
 
-Status: Active
+Status: Complete
 
 Outputs:
 
-- versioned normalized baseline release in CSV and Parquet
+- versioned normalized baseline release in CSV and Parquet [Completed]
 - focused CLI and Python API for acquisition, inspection, normalization,
-  validation, and export
-- release manifest, validation report, fidelity profile, and known deviations
+  validation, and export [Completed]
+- release manifest, validation report, fidelity profile, and known deviations [Completed]
 
 Exit criteria:
 
-- fixed manifests and seeds reproduce checksummed outputs
-- release claims are limited to properties supported by recorded validation
-- reference workflows run in Python and SQL
+- fixed manifests and seeds reproduce checksummed outputs [Completed]
+- release claims are limited to properties supported by recorded validation [Completed]
+- reference workflows run in Python and SQL [Completed]
 
 ## 5. Expansion and Scenarios
 
-Status: Planned
+Status: Active
 
 Outputs:
 

@@ -56,6 +56,19 @@ Completed Executable Model & Validation Deliverables:
 - **Unified Release CLI**: Implemented `medicare-synth` CLI entry point in `src/medicare_synth/cli.py` with `validate`, `scenario`, `manifest` commands.
 - **Comprehensive Unit Tests**: Added unit tests in `tests/test_scenarios.py`, `tests/test_normalizer.py`, and `tests/test_cli.py` (26 passing tests total).
 
+### Validation-First Release
+
+Status: Complete
+
+Completed Validation-First Release Deliverables:
+
+- **Release Bundle Exporter Framework**: Implemented `src/medicare_synth/release.py` providing `ReleaseExporter`, `ReleaseManifest`, `FileReleaseEntry`, and `FidelityProfile` Pydantic models.
+- **Multi-Format Export Pipeline**: Added support for exporting normalized baseline tables and scenario fixtures to versioned CSV and Parquet files with automatic SHA256 checksum tracking.
+- **Integrity & Fidelity Reporting**: Added automated generation of `release_manifest.json`, `validation_report.json`, `fidelity_profile.json`, and SQL DDL reference schema (`sql_reference_schema.sql`).
+- **CLI Export Subcommand**: Expanded `medicare-synth` CLI entry point with `export` subcommand (`medicare-synth export --scenario <name> --output-dir <path> --format <csv|parquet|all>`).
+- **Package API Integration**: Exposed `ReleaseExporter`, `ReleaseManifest`, and `FidelityProfile` at package top level in `src/medicare_synth/__init__.py`.
+- **Release Test Suite**: Added 3 unit tests in `tests/test_release.py` covering multi-format exports, fidelity metrics, and CLI export command (29 passing unit tests total).
+
 
 Verification requires each decision to cite evidence, state assumptions, and be
 

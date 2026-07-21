@@ -9,17 +9,21 @@ from medicare_synth.evidence import RKBEvidenceSnapshot, VariableContract
 from medicare_synth.manifest import FileManifest, SourceManifest
 from medicare_synth.models import ProvenanceStatus
 from medicare_synth.normalizer import BaselineNormalizer
+from medicare_synth.release import FidelityProfile, ReleaseExporter, ReleaseManifest
 from medicare_synth.scenarios import ScenarioCompiler
 from medicare_synth.validation import Finding, FindingCategory, RelationalValidator, Severity, ValidationReport
 
 __all__ = [
   "BaselineNormalizer",
+  "FidelityProfile",
   "FileManifest",
   "Finding",
   "FindingCategory",
   "ProvenanceStatus",
   "RKBEvidenceSnapshot",
   "RelationalValidator",
+  "ReleaseExporter",
+  "ReleaseManifest",
   "ScenarioCompiler",
   "Severity",
   "SourceManifest",

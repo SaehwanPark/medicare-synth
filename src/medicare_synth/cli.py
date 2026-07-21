@@ -1,12 +1,14 @@
-"""CLI interface for Medicare-Synth: validation, scenario compilation, and evidence inspection.
+"""CLI interface for Medicare-Synth: validation, scenario compilation, evidence inspection, and release exports.
 """
 
 import argparse
+from pathlib import Path
 import sys
 from typing import Optional
 
 from medicare_synth.evidence import RKBEvidenceSnapshot
 from medicare_synth.manifest import SourceManifest
+from medicare_synth.release import ReleaseExporter
 from medicare_synth.scenarios import ScenarioCompiler
 from medicare_synth.validation import RelationalValidator
 
@@ -44,6 +46,33 @@ def main(argv: Optional[list[str]] = None) -> int:
     choices=["baseline", "evidence"],
     default="baseline",
     help="Manifest type to display (baseline or evidence)",
+  )
+
+  # Subcommand: export
+  exp_parser = subparsers.add_parser("export", help="Export scenario fixture or baseline slice to a release bundle")
+  exp_parser.add_argument(
+    "--scenario",
+    type=str,
+    default="valid_baseline_cohort",
+    help="Name of scenario fixture to export (default: valid_baseline_cohort)",
+  )
+  exp_parser.add_argument(
+    "--output-dir",
+    type=str,
+    required=True,
+    help="Output directory path for release artifacts",
+  )
+  exp_parser.add_argument(
+    "--format",
+    choices=["csv", "parquet", "all"],
+    default="all",
+    help="Target export format (default: all)",
+  )
+  exp_parser.add_argument(
+    "--release-id",
+    type=str,
+    default="v1.0.0-2021",
+    help="Release version identifier (default: v1.0.0-2021)",
   )
 
   args = parser.parse_args(argv)
@@ -92,6 +121,27 @@ def main(argv: Optional[list[str]] = None) -> int:
       print(f"Evidence Version: {snapshot.rkb_version}")
       print(f"Snapshot Date: {snapshot.snapshot_date}")
       print(f"Variables: {len(snapshot.variables)}")
+    return 0
+
+  elif args.command == "export":
+    try:
+      scenario_slice = ScenarioCompiler.get_scenario(args.scenario)
+    except ValueError as e:
+      print(f"Error: {e}", file=sys.stderr)
+      return 1
+
+    exporter = ReleaseExporter(output_dir=Path(args.output_dir), release_id=args.release_id)
+    manifest = exporter.export_slice(
+      bene_df=scenario_slice.bene_df,
+      carrier_df=scenario_slice.carrier_df,
+      outpatient_df=scenario_slice.outpatient_df,
+      fmt=args.format,
+    )
+
+    print(f"Exported Release Bundle: {manifest.release_id}")
+    print(f"Target Directory: {args.output_dir}")
+    print(f"Validation Passed: {manifest.validation_passed}")
+    print(f"Files Exported: {len(manifest.files)}")
     return 0
 
   else:
