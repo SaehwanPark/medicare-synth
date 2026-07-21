@@ -1,0 +1,59 @@
+{
+  "collection_id": "CMS-2021-SYN-CLAIMS",
+  "title": "CMS 2021 Synthetic Claims Baseline Collection",
+  "schema_year": 2021,
+  "version": "1.0.0",
+  "description": "Immutable source manifest for official CMS 2021 synthetic claims baseline inventory spanning beneficiary summary, carrier claims, and outpatient claims files.",
+  "source_organization": "Centers for Medicare & Medicaid Services (CMS)",
+  "retrieval_date": "2026-07-20",
+  "license": "Public Domain / CC0-1.0",
+  "files": [
+    {
+      "file_id": "DE1_0_2021_Beneficiary_Summary_File_Sample_1",
+      "filename": "DE1_0_2021_Beneficiary_Summary_File_Sample_1.csv",
+      "file_domain": "beneficiary",
+      "grain": "beneficiary_year",
+      "format": "csv",
+      "expected_record_count": 116352,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_url": "https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SynPUFs/DE_1_0_2021_Beneficiary_Summary_File_Sample_1.zip",
+      "primary_key": ["BENE_ID"]
+    },
+    {
+      "file_id": "DE1_0_2021_Carrier_Claims_Sample_1A",
+      "filename": "DE1_0_2021_Carrier_Claims_Sample_1A.csv",
+      "file_domain": "carrier",
+      "grain": "claim_line",
+      "format": "csv",
+      "expected_record_count": 472109,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_url": "https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SynPUFs/DE_1_0_2021_Carrier_Claims_Sample_1A.zip",
+      "primary_key": ["CLM_ID", "LINE_NUM"],
+      "foreign_keys": [
+        {
+          "field": "BENE_ID",
+          "target_file_id": "DE1_0_2021_Beneficiary_Summary_File_Sample_1",
+          "target_field": "BENE_ID"
+        }
+      ]
+    },
+    {
+      "file_id": "DE1_0_2021_Outpatient_Claims_Sample_1",
+      "filename": "DE1_0_2021_Outpatient_Claims_Sample_1.csv",
+      "file_domain": "outpatient",
+      "grain": "claim_header",
+      "format": "csv",
+      "expected_record_count": 89412,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_url": "https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SynPUFs/DE_1_0_2021_Outpatient_Claims_Sample_1.zip",
+      "primary_key": ["CLM_ID"],
+      "foreign_keys": [
+        {
+          "field": "BENE_ID",
+          "target_file_id": "DE1_0_2021_Beneficiary_Summary_File_Sample_1",
+          "target_field": "BENE_ID"
+        }
+      ]
+    }
+  ]
+}

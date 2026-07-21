@@ -1,0 +1,96 @@
+{
+  "rkb_version": "1.0.0",
+  "snapshot_date": "2021-12-31",
+  "schema_year": 2021,
+  "description": "Immutable RKB evidence snapshot containing CCW dictionary specifications, types, constraints, and valid values for CMS 2021 baseline files.",
+  "source_repository": "resdac-knowledge-base",
+  "variables": {
+    "BENE_ID": {
+      "name": "BENE_ID",
+      "label": "Encrypted CCW Beneficiary ID",
+      "data_type": "string",
+      "max_length": 15,
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Unique identifier for the beneficiary assigned by CCW.",
+      "valid_values": null
+    },
+    "BENE_BIRTH_DT": {
+      "name": "BENE_BIRTH_DT",
+      "label": "Beneficiary Date of Birth",
+      "data_type": "date",
+      "format": "YYYYMMDD",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Date of birth of the beneficiary in YYYYMMDD format."
+    },
+    "BENE_DEATH_DT": {
+      "name": "BENE_DEATH_DT",
+      "label": "Beneficiary Date of Death",
+      "data_type": "date",
+      "format": "YYYYMMDD",
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "Date of death of the beneficiary if deceased; null otherwise."
+    },
+    "CLM_ID": {
+      "name": "CLM_ID",
+      "label": "Claim Control Number",
+      "data_type": "string",
+      "max_length": 15,
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Unique identifier for a claim submitted by a provider or facility."
+    },
+    "CLM_FROM_DT": {
+      "name": "CLM_FROM_DT",
+      "label": "Claim Start Date",
+      "data_type": "date",
+      "format": "YYYYMMDD",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "The date of service start for carrier line or admission/start for outpatient claim."
+    },
+    "CLM_THRU_DT": {
+      "name": "CLM_THRU_DT",
+      "label": "Claim Through Date",
+      "data_type": "date",
+      "format": "YYYYMMDD",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "The date of service end for carrier line or discharge/end for outpatient claim."
+    },
+    "ICD_DGNS_CD1": {
+      "name": "ICD_DGNS_CD1",
+      "label": "Primary Diagnosis Code (ICD-10-CM)",
+      "data_type": "string",
+      "max_length": 7,
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "Primary ICD-10-CM diagnosis code associated with the claim event."
+    },
+    "PRVDR_NPI": {
+      "name": "PRVDR_NPI",
+      "label": "National Provider Identifier",
+      "data_type": "string",
+      "max_length": 10,
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "Standard 10-digit National Provider Identifier."
+    }
+  },
+  "constraints": [
+    {
+      "constraint_id": "VAL_TEMP_01",
+      "category": "temporal",
+      "description": "CLM_FROM_DT must be less than or equal to CLM_THRU_DT.",
+      "rule": "CLM_FROM_DT <= CLM_THRU_DT"
+    },
+    {
+      "constraint_id": "VAL_REL_01",
+      "category": "relational",
+      "description": "BENE_ID on Carrier or Outpatient claim must exist in Beneficiary Summary file.",
+      "rule": "CLM.BENE_ID IN BENE_SUMMARY.BENE_ID"
+    }
+  ]
+}
