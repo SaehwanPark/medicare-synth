@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added `--json-report` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `json_report_path` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to write structured execution summaries.
+- Extended unit test coverage in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to verify JSON report output generation.
 - Added `auto-workflow` subcommand to `medicare-synth` CLI in `src/medicare_synth/cli.py` and reusable workflow execution core in `src/medicare_synth/workflow.py`.
 - Refactored `scripts/autonomous_workflow.py` to leverage `src/medicare_synth/workflow.py` engine.
 - Exported `run_autonomous_workflow` in package entrypoint `src/medicare_synth/__init__.py`.

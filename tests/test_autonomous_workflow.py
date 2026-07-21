@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from pathlib import Path
+
 sys.path.append(str(Path(__file__).parent.parent))
 
 from scripts.autonomous_workflow import main
@@ -30,7 +31,7 @@ def test_autonomous_workflow_dry_run(mock_run):
     # Verify that it ran the validation commands first
     assert mock_run.call_count >= 4
     called_cmds = [call_args[0][0] for call_args in mock_run.call_args_list]
-    
+
     # Assert check commands are in the call list
     assert ["uv", "run", "ruff", "check", "."] in called_cmds
     assert ["uv", "run", "basedpyright"] in called_cmds
@@ -54,4 +55,31 @@ def test_autonomous_workflow_checks_failed(mock_run):
 
     assert exc_info.value.code != 0
     # verify that execution stopped at the first step
-    mock_run.assert_called_once_with(["uv", "run", "ruff", "check", "."], capture_output=True, text=True)
+    mock_run.assert_called_once_with(
+        ["uv", "run", "ruff", "check", "."], capture_output=True, text=True
+    )
+
+
+@patch("subprocess.run")
+def test_run_autonomous_workflow_json_report(mock_run, tmp_path):
+    """Test that run_autonomous_workflow produces a valid JSON report file."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report.json"
+    res_code = run_autonomous_workflow(dry_run=True, json_report_path=str(report_file))
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["status"] == "success"
+    assert data["dry_run"] is True
+    assert data["branch"] == "feat/test-branch"
