@@ -25,7 +25,8 @@ The component model below records the implemented and planned boundaries.
   and distributional properties and reports findings without silently repairing
   baseline anomalies.
 - **Generation and Expansion** applies deterministic rules, `TabDatSynthAdapter` vertical feature synthesis, and `HorizontalExpander` connected-subgraph scaling with deterministic re-keying after validation gates pass.
-- **Scenario catalog & CI exporter** provides `ScenarioCatalog` for inspecting named fixtures (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`, `invalid_orphaned_claim`, `invalid_temporal_inversion`, `invalid_inpatient_admission`, `invalid_pde_days_supply`, `invalid_snf_utilization_days`, `invalid_hha_utilization_days`, `invalid_dme_line_item_count`, `invalid_hospice_utilization_days`, `invalid_mbsf_chronic_condition_indicator`, `invalid_mbsf_cost_use_payment`, `invalid_mbsf_part_d_contract`, `invalid_mbsf_base_coverage_months`) and automated `export-ci` generation.
+- **Scenario catalog & CI exporter** provides `ScenarioCatalog` for inspecting named fixtures (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`, `invalid_orphaned_claim`, `invalid_temporal_inversion`, `invalid_inpatient_admission`, `invalid_pde_days_supply`, `invalid_snf_utilization_days`, `invalid_hha_utilization_days`, `invalid_dme_line_item_count`, `invalid_hospice_utilization_days`, `invalid_mbsf_chronic_condition_indicator`, `invalid_mbsf_cost_use_payment`, `invalid_mbsf_part_d_contract`, `invalid_mbsf_base_coverage_months`, `invalid_mbsf_other_chronic_condition_indicator`, `invalid_mbsf_ndi_match_indicator`) and automated `export-ci` generation.
+
 
 
 - **Schema & evidence snapshot diff engine** (`SchemaDiffer`) compares RKB evidence snapshots or schema models to detect added, removed, and breaking field modifications (`medicare-synth diff`).

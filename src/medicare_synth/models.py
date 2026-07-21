@@ -226,3 +226,15 @@ class MBSFOtherChronicConditionsRecord(BaseModel):
   sp_hypot: str = Field(default="0", max_length=1, description="Hypothyroidism Indicator")
   sp_osteop: str = Field(default="0", max_length=1, description="Osteoporosis Indicator")
   val_mbsf_oc_01: float = Field(default=0.0, ge=0.0, description="MBSF Other Chronic Conditions Validation Metric")
+
+
+class MBSFNDIRecord(BaseModel):
+  """Domain record representation for Master Beneficiary Summary File National Death Index (NDI) Segment."""
+
+  model_config = ConfigDict(frozen=True)
+
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  rfrnc_yr: int = Field(default=2021, ge=2000, le=2099, description="Reference Year")
+  ndi_match_ind: str = Field(default="0", max_length=1, description="National Death Index Match Indicator")
+  ndi_diuse_cd: Optional[str] = Field(default=None, max_length=7, description="Underlying Cause of Death ICD Code")
+  val_mbsf_ndi_01: float = Field(default=0.0, ge=0.0, description="MBSF NDI Validation Metric")

@@ -4,7 +4,15 @@
 
 ### Added
 
+- Implemented `MBSFNDIRecord` domain model in `src/medicare_synth/models.py`.
+- Added Master Beneficiary Summary File (MBSF) National Death Index (NDI) Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`NDI_MATCH_IND`, `NDI_DIUSE_CD`, `VAL_MBSF_NDI_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_mbsf_ndi_field_constraints` and updated `validate_slice` to validate MBSF NDI foreign key integrity and match indicator constraints (`FLD-011`).
+- Updated `ScenarioCompiler` to compile MBSF NDI data frames across all scenarios and added `invalid_mbsf_ndi_match_indicator` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle MBSF NDI Segment.
+- Added comprehensive unit test suite in `tests/test_mbsf_ndi.py` (124 total passing unit tests).
+
 - Implemented `MBSFOtherChronicConditionsRecord` domain model in `src/medicare_synth/models.py`.
+
 - Added Master Beneficiary Summary File (MBSF) Other Chronic Conditions Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`SP_ARTHGLAU`, `SP_ASTHMA`, `SP_ATRIALF`, `SP_HYPERL`, `SP_HYPERT`, `SP_HYPOT`, `SP_OSTEOP`, `VAL_MBSF_OC_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_mbsf_oc_field_constraints` and updated `validate_slice` to validate MBSF Other Chronic Conditions foreign key integrity and condition indicator constraints (`FLD-010`).
 - Updated `ScenarioCompiler` to compile MBSF Other Chronic Conditions data frames across all scenarios and added `invalid_mbsf_other_chronic_condition_indicator` anomaly scenario fixture.

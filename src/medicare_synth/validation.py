@@ -425,6 +425,33 @@ class RelationalValidator:
       ]
     return []
 
+  @staticmethod
+  def check_mbsf_ndi_field_constraints(mbsf_ndi_df: pl.DataFrame) -> list[Finding]:
+    """Identifies MBSF NDI records with invalid match indicator values (not in '0', '1', 'Y', 'N')."""
+    if mbsf_ndi_df.is_empty():
+      return []
+
+    if "ndi_match_ind" not in mbsf_ndi_df.columns:
+      return []
+
+    valid_set = ["0", "1", "Y", "N"]
+    invalid = mbsf_ndi_df.filter(~pl.col("ndi_match_ind").is_in(valid_set))
+    invalid_count = invalid.height
+
+    if invalid_count > 0:
+      sample_ids = invalid.select("bene_id").slice(0, 5).to_series().to_list() if "bene_id" in invalid.columns else []
+      return [
+        Finding(
+          rule_id="FLD-011",
+          category=FindingCategory.FIELD,
+          severity=Severity.HIGH,
+          message=f"Found {invalid_count} MBSF NDI records with invalid NDI match indicator.",
+          count=invalid_count,
+          details={"table_name": "MBSF NDI", "sample_bene_ids": sample_ids},
+        )
+      ]
+    return []
+
   def validate_slice(
     self,
     bene_df: pl.DataFrame,
@@ -441,6 +468,7 @@ class RelationalValidator:
     mbsf_d_df: Optional[pl.DataFrame] = None,
     mbsf_base_df: Optional[pl.DataFrame] = None,
     mbsf_oc_df: Optional[pl.DataFrame] = None,
+    mbsf_ndi_df: Optional[pl.DataFrame] = None,
   ) -> ValidationReport:
     """Executes full suite of relational, temporal, field, and record-level checks over a dataset slice."""
     findings: list[Finding] = []
@@ -518,5 +546,10 @@ class RelationalValidator:
       findings.extend(self.check_orphaned_claims(bene_df, mbsf_oc_df, "MBSF Other Chronic Conditions"))
       findings.extend(self.check_mbsf_oc_field_constraints(mbsf_oc_df))
       findings.extend(self.check_record_uniqueness(mbsf_oc_df, ["bene_id"], "MBSF Other Chronic Conditions"))
+
+    if mbsf_ndi_df is not None and not mbsf_ndi_df.is_empty():
+      findings.extend(self.check_orphaned_claims(bene_df, mbsf_ndi_df, "MBSF NDI"))
+      findings.extend(self.check_mbsf_ndi_field_constraints(mbsf_ndi_df))
+      findings.extend(self.check_record_uniqueness(mbsf_ndi_df, ["bene_id"], "MBSF NDI"))
 
     return ValidationReport(findings=findings)

@@ -364,6 +364,24 @@
       "nullable": false,
       "provenance_status": "preserved",
       "description": "Chronic condition indicator for Osteoporosis."
+    },
+    "NDI_MATCH_IND": {
+      "name": "NDI_MATCH_IND",
+      "label": "National Death Index Match Indicator",
+      "data_type": "string",
+      "max_length": 1,
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "National Death Index Match Indicator ('0', '1', 'Y', 'N')."
+    },
+    "NDI_DIUSE_CD": {
+      "name": "NDI_DIUSE_CD",
+      "label": "Underlying Cause of Death ICD Code",
+      "data_type": "string",
+      "max_length": 7,
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "Underlying Cause of Death ICD-10 Code from NDI."
     }
   },
   "constraints": [
@@ -444,6 +462,12 @@
       "category": "field",
       "description": "Other Chronic Condition Indicators (SP_*) on MBSF Other Chronic records must be within valid set {'0', '1', '2'}.",
       "rule": "SP_* IN {'0', '1', '2'}"
+    },
+    {
+      "constraint_id": "VAL_MBSF_NDI_01",
+      "category": "field",
+      "description": "NDI Match Indicator on MBSF NDI records must be within valid set {'0', '1', 'Y', 'N'}.",
+      "rule": "NDI_MATCH_IND IN {'0', '1', 'Y', 'N'}"
     }
   ]
 }
