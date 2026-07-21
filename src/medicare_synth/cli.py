@@ -168,6 +168,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       mbsf_ra_df=scenario_slice.mbsf_ra_df,
       mbsf_c_df=scenario_slice.mbsf_c_df,
       mbsf_ffs_df=scenario_slice.mbsf_ffs_df,
+      mbsf_pde_util_df=scenario_slice.mbsf_pde_util_df,
     )
     print(f"Scenario: {args.scenario}")
 
@@ -203,6 +204,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  MBSF Risk Adjustment: {scenario_slice.mbsf_ra_df.height} rows")
     print(f"  MBSF Part C: {scenario_slice.mbsf_c_df.height} rows")
     print(f"  MBSF FFS Utilization: {scenario_slice.mbsf_ffs_df.height} rows")
+    print(f"  MBSF Part D PDE Utilization: {scenario_slice.mbsf_pde_util_df.height} rows")
     return 0
 
   elif args.command == "manifest":
@@ -246,6 +248,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       mbsf_ra_df=scenario_slice.mbsf_ra_df,
       mbsf_c_df=scenario_slice.mbsf_c_df,
       mbsf_ffs_df=scenario_slice.mbsf_ffs_df,
+      mbsf_pde_util_df=scenario_slice.mbsf_pde_util_df,
     )
 
     print(f"Exported Release Bundle: {manifest.release_id}")
@@ -280,6 +283,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       "mbsf_risk_adjustment": scenario_slice.mbsf_ra_df,
       "mbsf_part_c": scenario_slice.mbsf_c_df,
       "mbsf_ffs_utilization": scenario_slice.mbsf_ffs_df,
+      "mbsf_pde_utilization": scenario_slice.mbsf_pde_util_df,
     }
 
     if args.mode == "vertical":
@@ -309,6 +313,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       print(f"  MBSF Risk Adjustment: {expanded['mbsf_risk_adjustment'].height} rows")
       print(f"  MBSF Part C: {expanded['mbsf_part_c'].height} rows")
       print(f"  MBSF FFS Utilization: {expanded['mbsf_ffs_utilization'].height} rows")
+      print(f"  MBSF Part D PDE Utilization: {expanded['mbsf_pde_utilization'].height} rows")
     return 0
 
   elif args.command == "catalog":
@@ -369,6 +374,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       "mbsf_ra": scenario_slice.mbsf_ra_df,
       "mbsf_c": scenario_slice.mbsf_c_df,
       "mbsf_ffs": scenario_slice.mbsf_ffs_df,
+      "mbsf_pde_util": scenario_slice.mbsf_pde_util_df,
     }
 
 

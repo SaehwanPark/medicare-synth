@@ -497,6 +497,54 @@
       "nullable": false,
       "provenance_status": "preserved",
       "description": "Annual total Durable Medical Equipment service count."
+    },
+    "PDE_TOT_FILL_CNT": {
+      "name": "PDE_TOT_FILL_CNT",
+      "label": "Total Part D Prescription Fill Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total Part D prescription fill count."
+    },
+    "PDE_BRAND_FILL_CNT": {
+      "name": "PDE_BRAND_FILL_CNT",
+      "label": "Brand Prescription Fill Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual brand name prescription fill count."
+    },
+    "PDE_GENERIC_FILL_CNT": {
+      "name": "PDE_GENERIC_FILL_CNT",
+      "label": "Generic Prescription Fill Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual generic prescription fill count."
+    },
+    "PDE_TOT_CST_AMT": {
+      "name": "PDE_TOT_CST_AMT",
+      "label": "Total Prescription Cost Amount",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total prescription drug cost amount."
+    },
+    "PDE_PTNT_PAY_AMT": {
+      "name": "PDE_PTNT_PAY_AMT",
+      "label": "Patient Paid Amount",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total patient paid prescription cost amount."
+    },
+    "PDE_LIS_PAY_AMT": {
+      "name": "PDE_LIS_PAY_AMT",
+      "label": "Low-Income Subsidy Payment Amount",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total low-income cost-sharing subsidy payment amount."
     }
   },
   "constraints": [
@@ -601,6 +649,12 @@
       "category": "field",
       "description": "Fee-For-Service (FFS) utilization counts (inpatient, outpatient, SNF, carrier, HHA, hospice, DME) on MBSF FFS records must be non-negative.",
       "rule": "IP_ADM_CNT >= 0 AND OP_VIST_CNT >= 0 AND SNF_STAY_CNT >= 0 AND CAR_SRVC_CNT >= 0 AND HHA_VIST_CNT >= 0 AND HOSP_STAY_CNT >= 0 AND DME_SRVC_CNT >= 0"
+    },
+    {
+      "constraint_id": "VAL_MBSF_PDE_UTIL_01",
+      "category": "field",
+      "description": "Part D prescription fill counts and cost amounts on MBSF Part D PDE Cost & Utilization records must be non-negative.",
+      "rule": "PDE_TOT_FILL_CNT >= 0 AND PDE_BRAND_FILL_CNT >= 0 AND PDE_GENERIC_FILL_CNT >= 0 AND PDE_TOT_CST_AMT >= 0 AND PDE_PTNT_PAY_AMT >= 0 AND PDE_LIS_PAY_AMT >= 0"
     }
   ]
 }

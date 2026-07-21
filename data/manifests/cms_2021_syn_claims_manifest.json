@@ -324,6 +324,25 @@
           "target_field": "BENE_ID"
         }
       ]
+    },
+    {
+      "file_id": "DE1_0_2021_MBSF_PDE_Utilization_Sample_1",
+      "filename": "DE1_0_2021_MBSF_PDE_Utilization_Sample_1.csv",
+      "file_domain": "mbsf_pde_util",
+      "grain": "beneficiary_year",
+      "format": "csv",
+      "expected_record_count": 116352,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_url": "https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SynPUFs/DE_1_0_2021_MBSF_PDE_Utilization_Sample_1.zip",
+      "primary_key": ["BENE_ID"],
+      "foreign_keys": [
+        {
+          "field": "BENE_ID",
+          "target_file_id": "DE1_0_2021_Beneficiary_Summary_File_Sample_1",
+          "target_field": "BENE_ID"
+        }
+      ]
     }
   ]
 }
+

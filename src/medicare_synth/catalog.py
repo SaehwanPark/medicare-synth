@@ -207,6 +207,15 @@ class ScenarioCatalog:
       sample_bene_count=1,
       sample_claim_count=1,
     ),
+    "invalid_mbsf_pde_utilization_count": ScenarioEntry(
+      name="invalid_mbsf_pde_utilization_count",
+      description="Intentional anomaly fixture containing an MBSF Part D PDE Utilization record with a negative fill count (-1).",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "mbsf_pde_utilization"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
 
 
@@ -256,6 +265,7 @@ class ScenarioCatalog:
       "invalid_mbsf_risk_adjustment_score": ScenarioCompiler.invalid_mbsf_risk_adjustment_score,
       "invalid_mbsf_part_c_contract": ScenarioCompiler.invalid_mbsf_part_c_contract,
       "invalid_mbsf_ffs_utilization_count": ScenarioCompiler.invalid_mbsf_ffs_utilization_count,
+      "invalid_mbsf_pde_utilization_count": ScenarioCompiler.invalid_mbsf_pde_utilization_count,
     }
 
     for name, method in compiler_methods.items():
@@ -282,6 +292,7 @@ class ScenarioCatalog:
         ("mbsf_risk_adjustment", slice_data.mbsf_ra_df),
         ("mbsf_part_c", slice_data.mbsf_c_df),
         ("mbsf_ffs_utilization", slice_data.mbsf_ffs_df),
+        ("mbsf_pde_utilization", slice_data.mbsf_pde_util_df),
       ]
 
 
