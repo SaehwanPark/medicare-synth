@@ -21,6 +21,7 @@ from medicare_synth.profile import LimitationsProfiler
 from medicare_synth.release import ReleaseExporter
 from medicare_synth.scenarios import ScenarioCompiler
 from medicare_synth.validation import RelationalValidator
+from medicare_synth.workflow import run_autonomous_workflow
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -143,6 +144,37 @@ def main(argv: Optional[list[str]] = None) -> int:
     type=str,
     default=None,
     help="Optional output directory path to save audit_report.json",
+  )
+
+  # Subcommand: auto-workflow
+  auto_wf_parser = subparsers.add_parser("auto-workflow", help="Run local verification and autonomously stage, commit, push, PR, and merge")
+  auto_wf_parser.add_argument(
+    "--commit-msg",
+    type=str,
+    default="feat: implement autonomous workflow subcommand and reconcile docs",
+    help="Commit message to use for git commit",
+  )
+  auto_wf_parser.add_argument(
+    "--title",
+    type=str,
+    default="feat: implement autonomous workflow subcommand and reconcile docs",
+    help="Pull request title",
+  )
+  auto_wf_parser.add_argument(
+    "--body",
+    type=str,
+    default="Automated PR created by the autonomous workflow engine. Reconciles docs and adds CLI auto-workflow subcommand.",
+    help="Pull request body",
+  )
+  auto_wf_parser.add_argument(
+    "--dry-run",
+    action="store_true",
+    help="Validate code and show git commands but do not commit, push, or merge",
+  )
+  auto_wf_parser.add_argument(
+    "--skip-merge",
+    action="store_true",
+    help="Create the PR but skip the autonomous merge step",
   )
 
   args = parser.parse_args(argv)
@@ -406,6 +438,15 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  K-Anonymity Metrics: {list(report.k_anonymity.keys())}")
     print(f"  Column Metrics Tables: {list(report.column_metrics.keys())}")
     return 0
+
+  elif args.command == "auto-workflow":
+    return run_autonomous_workflow(
+      commit_msg=args.commit_msg,
+      title=args.title,
+      body=args.body,
+      dry_run=args.dry_run,
+      skip_merge=args.skip_merge,
+    )
 
 
   else:

@@ -1,4 +1,4 @@
-"""Behavioral tests for Medicare-Synth CLI."""
+from unittest.mock import patch
 
 from medicare_synth.cli import main
 
@@ -40,4 +40,17 @@ def test_cli_validate_subcommand_output_dir(tmp_path):
     data = json.load(f)
   assert "findings" in data
   assert isinstance(data["findings"], list)
+
+
+def test_cli_auto_workflow_dry_run():
+  with patch("medicare_synth.cli.run_autonomous_workflow", return_value=0) as mock_wf:
+    code = main(["auto-workflow", "--dry-run"])
+    assert code == 0
+    mock_wf.assert_called_once_with(
+      commit_msg="feat: implement autonomous workflow subcommand and reconcile docs",
+      title="feat: implement autonomous workflow subcommand and reconcile docs",
+      body="Automated PR created by the autonomous workflow engine. Reconciles docs and adds CLI auto-workflow subcommand.",
+      dry_run=True,
+      skip_merge=False,
+    )
 

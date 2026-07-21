@@ -4,6 +4,10 @@
 
 ### Added
 
+- Added `auto-workflow` subcommand to `medicare-synth` CLI in `src/medicare_synth/cli.py` and reusable workflow execution core in `src/medicare_synth/workflow.py`.
+- Refactored `scripts/autonomous_workflow.py` to leverage `src/medicare_synth/workflow.py` engine.
+- Exported `run_autonomous_workflow` in package entrypoint `src/medicare_synth/__init__.py`.
+- Added unit test coverage for `auto-workflow` CLI subcommand in `tests/test_cli.py`.
 - Created `scripts/autonomous_workflow.py` to automate repository validation checks, staging, committing, pushing, and autonomous pull request merge.
 - Created `tests/test_autonomous_workflow.py` to cover mock execution pathways and dry-run safety gates.
 - Extended `AuditEngine` and `AuditReport` in `src/medicare_synth/audit.py` to calculate k-anonymity privacy scores for all 19 tables in the dataset, covering all remaining Master Beneficiary Summary File (MBSF) segments (`mbsf_cu`, `mbsf_d`, `mbsf_base`, `mbsf_ndi`, `mbsf_ra`, `mbsf_c`, `mbsf_ffs`, `mbsf_pde_util`).
