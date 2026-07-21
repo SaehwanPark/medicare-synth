@@ -11,7 +11,13 @@ from medicare_synth.diff import DiffReport, SchemaDiffer
 from medicare_synth.evidence import RKBEvidenceSnapshot, VariableContract
 from medicare_synth.expansion import HorizontalExpander, TabDatSynthAdapter, VerticalExpander
 from medicare_synth.manifest import FileManifest, SourceManifest
-from medicare_synth.models import ProvenanceStatus
+from medicare_synth.models import (
+  BeneficiaryRecord,
+  CarrierClaimLineRecord,
+  InpatientClaimHeaderRecord,
+  OutpatientClaimHeaderRecord,
+  ProvenanceStatus,
+)
 from medicare_synth.normalizer import BaselineNormalizer
 from medicare_synth.profile import LimitationsProfile, LimitationsProfiler
 from medicare_synth.release import FidelityProfile, ReleaseExporter, ReleaseManifest
@@ -22,6 +28,8 @@ __all__ = [
   "AuditEngine",
   "AuditReport",
   "BaselineNormalizer",
+  "BeneficiaryRecord",
+  "CarrierClaimLineRecord",
   "ColumnAuditMetric",
   "DiffReport",
   "FidelityProfile",
@@ -29,9 +37,11 @@ __all__ = [
   "Finding",
   "FindingCategory",
   "HorizontalExpander",
+  "InpatientClaimHeaderRecord",
   "KAnonymityResult",
   "LimitationsProfile",
   "LimitationsProfiler",
+  "OutpatientClaimHeaderRecord",
   "ProvenanceStatus",
   "RKBEvidenceSnapshot",
   "RelationalValidator",

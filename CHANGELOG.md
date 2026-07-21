@@ -4,6 +4,12 @@
 
 ### Added
 
+- Implemented `InpatientClaimHeaderRecord` domain model in `src/medicare_synth/models.py`.
+- Added Inpatient Claims file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`CLM_ADMSN_DT`, `NCH_BENE_DSCHRG_DT`, `CLM_PMT_AMT`, `CLM_UTLZTN_DAY_CNT`, `CLM_DRG_CD`, `VAL_TEMP_02`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_admission_temporal_inversions` and updated `validate_slice` to validate inpatient claim relational integrity and admission temporal order (`TMP-002`).
+- Updated `ScenarioCompiler` to compile inpatient claims data frames across all scenarios and added `invalid_inpatient_admission` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`) to handle Inpatient Claims.
+- Added comprehensive unit test suite in `tests/test_inpatient.py` (49 total passing unit tests).
 - Implemented `AuditEngine` and `AuditReport` in `src/medicare_synth/audit.py` providing relational join coverage, k-anonymity privacy scoring, and column nullity/uniqueness metrics.
 - Exposed `audit` subcommand in `src/medicare_synth/cli.py` (`medicare-synth audit --scenario <name> --output-dir <path>`).
 - Added unit test suite in `tests/test_audit.py` (44 total passing unit tests).

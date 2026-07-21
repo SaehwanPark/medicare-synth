@@ -77,6 +77,49 @@
       "nullable": true,
       "provenance_status": "preserved",
       "description": "Standard 10-digit National Provider Identifier."
+    },
+    "CLM_ADMSN_DT": {
+      "name": "CLM_ADMSN_DT",
+      "label": "Claim Admission Date",
+      "data_type": "date",
+      "format": "YYYYMMDD",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "The date the beneficiary was admitted to an inpatient facility."
+    },
+    "NCH_BENE_DSCHRG_DT": {
+      "name": "NCH_BENE_DSCHRG_DT",
+      "label": "Beneficiary Discharge Date",
+      "data_type": "date",
+      "format": "YYYYMMDD",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "The date the beneficiary was discharged from an inpatient facility."
+    },
+    "CLM_PMT_AMT": {
+      "name": "CLM_PMT_AMT",
+      "label": "Claim Payment Amount",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Total amount paid by Medicare for the claim."
+    },
+    "CLM_UTLZTN_DAY_CNT": {
+      "name": "CLM_UTLZTN_DAY_CNT",
+      "label": "Utilization Day Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Number of covered days of inpatient care utilized."
+    },
+    "CLM_DRG_CD": {
+      "name": "CLM_DRG_CD",
+      "label": "Diagnosis Related Group Code",
+      "data_type": "string",
+      "max_length": 3,
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "3-digit Diagnosis Related Group code classification."
     }
   },
   "constraints": [
@@ -87,9 +130,15 @@
       "rule": "CLM_FROM_DT <= CLM_THRU_DT"
     },
     {
+      "constraint_id": "VAL_TEMP_02",
+      "category": "temporal",
+      "description": "CLM_ADMSN_DT must be less than or equal to NCH_BENE_DSCHRG_DT.",
+      "rule": "CLM_ADMSN_DT <= NCH_BENE_DSCHRG_DT"
+    },
+    {
       "constraint_id": "VAL_REL_01",
       "category": "relational",
-      "description": "BENE_ID on Carrier or Outpatient claim must exist in Beneficiary Summary file.",
+      "description": "BENE_ID on Carrier, Outpatient, or Inpatient claim must exist in Beneficiary Summary file.",
       "rule": "CLM.BENE_ID IN BENE_SUMMARY.BENE_ID"
     }
   ]

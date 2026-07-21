@@ -9,6 +9,7 @@ import polars as pl
 from medicare_synth.models import (
   BeneficiaryRecord,
   CarrierClaimLineRecord,
+  InpatientClaimHeaderRecord,
   OutpatientClaimHeaderRecord,
   ProvenanceStatus,
 )
@@ -95,6 +96,35 @@ class BaselineNormalizer:
         pl.col("clm_thru_dt").cast(pl.Date),
         pl.col("prvdr_npi").cast(pl.String),
         pl.col("icd_dgns_cd1").cast(pl.String),
+      ]
+    )
+
+  @staticmethod
+  def normalize_inpatient_claims(records: Sequence[dict[str, Any]]) -> pl.DataFrame:
+    """Normalizes raw inpatient claim header dictionary records into a canonical Polars DataFrame."""
+    validated = [InpatientClaimHeaderRecord(**r) for r in records]
+    df = pl.DataFrame([v.model_dump() for v in validated])
+    if df.is_empty():
+      return pl.DataFrame(
+        schema={
+          "clm_id": pl.String,
+          "bene_id": pl.String,
+          "clm_admsn_dt": pl.Date,
+          "nch_bene_dschrg_dt": pl.Date,
+          "clm_pmt_amt": pl.Float64,
+          "clm_utlztn_day_cnt": pl.Int64,
+          "clm_drg_cd": pl.String,
+        }
+      )
+    return df.with_columns(
+      [
+        pl.col("clm_id").cast(pl.String),
+        pl.col("bene_id").cast(pl.String),
+        pl.col("clm_admsn_dt").cast(pl.Date),
+        pl.col("nch_bene_dschrg_dt").cast(pl.Date),
+        pl.col("clm_pmt_amt").cast(pl.Float64),
+        pl.col("clm_utlztn_day_cnt").cast(pl.Int64),
+        pl.col("clm_drg_cd").cast(pl.String),
       ]
     )
 

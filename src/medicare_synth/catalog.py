@@ -29,30 +29,30 @@ class ScenarioCatalog:
   _CATALOG: Dict[str, ScenarioEntry] = {
     "valid_baseline_cohort": ScenarioEntry(
       name="valid_baseline_cohort",
-      description="Valid baseline cohort with matching beneficiary and claim records across carrier and outpatient files.",
+      description="Valid baseline cohort with matching beneficiary and claim records across carrier, outpatient, and inpatient files.",
       is_valid=True,
       expected_findings_count=0,
-      target_files=["beneficiary_summary", "carrier_claims", "outpatient_claims"],
+      target_files=["beneficiary_summary", "carrier_claims", "outpatient_claims", "inpatient_claims"],
       sample_bene_count=3,
-      sample_claim_count=3,
+      sample_claim_count=5,
     ),
     "valid_chronic_subgroup": ScenarioEntry(
       name="valid_chronic_subgroup",
-      description="Valid subgroup focusing on chronic condition tracking and outpatient encounters.",
+      description="Valid subgroup focusing on chronic condition tracking and outpatient/inpatient encounters.",
       is_valid=True,
       expected_findings_count=0,
-      target_files=["beneficiary_summary", "outpatient_claims"],
+      target_files=["beneficiary_summary", "outpatient_claims", "inpatient_claims"],
       sample_bene_count=2,
-      sample_claim_count=2,
+      sample_claim_count=4,
     ),
     "valid_carrier_line_item": ScenarioEntry(
       name="valid_carrier_line_item",
       description="Valid detailed carrier line-item claim records with valid NPI providers.",
       is_valid=True,
       expected_findings_count=0,
-      target_files=["beneficiary_summary", "carrier_claims"],
+      target_files=["beneficiary_summary", "carrier_claims", "inpatient_claims"],
       sample_bene_count=2,
-      sample_claim_count=2,
+      sample_claim_count=4,
     ),
     "invalid_orphaned_claim": ScenarioEntry(
       name="invalid_orphaned_claim",
@@ -69,6 +69,15 @@ class ScenarioCatalog:
       is_valid=False,
       expected_findings_count=1,
       target_files=["beneficiary_summary", "outpatient_claims"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
+    "invalid_inpatient_admission": ScenarioEntry(
+      name="invalid_inpatient_admission",
+      description="Intentional anomaly fixture with inpatient admission date after discharge date.",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "inpatient_claims"],
       sample_bene_count=1,
       sample_claim_count=1,
     ),
@@ -105,6 +114,7 @@ class ScenarioCatalog:
       "valid_carrier_line_item": ScenarioCompiler.valid_carrier_line_item,
       "invalid_orphaned_claim": ScenarioCompiler.invalid_orphaned_claim,
       "invalid_temporal_inversion": ScenarioCompiler.invalid_temporal_inversion,
+      "invalid_inpatient_admission": ScenarioCompiler.invalid_inpatient_admission,
     }
 
     for name, method in compiler_methods.items():
@@ -116,6 +126,7 @@ class ScenarioCatalog:
         ("beneficiary_summary", slice_data.bene_df),
         ("carrier_claims", slice_data.carrier_df),
         ("outpatient_claims", slice_data.outpatient_df),
+        ("inpatient_claims", slice_data.inpatient_df),
       ]
 
       for table_name, df in tables:
