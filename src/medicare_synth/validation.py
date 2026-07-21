@@ -329,6 +329,32 @@ class RelationalValidator:
       ]
     return []
 
+  @staticmethod
+  def check_mbsf_d_field_constraints(mbsf_d_df: pl.DataFrame) -> list[Finding]:
+    """Identifies MBSF Part D records with negative drug cost or out-of-pocket metrics."""
+    if mbsf_d_df.is_empty():
+      return []
+
+    invalid = mbsf_d_df.filter(
+      (pl.col("bene_ptd_trcc_amt") < 0)
+      | (pl.col("bene_ptd_moop_amt") < 0)
+    )
+    invalid_count = invalid.height
+
+    if invalid_count > 0:
+      sample_ids = invalid.select("bene_id").slice(0, 5).to_series().to_list() if "bene_id" in invalid.columns else []
+      return [
+        Finding(
+          rule_id="FLD-008",
+          category=FindingCategory.FIELD,
+          severity=Severity.HIGH,
+          message=f"Found {invalid_count} MBSF Part D records violating non-negative cost constraints.",
+          count=invalid_count,
+          details={"table_name": "MBSF Part D", "sample_bene_ids": sample_ids},
+        )
+      ]
+    return []
+
   def validate_slice(
     self,
     bene_df: pl.DataFrame,
@@ -342,6 +368,7 @@ class RelationalValidator:
     hospice_df: Optional[pl.DataFrame] = None,
     mbsf_cc_df: Optional[pl.DataFrame] = None,
     mbsf_cu_df: Optional[pl.DataFrame] = None,
+    mbsf_d_df: Optional[pl.DataFrame] = None,
   ) -> ValidationReport:
     """Executes full suite of relational, temporal, field, and record-level checks over a dataset slice."""
     findings: list[Finding] = []
@@ -404,5 +431,10 @@ class RelationalValidator:
       findings.extend(self.check_orphaned_claims(bene_df, mbsf_cu_df, "MBSF Cost & Use"))
       findings.extend(self.check_mbsf_cu_field_constraints(mbsf_cu_df))
       findings.extend(self.check_record_uniqueness(mbsf_cu_df, ["bene_id"], "MBSF Cost & Use"))
+
+    if mbsf_d_df is not None and not mbsf_d_df.is_empty():
+      findings.extend(self.check_orphaned_claims(bene_df, mbsf_d_df, "MBSF Part D"))
+      findings.extend(self.check_mbsf_d_field_constraints(mbsf_d_df))
+      findings.extend(self.check_record_uniqueness(mbsf_d_df, ["bene_id"], "MBSF Part D"))
 
     return ValidationReport(findings=findings)

@@ -4,6 +4,13 @@
 
 ### Added
 
+- Implemented `MBSFPartDRecord` domain model in `src/medicare_synth/models.py`.
+- Added Master Beneficiary Summary File (MBSF) Part D Characteristics Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`PTD_CNTRCT_ID_01`, `PTD_PBP_ID_01`, `PTD_SGNT_CD_01`, `RDS_IND_01`, `LI_COST_SHRH_GRP_CD_01`, `BENE_PTD_TRCC_AMT`, `BENE_PTD_MOOP_AMT`, `VAL_MBSF_D_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_mbsf_d_field_constraints` and updated `validate_slice` to validate MBSF Part D foreign key integrity and drug cost field constraints (`FLD-008`).
+- Updated `ScenarioCompiler` to compile MBSF Part D data frames across all scenarios and added `invalid_mbsf_part_d_contract` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle MBSF Part D Segment.
+- Added comprehensive unit test suite in `tests/test_mbsf_d.py` (106 total passing unit tests).
+
 - Implemented `MBSFCostAndUseRecord` domain model in `src/medicare_synth/models.py`.
 - Added Master Beneficiary Summary File (MBSF) Cost & Use Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`BENE_MDCR_PAY_AMT`, `BENE_TOT_PAY_AMT`, `BENE_IP_DDCTBL_AMT`, `BENE_CVRD_DYS_CNT`, `VAL_MBSF_CU_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_mbsf_cu_field_constraints` and updated `validate_slice` to validate MBSF Cost & Use foreign key integrity and payment field constraints (`FLD-007`).
