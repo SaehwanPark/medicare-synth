@@ -4,7 +4,14 @@
 
 ### Added
 
+- Implemented `SkilledNursingFacilityClaimRecord` domain model in `src/medicare_synth/models.py`.
+- Added Skilled Nursing Facility (SNF) Claims file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`CLM_ADMSN_DT`, `NCH_BENE_DSCHRG_DT`, `CLM_UTLZTN_DAY_CNT`, `NCVD_DAYS_CNT`, `CLM_PMT_AMT`, `VAL_SNF_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_snf_field_constraints` and updated `validate_slice` to validate SNF foreign key integrity, admission temporal order, and field constraints (`FLD-002`).
+- Updated `ScenarioCompiler` to compile SNF claim data frames across all scenarios and added `invalid_snf_utilization_days` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle SNF Claims.
+- Added comprehensive unit test suite in `tests/test_snf.py` (61 total passing unit tests).
 - Implemented `PrescriptionDrugEventRecord` domain model in `src/medicare_synth/models.py`.
+
 - Added Part D Prescription Drug Event file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`PDE_ID`, `SRVC_DT`, `PROD_SRVC_ID`, `QTY_DSPNSD_NUM`, `DAYS_SUPLY_NUM`, `PTNT_PAY_AMT`, `TOT_RX_CST_AMT`, `VAL_NUM_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_pde_field_constraints` and updated `validate_slice` to validate PDE foreign key integrity and field constraints (`FLD-001`).
 - Updated `ScenarioCompiler` to compile PDE data frames across all scenarios and added `invalid_pde_days_supply` anomaly scenario fixture.

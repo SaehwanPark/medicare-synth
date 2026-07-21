@@ -73,7 +73,7 @@ class AuditEngine:
     if total_bene == 0:
       return coverage
 
-    for table_name in ("carrier", "outpatient", "inpatient", "pde"):
+    for table_name in ("carrier", "outpatient", "inpatient", "pde", "snf"):
       claims_df = self.dataset.get(table_name)
       if claims_df is not None and not claims_df.is_empty():
         claim_bene_col = _find_col(claims_df, "BENE_ID")
@@ -83,6 +83,7 @@ class AuditEngine:
           coverage[f"beneficiary_{table_name}_coverage"] = round(matched / len(claim_benes), 4) if claim_benes else 1.0
 
     return coverage
+
 
 
   def compute_k_anonymity(self, table_name: str, qi_columns: list[str]) -> KAnonymityResult | None:

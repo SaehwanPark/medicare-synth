@@ -22,9 +22,11 @@ class FidelityProfile(BaseModel):
   outpatient_claim_count: int = Field(..., description="Number of outpatient claim line/header records")
   inpatient_claim_count: int = Field(default=0, description="Number of inpatient claim line/header records")
   pde_count: int = Field(default=0, description="Number of Part D prescription drug event records")
+  snf_claim_count: int = Field(default=0, description="Number of SNF claim line/header records")
   key_uniqueness_rate: float = Field(..., description="Proportion of records satisfying primary key uniqueness")
   foreign_key_validity_rate: float = Field(..., description="Proportion of claims linked to valid beneficiaries")
   temporal_integrity_rate: float = Field(..., description="Proportion of claims with valid temporal ordering")
+
 
 
 class FileReleaseEntry(BaseModel):
@@ -86,6 +88,7 @@ class ReleaseExporter:
     validation_report: ValidationReport,
     inpatient_df: pl.DataFrame | None = None,
     pde_df: pl.DataFrame | None = None,
+    snf_df: pl.DataFrame | None = None,
   ) -> FidelityProfile:
     """Compute summary metrics and integrity rates for a dataset slice.
 
@@ -96,13 +99,15 @@ class ReleaseExporter:
       validation_report: Relational validation report.
       inpatient_df: Optional Inpatient Claims DataFrame.
       pde_df: Optional Prescription Drug Events DataFrame.
+      snf_df: Optional SNF Claims DataFrame.
 
     Returns:
       FidelityProfile instance containing computed counts and validity ratios.
     """
     inp_count = inpatient_df.height if inpatient_df is not None else 0
     pde_cnt = pde_df.height if pde_df is not None else 0
-    total_claims = carrier_df.height + outpatient_df.height + inp_count + pde_cnt
+    snf_cnt = snf_df.height if snf_df is not None else 0
+    total_claims = carrier_df.height + outpatient_df.height + inp_count + pde_cnt + snf_cnt
     fk_findings = [f for f in validation_report.findings if f.category == FindingCategory.RELATIONAL]
     temp_findings = [f for f in validation_report.findings if f.category == FindingCategory.TEMPORAL]
 
@@ -115,6 +120,7 @@ class ReleaseExporter:
       outpatient_claim_count=outpatient_df.height,
       inpatient_claim_count=inp_count,
       pde_count=pde_cnt,
+      snf_claim_count=snf_cnt,
       key_uniqueness_rate=1.0,
       foreign_key_validity_rate=max(0.0, min(1.0, fk_validity_rate)),
       temporal_integrity_rate=max(0.0, min(1.0, temp_integrity_rate)),
@@ -172,6 +178,15 @@ class ReleaseExporter:
       "    DAYS_SUPLY_NUM INTEGER,\n"
       "    PTNT_PAY_AMT NUMERIC,\n"
       "    TOT_RX_CST_AMT NUMERIC\n"
+      ");\n\n"
+      "CREATE TABLE IF NOT EXISTS snf_claim (\n"
+      "    CLM_ID VARCHAR PRIMARY KEY,\n"
+      "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
+      "    CLM_ADMSN_DT DATE,\n"
+      "    NCH_BENE_DSCHRG_DT DATE,\n"
+      "    CLM_PMT_AMT NUMERIC,\n"
+      "    CLM_UTLZTN_DAY_CNT INTEGER,\n"
+      "    NCVD_DAYS_CNT INTEGER\n"
       ");\n"
     )
 
@@ -183,6 +198,7 @@ class ReleaseExporter:
     fmt: Literal["csv", "parquet", "all"] = "all",
     inpatient_df: pl.DataFrame | None = None,
     pde_df: pl.DataFrame | None = None,
+    snf_df: pl.DataFrame | None = None,
   ) -> ReleaseManifest:
     """Export normalized tabular data and metadata artifacts to the release directory.
 
@@ -193,6 +209,7 @@ class ReleaseExporter:
       fmt: Format choice ('csv', 'parquet', or 'all').
       inpatient_df: Optional Inpatient Claims DataFrame.
       pde_df: Optional Prescription Drug Events DataFrame.
+      snf_df: Optional SNF Claims DataFrame.
 
     Returns:
       ReleaseManifest detailing the exported files and validation summary.
@@ -200,10 +217,10 @@ class ReleaseExporter:
     self.output_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Run validation
-    report = self.validator.validate_slice(bene_df, carrier_df, outpatient_df, inpatient_df, pde_df)
+    report = self.validator.validate_slice(bene_df, carrier_df, outpatient_df, inpatient_df, pde_df, snf_df)
 
     # 2. Compute fidelity profile
-    fidelity = self.compute_fidelity_profile(bene_df, carrier_df, outpatient_df, report, inpatient_df, pde_df)
+    fidelity = self.compute_fidelity_profile(bene_df, carrier_df, outpatient_df, report, inpatient_df, pde_df, snf_df)
 
     # Write validation report and fidelity profile
     with open(self.output_dir / "validation_report.json", "w") as f:
@@ -227,6 +244,9 @@ class ReleaseExporter:
       tables["inpatient"] = inpatient_df
     if pde_df is not None:
       tables["pde"] = pde_df
+    if snf_df is not None:
+      tables["snf"] = snf_df
+
 
 
     formats_to_export = ["csv", "parquet"] if fmt == "all" else [fmt]
