@@ -301,6 +301,69 @@
       "nullable": false,
       "provenance_status": "preserved",
       "description": "Annual total months of Part D coverage."
+    },
+    "SP_ARTHGLAU": {
+      "name": "SP_ARTHGLAU",
+      "label": "Rheumatoid Arthritis / Osteoarthritis Indicator",
+      "data_type": "string",
+      "max_length": 1,
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Chronic condition indicator for Rheumatoid Arthritis or Osteoarthritis."
+    },
+    "SP_ASTHMA": {
+      "name": "SP_ASTHMA",
+      "label": "Asthma Indicator",
+      "data_type": "string",
+      "max_length": 1,
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Chronic condition indicator for Asthma."
+    },
+    "SP_ATRIALF": {
+      "name": "SP_ATRIALF",
+      "label": "Atrial Fibrillation Indicator",
+      "data_type": "string",
+      "max_length": 1,
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Chronic condition indicator for Atrial Fibrillation."
+    },
+    "SP_HYPERL": {
+      "name": "SP_HYPERL",
+      "label": "Hyperlipidemia Indicator",
+      "data_type": "string",
+      "max_length": 1,
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Chronic condition indicator for Hyperlipidemia."
+    },
+    "SP_HYPERT": {
+      "name": "SP_HYPERT",
+      "label": "Hypertension Indicator",
+      "data_type": "string",
+      "max_length": 1,
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Chronic condition indicator for Hypertension."
+    },
+    "SP_HYPOT": {
+      "name": "SP_HYPOT",
+      "label": "Hypothyroidism Indicator",
+      "data_type": "string",
+      "max_length": 1,
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Chronic condition indicator for Hypothyroidism."
+    },
+    "SP_OSTEOP": {
+      "name": "SP_OSTEOP",
+      "label": "Osteoporosis Indicator",
+      "data_type": "string",
+      "max_length": 1,
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Chronic condition indicator for Osteoporosis."
     }
   },
   "constraints": [
@@ -375,6 +438,12 @@
       "category": "field",
       "description": "Part A, B, HMO, and D coverage months on MBSF Base records must be between 0 and 12 inclusive.",
       "rule": "BENE_HI_CVRAGE_TOT_MONS BETWEEN 0 AND 12 AND BENE_SMI_CVRAGE_TOT_MONS BETWEEN 0 AND 12 AND BENE_HMO_CVRAGE_TOT_MONS BETWEEN 0 AND 12 AND BENE_PTD_CVRAGE_TOT_MONS BETWEEN 0 AND 12"
+    },
+    {
+      "constraint_id": "VAL_MBSF_OC_01",
+      "category": "field",
+      "description": "Other Chronic Condition Indicators (SP_*) on MBSF Other Chronic records must be within valid set {'0', '1', '2'}.",
+      "rule": "SP_* IN {'0', '1', '2'}"
     }
   ]
 }

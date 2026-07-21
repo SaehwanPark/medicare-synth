@@ -387,6 +387,44 @@ class RelationalValidator:
       ]
     return []
 
+  @staticmethod
+  def check_mbsf_oc_field_constraints(mbsf_oc_df: pl.DataFrame) -> list[Finding]:
+    """Identifies MBSF Other Chronic records with invalid indicator values (not in 0, 1, 2)."""
+    if mbsf_oc_df.is_empty():
+      return []
+
+    indicators = [
+      "sp_arthglau",
+      "sp_asthma",
+      "sp_atrialf",
+      "sp_hyperl",
+      "sp_hypert",
+      "sp_hypot",
+      "sp_osteop",
+    ]
+    valid_set = ["0", "1", "2"]
+    filter_expr = pl.lit(False)
+    for col_name in indicators:
+      if col_name in mbsf_oc_df.columns:
+        filter_expr = filter_expr | (~pl.col(col_name).is_in(valid_set))
+
+    invalid = mbsf_oc_df.filter(filter_expr)
+    invalid_count = invalid.height
+
+    if invalid_count > 0:
+      sample_ids = invalid.select("bene_id").slice(0, 5).to_series().to_list() if "bene_id" in invalid.columns else []
+      return [
+        Finding(
+          rule_id="FLD-010",
+          category=FindingCategory.FIELD,
+          severity=Severity.HIGH,
+          message=f"Found {invalid_count} MBSF Other Chronic records with invalid chronic condition indicators.",
+          count=invalid_count,
+          details={"table_name": "MBSF Other Chronic Conditions", "sample_bene_ids": sample_ids},
+        )
+      ]
+    return []
+
   def validate_slice(
     self,
     bene_df: pl.DataFrame,
@@ -402,6 +440,7 @@ class RelationalValidator:
     mbsf_cu_df: Optional[pl.DataFrame] = None,
     mbsf_d_df: Optional[pl.DataFrame] = None,
     mbsf_base_df: Optional[pl.DataFrame] = None,
+    mbsf_oc_df: Optional[pl.DataFrame] = None,
   ) -> ValidationReport:
     """Executes full suite of relational, temporal, field, and record-level checks over a dataset slice."""
     findings: list[Finding] = []
@@ -474,5 +513,10 @@ class RelationalValidator:
       findings.extend(self.check_orphaned_claims(bene_df, mbsf_base_df, "MBSF Base Enrollment"))
       findings.extend(self.check_mbsf_base_field_constraints(mbsf_base_df))
       findings.extend(self.check_record_uniqueness(mbsf_base_df, ["bene_id"], "MBSF Base Enrollment"))
+
+    if mbsf_oc_df is not None and not mbsf_oc_df.is_empty():
+      findings.extend(self.check_orphaned_claims(bene_df, mbsf_oc_df, "MBSF Other Chronic Conditions"))
+      findings.extend(self.check_mbsf_oc_field_constraints(mbsf_oc_df))
+      findings.extend(self.check_record_uniqueness(mbsf_oc_df, ["bene_id"], "MBSF Other Chronic Conditions"))
 
     return ValidationReport(findings=findings)

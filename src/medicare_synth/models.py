@@ -209,3 +209,20 @@ class MBSFBaseEnrollmentRecord(BaseModel):
   mdcr_entlmt_buyin_ind_01: Optional[str] = Field(default="C", max_length=1, description="Medicare Entitlement / Buy-in Indicator Month 01")
   dual_stus_cd_01: Optional[str] = Field(default="00", max_length=2, description="Dual Eligibility Status Code Month 01")
   val_mbsf_base_01: float = Field(default=0.0, ge=0.0, description="MBSF Base Enrollment Validation Metric")
+
+
+class MBSFOtherChronicConditionsRecord(BaseModel):
+  """Domain record representation for Master Beneficiary Summary File Other Chronic Conditions Segment."""
+
+  model_config = ConfigDict(frozen=True)
+
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  rfrnc_yr: int = Field(default=2021, ge=2000, le=2099, description="Reference Year")
+  sp_arthglau: str = Field(default="0", max_length=1, description="Arthritis / Glaucoma Indicator")
+  sp_asthma: str = Field(default="0", max_length=1, description="Asthma Indicator")
+  sp_atrialf: str = Field(default="0", max_length=1, description="Atrial Fibrillation Indicator")
+  sp_hyperl: str = Field(default="0", max_length=1, description="Hyperlipidemia Indicator")
+  sp_hypert: str = Field(default="0", max_length=1, description="Hypertension Indicator")
+  sp_hypot: str = Field(default="0", max_length=1, description="Hypothyroidism Indicator")
+  sp_osteop: str = Field(default="0", max_length=1, description="Osteoporosis Indicator")
+  val_mbsf_oc_01: float = Field(default=0.0, ge=0.0, description="MBSF Other Chronic Conditions Validation Metric")
