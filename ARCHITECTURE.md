@@ -1,15 +1,14 @@
 # ARCHITECTURE
 
 Last Reviewed: 2026-07-20
-Status: Proposed
+Status: Active Implementation
 
 ## Current Repository
 
-The repository currently contains project and contributor documentation plus a
-repo-local agent harness. No production package, public API, executable schema,
-validator, or generated dataset exists yet. The component model below records
-the intended boundaries that foundation decisions must confirm before code is
-claimed to implement them.
+The repository contains core Pydantic v2 domain schemas, source/evidence manifests,
+and a Polars-backed relational validator framework (`src/medicare_synth/validation.py`).
+The component model below records the implemented and planned boundaries.
+
 
 ## Proposed Components
 

@@ -42,6 +42,17 @@ Completed Baseline and Evidence Deliverables:
 - **Python Core Package**: Established `src/medicare_synth/` with Pydantic v2 validation models (`SourceManifest`, `FileManifest`, `RKBEvidenceSnapshot`, `VariableContract`, domain entity records).
 - **Behavioral Test Suite**: Added 10 passing unit tests under `tests/` for manifest validation, checksum verification logic, evidence snapshot lookups, and domain record constraints.
 
+### Executable Model and Validation
+
+Status: Active
+
+Completed Executable Model & Validation Deliverables:
+
+- **Validation Core Framework**: Created `src/medicare_synth/validation.py` establishing `Severity`, `FindingCategory`, `Finding`, and `ValidationReport` Pydantic models.
+- **High-Performance Relational Validator**: Implemented Polars-backed `RelationalValidator` performing foreign key constraint checks (`CLM_ID` -> `BENE_ID`), temporal inversion detection (`CLM_FROM_DT` <= `CLM_THRU_DT`), and record key uniqueness (`REC-001`).
+- **Scenario Validation Suite**: Added unit tests in `tests/test_validation.py` validating normal slices and verifying explicit finding emission for `invalid_orphaned_claim` (`REL-001`, CRITICAL) and `invalid_temporal_inversion` (`TMP-001`, HIGH) scenarios.
+
+
 Verification requires each decision to cite evidence, state assumptions, and be
 
 reflected in `ARCHITECTURE.md` and `ROADMAP.md`. No synthesis or release may be

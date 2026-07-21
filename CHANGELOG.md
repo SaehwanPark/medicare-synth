@@ -24,6 +24,10 @@
 - Added unit test suite under `tests/` with 10 passing tests for manifest verification, evidence snapshot lookups, and domain record constraints.
 - Added `pytest` dev dependency to `pyproject.toml` and configured `pythonpath = ["src"]`.
 - Completed Milestone 2 (Baseline and Evidence) across all deliverables.
+- Implemented core validation framework in `src/medicare_synth/validation.py` (`Severity`, `FindingCategory`, `Finding`, `ValidationReport`).
+- Added Polars-backed `RelationalValidator` supporting foreign key integrity (`CLM_ID` -> `BENE_ID`), temporal order (`CLM_FROM_DT` <= `CLM_THRU_DT`), and record uniqueness (`REC-001`).
+- Added 4 unit tests in `tests/test_validation.py` covering normal validation and anomaly scenarios (`invalid_orphaned_claim`, `invalid_temporal_inversion`).
+
 
 
 ### Changed
