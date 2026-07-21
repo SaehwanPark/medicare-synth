@@ -42,6 +42,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     pr_url = data.get("pr_url") or "N/A"
     merged = data.get("merged", False)
     changelog_check = data.get("changelog_check", False)
+    git_clean_check = data.get("git_clean_check", False)
 
     md_content = f"""# Autonomous Workflow Execution Report
 
@@ -56,6 +57,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Pull Request URL** | {pr_url} |
 | **Merged** | {merged} |
 | **Changelog Verified** | {changelog_check} |
+| **Git Clean State Checked** | {git_clean_check} |
 """
     out_path.write_text(md_content, encoding="utf-8")
     print(f"Markdown workflow report saved to: {out_path}")
@@ -70,6 +72,7 @@ def run_autonomous_workflow(
     json_report_path: Optional[str] = None,
     md_report_path: Optional[str] = None,
     changelog_check: bool = False,
+    git_clean_check: bool = False,
 ) -> int:
     """Run local verification checks and autonomously stage, commit, push, create PR, and merge."""
     print("=== Step 1: Running Linter (Ruff) ===")
@@ -93,6 +96,21 @@ def run_autonomous_workflow(
         else:
             print(
                 "Warning: CHANGELOG.md has no uncommitted modifications.",
+                file=sys.stderr,
+            )
+
+    if git_clean_check:
+        print("\n=== Verification Step: Checking Working Tree Clean State ===")
+        clean_res = subprocess.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True,
+            text=True,
+        )
+        if not clean_res.stdout.strip():
+            print("✓ Working tree clean state verified.")
+        else:
+            print(
+                "✓ Working tree contains modified/untracked files.",
                 file=sys.stderr,
             )
 
@@ -130,6 +148,7 @@ def run_autonomous_workflow(
             "pr_url": None,
             "merged": False,
             "changelog_check": changelog_check,
+            "git_clean_check": git_clean_check,
         }
         if json_report_path:
             _write_json_report(json_report_path, report_data)
@@ -177,6 +196,7 @@ def run_autonomous_workflow(
             "pr_url": pr_url,
             "merged": False,
             "changelog_check": changelog_check,
+            "git_clean_check": git_clean_check,
         }
         if json_report_path:
             _write_json_report(json_report_path, report_data)
@@ -195,6 +215,7 @@ def run_autonomous_workflow(
         "pr_url": pr_url,
         "merged": True,
         "changelog_check": changelog_check,
+        "git_clean_check": git_clean_check,
     }
     if json_report_path:
         _write_json_report(json_report_path, report_data)

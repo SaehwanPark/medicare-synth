@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added `--git-clean-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `git_clean_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to verify git working tree status during automated workflow execution.
+- Extended unit test suite in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `git_clean_check` status verification logic and CLI flag parsing.
 - Added `--md-report` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `md_report_path` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to generate clean Markdown summary reports of workflow execution status.
 - Extended unit test coverage in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to verify Markdown report generation and CLI flag parsing.
 - Added `--changelog-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `changelog_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to verify `CHANGELOG.md` updates before committing and pushing.

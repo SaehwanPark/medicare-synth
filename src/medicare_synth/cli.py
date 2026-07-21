@@ -238,6 +238,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify CHANGELOG.md contains uncommitted modifications before commit/push",
     )
+    auto_wf_parser.add_argument(
+        "--git-clean-check",
+        action="store_true",
+        help="Verify git working tree status check step before staging/committing",
+    )
 
     args = parser.parse_args(argv)
 
@@ -538,6 +543,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             json_report_path=args.json_report,
             md_report_path=args.md_report,
             changelog_check=args.changelog_check,
+            git_clean_check=args.git_clean_check,
         )
 
     else:

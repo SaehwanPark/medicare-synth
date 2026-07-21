@@ -133,3 +133,31 @@ def test_run_autonomous_workflow_md_report(mock_run, tmp_path):
     assert "| **Status** | success |" in content
     assert "| **Branch** | feat/test-branch |" in content
 
+
+@patch("subprocess.run")
+def test_run_autonomous_workflow_git_clean_check(mock_run, tmp_path):
+    """Test that git_clean_check option runs git status check step and records status in report."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_gcc.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        git_clean_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["git_clean_check"] is True
+
+
