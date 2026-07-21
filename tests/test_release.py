@@ -59,6 +59,7 @@ def test_fidelity_profile_computation(tmp_path: Path):
   assert profile.bene_count == 3
   assert profile.carrier_claim_count == 2
   assert profile.outpatient_claim_count == 2
+  assert profile.mbsf_d_count == 0
   assert profile.foreign_key_validity_rate == 1.0
   assert profile.temporal_integrity_rate == 1.0
 

@@ -1,4 +1,8 @@
-"""CLI interface for Medicare-Synth: validation, scenario compilation, evidence inspection, and release exports.
+"""CLI interface for Medicare-Synth: validation, scenario compilation, evidence inspection, release exports, dataset expansion, and privacy auditing.
+
+Executes subcommands for validating relational/temporal integrity, compiling deterministic
+scenario slices, loading source/evidence manifests, exporting versioned release bundles,
+scaling subgraphs vertically/horizontally, diffing schema snapshots, and auditing k-anonymity.
 """
 
 import argparse

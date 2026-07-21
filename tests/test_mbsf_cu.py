@@ -5,7 +5,6 @@ from pathlib import Path
 import tempfile
 
 import polars as pl
-import pytest
 
 from medicare_synth.audit import AuditEngine
 from medicare_synth.catalog import ScenarioCatalog

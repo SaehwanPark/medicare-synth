@@ -5,9 +5,7 @@ from pathlib import Path
 import tempfile
 
 import polars as pl
-import pytest
 from medicare_synth.audit import AuditEngine
-from medicare_synth.catalog import ScenarioCatalog
 from medicare_synth.cli import main as cli_main
 from medicare_synth.expansion import HorizontalExpander
 from medicare_synth.manifest import SourceManifest
@@ -15,7 +13,7 @@ from medicare_synth.models import DurableMedicalEquipmentClaimRecord
 from medicare_synth.normalizer import BaselineNormalizer
 from medicare_synth.release import ReleaseExporter
 from medicare_synth.scenarios import ScenarioCompiler
-from medicare_synth.validation import FindingCategory, RelationalValidator, Severity
+from medicare_synth.validation import FindingCategory, RelationalValidator
 
 
 def test_dme_claim_record_validation():

@@ -28,6 +28,7 @@ class FidelityProfile(BaseModel):
   hospice_claim_count: int = Field(default=0, description="Number of Hospice claim line/header records")
   mbsf_cc_count: int = Field(default=0, description="Number of MBSF Chronic Condition records")
   mbsf_cu_count: int = Field(default=0, description="Number of MBSF Cost & Use records")
+  mbsf_d_count: int = Field(default=0, description="Number of MBSF Part D records")
   mbsf_base_count: int = Field(default=0, description="Number of MBSF Base Enrollment records")
   mbsf_oc_count: int = Field(default=0, description="Number of MBSF Other Chronic Condition records")
   mbsf_ndi_count: int = Field(default=0, description="Number of MBSF NDI records")
@@ -149,6 +150,7 @@ class ReleaseExporter:
       hospice_claim_count=hospice_cnt,
       mbsf_cc_count=mbsf_cc_cnt,
       mbsf_cu_count=mbsf_cu_cnt,
+      mbsf_d_count=mbsf_d_cnt,
       mbsf_base_count=mbsf_base_cnt,
       mbsf_oc_count=mbsf_oc_cnt,
       mbsf_ndi_count=mbsf_ndi_cnt,

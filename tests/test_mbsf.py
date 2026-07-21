@@ -1,16 +1,14 @@
 """Unit test suite for MBSF Chronic Conditions Segment domain extension.
 """
 
-from datetime import date
 from pathlib import Path
 import tempfile
 
 import polars as pl
-import pytest
 
 from medicare_synth.audit import AuditEngine
 from medicare_synth.catalog import ScenarioCatalog
-from medicare_synth.expansion import HorizontalExpander, VerticalExpander
+from medicare_synth.expansion import HorizontalExpander
 from medicare_synth.models import MBSFChronicConditionsRecord
 from medicare_synth.normalizer import BaselineNormalizer
 from medicare_synth.release import ReleaseExporter
