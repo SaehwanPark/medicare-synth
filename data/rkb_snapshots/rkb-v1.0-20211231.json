@@ -212,6 +212,15 @@
       "nullable": true,
       "provenance_status": "preserved",
       "description": "Type of service code for DME claim line."
+    },
+    "HOSPICE_TERMINAL_DIAG_CD": {
+      "name": "HOSPICE_TERMINAL_DIAG_CD",
+      "label": "Terminal Diagnosis ICD-10 Code",
+      "data_type": "string",
+      "max_length": 7,
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "Primary ICD-10 diagnosis code for hospice care terminal condition."
     }
   },
   "constraints": [
@@ -230,7 +239,7 @@
     {
       "constraint_id": "VAL_REL_01",
       "category": "relational",
-      "description": "BENE_ID on Carrier, Outpatient, Inpatient, PDE, SNF, HHA, or DME claim must exist in Beneficiary Summary file.",
+      "description": "BENE_ID on Carrier, Outpatient, Inpatient, PDE, SNF, HHA, DME, or Hospice claim must exist in Beneficiary Summary file.",
       "rule": "CLM.BENE_ID IN BENE_SUMMARY.BENE_ID"
     },
     {
@@ -256,6 +265,12 @@
       "category": "field",
       "description": "DME_LINE_ITEM_COUNT on DME claims must be greater than or equal to 1.",
       "rule": "DME_LINE_ITEM_COUNT >= 1"
+    },
+    {
+      "constraint_id": "VAL_HOSPICE_01",
+      "category": "field",
+      "description": "CLM_UTLZTN_DAY_CNT on Hospice claims must be non-negative.",
+      "rule": "CLM_UTLZTN_DAY_CNT >= 0"
     }
   ]
 }

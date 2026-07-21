@@ -249,6 +249,29 @@ class RelationalValidator:
       ]
     return []
 
+  @staticmethod
+  def check_hospice_field_constraints(hospice_df: pl.DataFrame) -> list[Finding]:
+    """Identifies Hospice claims with negative utilization days count."""
+    if hospice_df.is_empty() or "clm_utlztn_day_cnt" not in hospice_df.columns:
+      return []
+
+    invalid = hospice_df.filter(pl.col("clm_utlztn_day_cnt") < 0)
+    invalid_count = invalid.height
+
+    if invalid_count > 0:
+      sample_ids = invalid.select("clm_id").slice(0, 5).to_series().to_list() if "clm_id" in invalid.columns else []
+      return [
+        Finding(
+          rule_id="FLD-005",
+          category=FindingCategory.FIELD,
+          severity=Severity.HIGH,
+          message=f"Found {invalid_count} Hospice claims with invalid negative utilization days count.",
+          count=invalid_count,
+          details={"table_name": "Hospice Claims", "sample_clm_ids": sample_ids},
+        )
+      ]
+    return []
+
   def validate_slice(
     self,
     bene_df: pl.DataFrame,
@@ -259,6 +282,7 @@ class RelationalValidator:
     snf_df: Optional[pl.DataFrame] = None,
     hha_df: Optional[pl.DataFrame] = None,
     dme_df: Optional[pl.DataFrame] = None,
+    hospice_df: Optional[pl.DataFrame] = None,
   ) -> ValidationReport:
     """Executes full suite of relational, temporal, field, and record-level checks over a dataset slice."""
     findings: list[Finding] = []
@@ -305,5 +329,11 @@ class RelationalValidator:
       findings.extend(self.check_dme_field_constraints(dme_df))
       if "line_num" in dme_df.columns:
         findings.extend(self.check_record_uniqueness(dme_df, ["clm_id", "line_num"], "DME Claims"))
+
+    if hospice_df is not None and not hospice_df.is_empty():
+      findings.extend(self.check_orphaned_claims(bene_df, hospice_df, "Hospice Claims"))
+      findings.extend(self.check_admission_temporal_inversions(hospice_df, "Hospice Claims"))
+      findings.extend(self.check_hospice_field_constraints(hospice_df))
+      findings.extend(self.check_record_uniqueness(hospice_df, ["clm_id"], "Hospice Claims"))
 
     return ValidationReport(findings=findings)

@@ -117,6 +117,15 @@ class ScenarioCatalog:
       sample_bene_count=1,
       sample_claim_count=1,
     ),
+    "invalid_hospice_utilization_days": ScenarioEntry(
+      name="invalid_hospice_utilization_days",
+      description="Intentional anomaly fixture containing a Hospice claim with invalid negative utilization days.",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "hospice_claims"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
 
   @classmethod
@@ -155,6 +164,7 @@ class ScenarioCatalog:
       "invalid_snf_utilization_days": ScenarioCompiler.invalid_snf_utilization_days,
       "invalid_hha_utilization_days": ScenarioCompiler.invalid_hha_utilization_days,
       "invalid_dme_line_item_count": ScenarioCompiler.invalid_dme_line_item_count,
+      "invalid_hospice_utilization_days": ScenarioCompiler.invalid_hospice_utilization_days,
     }
 
     for name, method in compiler_methods.items():
@@ -171,6 +181,7 @@ class ScenarioCatalog:
         ("snf_claims", slice_data.snf_df),
         ("hha_claims", slice_data.hha_df),
         ("dme_claims", slice_data.dme_df),
+        ("hospice_claims", slice_data.hospice_df),
       ]
 
       for table_name, df in tables:

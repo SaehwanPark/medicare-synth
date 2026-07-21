@@ -25,10 +25,10 @@ class FidelityProfile(BaseModel):
   snf_claim_count: int = Field(default=0, description="Number of SNF claim line/header records")
   hha_claim_count: int = Field(default=0, description="Number of HHA claim line/header records")
   dme_claim_count: int = Field(default=0, description="Number of DME claim line/header records")
+  hospice_claim_count: int = Field(default=0, description="Number of Hospice claim line/header records")
   key_uniqueness_rate: float = Field(..., description="Proportion of records satisfying primary key uniqueness")
   foreign_key_validity_rate: float = Field(..., description="Proportion of claims linked to valid beneficiaries")
   temporal_integrity_rate: float = Field(..., description="Proportion of claims with valid temporal ordering")
-
 
 
 class FileReleaseEntry(BaseModel):
@@ -93,6 +93,7 @@ class ReleaseExporter:
     snf_df: pl.DataFrame | None = None,
     hha_df: pl.DataFrame | None = None,
     dme_df: pl.DataFrame | None = None,
+    hospice_df: pl.DataFrame | None = None,
   ) -> FidelityProfile:
     """Compute summary metrics and integrity rates for a dataset slice.
 
@@ -106,6 +107,7 @@ class ReleaseExporter:
       snf_df: Optional SNF Claims DataFrame.
       hha_df: Optional HHA Claims DataFrame.
       dme_df: Optional DME Claims DataFrame.
+      hospice_df: Optional Hospice Claims DataFrame.
 
     Returns:
       FidelityProfile instance containing computed counts and validity ratios.
@@ -115,7 +117,8 @@ class ReleaseExporter:
     snf_cnt = snf_df.height if snf_df is not None else 0
     hha_cnt = hha_df.height if hha_df is not None else 0
     dme_cnt = dme_df.height if dme_df is not None else 0
-    total_claims = carrier_df.height + outpatient_df.height + inp_count + pde_cnt + snf_cnt + hha_cnt + dme_cnt
+    hospice_cnt = hospice_df.height if hospice_df is not None else 0
+    total_claims = carrier_df.height + outpatient_df.height + inp_count + pde_cnt + snf_cnt + hha_cnt + dme_cnt + hospice_cnt
     fk_findings = [f for f in validation_report.findings if f.category == FindingCategory.RELATIONAL]
     temp_findings = [f for f in validation_report.findings if f.category == FindingCategory.TEMPORAL]
 
@@ -131,6 +134,7 @@ class ReleaseExporter:
       snf_claim_count=snf_cnt,
       hha_claim_count=hha_cnt,
       dme_claim_count=dme_cnt,
+      hospice_claim_count=hospice_cnt,
       key_uniqueness_rate=1.0,
       foreign_key_validity_rate=max(0.0, min(1.0, fk_validity_rate)),
       temporal_integrity_rate=max(0.0, min(1.0, temp_integrity_rate)),
@@ -216,6 +220,15 @@ class ReleaseExporter:
       "    CLM_PMT_AMT NUMERIC,\n"
       "    DME_LINE_ITEM_COUNT INTEGER,\n"
       "    LINE_CMS_TYPE_SRVC_CD VARCHAR\n"
+      ");\n\n"
+      "CREATE TABLE IF NOT EXISTS hospice_claim (\n"
+      "    CLM_ID VARCHAR PRIMARY KEY,\n"
+      "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
+      "    CLM_ADMSN_DT DATE,\n"
+      "    NCH_BENE_DSCHRG_DT DATE,\n"
+      "    CLM_PMT_AMT NUMERIC,\n"
+      "    CLM_UTLZTN_DAY_CNT INTEGER,\n"
+      "    HOSPICE_TERMINAL_DIAG_CD VARCHAR\n"
       ");\n"
     )
 
@@ -230,6 +243,7 @@ class ReleaseExporter:
     snf_df: pl.DataFrame | None = None,
     hha_df: pl.DataFrame | None = None,
     dme_df: pl.DataFrame | None = None,
+    hospice_df: pl.DataFrame | None = None,
   ) -> ReleaseManifest:
     """Export normalized tabular data and metadata artifacts to the release directory.
 
@@ -243,6 +257,7 @@ class ReleaseExporter:
       snf_df: Optional SNF Claims DataFrame.
       hha_df: Optional HHA Claims DataFrame.
       dme_df: Optional DME Claims DataFrame.
+      hospice_df: Optional Hospice Claims DataFrame.
 
     Returns:
       ReleaseManifest detailing the exported files and validation summary.
@@ -250,10 +265,10 @@ class ReleaseExporter:
     self.output_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Run validation
-    report = self.validator.validate_slice(bene_df, carrier_df, outpatient_df, inpatient_df, pde_df, snf_df, hha_df, dme_df)
+    report = self.validator.validate_slice(bene_df, carrier_df, outpatient_df, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df)
 
     # 2. Compute fidelity profile
-    fidelity = self.compute_fidelity_profile(bene_df, carrier_df, outpatient_df, report, inpatient_df, pde_df, snf_df, hha_df, dme_df)
+    fidelity = self.compute_fidelity_profile(bene_df, carrier_df, outpatient_df, report, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df)
 
     # Write validation report and fidelity profile
     with open(self.output_dir / "validation_report.json", "w") as f:
@@ -283,8 +298,8 @@ class ReleaseExporter:
       tables["hha"] = hha_df
     if dme_df is not None:
       tables["dme"] = dme_df
-
-
+    if hospice_df is not None:
+      tables["hospice"] = hospice_df
 
     formats_to_export = ["csv", "parquet"] if fmt == "all" else [fmt]
 

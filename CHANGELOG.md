@@ -4,6 +4,12 @@
 
 ### Added
 
+- Implemented `HospiceClaimHeaderRecord` domain model in `src/medicare_synth/models.py`.
+- Added Hospice Claims file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`HOSPICE_TERMINAL_DIAG_CD`, `VAL_HOSPICE_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_hospice_field_constraints` and updated `validate_slice` to validate Hospice foreign key integrity, admission temporal ordering, and field constraints (`FLD-005`).
+- Updated `ScenarioCompiler` to compile Hospice claim data frames across all scenarios and added `invalid_hospice_utilization_days` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle Hospice Claims.
+- Added comprehensive unit test suite in `tests/test_hospice.py` (85 total passing unit tests).
 - Implemented `DurableMedicalEquipmentClaimRecord` domain model in `src/medicare_synth/models.py`.
 - Added Durable Medical Equipment (DME) Claims file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`DME_LINE_ITEM_COUNT`, `LINE_CMS_TYPE_SRVC_CD`, `VAL_DME_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_dme_field_constraints` and updated `validate_slice` to validate DME foreign key integrity, temporal ordering, and field constraints (`FLD-004`).
