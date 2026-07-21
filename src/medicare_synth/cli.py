@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 from typing import Optional
 
+from medicare_synth.audit import AuditEngine
 from medicare_synth.catalog import ScenarioCatalog
 from medicare_synth.diff import SchemaDiffer
 from medicare_synth.evidence import RKBEvidenceSnapshot
@@ -118,6 +119,21 @@ def main(argv: Optional[list[str]] = None) -> int:
   ci_parser = subparsers.add_parser("export-ci", help="Export CI test fixtures for all catalog scenarios")
   ci_parser.add_argument("--output-dir", type=str, required=True, help="Output directory path for CI fixtures")
   ci_parser.add_argument("--format", choices=["csv", "parquet"], default="parquet", help="CI fixture format (default: parquet)")
+
+  # Subcommand: audit
+  audit_parser = subparsers.add_parser("audit", help="Run data quality and privacy audit on a scenario fixture")
+  audit_parser.add_argument(
+    "--scenario",
+    type=str,
+    default="valid_baseline_cohort",
+    help="Name of scenario fixture to audit (default: valid_baseline_cohort)",
+  )
+  audit_parser.add_argument(
+    "--output-dir",
+    type=str,
+    default=None,
+    help="Optional output directory path to save audit_report.json",
+  )
 
   args = parser.parse_args(argv)
 
@@ -245,6 +261,35 @@ def main(argv: Optional[list[str]] = None) -> int:
   elif args.command == "export-ci":
     created = ScenarioCatalog.export_ci_fixtures(args.output_dir, file_format=args.format)
     print(f"Exported {len(created)} CI fixture files to '{args.output_dir}' ({args.format}).")
+    return 0
+
+  elif args.command == "audit":
+    try:
+      scenario_slice = ScenarioCompiler.get_scenario(args.scenario)
+    except ValueError as e:
+      print(f"Error: {e}", file=sys.stderr)
+      return 1
+
+    tables = {
+      "beneficiary": scenario_slice.bene_df,
+      "carrier": scenario_slice.carrier_df,
+      "outpatient": scenario_slice.outpatient_df,
+    }
+
+    engine = AuditEngine(dataset=tables, scenario_name=args.scenario)
+    report = engine.run_audit()
+
+    if args.output_dir:
+      out_dir = Path(args.output_dir)
+      out_dir.mkdir(parents=True, exist_ok=True)
+      out_file = out_dir / "audit_report.json"
+      out_file.write_text(report.model_dump_json(indent=2), encoding="utf-8")
+      print(f"Audit report saved to: {out_file}")
+
+    print(f"Audit Report for Scenario '{args.scenario}':")
+    print(f"  Join Coverage: {report.join_coverage}")
+    print(f"  K-Anonymity Metrics: {list(report.k_anonymity.keys())}")
+    print(f"  Column Metrics Tables: {list(report.column_metrics.keys())}")
     return 0
 
   else:

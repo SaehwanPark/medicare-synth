@@ -4,6 +4,9 @@
 
 ### Added
 
+- Implemented `AuditEngine` and `AuditReport` in `src/medicare_synth/audit.py` providing relational join coverage, k-anonymity privacy scoring, and column nullity/uniqueness metrics.
+- Exposed `audit` subcommand in `src/medicare_synth/cli.py` (`medicare-synth audit --scenario <name> --output-dir <path>`).
+- Added unit test suite in `tests/test_audit.py` (44 total passing unit tests).
 - Configured explicit `[build-system]` with `hatchling` backend and `tool.uv.package = true` in `pyproject.toml`.
 - Strongly typed `ScenarioCatalog._CATALOG` with `ScenarioEntry` instances, achieving 0 Pyright static type errors.
 - Cleaned unused imports across source and test files (`diff.py`, `profile.py`, `test_catalog.py`, `test_diff.py`).

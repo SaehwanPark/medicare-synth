@@ -90,8 +90,9 @@ Completed Adoption and Maintenance Deliverables:
 - **Schema & Evidence Snapshot Diff Engine**: Created `src/medicare_synth/diff.py` establishing `SchemaDiffer` and `DiffReport` for comparing RKB evidence snapshots and preventing breaking schema changes during annual updates (`medicare-synth diff`).
 - **Explicit Dataset Limitations Disclosure Profile**: Created `src/medicare_synth/profile.py` formalizing structural, relational, temporal, accounting, distributional, and inferential boundaries (`medicare-synth profile`).
 - **Cross-Language Reference Examples**: Added `examples/python_reference.py` and `examples/sql_reference.sql` illustrating downstream Polars/DuckDB analytical queries on synthetic release artifacts.
-- **CLI Subcommand Extensions**: Added `catalog`, `diff`, `profile`, and `export-ci` subcommands to `src/medicare_synth/cli.py`.
-- **Adoption & Maintenance Test Suite**: Added 7 unit tests across `tests/test_catalog.py`, `tests/test_diff.py`, and `tests/test_profile.py` (40 total passing unit tests).
+- **Data Quality & Privacy Audit Suite**: Created `src/medicare_synth/audit.py` establishing `AuditEngine` and `AuditReport` for join coverage, k-anonymity privacy scoring, and column metrics.
+- **CLI Subcommand Extensions**: Added `catalog`, `diff`, `profile`, `export-ci`, and `audit` subcommands to `src/medicare_synth/cli.py`.
+- **Adoption & Maintenance Test Suite**: Added 11 unit tests across `tests/test_catalog.py`, `tests/test_diff.py`, `tests/test_profile.py`, and `tests/test_audit.py` (44 total passing unit tests).
 
 
 
