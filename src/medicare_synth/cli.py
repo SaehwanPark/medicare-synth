@@ -161,6 +161,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       mbsf_base_df=scenario_slice.mbsf_base_df,
       mbsf_oc_df=scenario_slice.mbsf_oc_df,
       mbsf_ndi_df=scenario_slice.mbsf_ndi_df,
+      mbsf_ra_df=scenario_slice.mbsf_ra_df,
     )
     print(f"Scenario: {args.scenario}")
 
@@ -193,6 +194,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  MBSF Base Enrollment: {scenario_slice.mbsf_base_df.height} rows")
     print(f"  MBSF Other Chronic Conditions: {scenario_slice.mbsf_oc_df.height} rows")
     print(f"  MBSF NDI: {scenario_slice.mbsf_ndi_df.height} rows")
+    print(f"  MBSF Risk Adjustment: {scenario_slice.mbsf_ra_df.height} rows")
     return 0
 
   elif args.command == "manifest":
@@ -233,6 +235,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       mbsf_base_df=scenario_slice.mbsf_base_df,
       mbsf_oc_df=scenario_slice.mbsf_oc_df,
       mbsf_ndi_df=scenario_slice.mbsf_ndi_df,
+      mbsf_ra_df=scenario_slice.mbsf_ra_df,
     )
 
     print(f"Exported Release Bundle: {manifest.release_id}")
@@ -264,6 +267,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       "mbsf_base_enrollment": scenario_slice.mbsf_base_df,
       "mbsf_other_chronic_conditions": scenario_slice.mbsf_oc_df,
       "mbsf_ndi": scenario_slice.mbsf_ndi_df,
+      "mbsf_risk_adjustment": scenario_slice.mbsf_ra_df,
     }
 
     if args.mode == "vertical":
@@ -290,6 +294,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       print(f"  MBSF Base Enrollment: {expanded['mbsf_base_enrollment'].height} rows")
       print(f"  MBSF Other Chronic Conditions: {expanded['mbsf_other_chronic_conditions'].height} rows")
       print(f"  MBSF NDI: {expanded['mbsf_ndi'].height} rows")
+      print(f"  MBSF Risk Adjustment: {expanded['mbsf_risk_adjustment'].height} rows")
     return 0
 
   elif args.command == "catalog":
@@ -347,6 +352,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       "mbsf_base": scenario_slice.mbsf_base_df,
       "mbsf_oc": scenario_slice.mbsf_oc_df,
       "mbsf_ndi": scenario_slice.mbsf_ndi_df,
+      "mbsf_ra": scenario_slice.mbsf_ra_df,
     }
 
 

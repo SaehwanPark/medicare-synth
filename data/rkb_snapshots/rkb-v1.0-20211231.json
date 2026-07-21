@@ -382,6 +382,30 @@
       "nullable": true,
       "provenance_status": "preserved",
       "description": "Underlying Cause of Death ICD-10 Code from NDI."
+    },
+    "CMS_HCC_RISK_SCORE": {
+      "name": "CMS_HCC_RISK_SCORE",
+      "label": "CMS-HCC Risk Score",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "CMS Hierarchical Condition Category risk score."
+    },
+    "RXHCC_RISK_SCORE": {
+      "name": "RXHCC_RISK_SCORE",
+      "label": "RxHCC Risk Score",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "RxHCC Part D Risk Score."
+    },
+    "PAYMENT_COUNT": {
+      "name": "PAYMENT_COUNT",
+      "label": "Model Payment Month Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Number of payment months in the risk adjustment model."
     }
   },
   "constraints": [
@@ -468,6 +492,12 @@
       "category": "field",
       "description": "NDI Match Indicator on MBSF NDI records must be within valid set {'0', '1', 'Y', 'N'}.",
       "rule": "NDI_MATCH_IND IN {'0', '1', 'Y', 'N'}"
+    },
+    {
+      "constraint_id": "VAL_MBSF_RA_01",
+      "category": "field",
+      "description": "Risk scores on MBSF Risk Adjustment records must be non-negative and payment month count must be between 0 and 12.",
+      "rule": "CMS_HCC_RISK_SCORE >= 0 AND RXHCC_RISK_SCORE >= 0 AND PAYMENT_COUNT BETWEEN 0 AND 12"
     }
   ]
 }

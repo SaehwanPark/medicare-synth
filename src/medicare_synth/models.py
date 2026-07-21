@@ -238,3 +238,16 @@ class MBSFNDIRecord(BaseModel):
   ndi_match_ind: str = Field(default="0", max_length=1, description="National Death Index Match Indicator")
   ndi_diuse_cd: Optional[str] = Field(default=None, max_length=7, description="Underlying Cause of Death ICD Code")
   val_mbsf_ndi_01: float = Field(default=0.0, ge=0.0, description="MBSF NDI Validation Metric")
+
+
+class MBSFRiskAdjustmentRecord(BaseModel):
+  """Domain record representation for Master Beneficiary Summary File Risk Adjustment Segment."""
+
+  model_config = ConfigDict(frozen=True)
+
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  rfrnc_yr: int = Field(default=2021, ge=2000, le=2099, description="Reference Year")
+  cms_hcc_risk_score: float = Field(default=1.000, ge=0.0, description="CMS-HCC Risk Score")
+  rxhcc_risk_score: float = Field(default=1.000, ge=0.0, description="RxHCC Risk Score")
+  payment_count: int = Field(default=12, ge=0, le=12, description="Model Payment Month Count")
+  val_mbsf_ra_01: float = Field(default=0.0, ge=0.0, description="MBSF Risk Adjustment Validation Metric")
