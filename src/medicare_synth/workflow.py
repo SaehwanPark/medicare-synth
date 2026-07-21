@@ -43,6 +43,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     merged = data.get("merged", False)
     changelog_check = data.get("changelog_check", False)
     git_clean_check = data.get("git_clean_check", False)
+    audit_check = data.get("audit_check", False)
 
     md_content = f"""# Autonomous Workflow Execution Report
 
@@ -58,6 +59,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Merged** | {merged} |
 | **Changelog Verified** | {changelog_check} |
 | **Git Clean State Checked** | {git_clean_check} |
+| **Audit Verified** | {audit_check} |
 """
     out_path.write_text(md_content, encoding="utf-8")
     print(f"Markdown workflow report saved to: {out_path}")
@@ -74,6 +76,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     merged = data.get("merged", False)
     changelog_check = data.get("changelog_check", False)
     git_clean_check = data.get("git_clean_check", False)
+    audit_check = data.get("audit_check", False)
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -105,6 +108,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Merged</strong></td><td>{merged}</td></tr>
             <tr><td><strong>Changelog Verified</strong></td><td>{changelog_check}</td></tr>
             <tr><td><strong>Git Clean State Checked</strong></td><td>{git_clean_check}</td></tr>
+            <tr><td><strong>Audit Verified</strong></td><td>{audit_check}</td></tr>
         </tbody>
     </table>
 </body>
@@ -125,6 +129,7 @@ def run_autonomous_workflow(
     html_report_path: Optional[str] = None,
     changelog_check: bool = False,
     git_clean_check: bool = False,
+    audit_check: bool = False,
 ) -> int:
     """Run local verification checks and autonomously stage, commit, push, create PR, and merge."""
     print("=== Step 1: Running Linter (Ruff) ===")
@@ -166,6 +171,41 @@ def run_autonomous_workflow(
                 file=sys.stderr,
             )
 
+    if audit_check:
+        print("\n=== Verification Step: Executing Dataset Audit Check ===")
+        from medicare_synth.audit import AuditEngine
+        from medicare_synth.scenarios import ScenarioCompiler
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        tables = {
+            "beneficiary": scenario_slice.bene_df,
+            "carrier": scenario_slice.carrier_df,
+            "outpatient": scenario_slice.outpatient_df,
+            "inpatient": scenario_slice.inpatient_df,
+            "pde": scenario_slice.pde_df,
+            "snf": scenario_slice.snf_df,
+            "hha": scenario_slice.hha_df,
+            "dme": scenario_slice.dme_df,
+            "hospice": scenario_slice.hospice_df,
+            "mbsf_cc": scenario_slice.mbsf_cc_df,
+            "mbsf_cu": scenario_slice.mbsf_cu_df,
+            "mbsf_d": scenario_slice.mbsf_d_df,
+            "mbsf_base": scenario_slice.mbsf_base_df,
+            "mbsf_oc": scenario_slice.mbsf_oc_df,
+            "mbsf_ndi": scenario_slice.mbsf_ndi_df,
+            "mbsf_ra": scenario_slice.mbsf_ra_df,
+            "mbsf_c": scenario_slice.mbsf_c_df,
+            "mbsf_ffs": scenario_slice.mbsf_ffs_df,
+            "mbsf_pde_util": scenario_slice.mbsf_pde_util_df,
+        }
+        audit_engine = AuditEngine(
+            dataset=tables, scenario_name="valid_baseline_cohort"
+        )
+        report = audit_engine.run_audit()
+        print(
+            f"✓ Dataset audit verified ({len(report.join_coverage)} join coverage relationships audited)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -201,6 +241,7 @@ def run_autonomous_workflow(
             "merged": False,
             "changelog_check": changelog_check,
             "git_clean_check": git_clean_check,
+            "audit_check": audit_check,
         }
         if json_report_path:
             _write_json_report(json_report_path, report_data)
@@ -251,6 +292,7 @@ def run_autonomous_workflow(
             "merged": False,
             "changelog_check": changelog_check,
             "git_clean_check": git_clean_check,
+            "audit_check": audit_check,
         }
         if json_report_path:
             _write_json_report(json_report_path, report_data)
@@ -272,6 +314,7 @@ def run_autonomous_workflow(
         "merged": True,
         "changelog_check": changelog_check,
         "git_clean_check": git_clean_check,
+        "audit_check": audit_check,
     }
     if json_report_path:
         _write_json_report(json_report_path, report_data)

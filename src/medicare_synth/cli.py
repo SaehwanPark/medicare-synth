@@ -249,6 +249,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify git working tree status check step before staging/committing",
     )
+    auto_wf_parser.add_argument(
+        "--audit-check",
+        action="store_true",
+        help="Verify dataset privacy and relational join audit before commit/push",
+    )
 
     args = parser.parse_args(argv)
 
@@ -551,6 +556,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             html_report_path=args.html_report,
             changelog_check=args.changelog_check,
             git_clean_check=args.git_clean_check,
+            audit_check=args.audit_check,
         )
 
     else:
