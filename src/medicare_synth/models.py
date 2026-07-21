@@ -265,3 +265,20 @@ class MBSFPartCRecord(BaseModel):
   ptc_plan_type_cd_01: Optional[str] = Field(default="01", max_length=2, description="Monthly Part C Plan Type Code Month 01")
   bene_ma_cvrage_tot_mons: int = Field(default=12, ge=0, le=12, description="Beneficiary Medicare Advantage Total Coverage Months")
   val_mbsf_c_01: float = Field(default=0.0, ge=0.0, description="MBSF Part C Validation Metric")
+
+
+class MBSFFFSUtilizationRecord(BaseModel):
+  """Domain record representation for Master Beneficiary Summary File Fee-For-Service (FFS) Utilization Segment."""
+
+  model_config = ConfigDict(frozen=True)
+
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  rfrnc_yr: int = Field(default=2021, ge=2000, le=2099, description="Reference Year")
+  ip_adm_cnt: int = Field(default=0, ge=0, description="Inpatient Admission Count")
+  op_vist_cnt: int = Field(default=0, ge=0, description="Outpatient Service Visit Count")
+  snf_stay_cnt: int = Field(default=0, ge=0, description="Skilled Nursing Facility Stay Count")
+  car_srvc_cnt: int = Field(default=0, ge=0, description="Carrier Service Count")
+  hha_vist_cnt: int = Field(default=0, ge=0, description="Home Health Agency Visit Count")
+  hosp_stay_cnt: int = Field(default=0, ge=0, description="Hospice Stay Count")
+  dme_srvc_cnt: int = Field(default=0, ge=0, description="Durable Medical Equipment Service Count")
+  val_mbsf_ffs_01: float = Field(default=0.0, ge=0.0, description="MBSF FFS Utilization Validation Metric")

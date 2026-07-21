@@ -21,6 +21,7 @@ from medicare_synth.models import (
   MBSFNDIRecord,
   MBSFRiskAdjustmentRecord,
   MBSFPartCRecord,
+  MBSFFFSUtilizationRecord,
   OutpatientClaimHeaderRecord,
 
   PrescriptionDrugEventRecord,
@@ -535,6 +536,41 @@ class BaselineNormalizer:
         pl.col("ptc_plan_type_cd_01").cast(pl.String),
         pl.col("bene_ma_cvrage_tot_mons").cast(pl.Int64),
         pl.col("val_mbsf_c_01").cast(pl.Float64),
+      ]
+    )
+
+  @staticmethod
+  def normalize_mbsf_ffs_utilization(records: Sequence[dict[str, Any]]) -> pl.DataFrame:
+    """Normalizes raw MBSF FFS Utilization dictionary records into a canonical Polars DataFrame."""
+    validated = [MBSFFFSUtilizationRecord(**r) for r in records]
+    df = pl.DataFrame([v.model_dump() for v in validated])
+    if df.is_empty():
+      return pl.DataFrame(
+        schema={
+          "bene_id": pl.String,
+          "rfrnc_yr": pl.Int64,
+          "ip_adm_cnt": pl.Int64,
+          "op_vist_cnt": pl.Int64,
+          "snf_stay_cnt": pl.Int64,
+          "car_srvc_cnt": pl.Int64,
+          "hha_vist_cnt": pl.Int64,
+          "hosp_stay_cnt": pl.Int64,
+          "dme_srvc_cnt": pl.Int64,
+          "val_mbsf_ffs_01": pl.Float64,
+        }
+      )
+    return df.with_columns(
+      [
+        pl.col("bene_id").cast(pl.String),
+        pl.col("rfrnc_yr").cast(pl.Int64),
+        pl.col("ip_adm_cnt").cast(pl.Int64),
+        pl.col("op_vist_cnt").cast(pl.Int64),
+        pl.col("snf_stay_cnt").cast(pl.Int64),
+        pl.col("car_srvc_cnt").cast(pl.Int64),
+        pl.col("hha_vist_cnt").cast(pl.Int64),
+        pl.col("hosp_stay_cnt").cast(pl.Int64),
+        pl.col("dme_srvc_cnt").cast(pl.Int64),
+        pl.col("val_mbsf_ffs_01").cast(pl.Float64),
       ]
     )
 
