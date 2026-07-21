@@ -32,6 +32,35 @@ def _write_json_report(path: str, data: dict[str, object]) -> None:
     print(f"Workflow execution report saved to: {out_path}")
 
 
+def _write_md_report(path: str, data: dict[str, object]) -> None:
+    out_path = Path(path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    status = data.get("status", "unknown")
+    dry_run = data.get("dry_run", False)
+    branch = data.get("branch", "N/A")
+    commit_msg = data.get("commit_msg", "N/A")
+    pr_url = data.get("pr_url") or "N/A"
+    merged = data.get("merged", False)
+    changelog_check = data.get("changelog_check", False)
+
+    md_content = f"""# Autonomous Workflow Execution Report
+
+## Execution Summary
+
+| Parameter | Value |
+| --- | --- |
+| **Status** | {status} |
+| **Dry Run** | {dry_run} |
+| **Branch** | {branch} |
+| **Commit Message** | {commit_msg} |
+| **Pull Request URL** | {pr_url} |
+| **Merged** | {merged} |
+| **Changelog Verified** | {changelog_check} |
+"""
+    out_path.write_text(md_content, encoding="utf-8")
+    print(f"Markdown workflow report saved to: {out_path}")
+
+
 def run_autonomous_workflow(
     commit_msg: str = "feat: implement autonomous workflow subcommand and reconcile docs",
     title: str = "feat: implement autonomous workflow subcommand and reconcile docs",
@@ -39,6 +68,7 @@ def run_autonomous_workflow(
     dry_run: bool = False,
     skip_merge: bool = False,
     json_report_path: Optional[str] = None,
+    md_report_path: Optional[str] = None,
     changelog_check: bool = False,
 ) -> int:
     """Run local verification checks and autonomously stage, commit, push, create PR, and merge."""
@@ -92,19 +122,19 @@ def run_autonomous_workflow(
         if not skip_merge:
             print("Would autonomously merge PR: gh pr merge --merge --delete-branch")
         print("\n✓ Dry-run completed successfully.")
+        report_data: dict[str, object] = {
+            "status": "success",
+            "dry_run": True,
+            "branch": current_branch,
+            "commit_msg": commit_msg,
+            "pr_url": None,
+            "merged": False,
+            "changelog_check": changelog_check,
+        }
         if json_report_path:
-            _write_json_report(
-                json_report_path,
-                {
-                    "status": "success",
-                    "dry_run": True,
-                    "branch": current_branch,
-                    "commit_msg": commit_msg,
-                    "pr_url": None,
-                    "merged": False,
-                    "changelog_check": changelog_check,
-                },
-            )
+            _write_json_report(json_report_path, report_data)
+        if md_report_path:
+            _write_md_report(md_report_path, report_data)
         return 0
 
     print("\n=== Step 4: Staging and Committing Changes ===")
@@ -139,35 +169,35 @@ def run_autonomous_workflow(
 
     if skip_merge:
         print("\n✓ PR Handoff completed. Skipping autonomous merge as requested.")
+        report_data = {
+            "status": "success",
+            "dry_run": False,
+            "branch": current_branch,
+            "commit_msg": commit_msg,
+            "pr_url": pr_url,
+            "merged": False,
+            "changelog_check": changelog_check,
+        }
         if json_report_path:
-            _write_json_report(
-                json_report_path,
-                {
-                    "status": "success",
-                    "dry_run": False,
-                    "branch": current_branch,
-                    "commit_msg": commit_msg,
-                    "pr_url": pr_url,
-                    "merged": False,
-                    "changelog_check": changelog_check,
-                },
-            )
+            _write_json_report(json_report_path, report_data)
+        if md_report_path:
+            _write_md_report(md_report_path, report_data)
         return 0
 
     print("\n=== Step 7: Autonomous Merge to main ===")
     run_cmd(["gh", "pr", "merge", "--merge", "--delete-branch"])
     print("\n✓ PR successfully merged into main and remote branch deleted.")
+    report_data = {
+        "status": "success",
+        "dry_run": False,
+        "branch": current_branch,
+        "commit_msg": commit_msg,
+        "pr_url": pr_url,
+        "merged": True,
+        "changelog_check": changelog_check,
+    }
     if json_report_path:
-        _write_json_report(
-            json_report_path,
-            {
-                "status": "success",
-                "dry_run": False,
-                "branch": current_branch,
-                "commit_msg": commit_msg,
-                "pr_url": pr_url,
-                "merged": True,
-                "changelog_check": changelog_check,
-            },
-        )
+        _write_json_report(json_report_path, report_data)
+    if md_report_path:
+        _write_md_report(md_report_path, report_data)
     return 0

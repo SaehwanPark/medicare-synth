@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added `--md-report` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `md_report_path` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to generate clean Markdown summary reports of workflow execution status.
+- Extended unit test coverage in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to verify Markdown report generation and CLI flag parsing.
 - Added `--changelog-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `changelog_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to verify `CHANGELOG.md` updates before committing and pushing.
 - Extended unit test suite in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `changelog_check` verification logic and CLI flag parsing.
 - Added `--json-report` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `json_report_path` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to write structured execution summaries.
