@@ -4,6 +4,12 @@
 
 ### Added
 
+- Implemented `MBSFChronicConditionsRecord` domain model in `src/medicare_synth/models.py`.
+- Added Master Beneficiary Summary File (MBSF) Chronic Conditions Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`SP_ALZHMD`, `SP_CHF`, `SP_CHRNKIDN`, `SP_CNCR`, `SP_DIABETES`, `SP_ISCHDMT`, `SP_STRKETIA`, `VAL_MBSF_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_mbsf_cc_field_constraints` and updated `validate_slice` to validate MBSF Chronic Conditions foreign key integrity and field constraints (`FLD-006`).
+- Updated `ScenarioCompiler` to compile MBSF Chronic Condition data frames across all scenarios and added `invalid_mbsf_chronic_condition_indicator` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle MBSF Chronic Conditions.
+- Added comprehensive unit test suite in `tests/test_mbsf.py` (92 total passing unit tests).
 - Implemented `HospiceClaimHeaderRecord` domain model in `src/medicare_synth/models.py`.
 - Added Hospice Claims file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`HOSPICE_TERMINAL_DIAG_CD`, `VAL_HOSPICE_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_hospice_field_constraints` and updated `validate_slice` to validate Hospice foreign key integrity, admission temporal ordering, and field constraints (`FLD-005`).
