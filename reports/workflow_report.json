@@ -1,0 +1,9 @@
+{
+  "status": "success",
+  "dry_run": true,
+  "branch": "feat/auto-workflow-changelog-validation",
+  "commit_msg": "feat: add --changelog-check to auto-workflow",
+  "pr_url": null,
+  "merged": false,
+  "changelog_check": true
+}
