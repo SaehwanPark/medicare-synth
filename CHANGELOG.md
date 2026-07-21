@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added `--changelog-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `changelog_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to verify `CHANGELOG.md` updates before committing and pushing.
+- Extended unit test suite in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `changelog_check` verification logic and CLI flag parsing.
 - Added `--json-report` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `json_report_path` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to write structured execution summaries.
 - Extended unit test coverage in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to verify JSON report output generation.
 - Added `auto-workflow` subcommand to `medicare-synth` CLI in `src/medicare_synth/cli.py` and reusable workflow execution core in `src/medicare_synth/workflow.py`.

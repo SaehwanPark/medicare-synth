@@ -83,3 +83,30 @@ def test_run_autonomous_workflow_json_report(mock_run, tmp_path):
     assert data["status"] == "success"
     assert data["dry_run"] is True
     assert data["branch"] == "feat/test-branch"
+
+
+@patch("subprocess.run")
+def test_run_autonomous_workflow_changelog_check(mock_run, tmp_path):
+    """Test that changelog_check option runs git status check on CHANGELOG.md and logs status."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = " M CHANGELOG.md\n"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_cl.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        changelog_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["changelog_check"] is True

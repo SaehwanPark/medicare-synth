@@ -39,6 +39,7 @@ def run_autonomous_workflow(
     dry_run: bool = False,
     skip_merge: bool = False,
     json_report_path: Optional[str] = None,
+    changelog_check: bool = False,
 ) -> int:
     """Run local verification checks and autonomously stage, commit, push, create PR, and merge."""
     print("=== Step 1: Running Linter (Ruff) ===")
@@ -49,6 +50,21 @@ def run_autonomous_workflow(
 
     print("\n=== Step 3: Running Unit Tests (Pytest) ===")
     run_cmd(["uv", "run", "pytest"])
+
+    if changelog_check:
+        print("\n=== Verification Step: Checking CHANGELOG.md Modifications ===")
+        status_res = subprocess.run(
+            ["git", "status", "--porcelain", "CHANGELOG.md"],
+            capture_output=True,
+            text=True,
+        )
+        if status_res.stdout.strip():
+            print("✓ CHANGELOG.md modifications verified.")
+        else:
+            print(
+                "Warning: CHANGELOG.md has no uncommitted modifications.",
+                file=sys.stderr,
+            )
 
     print("\n✓ Verification checks passed successfully.")
 
@@ -86,6 +102,7 @@ def run_autonomous_workflow(
                     "commit_msg": commit_msg,
                     "pr_url": None,
                     "merged": False,
+                    "changelog_check": changelog_check,
                 },
             )
         return 0
@@ -132,6 +149,7 @@ def run_autonomous_workflow(
                     "commit_msg": commit_msg,
                     "pr_url": pr_url,
                     "merged": False,
+                    "changelog_check": changelog_check,
                 },
             )
         return 0
@@ -149,6 +167,7 @@ def run_autonomous_workflow(
                 "commit_msg": commit_msg,
                 "pr_url": pr_url,
                 "merged": True,
+                "changelog_check": changelog_check,
             },
         )
     return 0

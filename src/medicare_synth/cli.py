@@ -227,6 +227,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         default=None,
         help="Optional path to write a JSON summary execution report",
     )
+    auto_wf_parser.add_argument(
+        "--changelog-check",
+        action="store_true",
+        help="Verify CHANGELOG.md contains uncommitted modifications before commit/push",
+    )
 
     args = parser.parse_args(argv)
 
@@ -525,6 +530,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             dry_run=args.dry_run,
             skip_merge=args.skip_merge,
             json_report_path=args.json_report,
+            changelog_check=args.changelog_check,
         )
 
     else:
