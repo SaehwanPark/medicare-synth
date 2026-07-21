@@ -11,12 +11,14 @@ from medicare_synth.models import (
   CarrierClaimLineRecord,
   InpatientClaimHeaderRecord,
   OutpatientClaimHeaderRecord,
+  PrescriptionDrugEventRecord,
   ProvenanceStatus,
 )
 
 
 class BaselineNormalizer:
   """Normalizes raw input records into canonical Polars DataFrames."""
+
 
   @staticmethod
   def normalize_beneficiaries(records: Sequence[dict[str, Any]]) -> pl.DataFrame:
@@ -127,6 +129,38 @@ class BaselineNormalizer:
         pl.col("clm_drg_cd").cast(pl.String),
       ]
     )
+
+  @staticmethod
+  def normalize_pde_events(records: Sequence[dict[str, Any]]) -> pl.DataFrame:
+    """Normalizes raw Part D Prescription Drug Event dictionary records into a canonical Polars DataFrame."""
+    validated = [PrescriptionDrugEventRecord(**r) for r in records]
+    df = pl.DataFrame([v.model_dump() for v in validated])
+    if df.is_empty():
+      return pl.DataFrame(
+        schema={
+          "pde_id": pl.String,
+          "bene_id": pl.String,
+          "srvc_dt": pl.Date,
+          "prod_srvc_id": pl.String,
+          "qty_dspnsd_num": pl.Float64,
+          "days_suply_num": pl.Int64,
+          "ptnt_pay_amt": pl.Float64,
+          "tot_rx_cst_amt": pl.Float64,
+        }
+      )
+    return df.with_columns(
+      [
+        pl.col("pde_id").cast(pl.String),
+        pl.col("bene_id").cast(pl.String),
+        pl.col("srvc_dt").cast(pl.Date),
+        pl.col("prod_srvc_id").cast(pl.String),
+        pl.col("qty_dspnsd_num").cast(pl.Float64),
+        pl.col("days_suply_num").cast(pl.Int64),
+        pl.col("ptnt_pay_amt").cast(pl.Float64),
+        pl.col("tot_rx_cst_amt").cast(pl.Float64),
+      ]
+    )
+
 
   @staticmethod
   def attach_provenance_metadata(df: pl.DataFrame, status: ProvenanceStatus) -> dict[str, Any]:

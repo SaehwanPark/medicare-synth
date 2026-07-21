@@ -149,7 +149,13 @@ class HorizontalExpander:
             rekeyed_df = rekeyed_df.with_columns(
               (pl.col(col_name) + suffix).alias(col_name)
             )
+        for col_name in ("PDE_ID", "pde_id"):
+          if col_name in rekeyed_df.columns:
+            rekeyed_df = rekeyed_df.with_columns(
+              (pl.col(col_name) + suffix).alias(col_name)
+            )
         scaled_tables[tbl_name].append(rekeyed_df)
+
 
     return {
       tbl: pl.concat(dfs, rechunk=True)

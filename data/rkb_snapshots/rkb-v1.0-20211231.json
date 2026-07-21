@@ -120,6 +120,65 @@
       "nullable": true,
       "provenance_status": "preserved",
       "description": "3-digit Diagnosis Related Group code classification."
+    },
+    "PDE_ID": {
+      "name": "PDE_ID",
+      "label": "Prescription Drug Event ID",
+      "data_type": "string",
+      "max_length": 15,
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Unique identifier for a Part D Prescription Drug Event."
+    },
+    "SRVC_DT": {
+      "name": "SRVC_DT",
+      "label": "Prescription Fill Date",
+      "data_type": "date",
+      "format": "YYYYMMDD",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Date prescription was filled."
+    },
+    "PROD_SRVC_ID": {
+      "name": "PROD_SRVC_ID",
+      "label": "National Drug Code (NDC)",
+      "data_type": "string",
+      "max_length": 11,
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "11-digit National Drug Code."
+    },
+    "QTY_DSPNSD_NUM": {
+      "name": "QTY_DSPNSD_NUM",
+      "label": "Quantity Dispensed",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Quantity of drug dispensed."
+    },
+    "DAYS_SUPLY_NUM": {
+      "name": "DAYS_SUPLY_NUM",
+      "label": "Days Supply",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Number of days supply dispensed."
+    },
+    "PTNT_PAY_AMT": {
+      "name": "PTNT_PAY_AMT",
+      "label": "Patient Paid Amount",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Amount paid by beneficiary."
+    },
+    "TOT_RX_CST_AMT": {
+      "name": "TOT_RX_CST_AMT",
+      "label": "Total Prescription Cost Amount",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Total gross cost of prescription."
     }
   },
   "constraints": [
@@ -138,8 +197,14 @@
     {
       "constraint_id": "VAL_REL_01",
       "category": "relational",
-      "description": "BENE_ID on Carrier, Outpatient, or Inpatient claim must exist in Beneficiary Summary file.",
+      "description": "BENE_ID on Carrier, Outpatient, Inpatient, or PDE claim must exist in Beneficiary Summary file.",
       "rule": "CLM.BENE_ID IN BENE_SUMMARY.BENE_ID"
+    },
+    {
+      "constraint_id": "VAL_NUM_01",
+      "category": "field",
+      "description": "DAYS_SUPLY_NUM and TOT_RX_CST_AMT on PDE events must be non-negative.",
+      "rule": "DAYS_SUPLY_NUM >= 0 AND TOT_RX_CST_AMT >= 0"
     }
   ]
 }

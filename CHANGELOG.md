@@ -4,7 +4,14 @@
 
 ### Added
 
+- Implemented `PrescriptionDrugEventRecord` domain model in `src/medicare_synth/models.py`.
+- Added Part D Prescription Drug Event file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`PDE_ID`, `SRVC_DT`, `PROD_SRVC_ID`, `QTY_DSPNSD_NUM`, `DAYS_SUPLY_NUM`, `PTNT_PAY_AMT`, `TOT_RX_CST_AMT`, `VAL_NUM_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_pde_field_constraints` and updated `validate_slice` to validate PDE foreign key integrity and field constraints (`FLD-001`).
+- Updated `ScenarioCompiler` to compile PDE data frames across all scenarios and added `invalid_pde_days_supply` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`) to handle Part D Prescription Drug Events.
+- Added comprehensive unit test suite in `tests/test_pde.py` (56 total passing unit tests).
 - Implemented `InpatientClaimHeaderRecord` domain model in `src/medicare_synth/models.py`.
+
 - Added Inpatient Claims file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`CLM_ADMSN_DT`, `NCH_BENE_DSCHRG_DT`, `CLM_PMT_AMT`, `CLM_UTLZTN_DAY_CNT`, `CLM_DRG_CD`, `VAL_TEMP_02`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_admission_temporal_inversions` and updated `validate_slice` to validate inpatient claim relational integrity and admission temporal order (`TMP-002`).
 - Updated `ScenarioCompiler` to compile inpatient claims data frames across all scenarios and added `invalid_inpatient_admission` anomaly scenario fixture.

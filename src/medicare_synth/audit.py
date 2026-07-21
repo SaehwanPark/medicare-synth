@@ -73,7 +73,7 @@ class AuditEngine:
     if total_bene == 0:
       return coverage
 
-    for table_name in ("carrier", "outpatient", "inpatient"):
+    for table_name in ("carrier", "outpatient", "inpatient", "pde"):
       claims_df = self.dataset.get(table_name)
       if claims_df is not None and not claims_df.is_empty():
         claim_bene_col = _find_col(claims_df, "BENE_ID")
@@ -83,6 +83,7 @@ class AuditEngine:
           coverage[f"beneficiary_{table_name}_coverage"] = round(matched / len(claim_benes), 4) if claim_benes else 1.0
 
     return coverage
+
 
   def compute_k_anonymity(self, table_name: str, qi_columns: list[str]) -> KAnonymityResult | None:
     """Compute k-anonymity privacy score for specified quasi-identifier columns."""
@@ -160,6 +161,12 @@ class AuditEngine:
       res = self.compute_k_anonymity("inpatient", ["CLM_DRG_CD"])
       if res is not None:
         k_anon_map["inpatient"] = res
+
+    if "pde" in self.dataset:
+      res = self.compute_k_anonymity("pde", ["PROD_SRVC_ID"])
+      if res is not None:
+        k_anon_map["pde"] = res
+
 
     col_metrics_map: dict[str, list[ColumnAuditMetric]] = {}
     for table_name in self.dataset:
