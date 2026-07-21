@@ -1,9 +1,9 @@
 {
   "status": "success",
-  "dry_run": true,
+  "dry_run": false,
   "branch": "feat/auto-workflow-changelog-validation",
-  "commit_msg": "feat: add --changelog-check to auto-workflow",
-  "pr_url": null,
-  "merged": false,
+  "commit_msg": "feat: add --changelog-check to auto-workflow and expand tests",
+  "pr_url": "https://github.com/SaehwanPark/medicare-synth/pull/38",
+  "merged": true,
   "changelog_check": true
 }
