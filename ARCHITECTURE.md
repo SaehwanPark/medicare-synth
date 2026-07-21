@@ -32,6 +32,7 @@ The component model below records the implemented and planned boundaries.
 - **Schema & evidence snapshot diff engine** (`SchemaDiffer`) compares RKB evidence snapshots or schema models to detect added, removed, and breaking field modifications (`medicare-synth diff`).
 - **Limitations & dataset boundary profiler** (`LimitationsProfiler`) generates explicit 6-category disclosures covering structural, relational, temporal, accounting, distributional, and inferential boundaries (`limitations_profile.json`).
 - **Data Quality & Privacy Audit Suite** (`AuditEngine`) evaluates relational join coverage, k-anonymity scores over quasi-identifiers, and column-level nullity/uniqueness metrics (`audit_report.json`).
+- **Autonomous workflow automation** (`scripts/autonomous_workflow.py`) validates code state (linter, type checker, tests), stages, commits, pushes, creates Pull Requests via the GitHub CLI, and autonomously merges branches to main.
 - **Interfaces and exporters** expose a focused Python API and `medicare-synth` CLI (`validate`, `scenario`, `manifest`, `export`, `expand`, `catalog`, `diff`, `profile`, `export-ci`, `audit`) emitting versioned CSV, Parquet, SQL reference queries (`examples/sql_reference.sql`), manifests, fidelity reports, audit reports, and limitations profiles.
 
 These are responsibility boundaries, not an approved Python package layout.

@@ -4,6 +4,8 @@
 
 ### Added
 
+- Created `scripts/autonomous_workflow.py` to automate repository validation checks, staging, committing, pushing, and autonomous pull request merge.
+- Created `tests/test_autonomous_workflow.py` to cover mock execution pathways and dry-run safety gates.
 - Extended `AuditEngine` and `AuditReport` in `src/medicare_synth/audit.py` to calculate k-anonymity privacy scores for all 19 tables in the dataset, covering all remaining Master Beneficiary Summary File (MBSF) segments (`mbsf_cu`, `mbsf_d`, `mbsf_base`, `mbsf_ndi`, `mbsf_ra`, `mbsf_c`, `mbsf_ffs`, `mbsf_pde_util`).
 - Extended test coverage in `tests/test_audit.py` to assert correct k-anonymity score calculations and quasi-identifiers for all 19 tables.
 - Extended `AuditEngine` and `AuditReport` in `src/medicare_synth/audit.py` to calculate k-anonymity privacy scores for additional clinical tables (`outpatient`, `snf`, `hha`, `dme`, `hospice`) and MBSF segments (`mbsf_cc`, `mbsf_oc`).
