@@ -1,6 +1,7 @@
 """Canonical entity and record models for contemporary Medicare synthetic data.
 
-Provides typed Pydantic models for Beneficiary Summary, Carrier Claim Line, and Outpatient Claim Header records.
+Provides typed Pydantic models for Beneficiary Summary, Carrier, Outpatient, Inpatient, PDE,
+SNF, HHA, DME, Hospice, and MBSF (Base, CC, CU, Part D, OC, NDI, RA, Part C, FFS) records.
 """
 
 from datetime import date
