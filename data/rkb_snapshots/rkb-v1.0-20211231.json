@@ -441,6 +441,62 @@
       "nullable": false,
       "provenance_status": "preserved",
       "description": "Total months of Medicare Advantage enrollment in reference year."
+    },
+    "IP_ADM_CNT": {
+      "name": "IP_ADM_CNT",
+      "label": "Inpatient Admission Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total inpatient admission count."
+    },
+    "OP_VIST_CNT": {
+      "name": "OP_VIST_CNT",
+      "label": "Outpatient Visit Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total outpatient service visit count."
+    },
+    "SNF_STAY_CNT": {
+      "name": "SNF_STAY_CNT",
+      "label": "SNF Stay Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total Skilled Nursing Facility stay count."
+    },
+    "CAR_SRVC_CNT": {
+      "name": "CAR_SRVC_CNT",
+      "label": "Carrier Service Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total carrier service count."
+    },
+    "HHA_VIST_CNT": {
+      "name": "HHA_VIST_CNT",
+      "label": "HHA Visit Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total Home Health Agency visit count."
+    },
+    "HOSP_STAY_CNT": {
+      "name": "HOSP_STAY_CNT",
+      "label": "Hospice Stay Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total hospice stay count."
+    },
+    "DME_SRVC_CNT": {
+      "name": "DME_SRVC_CNT",
+      "label": "DME Service Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total Durable Medical Equipment service count."
     }
   },
   "constraints": [
@@ -539,6 +595,12 @@
       "category": "field",
       "description": "Medicare Advantage total coverage months on MBSF Part C records must be between 0 and 12 inclusive.",
       "rule": "BENE_MA_CVRAGE_TOT_MONS BETWEEN 0 AND 12"
+    },
+    {
+      "constraint_id": "VAL_MBSF_FFS_01",
+      "category": "field",
+      "description": "Fee-For-Service (FFS) utilization counts (inpatient, outpatient, SNF, carrier, HHA, hospice, DME) on MBSF FFS records must be non-negative.",
+      "rule": "IP_ADM_CNT >= 0 AND OP_VIST_CNT >= 0 AND SNF_STAY_CNT >= 0 AND CAR_SRVC_CNT >= 0 AND HHA_VIST_CNT >= 0 AND HOSP_STAY_CNT >= 0 AND DME_SRVC_CNT >= 0"
     }
   ]
 }

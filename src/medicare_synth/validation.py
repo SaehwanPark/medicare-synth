@@ -511,6 +511,38 @@ class RelationalValidator:
       ]
     return []
 
+  @staticmethod
+  def check_mbsf_ffs_field_constraints(mbsf_ffs_df: pl.DataFrame) -> list[Finding]:
+    """Identifies MBSF FFS Utilization records with negative utilization counts."""
+    if mbsf_ffs_df.is_empty():
+      return []
+
+    cols = ["ip_adm_cnt", "op_vist_cnt", "snf_stay_cnt", "car_srvc_cnt", "hha_vist_cnt", "hosp_stay_cnt", "dme_srvc_cnt"]
+    present_cols = [c for c in cols if c in mbsf_ffs_df.columns]
+    if not present_cols:
+      return []
+
+    cond = pl.lit(False)
+    for c in present_cols:
+      cond = cond | (pl.col(c) < 0)
+
+    invalid = mbsf_ffs_df.filter(cond)
+    invalid_count = invalid.height
+
+    if invalid_count > 0:
+      sample_ids = invalid.select("bene_id").slice(0, 5).to_series().to_list() if "bene_id" in invalid.columns else []
+      return [
+        Finding(
+          rule_id="FLD-014",
+          category=FindingCategory.FIELD,
+          severity=Severity.HIGH,
+          message=f"Found {invalid_count} MBSF FFS Utilization records violating non-negative count constraints.",
+          count=invalid_count,
+          details={"table_name": "MBSF FFS Utilization", "sample_bene_ids": sample_ids},
+        )
+      ]
+    return []
+
   def validate_slice(
     self,
     bene_df: pl.DataFrame,
@@ -530,6 +562,7 @@ class RelationalValidator:
     mbsf_ndi_df: Optional[pl.DataFrame] = None,
     mbsf_ra_df: Optional[pl.DataFrame] = None,
     mbsf_c_df: Optional[pl.DataFrame] = None,
+    mbsf_ffs_df: Optional[pl.DataFrame] = None,
   ) -> ValidationReport:
     """Executes full suite of relational, temporal, field, and record-level checks over a dataset slice."""
     findings: list[Finding] = []
@@ -622,5 +655,10 @@ class RelationalValidator:
       findings.extend(self.check_orphaned_claims(bene_df, mbsf_c_df, "MBSF Part C"))
       findings.extend(self.check_mbsf_c_field_constraints(mbsf_c_df))
       findings.extend(self.check_record_uniqueness(mbsf_c_df, ["bene_id"], "MBSF Part C"))
+
+    if mbsf_ffs_df is not None and not mbsf_ffs_df.is_empty():
+      findings.extend(self.check_orphaned_claims(bene_df, mbsf_ffs_df, "MBSF FFS Utilization"))
+      findings.extend(self.check_mbsf_ffs_field_constraints(mbsf_ffs_df))
+      findings.extend(self.check_record_uniqueness(mbsf_ffs_df, ["bene_id"], "MBSF FFS Utilization"))
 
     return ValidationReport(findings=findings)
