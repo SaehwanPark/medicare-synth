@@ -4,7 +4,15 @@
 
 ### Added
 
+- Implemented `MBSFBaseEnrollmentRecord` domain model in `src/medicare_synth/models.py`.
+- Added Master Beneficiary Summary File (MBSF) Base / Enrollment Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`BENE_HI_CVRAGE_TOT_MONS`, `BENE_SMI_CVRAGE_TOT_MONS`, `BENE_HMO_CVRAGE_TOT_MONS`, `BENE_PTD_CVRAGE_TOT_MONS`, `MDCR_ENTLMT_BUYIN_IND_01`, `DUAL_STUS_CD_01`, `VAL_MBSF_BASE_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_mbsf_base_field_constraints` and updated `validate_slice` to validate MBSF Base Enrollment foreign key integrity and coverage month bounds (`FLD-009`).
+- Updated `ScenarioCompiler` to compile MBSF Base Enrollment data frames across all scenarios and added `invalid_mbsf_base_coverage_months` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle MBSF Base / Enrollment Segment.
+- Added comprehensive unit test suite in `tests/test_mbsf_base.py` (112 total passing unit tests).
+
 - Implemented `MBSFPartDRecord` domain model in `src/medicare_synth/models.py`.
+
 - Added Master Beneficiary Summary File (MBSF) Part D Characteristics Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`PTD_CNTRCT_ID_01`, `PTD_PBP_ID_01`, `PTD_SGNT_CD_01`, `RDS_IND_01`, `LI_COST_SHRH_GRP_CD_01`, `BENE_PTD_TRCC_AMT`, `BENE_PTD_MOOP_AMT`, `VAL_MBSF_D_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_mbsf_d_field_constraints` and updated `validate_slice` to validate MBSF Part D foreign key integrity and drug cost field constraints (`FLD-008`).
 - Updated `ScenarioCompiler` to compile MBSF Part D data frames across all scenarios and added `invalid_mbsf_part_d_contract` anomaly scenario fixture.

@@ -193,3 +193,19 @@ class MBSFPartDRecord(BaseModel):
   li_cost_shrh_grp_cd_01: Optional[str] = Field(default="00", max_length=2, description="Monthly Low Income Cost Sharing Group Code Month 01")
   bene_ptd_trcc_amt: float = Field(default=0.0, ge=0.0, description="Beneficiary Part D Total Gross Covered Drug Cost Amount")
   bene_ptd_moop_amt: float = Field(default=0.0, ge=0.0, description="Beneficiary Part D True Out-of-Pocket Cost Amount")
+
+
+class MBSFBaseEnrollmentRecord(BaseModel):
+  """Domain record representation for Master Beneficiary Summary File Base / Enrollment Segment."""
+
+  model_config = ConfigDict(frozen=True)
+
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  rfrnc_yr: int = Field(default=2021, ge=2000, le=2099, description="Reference Year")
+  bene_hi_cvrage_tot_mons: int = Field(default=12, ge=0, le=12, description="Beneficiary Part A Total Coverage Months")
+  bene_smi_cvrage_tot_mons: int = Field(default=12, ge=0, le=12, description="Beneficiary Part B Total Coverage Months")
+  bene_hmo_cvrage_tot_mons: int = Field(default=0, ge=0, le=12, description="Beneficiary HMO Total Coverage Months")
+  bene_ptd_cvrage_tot_mons: int = Field(default=12, ge=0, le=12, description="Beneficiary Part D Total Coverage Months")
+  mdcr_entlmt_buyin_ind_01: Optional[str] = Field(default="C", max_length=1, description="Medicare Entitlement / Buy-in Indicator Month 01")
+  dual_stus_cd_01: Optional[str] = Field(default="00", max_length=2, description="Dual Eligibility Status Code Month 01")
+  val_mbsf_base_01: float = Field(default=0.0, ge=0.0, description="MBSF Base Enrollment Validation Metric")

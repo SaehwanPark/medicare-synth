@@ -153,6 +153,15 @@ class ScenarioCatalog:
       sample_bene_count=1,
       sample_claim_count=1,
     ),
+    "invalid_mbsf_base_coverage_months": ScenarioEntry(
+      name="invalid_mbsf_base_coverage_months",
+      description="Intentional anomaly fixture containing an MBSF Base record with invalid coverage months (>12).",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "mbsf_base_enrollment"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
 
   @classmethod
@@ -195,6 +204,7 @@ class ScenarioCatalog:
       "invalid_mbsf_chronic_condition_indicator": ScenarioCompiler.invalid_mbsf_chronic_condition_indicator,
       "invalid_mbsf_cost_use_payment": ScenarioCompiler.invalid_mbsf_cost_use_payment,
       "invalid_mbsf_part_d_contract": ScenarioCompiler.invalid_mbsf_part_d_contract,
+      "invalid_mbsf_base_coverage_months": ScenarioCompiler.invalid_mbsf_base_coverage_months,
     }
 
     for name, method in compiler_methods.items():
@@ -215,6 +225,7 @@ class ScenarioCatalog:
         ("mbsf_chronic_conditions", slice_data.mbsf_cc_df),
         ("mbsf_cost_and_use", slice_data.mbsf_cu_df),
         ("mbsf_part_d", slice_data.mbsf_d_df),
+        ("mbsf_base_enrollment", slice_data.mbsf_base_df),
       ]
 
       for table_name, df in tables:

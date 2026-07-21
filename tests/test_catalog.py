@@ -7,7 +7,7 @@ from medicare_synth.catalog import ScenarioCatalog
 
 def test_scenario_catalog_entries():
   catalog = ScenarioCatalog.get_catalog()
-  assert len(catalog) == 14
+  assert len(catalog) == 15
   names = [e.name for e in catalog]
   assert "valid_baseline_cohort" in names
   assert "invalid_orphaned_claim" in names
@@ -20,6 +20,8 @@ def test_scenario_catalog_entries():
   assert "invalid_mbsf_chronic_condition_indicator" in names
   assert "invalid_mbsf_cost_use_payment" in names
   assert "invalid_mbsf_part_d_contract" in names
+  assert "invalid_mbsf_base_coverage_months" in names
+
 
 
 

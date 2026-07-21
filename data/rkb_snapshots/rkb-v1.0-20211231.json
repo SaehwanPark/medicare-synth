@@ -269,6 +269,38 @@
       "nullable": false,
       "provenance_status": "preserved",
       "description": "Annual true out-of-pocket payment amount under Part D for beneficiary."
+    },
+    "BENE_HI_CVRAGE_TOT_MONS": {
+      "name": "BENE_HI_CVRAGE_TOT_MONS",
+      "label": "Beneficiary Part A Total Coverage Months",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total months of Part A (Hospital Insurance) coverage."
+    },
+    "BENE_SMI_CVRAGE_TOT_MONS": {
+      "name": "BENE_SMI_CVRAGE_TOT_MONS",
+      "label": "Beneficiary Part B Total Coverage Months",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total months of Part B (Supplementary Medical Insurance) coverage."
+    },
+    "BENE_HMO_CVRAGE_TOT_MONS": {
+      "name": "BENE_HMO_CVRAGE_TOT_MONS",
+      "label": "Beneficiary HMO Total Coverage Months",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total months of HMO coverage."
+    },
+    "BENE_PTD_CVRAGE_TOT_MONS": {
+      "name": "BENE_PTD_CVRAGE_TOT_MONS",
+      "label": "Beneficiary Part D Total Coverage Months",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total months of Part D coverage."
     }
   },
   "constraints": [
@@ -337,6 +369,12 @@
       "category": "field",
       "description": "Part D covered drug cost and out-of-pocket amounts on MBSF Part D records must be non-negative.",
       "rule": "BENE_PTD_TRCC_AMT >= 0 AND BENE_PTD_MOOP_AMT >= 0"
+    },
+    {
+      "constraint_id": "VAL_MBSF_BASE_01",
+      "category": "field",
+      "description": "Part A, B, HMO, and D coverage months on MBSF Base records must be between 0 and 12 inclusive.",
+      "rule": "BENE_HI_CVRAGE_TOT_MONS BETWEEN 0 AND 12 AND BENE_SMI_CVRAGE_TOT_MONS BETWEEN 0 AND 12 AND BENE_HMO_CVRAGE_TOT_MONS BETWEEN 0 AND 12 AND BENE_PTD_CVRAGE_TOT_MONS BETWEEN 0 AND 12"
     }
   ]
 }

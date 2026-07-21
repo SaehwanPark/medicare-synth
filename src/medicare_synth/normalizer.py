@@ -16,7 +16,9 @@ from medicare_synth.models import (
   MBSFChronicConditionsRecord,
   MBSFCostAndUseRecord,
   MBSFPartDRecord,
+  MBSFBaseEnrollmentRecord,
   OutpatientClaimHeaderRecord,
+
   PrescriptionDrugEventRecord,
   ProvenanceStatus,
   SkilledNursingFacilityClaimRecord,
@@ -384,7 +386,41 @@ class BaselineNormalizer:
     )
 
   @staticmethod
+  def normalize_mbsf_base(records: Sequence[dict[str, Any]]) -> pl.DataFrame:
+    """Normalizes raw MBSF Base Enrollment dictionary records into a canonical Polars DataFrame."""
+    validated = [MBSFBaseEnrollmentRecord(**r) for r in records]
+    df = pl.DataFrame([v.model_dump() for v in validated])
+    if df.is_empty():
+      return pl.DataFrame(
+        schema={
+          "bene_id": pl.String,
+          "rfrnc_yr": pl.Int64,
+          "bene_hi_cvrage_tot_mons": pl.Int64,
+          "bene_smi_cvrage_tot_mons": pl.Int64,
+          "bene_hmo_cvrage_tot_mons": pl.Int64,
+          "bene_ptd_cvrage_tot_mons": pl.Int64,
+          "mdcr_entlmt_buyin_ind_01": pl.String,
+          "dual_stus_cd_01": pl.String,
+          "val_mbsf_base_01": pl.Float64,
+        }
+      )
+    return df.with_columns(
+      [
+        pl.col("bene_id").cast(pl.String),
+        pl.col("rfrnc_yr").cast(pl.Int64),
+        pl.col("bene_hi_cvrage_tot_mons").cast(pl.Int64),
+        pl.col("bene_smi_cvrage_tot_mons").cast(pl.Int64),
+        pl.col("bene_hmo_cvrage_tot_mons").cast(pl.Int64),
+        pl.col("bene_ptd_cvrage_tot_mons").cast(pl.Int64),
+        pl.col("mdcr_entlmt_buyin_ind_01").cast(pl.String),
+        pl.col("dual_stus_cd_01").cast(pl.String),
+        pl.col("val_mbsf_base_01").cast(pl.Float64),
+      ]
+    )
+
+  @staticmethod
   def attach_provenance_metadata(df: pl.DataFrame, status: ProvenanceStatus) -> dict[str, Any]:
+
     """Generates a summary metadata object detailing table shape and provenance status."""
     return {
       "row_count": df.height,
