@@ -80,6 +80,20 @@ Completed Expansion and Scenarios Deliverables:
 - **CLI Expansion Subcommand**: Added `expand` subcommand to `medicare-synth` CLI (`medicare-synth expand --mode <vertical|horizontal> --scenario <name> --scale <factor>`).
 - **Expansion Unit Test Suite**: Added 4 unit tests in `tests/test_expansion.py` covering feature synthesis, horizontal scaling, relational validator compatibility, and CLI commands (33 total passing unit tests).
 
+### Adoption and Maintenance
+
+Status: Complete
+
+Completed Adoption and Maintenance Deliverables:
+
+- **Scenario Catalog & CI Fixture Exporter**: Created `src/medicare_synth/catalog.py` providing `ScenarioCatalog` and automated CI fixture export (`medicare-synth export-ci`).
+- **Schema & Evidence Snapshot Diff Engine**: Created `src/medicare_synth/diff.py` establishing `SchemaDiffer` and `DiffReport` for comparing RKB evidence snapshots and preventing breaking schema changes during annual updates (`medicare-synth diff`).
+- **Explicit Dataset Limitations Disclosure Profile**: Created `src/medicare_synth/profile.py` formalizing structural, relational, temporal, accounting, distributional, and inferential boundaries (`medicare-synth profile`).
+- **Cross-Language Reference Examples**: Added `examples/python_reference.py` and `examples/sql_reference.sql` illustrating downstream Polars/DuckDB analytical queries on synthetic release artifacts.
+- **CLI Subcommand Extensions**: Added `catalog`, `diff`, `profile`, and `export-ci` subcommands to `src/medicare_synth/cli.py`.
+- **Adoption & Maintenance Test Suite**: Added 7 unit tests across `tests/test_catalog.py`, `tests/test_diff.py`, and `tests/test_profile.py` (40 total passing unit tests).
+
+
 
 Verification requires each decision to cite evidence, state assumptions, and be
 

@@ -2,13 +2,17 @@
 """
 
 import argparse
+import json
 from pathlib import Path
 import sys
 from typing import Optional
 
+from medicare_synth.catalog import ScenarioCatalog
+from medicare_synth.diff import SchemaDiffer
 from medicare_synth.evidence import RKBEvidenceSnapshot
 from medicare_synth.expansion import HorizontalExpander, VerticalExpander
 from medicare_synth.manifest import SourceManifest
+from medicare_synth.profile import LimitationsProfiler
 from medicare_synth.release import ReleaseExporter
 from medicare_synth.scenarios import ScenarioCompiler
 from medicare_synth.validation import RelationalValidator
@@ -96,6 +100,24 @@ def main(argv: Optional[list[str]] = None) -> int:
     default=2,
     help="Scale factor for horizontal expansion (default: 2)",
   )
+
+  # Subcommand: catalog
+  cat_parser = subparsers.add_parser("catalog", help="List named scenario fixtures and metadata")
+  cat_parser.add_argument("--json", action="store_true", help="Output catalog in JSON format")
+
+  # Subcommand: diff
+  diff_parser = subparsers.add_parser("diff", help="Diff two RKB evidence snapshot contracts or schema files")
+  diff_parser.add_argument("--source-a", type=str, required=True, help="Path to first snapshot JSON file")
+  diff_parser.add_argument("--source-b", type=str, required=True, help="Path to second snapshot JSON file")
+
+  # Subcommand: profile
+  prof_parser = subparsers.add_parser("profile", help="Generate dataset limitations disclosure profile")
+  prof_parser.add_argument("--output-dir", type=str, required=True, help="Output directory for limitations profile")
+
+  # Subcommand: export-ci
+  ci_parser = subparsers.add_parser("export-ci", help="Export CI test fixtures for all catalog scenarios")
+  ci_parser.add_argument("--output-dir", type=str, required=True, help="Output directory path for CI fixtures")
+  ci_parser.add_argument("--format", choices=["csv", "parquet"], default="parquet", help="CI fixture format (default: parquet)")
 
   args = parser.parse_args(argv)
 
@@ -193,9 +215,42 @@ def main(argv: Optional[list[str]] = None) -> int:
       print(f"  Outpatient Claims: {expanded['outpatient_claims'].height} rows")
     return 0
 
+  elif args.command == "catalog":
+    entries = ScenarioCatalog.get_catalog()
+    if args.json:
+      print(json.dumps([e.model_dump() for e in entries], indent=2))
+    else:
+      print(f"Medicare-Synth Scenario Catalog ({len(entries)} scenarios):")
+      for e in entries:
+        status = "VALID" if e.is_valid else "ANOMALY"
+        print(f"  [{status}] {e.name}: {e.description}")
+    return 0
+
+  elif args.command == "diff":
+    report = SchemaDiffer.compare_files(Path(args.source_a), Path(args.source_b))
+    print(f"Schema Diff Report ({report.snapshot_a_version} -> {report.snapshot_b_version}):")
+    print(f"  Has Breaking Changes: {report.has_breaking_changes}")
+    print(f"  Total Changes: {report.total_changes}")
+    print(f"  Added Variables: {len(report.added_variables)}")
+    print(f"  Removed Variables: {len(report.removed_variables)}")
+    print(f"  Modified Variables: {len(report.modified_variables)}")
+    return 0
+
+  elif args.command == "profile":
+    prof = LimitationsProfiler.default_profile()
+    out_file = prof.save_file(Path(args.output_dir) / "limitations_profile.json")
+    print(f"Exported Limitations Profile: {out_file}")
+    return 0
+
+  elif args.command == "export-ci":
+    created = ScenarioCatalog.export_ci_fixtures(args.output_dir, file_format=args.format)
+    print(f"Exported {len(created)} CI fixture files to '{args.output_dir}' ({args.format}).")
+    return 0
+
   else:
     parser.print_help()
     return 0
+
 
 
 if __name__ == "__main__":

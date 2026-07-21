@@ -1,0 +1,135 @@
+"""Scenario catalog and teaching/CI fixture generator.
+
+Provides a structured catalog of named scenario fixtures and automated export of
+lightweight CI test fixtures.
+"""
+
+from pathlib import Path
+from typing import Dict, List, Optional
+from pydantic import BaseModel, Field
+
+from medicare_synth.scenarios import ScenarioCompiler, ScenarioSlice
+
+
+class ScenarioEntry(BaseModel):
+  """Metadata entry describing a scenario fixture in the catalog."""
+
+  name: str = Field(description="Unique scenario name identifier.")
+  description: str = Field(description="Detailed explanation of the scenario purpose and invariants.")
+  is_valid: bool = Field(description="True if scenario represents valid data; False if intentional anomaly.")
+  expected_findings_count: int = Field(description="Number of validator findings expected when validating this scenario.")
+  target_files: List[str] = Field(description="Medicare file grains represented in this scenario slice.")
+  sample_bene_count: int = Field(description="Number of beneficiary records in the scenario slice.")
+  sample_claim_count: int = Field(description="Total number of claim records (carrier + outpatient) in the slice.")
+
+
+class ScenarioCatalog:
+  """Catalog providing metadata inspection and CI fixture export capabilities."""
+
+  _CATALOG: Dict[str, Dict[str, str | bool | int | List[str]]] = {
+    "valid_baseline_cohort": {
+      "name": "valid_baseline_cohort",
+      "description": "Valid baseline cohort with matching beneficiary and claim records across carrier and outpatient files.",
+      "is_valid": True,
+      "expected_findings_count": 0,
+      "target_files": ["beneficiary_summary", "carrier_claims", "outpatient_claims"],
+      "sample_bene_count": 3,
+      "sample_claim_count": 3,
+    },
+    "valid_chronic_subgroup": {
+      "name": "valid_chronic_subgroup",
+      "description": "Valid subgroup focusing on chronic condition tracking and outpatient encounters.",
+      "is_valid": True,
+      "expected_findings_count": 0,
+      "target_files": ["beneficiary_summary", "outpatient_claims"],
+      "sample_bene_count": 2,
+      "sample_claim_count": 2,
+    },
+    "valid_carrier_line_item": {
+      "name": "valid_carrier_line_item",
+      "description": "Valid detailed carrier line-item claim records with valid NPI providers.",
+      "is_valid": True,
+      "expected_findings_count": 0,
+      "target_files": ["beneficiary_summary", "carrier_claims"],
+      "sample_bene_count": 2,
+      "sample_claim_count": 2,
+    },
+    "invalid_orphaned_claim": {
+      "name": "invalid_orphaned_claim",
+      "description": "Intentional anomaly fixture containing a claim referencing a non-existent beneficiary ID.",
+      "is_valid": False,
+      "expected_findings_count": 1,
+      "target_files": ["beneficiary_summary", "carrier_claims"],
+      "sample_bene_count": 1,
+      "sample_claim_count": 2,
+    },
+    "invalid_temporal_inversion": {
+      "name": "invalid_temporal_inversion",
+      "description": "Intentional anomaly fixture with claim end date preceding claim start date.",
+      "is_valid": False,
+      "expected_findings_count": 1,
+      "target_files": ["beneficiary_summary", "outpatient_claims"],
+      "sample_bene_count": 1,
+      "sample_claim_count": 1,
+    },
+  }
+
+  @classmethod
+  def get_catalog(cls) -> List[ScenarioEntry]:
+    """Returns all entries in the scenario catalog."""
+    return [ScenarioEntry(**data) for data in cls._CATALOG.values()]
+
+  @classmethod
+  def get_scenario_info(cls, name: str) -> Optional[ScenarioEntry]:
+    """Retrieves metadata for a specific scenario by name."""
+    data = cls._CATALOG.get(name)
+    if not data:
+      return None
+    return ScenarioEntry(**data)
+
+  @classmethod
+  def export_ci_fixtures(cls, output_dir: str | Path, file_format: str = "parquet") -> List[Path]:
+    """Exports all scenario slices to the specified output directory as CI fixtures.
+
+    Args:
+      output_dir: Directory path to save exported CI fixture files.
+      file_format: Output file format ('parquet' or 'csv').
+
+    Returns:
+      List of created file paths.
+    """
+    out_path = Path(output_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+    created_files: List[Path] = []
+
+    compiler_methods = {
+      "valid_baseline_cohort": ScenarioCompiler.valid_baseline_cohort,
+      "valid_chronic_subgroup": ScenarioCompiler.valid_chronic_subgroup,
+      "valid_carrier_line_item": ScenarioCompiler.valid_carrier_line_item,
+      "invalid_orphaned_claim": ScenarioCompiler.invalid_orphaned_claim,
+      "invalid_temporal_inversion": ScenarioCompiler.invalid_temporal_inversion,
+    }
+
+    for name, method in compiler_methods.items():
+      slice_data: ScenarioSlice = method()
+      scenario_dir = out_path / name
+      scenario_dir.mkdir(parents=True, exist_ok=True)
+
+      tables = [
+        ("beneficiary_summary", slice_data.bene_df),
+        ("carrier_claims", slice_data.carrier_df),
+        ("outpatient_claims", slice_data.outpatient_df),
+      ]
+
+      for table_name, df in tables:
+        if df.is_empty():
+          continue
+        if file_format.lower() == "csv":
+          file_file = scenario_dir / f"{table_name}.csv"
+          df.write_csv(file_file)
+        else:
+          file_file = scenario_dir / f"{table_name}.parquet"
+          df.write_parquet(file_file)
+        created_files.append(file_file)
+
+    return created_files

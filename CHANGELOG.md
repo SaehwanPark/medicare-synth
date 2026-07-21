@@ -47,6 +47,14 @@
 - Added unit test suite in `tests/test_expansion.py` (33 total passing unit tests).
 - Resolved linter warnings (`ruff`) and static type-checking issues (`pyright`).
 - Completed Milestone 5 (Expansion and Scenarios) across all deliverables.
+- Implemented `ScenarioCatalog` and `export_ci_fixtures` in `src/medicare_synth/catalog.py` for structured metadata and lightweight CI test fixtures.
+- Implemented `SchemaDiffer` and `DiffReport` in `src/medicare_synth/diff.py` for annual snapshot schema diffing.
+- Implemented `LimitationsProfile` and `LimitationsProfiler` in `src/medicare_synth/profile.py` for explicit 6-category limitations disclosure.
+- Exposed `catalog`, `diff`, `profile`, and `export-ci` subcommands in `src/medicare_synth/cli.py`.
+- Added executable cross-language reference examples in `examples/python_reference.py` and `examples/sql_reference.sql`.
+- Added unit test suites in `tests/test_catalog.py`, `tests/test_diff.py`, and `tests/test_profile.py` (40 total passing unit tests).
+- Completed Milestone 6 (Adoption and Maintenance) across all deliverables.
+
 
 
 

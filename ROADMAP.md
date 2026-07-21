@@ -112,17 +112,17 @@ Exit criteria:
 
 ## 6. Adoption and Maintenance
 
-Status: Active
+Status: Complete
 
 Outputs:
 
-- curated teaching and CI fixtures, scenario catalog, and cross-language examples
-- schema and evidence diff workflows for annual updates
+- curated teaching and CI fixtures, scenario catalog, and cross-language examples [Completed]
+- schema and evidence diff workflows for annual updates [Completed]
 - optional calibration and known-truth methods profiles where evidence supports
-  them
+  them [Completed]
 
 Exit criteria:
 
-- annual changes can be reviewed without silently changing prior releases
+- annual changes can be reviewed without silently changing prior releases [Completed]
 - every published profile states structural, relational, temporal, accounting,
-  distributional, and inferential limitations
+  distributional, and inferential limitations [Completed]
