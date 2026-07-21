@@ -4,6 +4,8 @@
 
 ### Added
 
+- Extended `AuditEngine` and `AuditReport` in `src/medicare_synth/audit.py` to calculate k-anonymity privacy scores for additional clinical tables (`outpatient`, `snf`, `hha`, `dme`, `hospice`) and MBSF segments (`mbsf_cc`, `mbsf_oc`).
+- Added test coverage in `tests/test_audit.py` to verify k-anonymity scoring on all 11 tables.
 - Added optional `--output-dir` parameter to the `validate` subcommand parser in `src/medicare_synth/cli.py` to write the validation report to a JSON file.
 - Added `pyrightconfig.json` to configure basedpyright type-checking rules for clean static analysis.
 
