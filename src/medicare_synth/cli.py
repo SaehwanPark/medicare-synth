@@ -39,6 +39,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     default="valid_baseline_cohort",
     help="Name of scenario fixture to validate (default: valid_baseline_cohort)",
   )
+  val_parser.add_argument(
+    "--output-dir",
+    type=str,
+    default=None,
+    help="Optional output directory path to save validation_report.json",
+  )
 
   # Subcommand: scenario
   scen_parser = subparsers.add_parser("scenario", help="Compile and display a deterministic scenario fixture")
@@ -170,6 +176,13 @@ def main(argv: Optional[list[str]] = None) -> int:
       mbsf_ffs_df=scenario_slice.mbsf_ffs_df,
       mbsf_pde_util_df=scenario_slice.mbsf_pde_util_df,
     )
+    if args.output_dir:
+      out_dir = Path(args.output_dir)
+      out_dir.mkdir(parents=True, exist_ok=True)
+      out_file = out_dir / "validation_report.json"
+      out_file.write_text(report.model_dump_json(indent=2), encoding="utf-8")
+      print(f"Validation report saved to: {out_file}")
+
     print(f"Scenario: {args.scenario}")
 
     print(f"Valid: {report.is_valid}")
