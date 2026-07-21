@@ -108,6 +108,15 @@ class ScenarioCatalog:
       sample_bene_count=1,
       sample_claim_count=1,
     ),
+    "invalid_dme_line_item_count": ScenarioEntry(
+      name="invalid_dme_line_item_count",
+      description="Intentional anomaly fixture containing a DME claim with invalid zero line item count.",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "dme_claims"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
 
   @classmethod
@@ -145,6 +154,7 @@ class ScenarioCatalog:
       "invalid_pde_days_supply": ScenarioCompiler.invalid_pde_days_supply,
       "invalid_snf_utilization_days": ScenarioCompiler.invalid_snf_utilization_days,
       "invalid_hha_utilization_days": ScenarioCompiler.invalid_hha_utilization_days,
+      "invalid_dme_line_item_count": ScenarioCompiler.invalid_dme_line_item_count,
     }
 
     for name, method in compiler_methods.items():
@@ -160,9 +170,8 @@ class ScenarioCatalog:
         ("pde_events", slice_data.pde_df),
         ("snf_claims", slice_data.snf_df),
         ("hha_claims", slice_data.hha_df),
+        ("dme_claims", slice_data.dme_df),
       ]
-
-
 
       for table_name, df in tables:
         if df.is_empty():

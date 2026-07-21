@@ -4,6 +4,12 @@
 
 ### Added
 
+- Implemented `DurableMedicalEquipmentClaimRecord` domain model in `src/medicare_synth/models.py`.
+- Added Durable Medical Equipment (DME) Claims file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`DME_LINE_ITEM_COUNT`, `LINE_CMS_TYPE_SRVC_CD`, `VAL_DME_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_dme_field_constraints` and updated `validate_slice` to validate DME foreign key integrity, temporal ordering, and field constraints (`FLD-004`).
+- Updated `ScenarioCompiler` to compile DME claim data frames across all scenarios and added `invalid_dme_line_item_count` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle DME Claims.
+- Added comprehensive unit test suite in `tests/test_dme.py` (77 total passing unit tests).
 - Implemented `HomeHealthAgencyClaimRecord` domain model in `src/medicare_synth/models.py`.
 - Added Home Health Agency (HHA) Claims file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`CLM_ADMSN_DT`, `NCH_BENE_DSCHRG_DT`, `CLM_UTLZTN_DAY_CNT`, `CLM_HHA_LUPA_IND`, `VAL_HHA_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_hha_field_constraints` and updated `validate_slice` to validate HHA foreign key integrity, admission temporal order, and field constraints (`FLD-003`).

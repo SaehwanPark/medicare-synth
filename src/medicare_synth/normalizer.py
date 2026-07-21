@@ -9,12 +9,13 @@ import polars as pl
 from medicare_synth.models import (
   BeneficiaryRecord,
   CarrierClaimLineRecord,
+  DurableMedicalEquipmentClaimRecord,
   HomeHealthAgencyClaimRecord,
   InpatientClaimHeaderRecord,
   OutpatientClaimHeaderRecord,
   PrescriptionDrugEventRecord,
-  SkilledNursingFacilityClaimRecord,
   ProvenanceStatus,
+  SkilledNursingFacilityClaimRecord,
 )
 
 
@@ -219,6 +220,37 @@ class BaselineNormalizer:
         pl.col("clm_pmt_amt").cast(pl.Float64),
         pl.col("clm_utlztn_day_cnt").cast(pl.Int64),
         pl.col("clm_hha_lupa_ind").cast(pl.String),
+      ]
+    )
+
+  @staticmethod
+  def normalize_dme_claims(records: Sequence[dict[str, Any]]) -> pl.DataFrame:
+    """Normalizes raw DME claim line dictionary records into a canonical Polars DataFrame."""
+    validated = [DurableMedicalEquipmentClaimRecord(**r) for r in records]
+    df = pl.DataFrame([v.model_dump() for v in validated])
+    if df.is_empty():
+      return pl.DataFrame(
+        schema={
+          "clm_id": pl.String,
+          "line_num": pl.Int64,
+          "bene_id": pl.String,
+          "clm_from_dt": pl.Date,
+          "clm_thru_dt": pl.Date,
+          "clm_pmt_amt": pl.Float64,
+          "dme_line_item_count": pl.Int64,
+          "line_cms_type_srvc_cd": pl.String,
+        }
+      )
+    return df.with_columns(
+      [
+        pl.col("clm_id").cast(pl.String),
+        pl.col("line_num").cast(pl.Int64),
+        pl.col("bene_id").cast(pl.String),
+        pl.col("clm_from_dt").cast(pl.Date),
+        pl.col("clm_thru_dt").cast(pl.Date),
+        pl.col("clm_pmt_amt").cast(pl.Float64),
+        pl.col("dme_line_item_count").cast(pl.Int64),
+        pl.col("line_cms_type_srvc_cd").cast(pl.String),
       ]
     )
 

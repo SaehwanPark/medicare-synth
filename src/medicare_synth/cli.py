@@ -153,6 +153,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       pde_df=scenario_slice.pde_df,
       snf_df=scenario_slice.snf_df,
       hha_df=scenario_slice.hha_df,
+      dme_df=scenario_slice.dme_df,
     )
     print(f"Scenario: {args.scenario}")
     print(f"Valid: {report.is_valid}")
@@ -176,6 +177,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  Prescription Drug Events: {scenario_slice.pde_df.height} rows")
     print(f"  SNF Claims: {scenario_slice.snf_df.height} rows")
     print(f"  HHA Claims: {scenario_slice.hha_df.height} rows")
+    print(f"  DME Claims: {scenario_slice.dme_df.height} rows")
     return 0
 
   elif args.command == "manifest":
@@ -208,6 +210,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       pde_df=scenario_slice.pde_df,
       snf_df=scenario_slice.snf_df,
       hha_df=scenario_slice.hha_df,
+      dme_df=scenario_slice.dme_df,
     )
 
     print(f"Exported Release Bundle: {manifest.release_id}")
@@ -231,6 +234,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       "pde_events": scenario_slice.pde_df,
       "snf_claims": scenario_slice.snf_df,
       "hha_claims": scenario_slice.hha_df,
+      "dme_claims": scenario_slice.dme_df,
     }
 
     if args.mode == "vertical":
@@ -249,6 +253,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       print(f"  Prescription Drug Events: {expanded['pde_events'].height} rows")
       print(f"  SNF Claims: {expanded['snf_claims'].height} rows")
       print(f"  HHA Claims: {expanded['hha_claims'].height} rows")
+      print(f"  DME Claims: {expanded['dme_claims'].height} rows")
     return 0
 
   elif args.command == "catalog":
@@ -298,6 +303,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       "pde": scenario_slice.pde_df,
       "snf": scenario_slice.snf_df,
       "hha": scenario_slice.hha_df,
+      "dme": scenario_slice.dme_df,
     }
 
     engine = AuditEngine(dataset=tables, scenario_name=args.scenario)
