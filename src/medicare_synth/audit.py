@@ -169,6 +169,41 @@ class AuditEngine:
       if res is not None:
         k_anon_map["pde"] = res
 
+    if "outpatient" in self.dataset:
+      res = self.compute_k_anonymity("outpatient", ["ICD_DGNS_CD1"])
+      if res is not None:
+        k_anon_map["outpatient"] = res
+
+    if "snf" in self.dataset:
+      res = self.compute_k_anonymity("snf", ["CLM_UTLZTN_DAY_CNT"])
+      if res is not None:
+        k_anon_map["snf"] = res
+
+    if "hha" in self.dataset:
+      res = self.compute_k_anonymity("hha", ["CLM_UTLZTN_DAY_CNT"])
+      if res is not None:
+        k_anon_map["hha"] = res
+
+    if "dme" in self.dataset:
+      res = self.compute_k_anonymity("dme", ["LINE_CMS_TYPE_SRVC_CD"])
+      if res is not None:
+        k_anon_map["dme"] = res
+
+    if "hospice" in self.dataset:
+      res = self.compute_k_anonymity("hospice", ["HOSPICE_TERMINAL_DIAG_CD"])
+      if res is not None:
+        k_anon_map["hospice"] = res
+
+    if "mbsf_cc" in self.dataset:
+      res = self.compute_k_anonymity("mbsf_cc", ["SP_DIABETES", "SP_CHF"])
+      if res is not None:
+        k_anon_map["mbsf_cc"] = res
+
+    if "mbsf_oc" in self.dataset:
+      res = self.compute_k_anonymity("mbsf_oc", ["SP_HYPERT", "SP_HYPERL"])
+      if res is not None:
+        k_anon_map["mbsf_oc"] = res
+
 
     col_metrics_map: dict[str, list[ColumnAuditMetric]] = {}
     for table_name in self.dataset:
