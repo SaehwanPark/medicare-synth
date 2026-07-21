@@ -4,9 +4,24 @@ Provides typed Pydantic models for Beneficiary Summary, Carrier Claim Line, and 
 """
 
 from datetime import date
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
+
+
+class ProvenanceStatus(str, Enum):
+  """Provenance status taxonomy for tracking field and table lineage."""
+
+  PRESERVED = "PRESERVED"
+  NORMALIZED = "NORMALIZED"
+  REKEYED = "REKEYED"
+  DERIVED = "DERIVED"
+  IMPUTED = "IMPUTED"
+  SYNTHESIZED = "SYNTHESIZED"
+  EXTERNALLY_CALIBRATED = "EXTERNALLY_CALIBRATED"
+  SCENARIO_GENERATED = "SCENARIO_GENERATED"
+
 
 
 class BeneficiaryRecord(BaseModel):

@@ -71,6 +71,13 @@ class SourceManifest(BaseModel):
       data: Any = json.load(f)
     return cls.model_validate(data)
 
+  @classmethod
+  def load_default_manifest(cls, base_dir: Optional[Path] = None) -> "SourceManifest":
+    """Loads default CMS 2021 Synthetic Claims manifest from data/manifests/."""
+    target_dir = base_dir or Path("data/manifests")
+    default_path = target_dir / "cms_2021_syn_claims_manifest.json"
+    return cls.from_file(default_path)
+
   def get_file_manifest(self, file_id: str) -> Optional[FileManifest]:
     """Retrieve file manifest by file_id if present."""
     for fm in self.files:
