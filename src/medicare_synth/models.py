@@ -251,3 +251,17 @@ class MBSFRiskAdjustmentRecord(BaseModel):
   rxhcc_risk_score: float = Field(default=1.000, ge=0.0, description="RxHCC Risk Score")
   payment_count: int = Field(default=12, ge=0, le=12, description="Model Payment Month Count")
   val_mbsf_ra_01: float = Field(default=0.0, ge=0.0, description="MBSF Risk Adjustment Validation Metric")
+
+
+class MBSFPartCRecord(BaseModel):
+  """Domain record representation for Master Beneficiary Summary File Part C / Medicare Advantage Segment."""
+
+  model_config = ConfigDict(frozen=True)
+
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  rfrnc_yr: int = Field(default=2021, ge=2000, le=2099, description="Reference Year")
+  ptc_cntrct_id_01: Optional[str] = Field(default="H0001", max_length=5, description="Monthly Part C Contract ID Month 01")
+  ptc_pbp_id_01: Optional[str] = Field(default="001", max_length=3, description="Monthly Part C Plan Benefit Package ID Month 01")
+  ptc_plan_type_cd_01: Optional[str] = Field(default="01", max_length=2, description="Monthly Part C Plan Type Code Month 01")
+  bene_ma_cvrage_tot_mons: int = Field(default=12, ge=0, le=12, description="Beneficiary Medicare Advantage Total Coverage Months")
+  val_mbsf_c_01: float = Field(default=0.0, ge=0.0, description="MBSF Part C Validation Metric")

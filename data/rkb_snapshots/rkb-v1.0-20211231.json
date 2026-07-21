@@ -406,6 +406,41 @@
       "nullable": false,
       "provenance_status": "preserved",
       "description": "Number of payment months in the risk adjustment model."
+    },
+    "PTC_CNTRCT_ID_01": {
+      "name": "PTC_CNTRCT_ID_01",
+      "label": "Monthly Part C Contract ID Month 01",
+      "data_type": "string",
+      "max_length": 5,
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "Medicare Advantage Contract ID for Month 01."
+    },
+    "PTC_PBP_ID_01": {
+      "name": "PTC_PBP_ID_01",
+      "label": "Monthly Part C Plan Benefit Package ID Month 01",
+      "data_type": "string",
+      "max_length": 3,
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "Medicare Advantage Plan Benefit Package ID for Month 01."
+    },
+    "PTC_PLAN_TYPE_CD_01": {
+      "name": "PTC_PLAN_TYPE_CD_01",
+      "label": "Monthly Part C Plan Type Code Month 01",
+      "data_type": "string",
+      "max_length": 2,
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "Medicare Advantage Plan Type Code for Month 01."
+    },
+    "BENE_MA_CVRAGE_TOT_MONS": {
+      "name": "BENE_MA_CVRAGE_TOT_MONS",
+      "label": "Beneficiary Medicare Advantage Total Coverage Months",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Total months of Medicare Advantage enrollment in reference year."
     }
   },
   "constraints": [
@@ -498,6 +533,12 @@
       "category": "field",
       "description": "Risk scores on MBSF Risk Adjustment records must be non-negative and payment month count must be between 0 and 12.",
       "rule": "CMS_HCC_RISK_SCORE >= 0 AND RXHCC_RISK_SCORE >= 0 AND PAYMENT_COUNT BETWEEN 0 AND 12"
+    },
+    {
+      "constraint_id": "VAL_MBSF_C_01",
+      "category": "field",
+      "description": "Medicare Advantage total coverage months on MBSF Part C records must be between 0 and 12 inclusive.",
+      "rule": "BENE_MA_CVRAGE_TOT_MONS BETWEEN 0 AND 12"
     }
   ]
 }

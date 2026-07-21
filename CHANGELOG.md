@@ -4,6 +4,14 @@
 
 ### Added
 
+- Implemented `MBSFPartCRecord` domain model in `src/medicare_synth/models.py`.
+- Added Master Beneficiary Summary File (MBSF) Part C / Medicare Advantage Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`PTC_CNTRCT_ID_01`, `PTC_PBP_ID_01`, `PTC_PLAN_TYPE_CD_01`, `BENE_MA_CVRAGE_TOT_MONS`, `VAL_MBSF_C_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_mbsf_c_field_constraints` and updated `validate_slice` to validate MBSF Part C foreign key integrity and coverage month bounds (`FLD-013`).
+- Updated `ScenarioCompiler` to compile MBSF Part C data frames across all scenarios and added `invalid_mbsf_part_c_contract` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle MBSF Part C Segment.
+- Added comprehensive unit test suite in `tests/test_mbsf_c.py` (134 total passing unit tests).
+
+
 - Implemented `MBSFRiskAdjustmentRecord` domain model in `src/medicare_synth/models.py`.
 - Added Master Beneficiary Summary File (MBSF) Risk Adjustment Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`CMS_HCC_RISK_SCORE`, `RXHCC_RISK_SCORE`, `PAYMENT_COUNT`, `VAL_MBSF_RA_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_mbsf_ra_field_constraints` and updated `validate_slice` to validate MBSF Risk Adjustment foreign key integrity and risk score field constraints (`FLD-012`).
