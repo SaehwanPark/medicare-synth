@@ -18,7 +18,9 @@ from medicare_synth.models import (
   MBSFPartDRecord,
   MBSFBaseEnrollmentRecord,
   MBSFOtherChronicConditionsRecord,
+  MBSFNDIRecord,
   OutpatientClaimHeaderRecord,
+
   PrescriptionDrugEventRecord,
   ProvenanceStatus,
   SkilledNursingFacilityClaimRecord,
@@ -454,7 +456,33 @@ class BaselineNormalizer:
     )
 
   @staticmethod
+  def normalize_mbsf_ndi(records: Sequence[dict[str, Any]]) -> pl.DataFrame:
+    """Normalizes raw MBSF NDI dictionary records into a canonical Polars DataFrame."""
+    validated = [MBSFNDIRecord(**r) for r in records]
+    df = pl.DataFrame([v.model_dump() for v in validated])
+    if df.is_empty():
+      return pl.DataFrame(
+        schema={
+          "bene_id": pl.String,
+          "rfrnc_yr": pl.Int64,
+          "ndi_match_ind": pl.String,
+          "ndi_diuse_cd": pl.String,
+          "val_mbsf_ndi_01": pl.Float64,
+        }
+      )
+    return df.with_columns(
+      [
+        pl.col("bene_id").cast(pl.String),
+        pl.col("rfrnc_yr").cast(pl.Int64),
+        pl.col("ndi_match_ind").cast(pl.String),
+        pl.col("ndi_diuse_cd").cast(pl.String),
+        pl.col("val_mbsf_ndi_01").cast(pl.Float64),
+      ]
+    )
+
+  @staticmethod
   def attach_provenance_metadata(df: pl.DataFrame, status: ProvenanceStatus) -> dict[str, Any]:
+
 
     """Generates a summary metadata object detailing table shape and provenance status."""
     return {

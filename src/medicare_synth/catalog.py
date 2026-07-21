@@ -171,7 +171,17 @@ class ScenarioCatalog:
       sample_bene_count=1,
       sample_claim_count=1,
     ),
+    "invalid_mbsf_ndi_match_indicator": ScenarioEntry(
+      name="invalid_mbsf_ndi_match_indicator",
+      description="Intentional anomaly fixture containing an MBSF NDI record with invalid match indicator ('X').",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "mbsf_ndi"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
+
 
   @classmethod
   def get_catalog(cls) -> List[ScenarioEntry]:
@@ -215,6 +225,7 @@ class ScenarioCatalog:
       "invalid_mbsf_part_d_contract": ScenarioCompiler.invalid_mbsf_part_d_contract,
       "invalid_mbsf_base_coverage_months": ScenarioCompiler.invalid_mbsf_base_coverage_months,
       "invalid_mbsf_other_chronic_condition_indicator": ScenarioCompiler.invalid_mbsf_other_chronic_condition_indicator,
+      "invalid_mbsf_ndi_match_indicator": ScenarioCompiler.invalid_mbsf_ndi_match_indicator,
     }
 
     for name, method in compiler_methods.items():
@@ -237,7 +248,9 @@ class ScenarioCatalog:
         ("mbsf_part_d", slice_data.mbsf_d_df),
         ("mbsf_base_enrollment", slice_data.mbsf_base_df),
         ("mbsf_other_chronic_conditions", slice_data.mbsf_oc_df),
+        ("mbsf_ndi", slice_data.mbsf_ndi_df),
       ]
+
 
       for table_name, df in tables:
         if df.is_empty():

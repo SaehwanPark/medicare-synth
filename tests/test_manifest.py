@@ -15,7 +15,8 @@ def test_load_source_manifest(sample_manifest_path: Path) -> None:
   manifest = SourceManifest.from_file(sample_manifest_path)
   assert manifest.collection_id == "CMS-2021-SYN-CLAIMS"
   assert manifest.schema_year == 2021
-  assert len(manifest.files) == 14
+  assert len(manifest.files) == 15
+
 
 
 

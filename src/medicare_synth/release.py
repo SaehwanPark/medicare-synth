@@ -30,7 +30,9 @@ class FidelityProfile(BaseModel):
   mbsf_cu_count: int = Field(default=0, description="Number of MBSF Cost & Use records")
   mbsf_base_count: int = Field(default=0, description="Number of MBSF Base Enrollment records")
   mbsf_oc_count: int = Field(default=0, description="Number of MBSF Other Chronic Condition records")
+  mbsf_ndi_count: int = Field(default=0, description="Number of MBSF NDI records")
   key_uniqueness_rate: float = Field(..., description="Proportion of records satisfying primary key uniqueness")
+
 
   foreign_key_validity_rate: float = Field(..., description="Proportion of claims linked to valid beneficiaries")
   temporal_integrity_rate: float = Field(..., description="Proportion of claims with valid temporal ordering")
@@ -104,6 +106,7 @@ class ReleaseExporter:
     mbsf_d_df: pl.DataFrame | None = None,
     mbsf_base_df: pl.DataFrame | None = None,
     mbsf_oc_df: pl.DataFrame | None = None,
+    mbsf_ndi_df: pl.DataFrame | None = None,
   ) -> FidelityProfile:
     """Compute summary metrics and integrity rates for a dataset slice."""
     inp_count = inpatient_df.height if inpatient_df is not None else 0
@@ -117,7 +120,8 @@ class ReleaseExporter:
     mbsf_d_cnt = mbsf_d_df.height if mbsf_d_df is not None else 0
     mbsf_base_cnt = mbsf_base_df.height if mbsf_base_df is not None else 0
     mbsf_oc_cnt = mbsf_oc_df.height if mbsf_oc_df is not None else 0
-    total_claims = carrier_df.height + outpatient_df.height + inp_count + pde_cnt + snf_cnt + hha_cnt + dme_cnt + hospice_cnt + mbsf_cc_cnt + mbsf_cu_cnt + mbsf_d_cnt + mbsf_base_cnt + mbsf_oc_cnt
+    mbsf_ndi_cnt = mbsf_ndi_df.height if mbsf_ndi_df is not None else 0
+    total_claims = carrier_df.height + outpatient_df.height + inp_count + pde_cnt + snf_cnt + hha_cnt + dme_cnt + hospice_cnt + mbsf_cc_cnt + mbsf_cu_cnt + mbsf_d_cnt + mbsf_base_cnt + mbsf_oc_cnt + mbsf_ndi_cnt
     fk_findings = [f for f in validation_report.findings if f.category == FindingCategory.RELATIONAL]
     temp_findings = [f for f in validation_report.findings if f.category == FindingCategory.TEMPORAL]
 
@@ -138,6 +142,7 @@ class ReleaseExporter:
       mbsf_cu_count=mbsf_cu_cnt,
       mbsf_base_count=mbsf_base_cnt,
       mbsf_oc_count=mbsf_oc_cnt,
+      mbsf_ndi_count=mbsf_ndi_cnt,
       key_uniqueness_rate=1.0,
       foreign_key_validity_rate=max(0.0, min(1.0, fk_validity_rate)),
       temporal_integrity_rate=max(0.0, min(1.0, temp_integrity_rate)),
@@ -151,29 +156,28 @@ class ReleaseExporter:
       "    BENE_ID VARCHAR PRIMARY KEY,\n"
       "    BENE_BIRTH_DT DATE,\n"
       "    BENE_DEATH_DT DATE,\n"
-      "    SEX_IDENT_CD VARCHAR,\n"
-      "    BENE_RACE_CD VARCHAR,\n"
-      "    SP_STATE_CODE VARCHAR,\n"
-      "    BENE_COUNTY_CD VARCHAR\n"
+      "    BENE_SEX_IDENT_CD VARCHAR,\n"
+      "    BENE_RACE_CD VARCHAR\n"
       ");\n\n"
-      "CREATE TABLE IF NOT EXISTS carrier_claim (\n"
-      "    CLM_ID VARCHAR PRIMARY KEY,\n"
-      "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
-      "    CLM_FROM_DT DATE,\n"
-      "    CLM_THRU_DT DATE,\n"
+      "CREATE TABLE IF NOT EXISTS carrier (\n"
+      "    CLM_ID VARCHAR,\n"
       "    LINE_NUM INTEGER,\n"
-      "    LINE_CMS_TYPE_SRVC_CD VARCHAR,\n"
-      "    LINE_NCH_PAY_TP_CD VARCHAR\n"
+      "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
+      "    CLM_FROM_DT DATE,\n"
+      "    CLM_THRU_DT DATE,\n"
+      "    PRVDR_NPI VARCHAR,\n"
+      "    ICD_DGNS_CD1 VARCHAR,\n"
+      "    PRIMARY KEY (CLM_ID, LINE_NUM)\n"
       ");\n\n"
-      "CREATE TABLE IF NOT EXISTS outpatient_claim (\n"
+      "CREATE TABLE IF NOT EXISTS outpatient (\n"
       "    CLM_ID VARCHAR PRIMARY KEY,\n"
       "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
       "    CLM_FROM_DT DATE,\n"
       "    CLM_THRU_DT DATE,\n"
-      "    NCH_BENEFTS_DISCHRG_DT DATE,\n"
-      "    CLM_PMT_AMT NUMERIC\n"
+      "    PRVDR_NPI VARCHAR,\n"
+      "    ICD_DGNS_CD1 VARCHAR\n"
       ");\n\n"
-      "CREATE TABLE IF NOT EXISTS inpatient_claim (\n"
+      "CREATE TABLE IF NOT EXISTS inpatient (\n"
       "    CLM_ID VARCHAR PRIMARY KEY,\n"
       "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
       "    CLM_ADMSN_DT DATE,\n"
@@ -182,7 +186,7 @@ class ReleaseExporter:
       "    CLM_UTLZTN_DAY_CNT INTEGER,\n"
       "    CLM_DRG_CD VARCHAR\n"
       ");\n\n"
-      "CREATE TABLE IF NOT EXISTS pde_event (\n"
+      "CREATE TABLE IF NOT EXISTS pde (\n"
       "    PDE_ID VARCHAR PRIMARY KEY,\n"
       "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
       "    SRVC_DT DATE,\n"
@@ -192,7 +196,7 @@ class ReleaseExporter:
       "    PTNT_PAY_AMT NUMERIC,\n"
       "    TOT_RX_CST_AMT NUMERIC\n"
       ");\n\n"
-      "CREATE TABLE IF NOT EXISTS snf_claim (\n"
+      "CREATE TABLE IF NOT EXISTS snf (\n"
       "    CLM_ID VARCHAR PRIMARY KEY,\n"
       "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
       "    CLM_ADMSN_DT DATE,\n"
@@ -201,7 +205,7 @@ class ReleaseExporter:
       "    CLM_UTLZTN_DAY_CNT INTEGER,\n"
       "    NCVD_DAYS_CNT INTEGER\n"
       ");\n\n"
-      "CREATE TABLE IF NOT EXISTS hha_claim (\n"
+      "CREATE TABLE IF NOT EXISTS hha (\n"
       "    CLM_ID VARCHAR PRIMARY KEY,\n"
       "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
       "    CLM_ADMSN_DT DATE,\n"
@@ -210,17 +214,18 @@ class ReleaseExporter:
       "    CLM_UTLZTN_DAY_CNT INTEGER,\n"
       "    CLM_HHA_LUPA_IND VARCHAR\n"
       ");\n\n"
-      "CREATE TABLE IF NOT EXISTS dme_claim (\n"
-      "    CLM_ID VARCHAR PRIMARY KEY,\n"
+      "CREATE TABLE IF NOT EXISTS dme (\n"
+      "    CLM_ID VARCHAR,\n"
       "    LINE_NUM INTEGER,\n"
       "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
       "    CLM_FROM_DT DATE,\n"
       "    CLM_THRU_DT DATE,\n"
       "    CLM_PMT_AMT NUMERIC,\n"
       "    DME_LINE_ITEM_COUNT INTEGER,\n"
-      "    LINE_CMS_TYPE_SRVC_CD VARCHAR\n"
+      "    LINE_CMS_TYPE_SRVC_CD VARCHAR,\n"
+      "    PRIMARY KEY (CLM_ID, LINE_NUM)\n"
       ");\n\n"
-      "CREATE TABLE IF NOT EXISTS hospice_claim (\n"
+      "CREATE TABLE IF NOT EXISTS hospice (\n"
       "    CLM_ID VARCHAR PRIMARY KEY,\n"
       "    BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID),\n"
       "    CLM_ADMSN_DT DATE,\n"
@@ -240,6 +245,25 @@ class ReleaseExporter:
       "    SP_ISCHDMT VARCHAR,\n"
       "    SP_STRKETIA VARCHAR,\n"
       "    VAL_MBSF_01 NUMERIC\n"
+      ");\n\n"
+      "CREATE TABLE IF NOT EXISTS mbsf_cost_and_use (\n"
+      "    BENE_ID VARCHAR PRIMARY KEY REFERENCES beneficiary(BENE_ID),\n"
+      "    RFRNC_YR INTEGER,\n"
+      "    BENE_MDCR_PAY_AMT NUMERIC,\n"
+      "    BENE_TOT_PAY_AMT NUMERIC,\n"
+      "    BENE_IP_DDCTBL_AMT NUMERIC,\n"
+      "    BENE_CVRD_DYS_CNT INTEGER\n"
+      ");\n\n"
+      "CREATE TABLE IF NOT EXISTS mbsf_part_d (\n"
+      "    BENE_ID VARCHAR PRIMARY KEY REFERENCES beneficiary(BENE_ID),\n"
+      "    RFRNC_YR INTEGER,\n"
+      "    PTD_CNTRCT_ID_01 VARCHAR,\n"
+      "    PTD_PBP_ID_01 VARCHAR,\n"
+      "    PTD_SGNT_CD_01 VARCHAR,\n"
+      "    RDS_IND_01 VARCHAR,\n"
+      "    LI_COST_SHRH_GRP_CD_01 VARCHAR,\n"
+      "    BENE_PTD_TRCC_AMT NUMERIC,\n"
+      "    BENE_PTD_MOOP_AMT NUMERIC\n"
       ");\n\n"
       "CREATE TABLE IF NOT EXISTS mbsf_base_enrollment (\n"
       "    BENE_ID VARCHAR PRIMARY KEY REFERENCES beneficiary(BENE_ID),\n"
@@ -263,6 +287,13 @@ class ReleaseExporter:
       "    SP_HYPOT VARCHAR,\n"
       "    SP_OSTEOP VARCHAR,\n"
       "    VAL_MBSF_OC_01 NUMERIC\n"
+      ");\n\n"
+      "CREATE TABLE IF NOT EXISTS mbsf_ndi (\n"
+      "    BENE_ID VARCHAR PRIMARY KEY REFERENCES beneficiary(BENE_ID),\n"
+      "    RFRNC_YR INTEGER,\n"
+      "    NDI_MATCH_IND VARCHAR,\n"
+      "    NDI_DIUSE_CD VARCHAR,\n"
+      "    VAL_MBSF_NDI_01 NUMERIC\n"
       ");\n"
     )
 
@@ -283,18 +314,19 @@ class ReleaseExporter:
     mbsf_d_df: pl.DataFrame | None = None,
     mbsf_base_df: pl.DataFrame | None = None,
     mbsf_oc_df: pl.DataFrame | None = None,
+    mbsf_ndi_df: pl.DataFrame | None = None,
   ) -> ReleaseManifest:
     """Export normalized tabular data and metadata artifacts to the release directory."""
     self.output_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Run validation
     report = self.validator.validate_slice(
-      bene_df, carrier_df, outpatient_df, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df, mbsf_cc_df, mbsf_cu_df, mbsf_d_df, mbsf_base_df, mbsf_oc_df
+      bene_df, carrier_df, outpatient_df, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df, mbsf_cc_df, mbsf_cu_df, mbsf_d_df, mbsf_base_df, mbsf_oc_df, mbsf_ndi_df
     )
 
     # 2. Compute fidelity profile
     fidelity = self.compute_fidelity_profile(
-      bene_df, carrier_df, outpatient_df, report, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df, mbsf_cc_df, mbsf_cu_df, mbsf_d_df, mbsf_base_df, mbsf_oc_df
+      bene_df, carrier_df, outpatient_df, report, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df, mbsf_cc_df, mbsf_cu_df, mbsf_d_df, mbsf_base_df, mbsf_oc_df, mbsf_ndi_df
     )
 
     # Write validation report and fidelity profile
@@ -337,6 +369,9 @@ class ReleaseExporter:
       tables["mbsf_base"] = mbsf_base_df
     if mbsf_oc_df is not None:
       tables["mbsf_oc"] = mbsf_oc_df
+    if mbsf_ndi_df is not None:
+      tables["mbsf_ndi"] = mbsf_ndi_df
+
 
 
     formats_to_export = ["csv", "parquet"] if fmt == "all" else [fmt]
