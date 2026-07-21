@@ -157,8 +157,11 @@ def main(argv: Optional[list[str]] = None) -> int:
       hospice_df=scenario_slice.hospice_df,
       mbsf_cc_df=scenario_slice.mbsf_cc_df,
       mbsf_cu_df=scenario_slice.mbsf_cu_df,
+      mbsf_d_df=scenario_slice.mbsf_d_df,
+      mbsf_base_df=scenario_slice.mbsf_base_df,
     )
     print(f"Scenario: {args.scenario}")
+
     print(f"Valid: {report.is_valid}")
     print(f"Findings Count: {len(report.findings)}")
     for f in report.findings:
@@ -184,6 +187,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  Hospice Claims: {scenario_slice.hospice_df.height} rows")
     print(f"  MBSF Chronic Conditions: {scenario_slice.mbsf_cc_df.height} rows")
     print(f"  MBSF Cost & Use: {scenario_slice.mbsf_cu_df.height} rows")
+    print(f"  MBSF Part D: {scenario_slice.mbsf_d_df.height} rows")
+    print(f"  MBSF Base Enrollment: {scenario_slice.mbsf_base_df.height} rows")
     return 0
 
   elif args.command == "manifest":
@@ -220,6 +225,8 @@ def main(argv: Optional[list[str]] = None) -> int:
       hospice_df=scenario_slice.hospice_df,
       mbsf_cc_df=scenario_slice.mbsf_cc_df,
       mbsf_cu_df=scenario_slice.mbsf_cu_df,
+      mbsf_d_df=scenario_slice.mbsf_d_df,
+      mbsf_base_df=scenario_slice.mbsf_base_df,
     )
 
     print(f"Exported Release Bundle: {manifest.release_id}")
@@ -247,6 +254,8 @@ def main(argv: Optional[list[str]] = None) -> int:
       "hospice_claims": scenario_slice.hospice_df,
       "mbsf_chronic_conditions": scenario_slice.mbsf_cc_df,
       "mbsf_cost_and_use": scenario_slice.mbsf_cu_df,
+      "mbsf_part_d": scenario_slice.mbsf_d_df,
+      "mbsf_base_enrollment": scenario_slice.mbsf_base_df,
     }
 
     if args.mode == "vertical":
@@ -269,6 +278,8 @@ def main(argv: Optional[list[str]] = None) -> int:
       print(f"  Hospice Claims: {expanded['hospice_claims'].height} rows")
       print(f"  MBSF Chronic Conditions: {expanded['mbsf_chronic_conditions'].height} rows")
       print(f"  MBSF Cost & Use: {expanded['mbsf_cost_and_use'].height} rows")
+      print(f"  MBSF Part D: {expanded['mbsf_part_d'].height} rows")
+      print(f"  MBSF Base Enrollment: {expanded['mbsf_base_enrollment'].height} rows")
     return 0
 
   elif args.command == "catalog":
@@ -322,7 +333,10 @@ def main(argv: Optional[list[str]] = None) -> int:
       "hospice": scenario_slice.hospice_df,
       "mbsf_cc": scenario_slice.mbsf_cc_df,
       "mbsf_cu": scenario_slice.mbsf_cu_df,
+      "mbsf_d": scenario_slice.mbsf_d_df,
+      "mbsf_base": scenario_slice.mbsf_base_df,
     }
+
 
     engine = AuditEngine(dataset=tables, scenario_name=args.scenario)
     report = engine.run_audit()
