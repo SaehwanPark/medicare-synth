@@ -34,6 +34,13 @@
 - Registered `[project.scripts] medicare-synth = "medicare_synth.cli:main"` in `pyproject.toml`.
 - Added 12 new unit tests across `tests/test_scenarios.py`, `tests/test_normalizer.py`, and `tests/test_cli.py` (26 total passing tests).
 - Completed Milestone 3 (Executable Model and Validation) across all deliverables.
+- Implemented `ReleaseExporter`, `ReleaseManifest`, `FileReleaseEntry`, and `FidelityProfile` in `src/medicare_synth/release.py`.
+- Supported multi-format export of dataset tables to CSV and Parquet formats with automatic SHA256 checksum calculation.
+- Automated release bundle metadata generation (`release_manifest.json`, `validation_report.json`, `fidelity_profile.json`, `sql_reference_schema.sql`).
+- Exposed `export` subcommand in `medicare-synth` CLI (`src/medicare_synth/cli.py`).
+- Added package top-level exports in `src/medicare_synth/__init__.py`.
+- Added unit test suite in `tests/test_release.py` (29 total passing unit tests).
+- Completed Milestone 4 (Validation-First Release) across all deliverables.
 
 
 
