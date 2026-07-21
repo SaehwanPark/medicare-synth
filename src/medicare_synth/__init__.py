@@ -5,6 +5,7 @@ Provenance-backed contemporary Medicare synthetic data and research fixtures.
 
 __version__ = "0.1.0"
 
+from medicare_synth.audit import AuditEngine, AuditReport, ColumnAuditMetric, KAnonymityResult
 from medicare_synth.catalog import ScenarioCatalog, ScenarioEntry
 from medicare_synth.diff import DiffReport, SchemaDiffer
 from medicare_synth.evidence import RKBEvidenceSnapshot, VariableContract
@@ -18,13 +19,17 @@ from medicare_synth.scenarios import ScenarioCompiler
 from medicare_synth.validation import Finding, FindingCategory, RelationalValidator, Severity, ValidationReport
 
 __all__ = [
+  "AuditEngine",
+  "AuditReport",
   "BaselineNormalizer",
+  "ColumnAuditMetric",
   "DiffReport",
   "FidelityProfile",
   "FileManifest",
   "Finding",
   "FindingCategory",
   "HorizontalExpander",
+  "KAnonymityResult",
   "LimitationsProfile",
   "LimitationsProfiler",
   "ProvenanceStatus",
