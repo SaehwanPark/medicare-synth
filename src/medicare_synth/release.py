@@ -26,6 +26,7 @@ class FidelityProfile(BaseModel):
   hha_claim_count: int = Field(default=0, description="Number of HHA claim line/header records")
   dme_claim_count: int = Field(default=0, description="Number of DME claim line/header records")
   hospice_claim_count: int = Field(default=0, description="Number of Hospice claim line/header records")
+  mbsf_cc_count: int = Field(default=0, description="Number of MBSF Chronic Condition records")
   key_uniqueness_rate: float = Field(..., description="Proportion of records satisfying primary key uniqueness")
   foreign_key_validity_rate: float = Field(..., description="Proportion of claims linked to valid beneficiaries")
   temporal_integrity_rate: float = Field(..., description="Proportion of claims with valid temporal ordering")
@@ -94,31 +95,17 @@ class ReleaseExporter:
     hha_df: pl.DataFrame | None = None,
     dme_df: pl.DataFrame | None = None,
     hospice_df: pl.DataFrame | None = None,
+    mbsf_cc_df: pl.DataFrame | None = None,
   ) -> FidelityProfile:
-    """Compute summary metrics and integrity rates for a dataset slice.
-
-    Args:
-      bene_df: Beneficiary DataFrame.
-      carrier_df: Carrier Claims DataFrame.
-      outpatient_df: Outpatient Claims DataFrame.
-      validation_report: Relational validation report.
-      inpatient_df: Optional Inpatient Claims DataFrame.
-      pde_df: Optional Prescription Drug Events DataFrame.
-      snf_df: Optional SNF Claims DataFrame.
-      hha_df: Optional HHA Claims DataFrame.
-      dme_df: Optional DME Claims DataFrame.
-      hospice_df: Optional Hospice Claims DataFrame.
-
-    Returns:
-      FidelityProfile instance containing computed counts and validity ratios.
-    """
+    """Compute summary metrics and integrity rates for a dataset slice."""
     inp_count = inpatient_df.height if inpatient_df is not None else 0
     pde_cnt = pde_df.height if pde_df is not None else 0
     snf_cnt = snf_df.height if snf_df is not None else 0
     hha_cnt = hha_df.height if hha_df is not None else 0
     dme_cnt = dme_df.height if dme_df is not None else 0
     hospice_cnt = hospice_df.height if hospice_df is not None else 0
-    total_claims = carrier_df.height + outpatient_df.height + inp_count + pde_cnt + snf_cnt + hha_cnt + dme_cnt + hospice_cnt
+    mbsf_cc_cnt = mbsf_cc_df.height if mbsf_cc_df is not None else 0
+    total_claims = carrier_df.height + outpatient_df.height + inp_count + pde_cnt + snf_cnt + hha_cnt + dme_cnt + hospice_cnt + mbsf_cc_cnt
     fk_findings = [f for f in validation_report.findings if f.category == FindingCategory.RELATIONAL]
     temp_findings = [f for f in validation_report.findings if f.category == FindingCategory.TEMPORAL]
 
@@ -135,17 +122,14 @@ class ReleaseExporter:
       hha_claim_count=hha_cnt,
       dme_claim_count=dme_cnt,
       hospice_claim_count=hospice_cnt,
+      mbsf_cc_count=mbsf_cc_cnt,
       key_uniqueness_rate=1.0,
       foreign_key_validity_rate=max(0.0, min(1.0, fk_validity_rate)),
       temporal_integrity_rate=max(0.0, min(1.0, temp_integrity_rate)),
     )
 
   def generate_sql_schema(self) -> str:
-    """Generate DDL schema for loading exported tables into SQL engines (e.g. DuckDB, PostgreSQL).
-
-    Returns:
-      SQL string containing DDL statements.
-    """
+    """Generate DDL schema for loading exported tables into SQL engines (e.g. DuckDB, PostgreSQL)."""
     return (
       "-- Medicare-Synth 2021 CCW Baseline Reference DDL Schema\n\n"
       "CREATE TABLE IF NOT EXISTS beneficiary (\n"
@@ -229,6 +213,18 @@ class ReleaseExporter:
       "    CLM_PMT_AMT NUMERIC,\n"
       "    CLM_UTLZTN_DAY_CNT INTEGER,\n"
       "    HOSPICE_TERMINAL_DIAG_CD VARCHAR\n"
+      ");\n\n"
+      "CREATE TABLE IF NOT EXISTS mbsf_chronic_conditions (\n"
+      "    BENE_ID VARCHAR PRIMARY KEY REFERENCES beneficiary(BENE_ID),\n"
+      "    RFRNC_YR INTEGER,\n"
+      "    SP_ALZHMD VARCHAR,\n"
+      "    SP_CHF VARCHAR,\n"
+      "    SP_CHRNKIDN VARCHAR,\n"
+      "    SP_CNCR VARCHAR,\n"
+      "    SP_DIABETES VARCHAR,\n"
+      "    SP_ISCHDMT VARCHAR,\n"
+      "    SP_STRKETIA VARCHAR,\n"
+      "    VAL_MBSF_01 NUMERIC\n"
       ");\n"
     )
 
@@ -244,31 +240,16 @@ class ReleaseExporter:
     hha_df: pl.DataFrame | None = None,
     dme_df: pl.DataFrame | None = None,
     hospice_df: pl.DataFrame | None = None,
+    mbsf_cc_df: pl.DataFrame | None = None,
   ) -> ReleaseManifest:
-    """Export normalized tabular data and metadata artifacts to the release directory.
-
-    Args:
-      bene_df: Beneficiary DataFrame.
-      carrier_df: Carrier Claims DataFrame.
-      outpatient_df: Outpatient Claims DataFrame.
-      fmt: Format choice ('csv', 'parquet', or 'all').
-      inpatient_df: Optional Inpatient Claims DataFrame.
-      pde_df: Optional Prescription Drug Events DataFrame.
-      snf_df: Optional SNF Claims DataFrame.
-      hha_df: Optional HHA Claims DataFrame.
-      dme_df: Optional DME Claims DataFrame.
-      hospice_df: Optional Hospice Claims DataFrame.
-
-    Returns:
-      ReleaseManifest detailing the exported files and validation summary.
-    """
+    """Export normalized tabular data and metadata artifacts to the release directory."""
     self.output_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Run validation
-    report = self.validator.validate_slice(bene_df, carrier_df, outpatient_df, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df)
+    report = self.validator.validate_slice(bene_df, carrier_df, outpatient_df, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df, mbsf_cc_df)
 
     # 2. Compute fidelity profile
-    fidelity = self.compute_fidelity_profile(bene_df, carrier_df, outpatient_df, report, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df)
+    fidelity = self.compute_fidelity_profile(bene_df, carrier_df, outpatient_df, report, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df, mbsf_cc_df)
 
     # Write validation report and fidelity profile
     with open(self.output_dir / "validation_report.json", "w") as f:
@@ -300,6 +281,8 @@ class ReleaseExporter:
       tables["dme"] = dme_df
     if hospice_df is not None:
       tables["hospice"] = hospice_df
+    if mbsf_cc_df is not None:
+      tables["mbsf_cc"] = mbsf_cc_df
 
     formats_to_export = ["csv", "parquet"] if fmt == "all" else [fmt]
 

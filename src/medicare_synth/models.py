@@ -147,3 +147,20 @@ class HospiceClaimHeaderRecord(BaseModel):
   clm_pmt_amt: float = Field(default=0.0, ge=0.0, description="Claim Payment Amount")
   clm_utlztn_day_cnt: int = Field(default=1, ge=0, description="Hospice Care Days Count")
   hospice_terminal_diag_cd: Optional[str] = Field(default=None, max_length=7, description="Terminal Diagnosis ICD-10 Code")
+
+
+class MBSFChronicConditionsRecord(BaseModel):
+  """Domain record representation for Master Beneficiary Summary File Chronic Conditions Segment."""
+
+  model_config = ConfigDict(frozen=True)
+
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  rfrnc_yr: int = Field(default=2021, ge=2000, le=2099, description="Reference Year")
+  sp_alzhmd: str = Field(default="0", max_length=1, description="Alzheimer's Disease or Related Disorders Indicator")
+  sp_chf: str = Field(default="0", max_length=1, description="Heart Failure Indicator")
+  sp_chrnkidn: str = Field(default="0", max_length=1, description="Chronic Kidney Disease Indicator")
+  sp_cncr: str = Field(default="0", max_length=1, description="Cancer Indicator")
+  sp_diabetes: str = Field(default="0", max_length=1, description="Diabetes Indicator")
+  sp_ischdmt: str = Field(default="0", max_length=1, description="Ischemic Heart Disease Indicator")
+  sp_strketia: str = Field(default="0", max_length=1, description="Stroke/TIA Indicator")
+  val_mbsf_01: float = Field(default=0.0, ge=0.0, description="MBSF Chronic Conditions Validation Metric")

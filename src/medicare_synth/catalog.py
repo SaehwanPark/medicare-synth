@@ -126,6 +126,15 @@ class ScenarioCatalog:
       sample_bene_count=1,
       sample_claim_count=1,
     ),
+    "invalid_mbsf_chronic_condition_indicator": ScenarioEntry(
+      name="invalid_mbsf_chronic_condition_indicator",
+      description="Intentional anomaly fixture containing an MBSF record with invalid indicator value outside {'0', '1', '2'}.",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "mbsf_chronic_conditions"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
 
   @classmethod
@@ -165,6 +174,7 @@ class ScenarioCatalog:
       "invalid_hha_utilization_days": ScenarioCompiler.invalid_hha_utilization_days,
       "invalid_dme_line_item_count": ScenarioCompiler.invalid_dme_line_item_count,
       "invalid_hospice_utilization_days": ScenarioCompiler.invalid_hospice_utilization_days,
+      "invalid_mbsf_chronic_condition_indicator": ScenarioCompiler.invalid_mbsf_chronic_condition_indicator,
     }
 
     for name, method in compiler_methods.items():
@@ -182,6 +192,7 @@ class ScenarioCatalog:
         ("hha_claims", slice_data.hha_df),
         ("dme_claims", slice_data.dme_df),
         ("hospice_claims", slice_data.hospice_df),
+        ("mbsf_chronic_conditions", slice_data.mbsf_cc_df),
       ]
 
       for table_name, df in tables:

@@ -271,6 +271,12 @@
       "category": "field",
       "description": "CLM_UTLZTN_DAY_CNT on Hospice claims must be non-negative.",
       "rule": "CLM_UTLZTN_DAY_CNT >= 0"
+    },
+    {
+      "constraint_id": "VAL_MBSF_01",
+      "category": "field",
+      "description": "Chronic Condition Indicators (SP_*) on MBSF records must be within valid set {'0', '1', '2'}.",
+      "rule": "SP_* IN {'0', '1', '2'}"
     }
   ]
 }

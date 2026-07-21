@@ -13,6 +13,7 @@ from medicare_synth.models import (
   HomeHealthAgencyClaimRecord,
   HospiceClaimHeaderRecord,
   InpatientClaimHeaderRecord,
+  MBSFChronicConditionsRecord,
   OutpatientClaimHeaderRecord,
   PrescriptionDrugEventRecord,
   ProvenanceStatus,
@@ -284,6 +285,41 @@ class BaselineNormalizer:
     )
 
 
+
+  @staticmethod
+  def normalize_mbsf_chronic_conditions(records: Sequence[dict[str, Any]]) -> pl.DataFrame:
+    """Normalizes raw MBSF Chronic Condition dictionary records into a canonical Polars DataFrame."""
+    validated = [MBSFChronicConditionsRecord(**r) for r in records]
+    df = pl.DataFrame([v.model_dump() for v in validated])
+    if df.is_empty():
+      return pl.DataFrame(
+        schema={
+          "bene_id": pl.String,
+          "rfrnc_yr": pl.Int64,
+          "sp_alzhmd": pl.String,
+          "sp_chf": pl.String,
+          "sp_chrnkidn": pl.String,
+          "sp_cncr": pl.String,
+          "sp_diabetes": pl.String,
+          "sp_ischdmt": pl.String,
+          "sp_strketia": pl.String,
+          "val_mbsf_01": pl.Float64,
+        }
+      )
+    return df.with_columns(
+      [
+        pl.col("bene_id").cast(pl.String),
+        pl.col("rfrnc_yr").cast(pl.Int64),
+        pl.col("sp_alzhmd").cast(pl.String),
+        pl.col("sp_chf").cast(pl.String),
+        pl.col("sp_chrnkidn").cast(pl.String),
+        pl.col("sp_cncr").cast(pl.String),
+        pl.col("sp_diabetes").cast(pl.String),
+        pl.col("sp_ischdmt").cast(pl.String),
+        pl.col("sp_strketia").cast(pl.String),
+        pl.col("val_mbsf_01").cast(pl.Float64),
+      ]
+    )
 
   @staticmethod
   def attach_provenance_metadata(df: pl.DataFrame, status: ProvenanceStatus) -> dict[str, Any]:
