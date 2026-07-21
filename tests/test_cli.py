@@ -64,6 +64,7 @@ def test_cli_auto_workflow_dry_run():
             json_report_path=None,
             md_report_path=None,
             changelog_check=False,
+            git_clean_check=False,
         )
 
 
@@ -81,6 +82,7 @@ def test_cli_auto_workflow_json_report(tmp_path):
             json_report_path=report_path,
             md_report_path=None,
             changelog_check=False,
+            git_clean_check=False,
         )
 
 
@@ -98,6 +100,7 @@ def test_cli_auto_workflow_md_report(tmp_path):
             json_report_path=None,
             md_report_path=report_path,
             changelog_check=False,
+            git_clean_check=False,
         )
 
 
@@ -114,4 +117,22 @@ def test_cli_auto_workflow_changelog_check():
             json_report_path=None,
             md_report_path=None,
             changelog_check=True,
+            git_clean_check=False,
+        )
+
+
+def test_cli_auto_workflow_git_clean_check():
+    with patch("medicare_synth.cli.run_autonomous_workflow", return_value=0) as mock_wf:
+        code = main(["auto-workflow", "--dry-run", "--git-clean-check"])
+        assert code == 0
+        mock_wf.assert_called_once_with(
+            commit_msg="feat: implement autonomous workflow subcommand and reconcile docs",
+            title="feat: implement autonomous workflow subcommand and reconcile docs",
+            body="Automated PR created by the autonomous workflow engine. Reconciles docs and adds CLI auto-workflow subcommand.",
+            dry_run=True,
+            skip_merge=False,
+            json_report_path=None,
+            md_report_path=None,
+            changelog_check=False,
+            git_clean_check=True,
         )
