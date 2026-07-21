@@ -1,6 +1,5 @@
 """Unit tests for SchemaDiffer and RKBEvidenceSnapshot comparison."""
 
-from pathlib import Path
 from medicare_synth.diff import DiffSeverity, SchemaDiffer
 from medicare_synth.evidence import RKBEvidenceSnapshot, VariableContract
 

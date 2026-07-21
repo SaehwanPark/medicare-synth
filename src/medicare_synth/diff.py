@@ -7,7 +7,7 @@ silent baseline corruption and breaking structural changes.
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from medicare_synth.evidence import RKBEvidenceSnapshot, VariableContract
 

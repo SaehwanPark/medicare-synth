@@ -4,6 +4,10 @@
 
 ### Added
 
+- Configured explicit `[build-system]` with `hatchling` backend and `tool.uv.package = true` in `pyproject.toml`.
+- Strongly typed `ScenarioCatalog._CATALOG` with `ScenarioEntry` instances, achieving 0 Pyright static type errors.
+- Cleaned unused imports across source and test files (`diff.py`, `profile.py`, `test_catalog.py`, `test_diff.py`).
+
 - Contributor-first README and repository-wide agent guidance.
 - Portable Medicare foundation-slice harness with deterministic local handoffs
   and bounded domain review.
