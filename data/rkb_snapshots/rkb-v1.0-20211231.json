@@ -253,6 +253,22 @@
       "nullable": false,
       "provenance_status": "preserved",
       "description": "Annual count of covered inpatient and SNF stay days for beneficiary."
+    },
+    "BENE_PTD_TRCC_AMT": {
+      "name": "BENE_PTD_TRCC_AMT",
+      "label": "Beneficiary Part D Total Gross Covered Drug Cost Amount",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total gross covered drug cost amount under Part D for beneficiary."
+    },
+    "BENE_PTD_MOOP_AMT": {
+      "name": "BENE_PTD_MOOP_AMT",
+      "label": "Beneficiary Part D True Out-of-Pocket Cost Amount",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual true out-of-pocket payment amount under Part D for beneficiary."
     }
   },
   "constraints": [
@@ -315,6 +331,12 @@
       "category": "field",
       "description": "Payment amounts and covered days on MBSF Cost & Use records must be non-negative.",
       "rule": "BENE_MDCR_PAY_AMT >= 0 AND BENE_TOT_PAY_AMT >= 0 AND BENE_IP_DDCTBL_AMT >= 0 AND BENE_CVRD_DYS_CNT >= 0"
+    },
+    {
+      "constraint_id": "VAL_MBSF_D_01",
+      "category": "field",
+      "description": "Part D covered drug cost and out-of-pocket amounts on MBSF Part D records must be non-negative.",
+      "rule": "BENE_PTD_TRCC_AMT >= 0 AND BENE_PTD_MOOP_AMT >= 0"
     }
   ]
 }

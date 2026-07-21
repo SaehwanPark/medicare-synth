@@ -177,3 +177,19 @@ class MBSFCostAndUseRecord(BaseModel):
   bene_tot_pay_amt: float = Field(default=0.0, ge=0.0, description="Beneficiary Annual Total Payment Amount")
   bene_ip_ddctbl_amt: float = Field(default=0.0, ge=0.0, description="Beneficiary Inpatient Deductible Paid Amount")
   bene_cvrd_dys_cnt: int = Field(default=0, ge=0, description="Beneficiary Total Covered Inpatient/SNF Days Count")
+
+
+class MBSFPartDRecord(BaseModel):
+  """Domain record representation for Master Beneficiary Summary File Part D Characteristics Segment."""
+
+  model_config = ConfigDict(frozen=True)
+
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  rfrnc_yr: int = Field(default=2021, ge=2000, le=2099, description="Reference Year")
+  ptd_cntrct_id_01: Optional[str] = Field(default="S0001", max_length=5, description="Monthly Part D Contract ID Month 01")
+  ptd_pbp_id_01: Optional[str] = Field(default="001", max_length=3, description="Monthly Part D Plan Benefit Package ID Month 01")
+  ptd_sgnt_cd_01: Optional[str] = Field(default="000", max_length=3, description="Monthly Part D Segment Code Month 01")
+  rds_ind_01: Optional[str] = Field(default="N", max_length=1, description="Monthly Retiree Drug Subsidy Indicator Month 01")
+  li_cost_shrh_grp_cd_01: Optional[str] = Field(default="00", max_length=2, description="Monthly Low Income Cost Sharing Group Code Month 01")
+  bene_ptd_trcc_amt: float = Field(default=0.0, ge=0.0, description="Beneficiary Part D Total Gross Covered Drug Cost Amount")
+  bene_ptd_moop_amt: float = Field(default=0.0, ge=0.0, description="Beneficiary Part D True Out-of-Pocket Cost Amount")
