@@ -1,7 +1,7 @@
 """Canonical entity and record models for contemporary Medicare synthetic data.
 
 Provides typed Pydantic models for Beneficiary Summary, Carrier, Outpatient, Inpatient, PDE,
-SNF, HHA, DME, Hospice, and MBSF (Base, CC, CU, Part D, OC, NDI, RA, Part C, FFS) records.
+SNF, HHA, DME, Hospice, and MBSF (Base, CC, CU, Part D, OC, NDI, RA, Part C, FFS, PDE Utilization) records.
 """
 
 from datetime import date
@@ -283,3 +283,20 @@ class MBSFFFSUtilizationRecord(BaseModel):
   hosp_stay_cnt: int = Field(default=0, ge=0, description="Hospice Stay Count")
   dme_srvc_cnt: int = Field(default=0, ge=0, description="Durable Medical Equipment Service Count")
   val_mbsf_ffs_01: float = Field(default=0.0, ge=0.0, description="MBSF FFS Utilization Validation Metric")
+
+
+class MBSFPartDPDEUtilizationRecord(BaseModel):
+  """Domain record representation for Master Beneficiary Summary File Part D PDE Cost & Utilization Segment."""
+
+  model_config = ConfigDict(frozen=True)
+
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  rfrnc_yr: int = Field(default=2021, ge=2000, le=2099, description="Reference Year")
+  pde_tot_fill_cnt: int = Field(default=0, ge=0, description="Total Part D Prescription Fill Count")
+  pde_brand_fill_cnt: int = Field(default=0, ge=0, description="Brand Prescription Fill Count")
+  pde_generic_fill_cnt: int = Field(default=0, ge=0, description="Generic Prescription Fill Count")
+  pde_tot_cst_amt: float = Field(default=0.0, ge=0.0, description="Total Prescription Cost Amount")
+  pde_ptnt_pay_amt: float = Field(default=0.0, ge=0.0, description="Patient Paid Amount")
+  pde_lis_pay_amt: float = Field(default=0.0, ge=0.0, description="Low-Income Subsidy Payment Amount")
+  val_mbsf_pde_util_01: float = Field(default=0.0, ge=0.0, description="MBSF Part D PDE Utilization Validation Metric")
+

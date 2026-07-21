@@ -4,6 +4,13 @@
 
 ### Added
 
+- Implemented `MBSFPartDPDEUtilizationRecord` domain model in `src/medicare_synth/models.py`.
+- Added Master Beneficiary Summary File (MBSF) Part D PDE Cost & Utilization Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`PDE_TOT_FILL_CNT`, `PDE_BRAND_FILL_CNT`, `PDE_GENERIC_FILL_CNT`, `PDE_TOT_CST_AMT`, `PDE_PTNT_PAY_AMT`, `PDE_LIS_PAY_AMT`, `VAL_MBSF_PDE_UTIL_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_mbsf_pde_util_field_constraints` and updated `validate_slice` to validate MBSF Part D PDE Utilization foreign key integrity and count/amount non-negativity (`FLD-015`).
+- Updated `ScenarioCompiler` to compile MBSF Part D PDE Utilization data frames across all scenarios and added `invalid_mbsf_pde_utilization_count` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle MBSF Part D PDE Utilization Segment.
+- Added comprehensive unit test suite in `tests/test_mbsf_pde_util.py` (144 total passing unit tests).
+
 - Implemented `MBSFFFSUtilizationRecord` domain model in `src/medicare_synth/models.py`.
 - Added Master Beneficiary Summary File (MBSF) Fee-For-Service (FFS) Utilization Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`IP_ADM_CNT`, `OP_VIST_CNT`, `SNF_STAY_CNT`, `CAR_SRVC_CNT`, `HHA_VIST_CNT`, `HOSP_STAY_CNT`, `DME_SRVC_CNT`, `VAL_MBSF_FFS_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_mbsf_ffs_field_constraints` and updated `validate_slice` to validate MBSF FFS Utilization foreign key integrity and count non-negativity (`FLD-014`).

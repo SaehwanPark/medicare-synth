@@ -543,6 +543,38 @@ class RelationalValidator:
       ]
     return []
 
+  @staticmethod
+  def check_mbsf_pde_util_field_constraints(mbsf_pde_util_df: pl.DataFrame) -> list[Finding]:
+    """Identifies MBSF Part D PDE Utilization records with negative fill counts or cost amounts."""
+    if mbsf_pde_util_df.is_empty():
+      return []
+
+    cols = ["pde_tot_fill_cnt", "pde_brand_fill_cnt", "pde_generic_fill_cnt", "pde_tot_cst_amt", "pde_ptnt_pay_amt", "pde_lis_pay_amt"]
+    present_cols = [c for c in cols if c in mbsf_pde_util_df.columns]
+    if not present_cols:
+      return []
+
+    cond = pl.lit(False)
+    for c in present_cols:
+      cond = cond | (pl.col(c) < 0)
+
+    invalid = mbsf_pde_util_df.filter(cond)
+    invalid_count = invalid.height
+
+    if invalid_count > 0:
+      sample_ids = invalid.select("bene_id").slice(0, 5).to_series().to_list() if "bene_id" in invalid.columns else []
+      return [
+        Finding(
+          rule_id="FLD-015",
+          category=FindingCategory.FIELD,
+          severity=Severity.HIGH,
+          message=f"Found {invalid_count} MBSF Part D PDE Utilization records violating non-negative count/amount constraints.",
+          count=invalid_count,
+          details={"table_name": "MBSF Part D PDE Utilization", "sample_bene_ids": sample_ids},
+        )
+      ]
+    return []
+
   def validate_slice(
     self,
     bene_df: pl.DataFrame,
@@ -563,6 +595,7 @@ class RelationalValidator:
     mbsf_ra_df: Optional[pl.DataFrame] = None,
     mbsf_c_df: Optional[pl.DataFrame] = None,
     mbsf_ffs_df: Optional[pl.DataFrame] = None,
+    mbsf_pde_util_df: Optional[pl.DataFrame] = None,
   ) -> ValidationReport:
     """Executes full suite of relational, temporal, field, and record-level checks over a dataset slice."""
     findings: list[Finding] = []
@@ -661,4 +694,10 @@ class RelationalValidator:
       findings.extend(self.check_mbsf_ffs_field_constraints(mbsf_ffs_df))
       findings.extend(self.check_record_uniqueness(mbsf_ffs_df, ["bene_id"], "MBSF FFS Utilization"))
 
+    if mbsf_pde_util_df is not None and not mbsf_pde_util_df.is_empty():
+      findings.extend(self.check_orphaned_claims(bene_df, mbsf_pde_util_df, "MBSF Part D PDE Utilization"))
+      findings.extend(self.check_mbsf_pde_util_field_constraints(mbsf_pde_util_df))
+      findings.extend(self.check_record_uniqueness(mbsf_pde_util_df, ["bene_id"], "MBSF Part D PDE Utilization"))
+
     return ValidationReport(findings=findings)
+

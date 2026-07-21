@@ -59,7 +59,7 @@ class LimitationsProfiler:
       LimitationStatement(
         category=LimitationsCategory.STRUCTURAL,
         title="Beneficiary-Year and Claim Line/Header Scope Boundary",
-        description="Release baseline supports Beneficiary Summary, Carrier, Outpatient, Inpatient, PDE, SNF, HHA, DME, Hospice, and 9 MBSF segment files for 2021 schema.",
+        description="Release baseline supports Beneficiary Summary, Carrier, Outpatient, Inpatient, PDE, SNF, HHA, DME, Hospice, and 10 MBSF segment files for 2021 schema.",
         mitigation="Verify specific file table inclusions and record counts using release manifests and fidelity profiles.",
       ),
       LimitationStatement(
