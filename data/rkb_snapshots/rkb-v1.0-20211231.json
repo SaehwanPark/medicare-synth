@@ -187,6 +187,14 @@
       "nullable": false,
       "provenance_status": "preserved",
       "description": "Number of non-covered stay days during a SNF claim stay."
+    },
+    "CLM_HHA_LUPA_IND": {
+      "name": "CLM_HHA_LUPA_IND",
+      "label": "HHA Low Utilization Payment Adjustment Indicator",
+      "data_type": "string",
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "Indicator for Low Utilization Payment Adjustment on HHA claims."
     }
   },
   "constraints": [
@@ -205,7 +213,7 @@
     {
       "constraint_id": "VAL_REL_01",
       "category": "relational",
-      "description": "BENE_ID on Carrier, Outpatient, Inpatient, PDE, or SNF claim must exist in Beneficiary Summary file.",
+      "description": "BENE_ID on Carrier, Outpatient, Inpatient, PDE, SNF, or HHA claim must exist in Beneficiary Summary file.",
       "rule": "CLM.BENE_ID IN BENE_SUMMARY.BENE_ID"
     },
     {
@@ -219,6 +227,12 @@
       "category": "field",
       "description": "CLM_UTLZTN_DAY_CNT and NCVD_DAYS_CNT on SNF claims must be non-negative.",
       "rule": "CLM_UTLZTN_DAY_CNT >= 0 AND NCVD_DAYS_CNT >= 0"
+    },
+    {
+      "constraint_id": "VAL_HHA_01",
+      "category": "field",
+      "description": "CLM_UTLZTN_DAY_CNT on HHA claims must be non-negative.",
+      "rule": "CLM_UTLZTN_DAY_CNT >= 0"
     }
   ]
 }
