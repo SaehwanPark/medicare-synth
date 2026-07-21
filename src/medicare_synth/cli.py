@@ -156,6 +156,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       dme_df=scenario_slice.dme_df,
       hospice_df=scenario_slice.hospice_df,
       mbsf_cc_df=scenario_slice.mbsf_cc_df,
+      mbsf_cu_df=scenario_slice.mbsf_cu_df,
     )
     print(f"Scenario: {args.scenario}")
     print(f"Valid: {report.is_valid}")
@@ -182,6 +183,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  DME Claims: {scenario_slice.dme_df.height} rows")
     print(f"  Hospice Claims: {scenario_slice.hospice_df.height} rows")
     print(f"  MBSF Chronic Conditions: {scenario_slice.mbsf_cc_df.height} rows")
+    print(f"  MBSF Cost & Use: {scenario_slice.mbsf_cu_df.height} rows")
     return 0
 
   elif args.command == "manifest":
@@ -217,6 +219,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       dme_df=scenario_slice.dme_df,
       hospice_df=scenario_slice.hospice_df,
       mbsf_cc_df=scenario_slice.mbsf_cc_df,
+      mbsf_cu_df=scenario_slice.mbsf_cu_df,
     )
 
     print(f"Exported Release Bundle: {manifest.release_id}")
@@ -243,6 +246,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       "dme_claims": scenario_slice.dme_df,
       "hospice_claims": scenario_slice.hospice_df,
       "mbsf_chronic_conditions": scenario_slice.mbsf_cc_df,
+      "mbsf_cost_and_use": scenario_slice.mbsf_cu_df,
     }
 
     if args.mode == "vertical":
@@ -264,6 +268,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       print(f"  DME Claims: {expanded['dme_claims'].height} rows")
       print(f"  Hospice Claims: {expanded['hospice_claims'].height} rows")
       print(f"  MBSF Chronic Conditions: {expanded['mbsf_chronic_conditions'].height} rows")
+      print(f"  MBSF Cost & Use: {expanded['mbsf_cost_and_use'].height} rows")
     return 0
 
   elif args.command == "catalog":
@@ -316,6 +321,7 @@ def main(argv: Optional[list[str]] = None) -> int:
       "dme": scenario_slice.dme_df,
       "hospice": scenario_slice.hospice_df,
       "mbsf_cc": scenario_slice.mbsf_cc_df,
+      "mbsf_cu": scenario_slice.mbsf_cu_df,
     }
 
     engine = AuditEngine(dataset=tables, scenario_name=args.scenario)

@@ -221,6 +221,38 @@
       "nullable": true,
       "provenance_status": "preserved",
       "description": "Primary ICD-10 diagnosis code for hospice care terminal condition."
+    },
+    "BENE_MDCR_PAY_AMT": {
+      "name": "BENE_MDCR_PAY_AMT",
+      "label": "Beneficiary Medicare Payment Total Amount",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total Medicare payments made on behalf of beneficiary."
+    },
+    "BENE_TOT_PAY_AMT": {
+      "name": "BENE_TOT_PAY_AMT",
+      "label": "Beneficiary Total Payment Amount",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual total payments (Medicare + Beneficiary + Third-Party) for beneficiary."
+    },
+    "BENE_IP_DDCTBL_AMT": {
+      "name": "BENE_IP_DDCTBL_AMT",
+      "label": "Beneficiary Inpatient Deductible Amount",
+      "data_type": "float",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual inpatient deductible amount paid by beneficiary."
+    },
+    "BENE_CVRD_DYS_CNT": {
+      "name": "BENE_CVRD_DYS_CNT",
+      "label": "Beneficiary Total Covered Days Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Annual count of covered inpatient and SNF stay days for beneficiary."
     }
   },
   "constraints": [
@@ -239,7 +271,7 @@
     {
       "constraint_id": "VAL_REL_01",
       "category": "relational",
-      "description": "BENE_ID on Carrier, Outpatient, Inpatient, PDE, SNF, HHA, DME, or Hospice claim must exist in Beneficiary Summary file.",
+      "description": "BENE_ID on Carrier, Outpatient, Inpatient, PDE, SNF, HHA, DME, Hospice, or MBSF record must exist in Beneficiary Summary file.",
       "rule": "CLM.BENE_ID IN BENE_SUMMARY.BENE_ID"
     },
     {
@@ -277,6 +309,12 @@
       "category": "field",
       "description": "Chronic Condition Indicators (SP_*) on MBSF records must be within valid set {'0', '1', '2'}.",
       "rule": "SP_* IN {'0', '1', '2'}"
+    },
+    {
+      "constraint_id": "VAL_MBSF_CU_01",
+      "category": "field",
+      "description": "Payment amounts and covered days on MBSF Cost & Use records must be non-negative.",
+      "rule": "BENE_MDCR_PAY_AMT >= 0 AND BENE_TOT_PAY_AMT >= 0 AND BENE_IP_DDCTBL_AMT >= 0 AND BENE_CVRD_DYS_CNT >= 0"
     }
   ]
 }

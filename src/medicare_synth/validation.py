@@ -300,6 +300,35 @@ class RelationalValidator:
       ]
     return []
 
+  @staticmethod
+  def check_mbsf_cu_field_constraints(mbsf_cu_df: pl.DataFrame) -> list[Finding]:
+    """Identifies MBSF Cost & Use records with negative payment/days metrics or total pay less than Medicare pay."""
+    if mbsf_cu_df.is_empty():
+      return []
+
+    invalid = mbsf_cu_df.filter(
+      (pl.col("bene_mdcr_pay_amt") < 0)
+      | (pl.col("bene_tot_pay_amt") < 0)
+      | (pl.col("bene_ip_ddctbl_amt") < 0)
+      | (pl.col("bene_cvrd_dys_cnt") < 0)
+      | (pl.col("bene_tot_pay_amt") < pl.col("bene_mdcr_pay_amt"))
+    )
+    invalid_count = invalid.height
+
+    if invalid_count > 0:
+      sample_ids = invalid.select("bene_id").slice(0, 5).to_series().to_list() if "bene_id" in invalid.columns else []
+      return [
+        Finding(
+          rule_id="FLD-007",
+          category=FindingCategory.FIELD,
+          severity=Severity.HIGH,
+          message=f"Found {invalid_count} MBSF Cost & Use records violating non-negative payment or covered day constraints.",
+          count=invalid_count,
+          details={"table_name": "MBSF Cost & Use", "sample_bene_ids": sample_ids},
+        )
+      ]
+    return []
+
   def validate_slice(
     self,
     bene_df: pl.DataFrame,
@@ -312,6 +341,7 @@ class RelationalValidator:
     dme_df: Optional[pl.DataFrame] = None,
     hospice_df: Optional[pl.DataFrame] = None,
     mbsf_cc_df: Optional[pl.DataFrame] = None,
+    mbsf_cu_df: Optional[pl.DataFrame] = None,
   ) -> ValidationReport:
     """Executes full suite of relational, temporal, field, and record-level checks over a dataset slice."""
     findings: list[Finding] = []
@@ -369,5 +399,10 @@ class RelationalValidator:
       findings.extend(self.check_orphaned_claims(bene_df, mbsf_cc_df, "MBSF Chronic Conditions"))
       findings.extend(self.check_mbsf_cc_field_constraints(mbsf_cc_df))
       findings.extend(self.check_record_uniqueness(mbsf_cc_df, ["bene_id"], "MBSF Chronic Conditions"))
+
+    if mbsf_cu_df is not None and not mbsf_cu_df.is_empty():
+      findings.extend(self.check_orphaned_claims(bene_df, mbsf_cu_df, "MBSF Cost & Use"))
+      findings.extend(self.check_mbsf_cu_field_constraints(mbsf_cu_df))
+      findings.extend(self.check_record_uniqueness(mbsf_cu_df, ["bene_id"], "MBSF Cost & Use"))
 
     return ValidationReport(findings=findings)

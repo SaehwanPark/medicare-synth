@@ -22,6 +22,7 @@ class ScenarioSlice(NamedTuple):
   dme_df: pl.DataFrame
   hospice_df: pl.DataFrame
   mbsf_cc_df: pl.DataFrame
+  mbsf_cu_df: pl.DataFrame
 
 
 class ScenarioCompiler:
@@ -283,6 +284,35 @@ class ScenarioCompiler:
       ]
     )
 
+    mbsf_cu_df = pl.DataFrame(
+      [
+        {
+          "bene_id": "BENE_001",
+          "rfrnc_yr": 2021,
+          "bene_mdcr_pay_amt": 12500.0,
+          "bene_tot_pay_amt": 14000.0,
+          "bene_ip_ddctbl_amt": 1484.0,
+          "bene_cvrd_dys_cnt": 12,
+        },
+        {
+          "bene_id": "BENE_002",
+          "rfrnc_yr": 2021,
+          "bene_mdcr_pay_amt": 8200.0,
+          "bene_tot_pay_amt": 9500.0,
+          "bene_ip_ddctbl_amt": 0.0,
+          "bene_cvrd_dys_cnt": 5,
+        },
+        {
+          "bene_id": "BENE_003",
+          "rfrnc_yr": 2021,
+          "bene_mdcr_pay_amt": 450.0,
+          "bene_tot_pay_amt": 500.0,
+          "bene_ip_ddctbl_amt": 0.0,
+          "bene_cvrd_dys_cnt": 0,
+        },
+      ]
+    )
+
     return ScenarioSlice(
       bene_df=bene_df,
       carrier_df=carrier_df,
@@ -294,6 +324,7 @@ class ScenarioCompiler:
       dme_df=dme_df,
       hospice_df=hospice_df,
       mbsf_cc_df=mbsf_cc_df,
+      mbsf_cu_df=mbsf_cu_df,
     )
 
   @staticmethod
@@ -310,6 +341,7 @@ class ScenarioCompiler:
     dme_sub = slice_data.dme_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     hospice_sub = slice_data.hospice_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     mbsf_cc_sub = slice_data.mbsf_cc_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
+    mbsf_cu_sub = slice_data.mbsf_cu_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     return ScenarioSlice(
       bene_df=bene_sub,
       carrier_df=carrier_sub,
@@ -321,6 +353,7 @@ class ScenarioCompiler:
       dme_df=dme_sub,
       hospice_df=hospice_sub,
       mbsf_cc_df=mbsf_cc_sub,
+      mbsf_cu_df=mbsf_cu_sub,
     )
 
   @staticmethod
@@ -360,6 +393,7 @@ class ScenarioCompiler:
       dme_df=slice_data.dme_df,
       hospice_df=slice_data.hospice_df,
       mbsf_cc_df=slice_data.mbsf_cc_df,
+      mbsf_cu_df=slice_data.mbsf_cu_df,
     )
 
   @staticmethod
@@ -390,6 +424,7 @@ class ScenarioCompiler:
       dme_df=slice_data.dme_df,
       hospice_df=slice_data.hospice_df,
       mbsf_cc_df=slice_data.mbsf_cc_df,
+      mbsf_cu_df=slice_data.mbsf_cu_df,
     )
 
   @staticmethod
@@ -419,6 +454,7 @@ class ScenarioCompiler:
       dme_df=slice_data.dme_df,
       hospice_df=slice_data.hospice_df,
       mbsf_cc_df=slice_data.mbsf_cc_df,
+      mbsf_cu_df=slice_data.mbsf_cu_df,
     )
 
   @staticmethod
@@ -449,6 +485,7 @@ class ScenarioCompiler:
       dme_df=slice_data.dme_df,
       hospice_df=slice_data.hospice_df,
       mbsf_cc_df=slice_data.mbsf_cc_df,
+      mbsf_cu_df=slice_data.mbsf_cu_df,
     )
 
   @staticmethod
@@ -480,6 +517,7 @@ class ScenarioCompiler:
       dme_df=slice_data.dme_df,
       hospice_df=slice_data.hospice_df,
       mbsf_cc_df=slice_data.mbsf_cc_df,
+      mbsf_cu_df=slice_data.mbsf_cu_df,
     )
 
   @staticmethod
@@ -510,6 +548,7 @@ class ScenarioCompiler:
       dme_df=slice_data.dme_df,
       hospice_df=slice_data.hospice_df,
       mbsf_cc_df=slice_data.mbsf_cc_df,
+      mbsf_cu_df=slice_data.mbsf_cu_df,
     )
 
   @staticmethod
@@ -540,6 +579,7 @@ class ScenarioCompiler:
       dme_df=slice_data.dme_df,
       hospice_df=slice_data.hospice_df,
       mbsf_cc_df=slice_data.mbsf_cc_df,
+      mbsf_cu_df=slice_data.mbsf_cu_df,
     )
 
   @staticmethod
@@ -571,6 +611,7 @@ class ScenarioCompiler:
       dme_df=invalid_dme,
       hospice_df=slice_data.hospice_df,
       mbsf_cc_df=slice_data.mbsf_cc_df,
+      mbsf_cu_df=slice_data.mbsf_cu_df,
     )
 
   @staticmethod
@@ -601,6 +642,7 @@ class ScenarioCompiler:
       dme_df=slice_data.dme_df,
       hospice_df=invalid_hospice,
       mbsf_cc_df=slice_data.mbsf_cc_df,
+      mbsf_cu_df=slice_data.mbsf_cu_df,
     )
 
   @staticmethod
@@ -634,6 +676,37 @@ class ScenarioCompiler:
       dme_df=slice_data.dme_df,
       hospice_df=slice_data.hospice_df,
       mbsf_cc_df=invalid_mbsf,
+      mbsf_cu_df=slice_data.mbsf_cu_df,
+    )
+
+  @staticmethod
+  def invalid_mbsf_cost_use_payment() -> ScenarioSlice:
+    """Creates an anomaly scenario containing an MBSF Cost & Use record with negative Medicare payment amount."""
+    slice_data = ScenarioCompiler.valid_baseline_cohort()
+    invalid_cu = pl.DataFrame(
+      [
+        {
+          "bene_id": "BENE_001",
+          "rfrnc_yr": 2021,
+          "bene_mdcr_pay_amt": -500.0,  # Invalid negative payment amount
+          "bene_tot_pay_amt": 1000.0,
+          "bene_ip_ddctbl_amt": 0.0,
+          "bene_cvrd_dys_cnt": 0,
+        }
+      ]
+    )
+    return ScenarioSlice(
+      bene_df=slice_data.bene_df,
+      carrier_df=slice_data.carrier_df,
+      outpatient_df=slice_data.outpatient_df,
+      inpatient_df=slice_data.inpatient_df,
+      pde_df=slice_data.pde_df,
+      snf_df=slice_data.snf_df,
+      hha_df=slice_data.hha_df,
+      dme_df=slice_data.dme_df,
+      hospice_df=slice_data.hospice_df,
+      mbsf_cc_df=slice_data.mbsf_cc_df,
+      mbsf_cu_df=invalid_cu,
     )
 
   @classmethod
@@ -652,6 +725,7 @@ class ScenarioCompiler:
       "invalid_dme_line_item_count": cls.invalid_dme_line_item_count,
       "invalid_hospice_utilization_days": cls.invalid_hospice_utilization_days,
       "invalid_mbsf_chronic_condition_indicator": cls.invalid_mbsf_chronic_condition_indicator,
+      "invalid_mbsf_cost_use_payment": cls.invalid_mbsf_cost_use_payment,
     }
     if name not in scenarios:
       raise ValueError(f"Unknown scenario name: '{name}'. Available: {list(scenarios.keys())}")

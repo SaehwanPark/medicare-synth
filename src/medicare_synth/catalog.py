@@ -135,6 +135,15 @@ class ScenarioCatalog:
       sample_bene_count=1,
       sample_claim_count=1,
     ),
+    "invalid_mbsf_cost_use_payment": ScenarioEntry(
+      name="invalid_mbsf_cost_use_payment",
+      description="Intentional anomaly fixture containing an MBSF Cost & Use record with negative payment amount.",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "mbsf_cost_and_use"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
 
   @classmethod
@@ -175,6 +184,7 @@ class ScenarioCatalog:
       "invalid_dme_line_item_count": ScenarioCompiler.invalid_dme_line_item_count,
       "invalid_hospice_utilization_days": ScenarioCompiler.invalid_hospice_utilization_days,
       "invalid_mbsf_chronic_condition_indicator": ScenarioCompiler.invalid_mbsf_chronic_condition_indicator,
+      "invalid_mbsf_cost_use_payment": ScenarioCompiler.invalid_mbsf_cost_use_payment,
     }
 
     for name, method in compiler_methods.items():
@@ -193,6 +203,7 @@ class ScenarioCatalog:
         ("dme_claims", slice_data.dme_df),
         ("hospice_claims", slice_data.hospice_df),
         ("mbsf_chronic_conditions", slice_data.mbsf_cc_df),
+        ("mbsf_cost_and_use", slice_data.mbsf_cu_df),
       ]
 
       for table_name, df in tables:
