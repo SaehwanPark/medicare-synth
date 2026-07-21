@@ -26,66 +26,63 @@ class ScenarioEntry(BaseModel):
 class ScenarioCatalog:
   """Catalog providing metadata inspection and CI fixture export capabilities."""
 
-  _CATALOG: Dict[str, Dict[str, str | bool | int | List[str]]] = {
-    "valid_baseline_cohort": {
-      "name": "valid_baseline_cohort",
-      "description": "Valid baseline cohort with matching beneficiary and claim records across carrier and outpatient files.",
-      "is_valid": True,
-      "expected_findings_count": 0,
-      "target_files": ["beneficiary_summary", "carrier_claims", "outpatient_claims"],
-      "sample_bene_count": 3,
-      "sample_claim_count": 3,
-    },
-    "valid_chronic_subgroup": {
-      "name": "valid_chronic_subgroup",
-      "description": "Valid subgroup focusing on chronic condition tracking and outpatient encounters.",
-      "is_valid": True,
-      "expected_findings_count": 0,
-      "target_files": ["beneficiary_summary", "outpatient_claims"],
-      "sample_bene_count": 2,
-      "sample_claim_count": 2,
-    },
-    "valid_carrier_line_item": {
-      "name": "valid_carrier_line_item",
-      "description": "Valid detailed carrier line-item claim records with valid NPI providers.",
-      "is_valid": True,
-      "expected_findings_count": 0,
-      "target_files": ["beneficiary_summary", "carrier_claims"],
-      "sample_bene_count": 2,
-      "sample_claim_count": 2,
-    },
-    "invalid_orphaned_claim": {
-      "name": "invalid_orphaned_claim",
-      "description": "Intentional anomaly fixture containing a claim referencing a non-existent beneficiary ID.",
-      "is_valid": False,
-      "expected_findings_count": 1,
-      "target_files": ["beneficiary_summary", "carrier_claims"],
-      "sample_bene_count": 1,
-      "sample_claim_count": 2,
-    },
-    "invalid_temporal_inversion": {
-      "name": "invalid_temporal_inversion",
-      "description": "Intentional anomaly fixture with claim end date preceding claim start date.",
-      "is_valid": False,
-      "expected_findings_count": 1,
-      "target_files": ["beneficiary_summary", "outpatient_claims"],
-      "sample_bene_count": 1,
-      "sample_claim_count": 1,
-    },
+  _CATALOG: Dict[str, ScenarioEntry] = {
+    "valid_baseline_cohort": ScenarioEntry(
+      name="valid_baseline_cohort",
+      description="Valid baseline cohort with matching beneficiary and claim records across carrier and outpatient files.",
+      is_valid=True,
+      expected_findings_count=0,
+      target_files=["beneficiary_summary", "carrier_claims", "outpatient_claims"],
+      sample_bene_count=3,
+      sample_claim_count=3,
+    ),
+    "valid_chronic_subgroup": ScenarioEntry(
+      name="valid_chronic_subgroup",
+      description="Valid subgroup focusing on chronic condition tracking and outpatient encounters.",
+      is_valid=True,
+      expected_findings_count=0,
+      target_files=["beneficiary_summary", "outpatient_claims"],
+      sample_bene_count=2,
+      sample_claim_count=2,
+    ),
+    "valid_carrier_line_item": ScenarioEntry(
+      name="valid_carrier_line_item",
+      description="Valid detailed carrier line-item claim records with valid NPI providers.",
+      is_valid=True,
+      expected_findings_count=0,
+      target_files=["beneficiary_summary", "carrier_claims"],
+      sample_bene_count=2,
+      sample_claim_count=2,
+    ),
+    "invalid_orphaned_claim": ScenarioEntry(
+      name="invalid_orphaned_claim",
+      description="Intentional anomaly fixture containing a claim referencing a non-existent beneficiary ID.",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "carrier_claims"],
+      sample_bene_count=1,
+      sample_claim_count=2,
+    ),
+    "invalid_temporal_inversion": ScenarioEntry(
+      name="invalid_temporal_inversion",
+      description="Intentional anomaly fixture with claim end date preceding claim start date.",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "outpatient_claims"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
 
   @classmethod
   def get_catalog(cls) -> List[ScenarioEntry]:
     """Returns all entries in the scenario catalog."""
-    return [ScenarioEntry(**data) for data in cls._CATALOG.values()]
+    return list(cls._CATALOG.values())
 
   @classmethod
   def get_scenario_info(cls, name: str) -> Optional[ScenarioEntry]:
     """Retrieves metadata for a specific scenario by name."""
-    data = cls._CATALOG.get(name)
-    if not data:
-      return None
-    return ScenarioEntry(**data)
+    return cls._CATALOG.get(name)
 
   @classmethod
   def export_ci_fixtures(cls, output_dir: str | Path, file_format: str = "parquet") -> List[Path]:

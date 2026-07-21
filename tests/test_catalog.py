@@ -2,7 +2,7 @@
 
 from pathlib import Path
 import tempfile
-from medicare_synth.catalog import ScenarioCatalog, ScenarioEntry
+from medicare_synth.catalog import ScenarioCatalog
 
 
 def test_scenario_catalog_entries():
