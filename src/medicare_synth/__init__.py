@@ -36,6 +36,7 @@ from medicare_synth.profile import LimitationsProfile, LimitationsProfiler
 from medicare_synth.release import FidelityProfile, ReleaseExporter, ReleaseManifest
 from medicare_synth.scenarios import ScenarioCompiler
 from medicare_synth.validation import Finding, FindingCategory, RelationalValidator, Severity, ValidationReport
+from medicare_synth.workflow import run_autonomous_workflow
 
 __all__ = [
   "AuditEngine",
@@ -72,6 +73,7 @@ __all__ = [
   "RelationalValidator",
   "ReleaseExporter",
   "ReleaseManifest",
+  "run_autonomous_workflow",
   "ScenarioCatalog",
   "ScenarioCompiler",
   "ScenarioEntry",

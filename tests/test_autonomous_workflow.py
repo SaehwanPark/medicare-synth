@@ -22,8 +22,10 @@ def test_autonomous_workflow_dry_run(mock_run):
     mock_res.stderr = ""
     mock_run.return_value = mock_res
 
-    # Should run successfully and not raise SystemExit
-    main()
+    # Should exit with code 0
+    with pytest.raises(SystemExit) as exc_info:
+        main()
+    assert exc_info.value.code == 0
 
     # Verify that it ran the validation commands first
     assert mock_run.call_count >= 4
