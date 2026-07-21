@@ -133,3 +133,17 @@ class DurableMedicalEquipmentClaimRecord(BaseModel):
   clm_pmt_amt: float = Field(default=0.0, ge=0.0, description="Claim Payment Amount")
   dme_line_item_count: int = Field(default=1, ge=1, description="DME Line Item Count")
   line_cms_type_srvc_cd: Optional[str] = Field(default="P", max_length=1, description="CMS Type of Service Code")
+
+
+class HospiceClaimHeaderRecord(BaseModel):
+  """Domain record representation for a Hospice Claim header."""
+
+  model_config = ConfigDict(frozen=True)
+
+  clm_id: str = Field(..., max_length=15, description="Claim Control Number")
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  clm_admsn_dt: date = Field(..., description="Hospice Care Admission Date")
+  nch_bene_dschrg_dt: date = Field(..., description="Beneficiary Discharge Date")
+  clm_pmt_amt: float = Field(default=0.0, ge=0.0, description="Claim Payment Amount")
+  clm_utlztn_day_cnt: int = Field(default=1, ge=0, description="Hospice Care Days Count")
+  hospice_terminal_diag_cd: Optional[str] = Field(default=None, max_length=7, description="Terminal Diagnosis ICD-10 Code")

@@ -20,6 +20,7 @@ class ScenarioSlice(NamedTuple):
   snf_df: pl.DataFrame
   hha_df: pl.DataFrame
   dme_df: pl.DataFrame
+  hospice_df: pl.DataFrame
 
 
 class ScenarioCompiler:
@@ -217,6 +218,29 @@ class ScenarioCompiler:
       ]
     )
 
+    hospice_df = pl.DataFrame(
+      [
+        {
+          "clm_id": "CLM_HS001",
+          "bene_id": "BENE_001",
+          "clm_admsn_dt": date(2021, 10, 1),
+          "nch_bene_dschrg_dt": date(2021, 10, 14),
+          "clm_pmt_amt": 3100.00,
+          "clm_utlztn_day_cnt": 13,
+          "hospice_terminal_diag_cd": "C3490",
+        },
+        {
+          "clm_id": "CLM_HS002",
+          "bene_id": "BENE_002",
+          "clm_admsn_dt": date(2021, 11, 5),
+          "nch_bene_dschrg_dt": date(2021, 11, 25),
+          "clm_pmt_amt": 4800.00,
+          "clm_utlztn_day_cnt": 20,
+          "hospice_terminal_diag_cd": "I509",
+        },
+      ]
+    )
+
     return ScenarioSlice(
       bene_df=bene_df,
       carrier_df=carrier_df,
@@ -226,6 +250,7 @@ class ScenarioCompiler:
       snf_df=snf_df,
       hha_df=hha_df,
       dme_df=dme_df,
+      hospice_df=hospice_df,
     )
 
   @staticmethod
@@ -240,6 +265,7 @@ class ScenarioCompiler:
     snf_sub = slice_data.snf_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     hha_sub = slice_data.hha_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     dme_sub = slice_data.dme_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
+    hospice_sub = slice_data.hospice_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     return ScenarioSlice(
       bene_df=bene_sub,
       carrier_df=carrier_sub,
@@ -249,6 +275,7 @@ class ScenarioCompiler:
       snf_df=snf_sub,
       hha_df=hha_sub,
       dme_df=dme_sub,
+      hospice_df=hospice_sub,
     )
 
   @staticmethod
@@ -286,6 +313,7 @@ class ScenarioCompiler:
       snf_df=slice_data.snf_df,
       hha_df=slice_data.hha_df,
       dme_df=slice_data.dme_df,
+      hospice_df=slice_data.hospice_df,
     )
 
   @staticmethod
@@ -314,6 +342,7 @@ class ScenarioCompiler:
       snf_df=slice_data.snf_df,
       hha_df=slice_data.hha_df,
       dme_df=slice_data.dme_df,
+      hospice_df=slice_data.hospice_df,
     )
 
   @staticmethod
@@ -341,6 +370,7 @@ class ScenarioCompiler:
       snf_df=slice_data.snf_df,
       hha_df=slice_data.hha_df,
       dme_df=slice_data.dme_df,
+      hospice_df=slice_data.hospice_df,
     )
 
   @staticmethod
@@ -369,6 +399,7 @@ class ScenarioCompiler:
       snf_df=slice_data.snf_df,
       hha_df=slice_data.hha_df,
       dme_df=slice_data.dme_df,
+      hospice_df=slice_data.hospice_df,
     )
 
   @staticmethod
@@ -398,6 +429,7 @@ class ScenarioCompiler:
       snf_df=slice_data.snf_df,
       hha_df=slice_data.hha_df,
       dme_df=slice_data.dme_df,
+      hospice_df=slice_data.hospice_df,
     )
 
   @staticmethod
@@ -426,6 +458,7 @@ class ScenarioCompiler:
       snf_df=invalid_snf,
       hha_df=slice_data.hha_df,
       dme_df=slice_data.dme_df,
+      hospice_df=slice_data.hospice_df,
     )
 
   @staticmethod
@@ -454,6 +487,7 @@ class ScenarioCompiler:
       snf_df=slice_data.snf_df,
       hha_df=invalid_hha,
       dme_df=slice_data.dme_df,
+      hospice_df=slice_data.hospice_df,
     )
 
   @staticmethod
@@ -483,6 +517,36 @@ class ScenarioCompiler:
       snf_df=slice_data.snf_df,
       hha_df=slice_data.hha_df,
       dme_df=invalid_dme,
+      hospice_df=slice_data.hospice_df,
+    )
+
+  @staticmethod
+  def invalid_hospice_utilization_days() -> ScenarioSlice:
+    """Creates an anomaly scenario containing a Hospice claim with invalid negative utilization days."""
+    slice_data = ScenarioCompiler.valid_baseline_cohort()
+    invalid_hospice = pl.DataFrame(
+      [
+        {
+          "clm_id": "CLM_HOSPICE_ERR_001",
+          "bene_id": "BENE_001",
+          "clm_admsn_dt": date(2021, 10, 1),
+          "nch_bene_dschrg_dt": date(2021, 10, 14),
+          "clm_pmt_amt": 3100.00,
+          "clm_utlztn_day_cnt": -4,  # Negative utilization days
+          "hospice_terminal_diag_cd": "C3490",
+        }
+      ]
+    )
+    return ScenarioSlice(
+      bene_df=slice_data.bene_df,
+      carrier_df=slice_data.carrier_df,
+      outpatient_df=slice_data.outpatient_df,
+      inpatient_df=slice_data.inpatient_df,
+      pde_df=slice_data.pde_df,
+      snf_df=slice_data.snf_df,
+      hha_df=slice_data.hha_df,
+      dme_df=slice_data.dme_df,
+      hospice_df=invalid_hospice,
     )
 
   @classmethod
@@ -499,6 +563,7 @@ class ScenarioCompiler:
       "invalid_snf_utilization_days": cls.invalid_snf_utilization_days,
       "invalid_hha_utilization_days": cls.invalid_hha_utilization_days,
       "invalid_dme_line_item_count": cls.invalid_dme_line_item_count,
+      "invalid_hospice_utilization_days": cls.invalid_hospice_utilization_days,
     }
     if name not in scenarios:
       raise ValueError(f"Unknown scenario name: '{name}'. Available: {list(scenarios.keys())}")
