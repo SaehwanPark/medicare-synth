@@ -3,15 +3,15 @@
 
 from datetime import datetime, timezone
 import hashlib
-import json
 from pathlib import Path
 from typing import Dict, Literal, Union
 
-polars_installed = True
 import polars as pl
 from pydantic import BaseModel, Field
 
 from medicare_synth.validation import FindingCategory, RelationalValidator, ValidationReport
+
+polars_installed = True
 
 
 class FidelityProfile(BaseModel):
@@ -39,8 +39,8 @@ class ReleaseManifest(BaseModel):
   """Versioned release manifest summarizing exported files and validation status."""
 
   release_id: str = Field(..., description="Unique release identifier")
-  schema_year: int = Field(2021, description="Target schema year")
-  collection_id: str = Field("CMS-2021-SYN-CLAIMS", description="Baseline CMS synthetic collection ID")
+  schema_year: int = Field(default=2021, description="Target schema year")
+  collection_id: str = Field(default="CMS-2021-SYN-CLAIMS", description="Baseline CMS synthetic collection ID")
   created_at: str = Field(..., description="ISO 8601 creation timestamp")
   validation_passed: bool = Field(..., description="Whether dataset passed relational validation")
   files: Dict[str, FileReleaseEntry] = Field(default_factory=dict, description="Exported data files metadata")

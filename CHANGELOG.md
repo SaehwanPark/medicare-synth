@@ -41,6 +41,12 @@
 - Added package top-level exports in `src/medicare_synth/__init__.py`.
 - Added unit test suite in `tests/test_release.py` (29 total passing unit tests).
 - Completed Milestone 4 (Validation-First Release) across all deliverables.
+- Implemented `TabDatSynthAdapter` and `VerticalExpander` in `src/medicare_synth/expansion.py` providing evidence-graded vertical feature synthesis.
+- Implemented `HorizontalExpander` in `src/medicare_synth/expansion.py` providing connected-subgraph scaling with deterministic re-keying.
+- Exposed `expand` subcommand in `medicare-synth` CLI (`src/medicare_synth/cli.py`).
+- Added unit test suite in `tests/test_expansion.py` (33 total passing unit tests).
+- Resolved linter warnings (`ruff`) and static type-checking issues (`pyright`).
+- Completed Milestone 5 (Expansion and Scenarios) across all deliverables.
 
 
 

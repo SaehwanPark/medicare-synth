@@ -24,11 +24,9 @@ The component model below records the implemented and planned boundaries.
 - **Validation** evaluates field (Pydantic), record, relational (Polars lazy frames), administrative, scenario,
   and distributional properties and reports findings without silently repairing
   baseline anomalies.
-- **Generation** applies deterministic rules and transparent conditional models
-  only after applicable validation gates pass.
+- **Generation and Expansion** applies deterministic rules, `TabDatSynthAdapter` vertical feature synthesis, and `HorizontalExpander` connected-subgraph scaling with deterministic re-keying after validation gates pass.
 - **Scenario compiler** creates small named valid (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`) and intentionally invalid (`invalid_orphaned_claim`, `invalid_temporal_inversion`) fixtures with stable expected analytic outputs.
-- **Interfaces and exporters** will expose a focused Python API and CLI and emit
-  versioned CSV, Parquet, SQL fixtures, manifests, and fidelity reports.
+- **Interfaces and exporters** expose a focused Python API and `medicare-synth` CLI (`validate`, `scenario`, `manifest`, `export`, `expand`) emitting versioned CSV, Parquet, SQL fixtures, manifests, and fidelity reports.
 
 These are responsibility boundaries, not an approved Python package layout.
 

@@ -69,6 +69,17 @@ Completed Validation-First Release Deliverables:
 - **Package API Integration**: Exposed `ReleaseExporter`, `ReleaseManifest`, and `FidelityProfile` at package top level in `src/medicare_synth/__init__.py`.
 - **Release Test Suite**: Added 3 unit tests in `tests/test_release.py` covering multi-format exports, fidelity metrics, and CLI export command (29 passing unit tests total).
 
+### Expansion and Scenarios
+
+Status: Complete
+
+Completed Expansion and Scenarios Deliverables:
+
+- **TabDat-Synth Adapter & Vertical Expansion**: Implemented `TabDatSynthAdapter` and `VerticalExpander` in `src/medicare_synth/expansion.py` providing evidence-graded feature synthesis for within-table attributes with `SYNTHESIZED` provenance status while preserving relational keys and temporal invariants.
+- **Connected-Subgraph Horizontal Expansion**: Implemented `HorizontalExpander` in `src/medicare_synth/expansion.py` performing deterministic connected-subgraph scaling and re-keying across beneficiary, carrier, and outpatient tables with `REKEYED` provenance status.
+- **CLI Expansion Subcommand**: Added `expand` subcommand to `medicare-synth` CLI (`medicare-synth expand --mode <vertical|horizontal> --scenario <name> --scale <factor>`).
+- **Expansion Unit Test Suite**: Added 4 unit tests in `tests/test_expansion.py` covering feature synthesis, horizontal scaling, relational validator compatibility, and CLI commands (33 total passing unit tests).
+
 
 Verification requires each decision to cite evidence, state assumptions, and be
 

@@ -7,6 +7,7 @@ import sys
 from typing import Optional
 
 from medicare_synth.evidence import RKBEvidenceSnapshot
+from medicare_synth.expansion import HorizontalExpander, VerticalExpander
 from medicare_synth.manifest import SourceManifest
 from medicare_synth.release import ReleaseExporter
 from medicare_synth.scenarios import ScenarioCompiler
@@ -73,6 +74,27 @@ def main(argv: Optional[list[str]] = None) -> int:
     type=str,
     default="v1.0.0-2021",
     help="Release version identifier (default: v1.0.0-2021)",
+  )
+
+  # Subcommand: expand
+  expand_parser = subparsers.add_parser("expand", help="Perform vertical feature expansion or horizontal subgraph scaling")
+  expand_parser.add_argument(
+    "--mode",
+    choices=["vertical", "horizontal"],
+    default="horizontal",
+    help="Expansion mode (vertical or horizontal)",
+  )
+  expand_parser.add_argument(
+    "--scenario",
+    type=str,
+    default="valid_baseline_cohort",
+    help="Scenario fixture to use as base cohort (default: valid_baseline_cohort)",
+  )
+  expand_parser.add_argument(
+    "--scale",
+    type=int,
+    default=2,
+    help="Scale factor for horizontal expansion (default: 2)",
   )
 
   args = parser.parse_args(argv)
@@ -142,6 +164,33 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"Target Directory: {args.output_dir}")
     print(f"Validation Passed: {manifest.validation_passed}")
     print(f"Files Exported: {len(manifest.files)}")
+    return 0
+
+  elif args.command == "expand":
+    try:
+      scenario_slice = ScenarioCompiler.get_scenario(args.scenario)
+    except ValueError as e:
+      print(f"Error: {e}", file=sys.stderr)
+      return 1
+
+    tables = {
+      "beneficiary_summary": scenario_slice.bene_df,
+      "carrier_claims": scenario_slice.carrier_df,
+      "outpatient_claims": scenario_slice.outpatient_df,
+    }
+
+    if args.mode == "vertical":
+      expander = VerticalExpander()
+      expanded = expander.expand_slice(tables)
+      print(f"Vertical Expansion ({args.scenario}):")
+      print(f"  Beneficiary summary columns: {expanded['beneficiary_summary'].columns}")
+    else:
+      expander = HorizontalExpander()
+      expanded = expander.expand_subgraph(tables, scale_factor=args.scale)
+      print(f"Horizontal Subgraph Expansion ({args.scenario}, scale={args.scale}):")
+      print(f"  Beneficiaries: {expanded['beneficiary_summary'].height} rows")
+      print(f"  Carrier Claims: {expanded['carrier_claims'].height} rows")
+      print(f"  Outpatient Claims: {expanded['outpatient_claims'].height} rows")
     return 0
 
   else:
