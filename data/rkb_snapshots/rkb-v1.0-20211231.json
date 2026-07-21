@@ -195,6 +195,23 @@
       "nullable": true,
       "provenance_status": "preserved",
       "description": "Indicator for Low Utilization Payment Adjustment on HHA claims."
+    },
+    "DME_LINE_ITEM_COUNT": {
+      "name": "DME_LINE_ITEM_COUNT",
+      "label": "DME Line Item Count",
+      "data_type": "integer",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Number of line items on Durable Medical Equipment claim."
+    },
+    "LINE_CMS_TYPE_SRVC_CD": {
+      "name": "LINE_CMS_TYPE_SRVC_CD",
+      "label": "CMS Type of Service Code",
+      "data_type": "string",
+      "max_length": 1,
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "Type of service code for DME claim line."
     }
   },
   "constraints": [
@@ -213,7 +230,7 @@
     {
       "constraint_id": "VAL_REL_01",
       "category": "relational",
-      "description": "BENE_ID on Carrier, Outpatient, Inpatient, PDE, SNF, or HHA claim must exist in Beneficiary Summary file.",
+      "description": "BENE_ID on Carrier, Outpatient, Inpatient, PDE, SNF, HHA, or DME claim must exist in Beneficiary Summary file.",
       "rule": "CLM.BENE_ID IN BENE_SUMMARY.BENE_ID"
     },
     {
@@ -233,6 +250,12 @@
       "category": "field",
       "description": "CLM_UTLZTN_DAY_CNT on HHA claims must be non-negative.",
       "rule": "CLM_UTLZTN_DAY_CNT >= 0"
+    },
+    {
+      "constraint_id": "VAL_DME_01",
+      "category": "field",
+      "description": "DME_LINE_ITEM_COUNT on DME claims must be greater than or equal to 1.",
+      "rule": "DME_LINE_ITEM_COUNT >= 1"
     }
   ]
 }

@@ -226,6 +226,29 @@ class RelationalValidator:
       ]
     return []
 
+  @staticmethod
+  def check_dme_field_constraints(dme_df: pl.DataFrame) -> list[Finding]:
+    """Identifies DME claims with invalid line item count less than 1."""
+    if dme_df.is_empty() or "dme_line_item_count" not in dme_df.columns:
+      return []
+
+    invalid = dme_df.filter(pl.col("dme_line_item_count") < 1)
+    invalid_count = invalid.height
+
+    if invalid_count > 0:
+      sample_ids = invalid.select("clm_id").slice(0, 5).to_series().to_list() if "clm_id" in invalid.columns else []
+      return [
+        Finding(
+          rule_id="FLD-004",
+          category=FindingCategory.FIELD,
+          severity=Severity.HIGH,
+          message=f"Found {invalid_count} DME claims with invalid line item count less than 1.",
+          count=invalid_count,
+          details={"table_name": "DME Claims", "sample_clm_ids": sample_ids},
+        )
+      ]
+    return []
+
   def validate_slice(
     self,
     bene_df: pl.DataFrame,
@@ -235,6 +258,7 @@ class RelationalValidator:
     pde_df: Optional[pl.DataFrame] = None,
     snf_df: Optional[pl.DataFrame] = None,
     hha_df: Optional[pl.DataFrame] = None,
+    dme_df: Optional[pl.DataFrame] = None,
   ) -> ValidationReport:
     """Executes full suite of relational, temporal, field, and record-level checks over a dataset slice."""
     findings: list[Finding] = []
@@ -274,5 +298,12 @@ class RelationalValidator:
       findings.extend(self.check_admission_temporal_inversions(hha_df, "HHA Claims"))
       findings.extend(self.check_hha_field_constraints(hha_df))
       findings.extend(self.check_record_uniqueness(hha_df, ["clm_id"], "HHA Claims"))
+
+    if dme_df is not None and not dme_df.is_empty():
+      findings.extend(self.check_orphaned_claims(bene_df, dme_df, "DME Claims"))
+      findings.extend(self.check_temporal_inversions(dme_df, "DME Claims"))
+      findings.extend(self.check_dme_field_constraints(dme_df))
+      if "line_num" in dme_df.columns:
+        findings.extend(self.check_record_uniqueness(dme_df, ["clm_id", "line_num"], "DME Claims"))
 
     return ValidationReport(findings=findings)

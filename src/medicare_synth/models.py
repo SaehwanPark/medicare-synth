@@ -118,3 +118,18 @@ class HomeHealthAgencyClaimRecord(BaseModel):
   clm_pmt_amt: float = Field(default=0.0, ge=0.0, description="Claim Payment Amount")
   clm_utlztn_day_cnt: int = Field(default=1, ge=0, description="Utilization Day Count")
   clm_hha_lupa_ind: Optional[str] = Field(default="0", max_length=1, description="HHA Low Utilization Payment Adjustment Indicator")
+
+
+class DurableMedicalEquipmentClaimRecord(BaseModel):
+  """Domain record representation for a Durable Medical Equipment (DME) Claim line."""
+
+  model_config = ConfigDict(frozen=True)
+
+  clm_id: str = Field(..., max_length=15, description="Claim Control Number")
+  line_num: int = Field(..., ge=1, description="Claim Line Number")
+  bene_id: str = Field(..., max_length=15, description="Encrypted CCW Beneficiary ID")
+  clm_from_dt: date = Field(..., description="Claim From Date")
+  clm_thru_dt: date = Field(..., description="Claim Through Date")
+  clm_pmt_amt: float = Field(default=0.0, ge=0.0, description="Claim Payment Amount")
+  dme_line_item_count: int = Field(default=1, ge=1, description="DME Line Item Count")
+  line_cms_type_srvc_cd: Optional[str] = Field(default="P", max_length=1, description="CMS Type of Service Code")

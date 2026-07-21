@@ -19,6 +19,7 @@ class ScenarioSlice(NamedTuple):
   pde_df: pl.DataFrame
   snf_df: pl.DataFrame
   hha_df: pl.DataFrame
+  dme_df: pl.DataFrame
 
 
 class ScenarioCompiler:
@@ -191,6 +192,31 @@ class ScenarioCompiler:
       ]
     )
 
+    dme_df = pl.DataFrame(
+      [
+        {
+          "clm_id": "CLM_D001",
+          "line_num": 1,
+          "bene_id": "BENE_001",
+          "clm_from_dt": date(2021, 2, 10),
+          "clm_thru_dt": date(2021, 2, 15),
+          "clm_pmt_amt": 350.00,
+          "dme_line_item_count": 2,
+          "line_cms_type_srvc_cd": "P",
+        },
+        {
+          "clm_id": "CLM_D002",
+          "line_num": 1,
+          "bene_id": "BENE_002",
+          "clm_from_dt": date(2021, 6, 1),
+          "clm_thru_dt": date(2021, 6, 5),
+          "clm_pmt_amt": 620.00,
+          "dme_line_item_count": 1,
+          "line_cms_type_srvc_cd": "P",
+        },
+      ]
+    )
+
     return ScenarioSlice(
       bene_df=bene_df,
       carrier_df=carrier_df,
@@ -199,6 +225,7 @@ class ScenarioCompiler:
       pde_df=pde_df,
       snf_df=snf_df,
       hha_df=hha_df,
+      dme_df=dme_df,
     )
 
   @staticmethod
@@ -212,6 +239,7 @@ class ScenarioCompiler:
     pde_sub = slice_data.pde_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     snf_sub = slice_data.snf_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     hha_sub = slice_data.hha_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
+    dme_sub = slice_data.dme_df.filter(pl.col("bene_id").is_in(["BENE_001", "BENE_002"]))
     return ScenarioSlice(
       bene_df=bene_sub,
       carrier_df=carrier_sub,
@@ -220,6 +248,7 @@ class ScenarioCompiler:
       pde_df=pde_sub,
       snf_df=snf_sub,
       hha_df=hha_sub,
+      dme_df=dme_sub,
     )
 
   @staticmethod
@@ -256,6 +285,7 @@ class ScenarioCompiler:
       pde_df=slice_data.pde_df,
       snf_df=slice_data.snf_df,
       hha_df=slice_data.hha_df,
+      dme_df=slice_data.dme_df,
     )
 
   @staticmethod
@@ -283,6 +313,7 @@ class ScenarioCompiler:
       pde_df=slice_data.pde_df,
       snf_df=slice_data.snf_df,
       hha_df=slice_data.hha_df,
+      dme_df=slice_data.dme_df,
     )
 
   @staticmethod
@@ -309,6 +340,7 @@ class ScenarioCompiler:
       pde_df=slice_data.pde_df,
       snf_df=slice_data.snf_df,
       hha_df=slice_data.hha_df,
+      dme_df=slice_data.dme_df,
     )
 
   @staticmethod
@@ -336,6 +368,7 @@ class ScenarioCompiler:
       pde_df=slice_data.pde_df,
       snf_df=slice_data.snf_df,
       hha_df=slice_data.hha_df,
+      dme_df=slice_data.dme_df,
     )
 
   @staticmethod
@@ -364,6 +397,7 @@ class ScenarioCompiler:
       pde_df=invalid_pde,
       snf_df=slice_data.snf_df,
       hha_df=slice_data.hha_df,
+      dme_df=slice_data.dme_df,
     )
 
   @staticmethod
@@ -391,6 +425,7 @@ class ScenarioCompiler:
       pde_df=slice_data.pde_df,
       snf_df=invalid_snf,
       hha_df=slice_data.hha_df,
+      dme_df=slice_data.dme_df,
     )
 
   @staticmethod
@@ -418,6 +453,36 @@ class ScenarioCompiler:
       pde_df=slice_data.pde_df,
       snf_df=slice_data.snf_df,
       hha_df=invalid_hha,
+      dme_df=slice_data.dme_df,
+    )
+
+  @staticmethod
+  def invalid_dme_line_item_count() -> ScenarioSlice:
+    """Creates an anomaly scenario containing a DME claim with invalid zero line item count."""
+    slice_data = ScenarioCompiler.valid_baseline_cohort()
+    invalid_dme = pl.DataFrame(
+      [
+        {
+          "clm_id": "CLM_DME_ERR_001",
+          "line_num": 1,
+          "bene_id": "BENE_001",
+          "clm_from_dt": date(2021, 2, 10),
+          "clm_thru_dt": date(2021, 2, 15),
+          "clm_pmt_amt": 350.00,
+          "dme_line_item_count": 0,  # Invalid zero line item count
+          "line_cms_type_srvc_cd": "P",
+        }
+      ]
+    )
+    return ScenarioSlice(
+      bene_df=slice_data.bene_df,
+      carrier_df=slice_data.carrier_df,
+      outpatient_df=slice_data.outpatient_df,
+      inpatient_df=slice_data.inpatient_df,
+      pde_df=slice_data.pde_df,
+      snf_df=slice_data.snf_df,
+      hha_df=slice_data.hha_df,
+      dme_df=invalid_dme,
     )
 
   @classmethod
@@ -433,6 +498,7 @@ class ScenarioCompiler:
       "invalid_pde_days_supply": cls.invalid_pde_days_supply,
       "invalid_snf_utilization_days": cls.invalid_snf_utilization_days,
       "invalid_hha_utilization_days": cls.invalid_hha_utilization_days,
+      "invalid_dme_line_item_count": cls.invalid_dme_line_item_count,
     }
     if name not in scenarios:
       raise ValueError(f"Unknown scenario name: '{name}'. Available: {list(scenarios.keys())}")
