@@ -4,6 +4,13 @@
 
 ### Added
 
+- Implemented `MBSFRiskAdjustmentRecord` domain model in `src/medicare_synth/models.py`.
+- Added Master Beneficiary Summary File (MBSF) Risk Adjustment Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`CMS_HCC_RISK_SCORE`, `RXHCC_RISK_SCORE`, `PAYMENT_COUNT`, `VAL_MBSF_RA_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
+- Extended `RelationalValidator` with `check_mbsf_ra_field_constraints` and updated `validate_slice` to validate MBSF Risk Adjustment foreign key integrity and risk score field constraints (`FLD-012`).
+- Updated `ScenarioCompiler` to compile MBSF Risk Adjustment data frames across all scenarios and added `invalid_mbsf_risk_adjustment_score` anomaly scenario fixture.
+- Updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and `CLI` subcommands (`validate`, `scenario`, `export`, `expand`, `audit`, `catalog`, `export-ci`) to handle MBSF Risk Adjustment Segment.
+- Added comprehensive unit test suite in `tests/test_mbsf_ra.py` (129 total passing unit tests).
+
 - Implemented `MBSFNDIRecord` domain model in `src/medicare_synth/models.py`.
 - Added Master Beneficiary Summary File (MBSF) National Death Index (NDI) Segment file entry to `data/manifests/cms_2021_syn_claims_manifest.json` and variable/constraint contracts (`NDI_MATCH_IND`, `NDI_DIUSE_CD`, `VAL_MBSF_NDI_01`) to `data/rkb_snapshots/rkb-v1.0-20211231.json`.
 - Extended `RelationalValidator` with `check_mbsf_ndi_field_constraints` and updated `validate_slice` to validate MBSF NDI foreign key integrity and match indicator constraints (`FLD-011`).

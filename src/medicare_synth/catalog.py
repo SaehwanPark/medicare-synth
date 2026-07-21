@@ -180,6 +180,15 @@ class ScenarioCatalog:
       sample_bene_count=1,
       sample_claim_count=1,
     ),
+    "invalid_mbsf_risk_adjustment_score": ScenarioEntry(
+      name="invalid_mbsf_risk_adjustment_score",
+      description="Intentional anomaly fixture containing an MBSF Risk Adjustment record with negative risk score (-0.5).",
+      is_valid=False,
+      expected_findings_count=1,
+      target_files=["beneficiary_summary", "mbsf_risk_adjustment"],
+      sample_bene_count=1,
+      sample_claim_count=1,
+    ),
   }
 
 
@@ -226,6 +235,7 @@ class ScenarioCatalog:
       "invalid_mbsf_base_coverage_months": ScenarioCompiler.invalid_mbsf_base_coverage_months,
       "invalid_mbsf_other_chronic_condition_indicator": ScenarioCompiler.invalid_mbsf_other_chronic_condition_indicator,
       "invalid_mbsf_ndi_match_indicator": ScenarioCompiler.invalid_mbsf_ndi_match_indicator,
+      "invalid_mbsf_risk_adjustment_score": ScenarioCompiler.invalid_mbsf_risk_adjustment_score,
     }
 
     for name, method in compiler_methods.items():
@@ -249,6 +259,7 @@ class ScenarioCatalog:
         ("mbsf_base_enrollment", slice_data.mbsf_base_df),
         ("mbsf_other_chronic_conditions", slice_data.mbsf_oc_df),
         ("mbsf_ndi", slice_data.mbsf_ndi_df),
+        ("mbsf_risk_adjustment", slice_data.mbsf_ra_df),
       ]
 
 

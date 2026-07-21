@@ -31,6 +31,7 @@ class FidelityProfile(BaseModel):
   mbsf_base_count: int = Field(default=0, description="Number of MBSF Base Enrollment records")
   mbsf_oc_count: int = Field(default=0, description="Number of MBSF Other Chronic Condition records")
   mbsf_ndi_count: int = Field(default=0, description="Number of MBSF NDI records")
+  mbsf_ra_count: int = Field(default=0, description="Number of MBSF Risk Adjustment records")
   key_uniqueness_rate: float = Field(..., description="Proportion of records satisfying primary key uniqueness")
 
 
@@ -107,6 +108,7 @@ class ReleaseExporter:
     mbsf_base_df: pl.DataFrame | None = None,
     mbsf_oc_df: pl.DataFrame | None = None,
     mbsf_ndi_df: pl.DataFrame | None = None,
+    mbsf_ra_df: pl.DataFrame | None = None,
   ) -> FidelityProfile:
     """Compute summary metrics and integrity rates for a dataset slice."""
     inp_count = inpatient_df.height if inpatient_df is not None else 0
@@ -121,7 +123,8 @@ class ReleaseExporter:
     mbsf_base_cnt = mbsf_base_df.height if mbsf_base_df is not None else 0
     mbsf_oc_cnt = mbsf_oc_df.height if mbsf_oc_df is not None else 0
     mbsf_ndi_cnt = mbsf_ndi_df.height if mbsf_ndi_df is not None else 0
-    total_claims = carrier_df.height + outpatient_df.height + inp_count + pde_cnt + snf_cnt + hha_cnt + dme_cnt + hospice_cnt + mbsf_cc_cnt + mbsf_cu_cnt + mbsf_d_cnt + mbsf_base_cnt + mbsf_oc_cnt + mbsf_ndi_cnt
+    mbsf_ra_cnt = mbsf_ra_df.height if mbsf_ra_df is not None else 0
+    total_claims = carrier_df.height + outpatient_df.height + inp_count + pde_cnt + snf_cnt + hha_cnt + dme_cnt + hospice_cnt + mbsf_cc_cnt + mbsf_cu_cnt + mbsf_d_cnt + mbsf_base_cnt + mbsf_oc_cnt + mbsf_ndi_cnt + mbsf_ra_cnt
     fk_findings = [f for f in validation_report.findings if f.category == FindingCategory.RELATIONAL]
     temp_findings = [f for f in validation_report.findings if f.category == FindingCategory.TEMPORAL]
 
@@ -143,6 +146,7 @@ class ReleaseExporter:
       mbsf_base_count=mbsf_base_cnt,
       mbsf_oc_count=mbsf_oc_cnt,
       mbsf_ndi_count=mbsf_ndi_cnt,
+      mbsf_ra_count=mbsf_ra_cnt,
       key_uniqueness_rate=1.0,
       foreign_key_validity_rate=max(0.0, min(1.0, fk_validity_rate)),
       temporal_integrity_rate=max(0.0, min(1.0, temp_integrity_rate)),
@@ -294,6 +298,14 @@ class ReleaseExporter:
       "    NDI_MATCH_IND VARCHAR,\n"
       "    NDI_DIUSE_CD VARCHAR,\n"
       "    VAL_MBSF_NDI_01 NUMERIC\n"
+      ");\n\n"
+      "CREATE TABLE IF NOT EXISTS mbsf_risk_adjustment (\n"
+      "    BENE_ID VARCHAR PRIMARY KEY REFERENCES beneficiary(BENE_ID),\n"
+      "    RFRNC_YR INTEGER,\n"
+      "    CMS_HCC_RISK_SCORE NUMERIC,\n"
+      "    RXHCC_RISK_SCORE NUMERIC,\n"
+      "    PAYMENT_COUNT INTEGER,\n"
+      "    VAL_MBSF_RA_01 NUMERIC\n"
       ");\n"
     )
 
@@ -315,18 +327,19 @@ class ReleaseExporter:
     mbsf_base_df: pl.DataFrame | None = None,
     mbsf_oc_df: pl.DataFrame | None = None,
     mbsf_ndi_df: pl.DataFrame | None = None,
+    mbsf_ra_df: pl.DataFrame | None = None,
   ) -> ReleaseManifest:
     """Export normalized tabular data and metadata artifacts to the release directory."""
     self.output_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Run validation
     report = self.validator.validate_slice(
-      bene_df, carrier_df, outpatient_df, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df, mbsf_cc_df, mbsf_cu_df, mbsf_d_df, mbsf_base_df, mbsf_oc_df, mbsf_ndi_df
+      bene_df, carrier_df, outpatient_df, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df, mbsf_cc_df, mbsf_cu_df, mbsf_d_df, mbsf_base_df, mbsf_oc_df, mbsf_ndi_df, mbsf_ra_df
     )
 
     # 2. Compute fidelity profile
     fidelity = self.compute_fidelity_profile(
-      bene_df, carrier_df, outpatient_df, report, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df, mbsf_cc_df, mbsf_cu_df, mbsf_d_df, mbsf_base_df, mbsf_oc_df, mbsf_ndi_df
+      bene_df, carrier_df, outpatient_df, report, inpatient_df, pde_df, snf_df, hha_df, dme_df, hospice_df, mbsf_cc_df, mbsf_cu_df, mbsf_d_df, mbsf_base_df, mbsf_oc_df, mbsf_ndi_df, mbsf_ra_df
     )
 
     # Write validation report and fidelity profile
@@ -371,6 +384,8 @@ class ReleaseExporter:
       tables["mbsf_oc"] = mbsf_oc_df
     if mbsf_ndi_df is not None:
       tables["mbsf_ndi"] = mbsf_ndi_df
+    if mbsf_ra_df is not None:
+      tables["mbsf_ra"] = mbsf_ra_df
 
 
 

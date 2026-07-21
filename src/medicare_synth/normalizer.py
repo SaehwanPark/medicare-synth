@@ -19,6 +19,7 @@ from medicare_synth.models import (
   MBSFBaseEnrollmentRecord,
   MBSFOtherChronicConditionsRecord,
   MBSFNDIRecord,
+  MBSFRiskAdjustmentRecord,
   OutpatientClaimHeaderRecord,
 
   PrescriptionDrugEventRecord,
@@ -477,6 +478,33 @@ class BaselineNormalizer:
         pl.col("ndi_match_ind").cast(pl.String),
         pl.col("ndi_diuse_cd").cast(pl.String),
         pl.col("val_mbsf_ndi_01").cast(pl.Float64),
+      ]
+    )
+
+  @staticmethod
+  def normalize_mbsf_ra(records: Sequence[dict[str, Any]]) -> pl.DataFrame:
+    """Normalizes raw MBSF Risk Adjustment dictionary records into a canonical Polars DataFrame."""
+    validated = [MBSFRiskAdjustmentRecord(**r) for r in records]
+    df = pl.DataFrame([v.model_dump() for v in validated])
+    if df.is_empty():
+      return pl.DataFrame(
+        schema={
+          "bene_id": pl.String,
+          "rfrnc_yr": pl.Int64,
+          "cms_hcc_risk_score": pl.Float64,
+          "rxhcc_risk_score": pl.Float64,
+          "payment_count": pl.Int64,
+          "val_mbsf_ra_01": pl.Float64,
+        }
+      )
+    return df.with_columns(
+      [
+        pl.col("bene_id").cast(pl.String),
+        pl.col("rfrnc_yr").cast(pl.Int64),
+        pl.col("cms_hcc_risk_score").cast(pl.Float64),
+        pl.col("rxhcc_risk_score").cast(pl.Float64),
+        pl.col("payment_count").cast(pl.Int64),
+        pl.col("val_mbsf_ra_01").cast(pl.Float64),
       ]
     )
 
