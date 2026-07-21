@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added optional `--output-dir` parameter to the `validate` subcommand parser in `src/medicare_synth/cli.py` to write the validation report to a JSON file.
 - Added `pyrightconfig.json` to configure basedpyright type-checking rules for clean static analysis.
 
 - Implemented `MBSFPartDPDEUtilizationRecord` domain model in `src/medicare_synth/models.py`.
