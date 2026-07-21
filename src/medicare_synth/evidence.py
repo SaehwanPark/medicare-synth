@@ -58,6 +58,13 @@ class RKBEvidenceSnapshot(BaseModel):
       data: Any = json.load(f)
     return cls.model_validate(data)
 
+  @classmethod
+  def load_default_snapshot(cls, base_dir: Optional[Path] = None) -> "RKBEvidenceSnapshot":
+    """Loads default RKB snapshot from data/rkb_snapshots/."""
+    target_dir = base_dir or Path("data/rkb_snapshots")
+    default_path = target_dir / "rkb-v1.0-20211231.json"
+    return cls.from_file(default_path)
+
   def get_variable(self, variable_name: str) -> Optional[VariableContract]:
     """Look up a variable contract by CCW variable name."""
     return self.variables.get(variable_name)

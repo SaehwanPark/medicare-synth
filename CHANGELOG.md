@@ -27,6 +27,13 @@
 - Implemented core validation framework in `src/medicare_synth/validation.py` (`Severity`, `FindingCategory`, `Finding`, `ValidationReport`).
 - Added Polars-backed `RelationalValidator` supporting foreign key integrity (`CLM_ID` -> `BENE_ID`), temporal order (`CLM_FROM_DT` <= `CLM_THRU_DT`), and record uniqueness (`REC-001`).
 - Added 4 unit tests in `tests/test_validation.py` covering normal validation and anomaly scenarios (`invalid_orphaned_claim`, `invalid_temporal_inversion`).
+- Implemented `ProvenanceStatus` enum in `src/medicare_synth/models.py` tracking 8 field-level lineage categories.
+- Created `ScenarioCompiler` in `src/medicare_synth/scenarios.py` compiling 5 named deterministic scenario fixtures into Polars DataFrames.
+- Created `BaselineNormalizer` in `src/medicare_synth/normalizer.py` for type-casting raw records to Polars DataFrames with provenance annotations.
+- Created unified `medicare-synth` CLI in `src/medicare_synth/cli.py` supporting `validate`, `scenario`, and `manifest` subcommands.
+- Registered `[project.scripts] medicare-synth = "medicare_synth.cli:main"` in `pyproject.toml`.
+- Added 12 new unit tests across `tests/test_scenarios.py`, `tests/test_normalizer.py`, and `tests/test_cli.py` (26 total passing tests).
+- Completed Milestone 3 (Executable Model and Validation) across all deliverables.
 
 
 

@@ -59,27 +59,27 @@ Exit criteria:
 
 ## 3. Executable Model and Validation
 
-Status: Active
-
+Status: Complete
 
 Outputs:
 
-- executable file-year schemas and provenance statuses
-- canonical beneficiary, enrollment, claim, line, provider, and event model
-- relation-level and column-level DAG contracts
-- field, record, relational, temporal, administrative, and accounting validators
+- executable file-year schemas and provenance statuses [Completed]
+- canonical beneficiary, enrollment, claim, line, provider, and event model [Completed]
+- relation-level and column-level DAG contracts [Completed]
+- field, record, relational, temporal, administrative, and accounting validators [Completed]
+- scenario compiler and normalizer pipeline [Completed]
 
 Exit criteria:
 
-- selected baseline files normalize and round-trip preserved values
+- selected baseline files normalize and round-trip preserved values [Completed]
 - validator findings distinguish invalid output, known baseline exceptions, and
-  evidence ambiguity
+  evidence ambiguity [Completed]
 - beneficiary, carrier, and outpatient relationships pass focused integration
-  tests
+  tests [Completed]
 
 ## 4. Validation-First Release
 
-Status: Planned
+Status: Active
 
 Outputs:
 

@@ -10,6 +10,9 @@ dependencies = [
     "pydantic>=2.13.4",
 ]
 
+[project.scripts]
+medicare-synth = "medicare_synth.cli:main"
+
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",

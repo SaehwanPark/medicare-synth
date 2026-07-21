@@ -44,13 +44,17 @@ Completed Baseline and Evidence Deliverables:
 
 ### Executable Model and Validation
 
-Status: Active
+Status: Complete
 
 Completed Executable Model & Validation Deliverables:
 
 - **Validation Core Framework**: Created `src/medicare_synth/validation.py` establishing `Severity`, `FindingCategory`, `Finding`, and `ValidationReport` Pydantic models.
 - **High-Performance Relational Validator**: Implemented Polars-backed `RelationalValidator` performing foreign key constraint checks (`CLM_ID` -> `BENE_ID`), temporal inversion detection (`CLM_FROM_DT` <= `CLM_THRU_DT`), and record key uniqueness (`REC-001`).
-- **Scenario Validation Suite**: Added unit tests in `tests/test_validation.py` validating normal slices and verifying explicit finding emission for `invalid_orphaned_claim` (`REL-001`, CRITICAL) and `invalid_temporal_inversion` (`TMP-001`, HIGH) scenarios.
+- **Provenance Status Taxonomy**: Added `ProvenanceStatus` enum (8 lineage statuses) in `src/medicare_synth/models.py`.
+- **Deterministic Scenario Compiler**: Created `ScenarioCompiler` in `src/medicare_synth/scenarios.py` compiling 5 named scenarios (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`, `invalid_orphaned_claim`, `invalid_temporal_inversion`).
+- **Baseline Normalizer**: Implemented `BaselineNormalizer` in `src/medicare_synth/normalizer.py` for type-casting raw records to Polars DataFrames and tagging provenance.
+- **Unified Release CLI**: Implemented `medicare-synth` CLI entry point in `src/medicare_synth/cli.py` with `validate`, `scenario`, `manifest` commands.
+- **Comprehensive Unit Tests**: Added unit tests in `tests/test_scenarios.py`, `tests/test_normalizer.py`, and `tests/test_cli.py` (26 passing tests total).
 
 
 Verification requires each decision to cite evidence, state assumptions, and be
