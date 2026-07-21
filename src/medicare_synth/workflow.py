@@ -63,6 +63,57 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     print(f"Markdown workflow report saved to: {out_path}")
 
 
+def _write_html_report(path: str, data: dict[str, object]) -> None:
+    out_path = Path(path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    status = data.get("status", "unknown")
+    dry_run = data.get("dry_run", False)
+    branch = data.get("branch", "N/A")
+    commit_msg = data.get("commit_msg", "N/A")
+    pr_url = data.get("pr_url") or "N/A"
+    merged = data.get("merged", False)
+    changelog_check = data.get("changelog_check", False)
+    git_clean_check = data.get("git_clean_check", False)
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Autonomous Workflow Execution Report</title>
+    <style>
+        body {{ font-family: system-ui, -apple-system, sans-serif; margin: 20px; line-height: 1.5; background-color: #f8f9fa; color: #212529; }}
+        h1 {{ color: #0d6efd; border-bottom: 2px solid #0d6efd; padding-bottom: 8px; }}
+        table {{ border-collapse: collapse; width: 100%; max-width: 800px; margin-top: 15px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
+        th, td {{ border: 1px solid #dee2e6; padding: 10px 14px; text-align: left; }}
+        th {{ background-color: #e9ecef; font-weight: 600; }}
+        tr:nth-child(even) {{ background-color: #f8f9fa; }}
+    </style>
+</head>
+<body>
+    <h1>Autonomous Workflow Execution Report</h1>
+    <h2>Execution Summary</h2>
+    <table>
+        <thead>
+            <tr><th>Parameter</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Status</strong></td><td>{status}</td></tr>
+            <tr><td><strong>Dry Run</strong></td><td>{dry_run}</td></tr>
+            <tr><td><strong>Branch</strong></td><td>{branch}</td></tr>
+            <tr><td><strong>Commit Message</strong></td><td>{commit_msg}</td></tr>
+            <tr><td><strong>Pull Request URL</strong></td><td>{pr_url}</td></tr>
+            <tr><td><strong>Merged</strong></td><td>{merged}</td></tr>
+            <tr><td><strong>Changelog Verified</strong></td><td>{changelog_check}</td></tr>
+            <tr><td><strong>Git Clean State Checked</strong></td><td>{git_clean_check}</td></tr>
+        </tbody>
+    </table>
+</body>
+</html>
+"""
+    out_path.write_text(html_content, encoding="utf-8")
+    print(f"HTML workflow report saved to: {out_path}")
+
+
 def run_autonomous_workflow(
     commit_msg: str = "feat: implement autonomous workflow subcommand and reconcile docs",
     title: str = "feat: implement autonomous workflow subcommand and reconcile docs",
@@ -71,6 +122,7 @@ def run_autonomous_workflow(
     skip_merge: bool = False,
     json_report_path: Optional[str] = None,
     md_report_path: Optional[str] = None,
+    html_report_path: Optional[str] = None,
     changelog_check: bool = False,
     git_clean_check: bool = False,
 ) -> int:
@@ -154,6 +206,8 @@ def run_autonomous_workflow(
             _write_json_report(json_report_path, report_data)
         if md_report_path:
             _write_md_report(md_report_path, report_data)
+        if html_report_path:
+            _write_html_report(html_report_path, report_data)
         return 0
 
     print("\n=== Step 4: Staging and Committing Changes ===")
@@ -202,6 +256,8 @@ def run_autonomous_workflow(
             _write_json_report(json_report_path, report_data)
         if md_report_path:
             _write_md_report(md_report_path, report_data)
+        if html_report_path:
+            _write_html_report(html_report_path, report_data)
         return 0
 
     print("\n=== Step 7: Autonomous Merge to main ===")
@@ -221,4 +277,6 @@ def run_autonomous_workflow(
         _write_json_report(json_report_path, report_data)
     if md_report_path:
         _write_md_report(md_report_path, report_data)
+    if html_report_path:
+        _write_html_report(html_report_path, report_data)
     return 0
