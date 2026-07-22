@@ -55,6 +55,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     summary_check = data.get("summary_check", False)
     manifest_check = data.get("manifest_check", False)
     dag_check = data.get("dag_check", False)
+    temporal_check = data.get("temporal_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -84,6 +85,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Dataset Summary Matrix Verified** | {summary_check} |
 | **CMS Baseline Manifest Verified** | {manifest_check} |
 | **DAG Topology Verified** | {dag_check} |
+| **Temporal Integrity Verified** | {temporal_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -114,6 +116,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     summary_check = data.get("summary_check", False)
     manifest_check = data.get("manifest_check", False)
     dag_check = data.get("dag_check", False)
+    temporal_check = data.get("temporal_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -159,6 +162,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Dataset Summary Matrix Verified</strong></td><td>{summary_check}</td></tr>
             <tr><td><strong>CMS Baseline Manifest Verified</strong></td><td>{manifest_check}</td></tr>
             <tr><td><strong>DAG Topology Verified</strong></td><td>{dag_check}</td></tr>
+            <tr><td><strong>Temporal Integrity Verified</strong></td><td>{temporal_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -193,6 +197,7 @@ def run_autonomous_workflow(
     summary_check: bool = False,
     manifest_check: bool = False,
     dag_check: bool = False,
+    temporal_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -212,6 +217,7 @@ def run_autonomous_workflow(
         summary_check = True
         manifest_check = True
         dag_check = True
+        temporal_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -589,6 +595,35 @@ def run_autonomous_workflow(
             f"✓ DAG topology contract verified ({total_dag_tables} tables in relation DAG, {total_manifest_files} manifest files, {topological_levels} topological levels, {orphan_count} orphan key violations)."
         )
 
+    if temporal_check:
+        print("\n=== Verification Step: Executing Temporal Integrity Verification Check ===")
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        claim_tables = [
+            ("carrier", scenario_slice.carrier_df),
+            ("outpatient", scenario_slice.outpatient_df),
+            ("inpatient", scenario_slice.inpatient_df),
+            ("pde", scenario_slice.pde_df),
+            ("snf", scenario_slice.snf_df),
+            ("hha", scenario_slice.hha_df),
+            ("dme", scenario_slice.dme_df),
+            ("hospice", scenario_slice.hospice_df),
+        ]
+        temporal_findings = []
+        for name, df in claim_tables:
+            temporal_findings.extend(
+                RelationalValidator.check_temporal_inversions(df, name)
+            )
+            temporal_findings.extend(
+                RelationalValidator.check_admission_temporal_inversions(df, name)
+            )
+        inversion_count = sum(f.count for f in temporal_findings)
+        print(
+            f"✓ Temporal integrity verified across {len(claim_tables)} claim table families ({inversion_count} temporal inversion findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -638,6 +673,7 @@ def run_autonomous_workflow(
             "summary_check": summary_check,
             "manifest_check": manifest_check,
             "dag_check": dag_check,
+            "temporal_check": temporal_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -702,6 +738,7 @@ def run_autonomous_workflow(
             "summary_check": summary_check,
             "manifest_check": manifest_check,
             "dag_check": dag_check,
+            "temporal_check": temporal_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -742,6 +779,7 @@ def run_autonomous_workflow(
         "summary_check": summary_check,
         "manifest_check": manifest_check,
         "dag_check": dag_check,
+        "temporal_check": temporal_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
