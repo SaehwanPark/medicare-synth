@@ -51,6 +51,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     catalog_check = data.get("catalog_check", False)
     expansion_check = data.get("expansion_check", False)
     provenance_check = data.get("provenance_check", False)
+    benchmark_check = data.get("benchmark_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -76,6 +77,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Scenario Catalog Verified** | {catalog_check} |
 | **Dataset Expansion Verified** | {expansion_check} |
 | **Dataset Provenance Verified** | {provenance_check} |
+| **Benchmark Throughput Verified** | {benchmark_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -102,6 +104,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     catalog_check = data.get("catalog_check", False)
     expansion_check = data.get("expansion_check", False)
     provenance_check = data.get("provenance_check", False)
+    benchmark_check = data.get("benchmark_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -143,6 +146,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Scenario Catalog Verified</strong></td><td>{catalog_check}</td></tr>
             <tr><td><strong>Dataset Expansion Verified</strong></td><td>{expansion_check}</td></tr>
             <tr><td><strong>Dataset Provenance Verified</strong></td><td>{provenance_check}</td></tr>
+            <tr><td><strong>Benchmark Throughput Verified</strong></td><td>{benchmark_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -173,6 +177,7 @@ def run_autonomous_workflow(
     catalog_check: bool = False,
     expansion_check: bool = False,
     provenance_check: bool = False,
+    benchmark_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -188,6 +193,7 @@ def run_autonomous_workflow(
         catalog_check = True
         expansion_check = True
         provenance_check = True
+        benchmark_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -434,6 +440,40 @@ def run_autonomous_workflow(
             f"✓ Dataset provenance verified ({table_count} tables audited across {len(statuses)} taxonomy statuses)."
         )
 
+    if benchmark_check:
+        print("\n=== Verification Step: Executing Synthetic Data Benchmark Check ===")
+        import time
+        from medicare_synth.scenarios import ScenarioCompiler
+
+        start_t = time.perf_counter()
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        elapsed = time.perf_counter() - start_t
+        total_records = sum([
+            len(scenario_slice.bene_df),
+            len(scenario_slice.carrier_df),
+            len(scenario_slice.outpatient_df),
+            len(scenario_slice.inpatient_df),
+            len(scenario_slice.pde_df),
+            len(scenario_slice.snf_df),
+            len(scenario_slice.hha_df),
+            len(scenario_slice.dme_df),
+            len(scenario_slice.hospice_df),
+            len(scenario_slice.mbsf_cc_df),
+            len(scenario_slice.mbsf_cu_df),
+            len(scenario_slice.mbsf_d_df),
+            len(scenario_slice.mbsf_base_df),
+            len(scenario_slice.mbsf_oc_df),
+            len(scenario_slice.mbsf_ndi_df),
+            len(scenario_slice.mbsf_ra_df),
+            len(scenario_slice.mbsf_c_df),
+            len(scenario_slice.mbsf_ffs_df),
+            len(scenario_slice.mbsf_pde_util_df),
+        ])
+        rate = total_records / max(elapsed, 1e-6)
+        print(
+            f"✓ Benchmark throughput verified ({total_records} records synthesized in {elapsed:.4f}s: {rate:.1f} rec/s)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -479,6 +519,7 @@ def run_autonomous_workflow(
             "catalog_check": catalog_check,
             "expansion_check": expansion_check,
             "provenance_check": provenance_check,
+            "benchmark_check": benchmark_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -539,6 +580,7 @@ def run_autonomous_workflow(
             "catalog_check": catalog_check,
             "expansion_check": expansion_check,
             "provenance_check": provenance_check,
+            "benchmark_check": benchmark_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -575,6 +617,7 @@ def run_autonomous_workflow(
         "catalog_check": catalog_check,
         "expansion_check": expansion_check,
         "provenance_check": provenance_check,
+        "benchmark_check": benchmark_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }

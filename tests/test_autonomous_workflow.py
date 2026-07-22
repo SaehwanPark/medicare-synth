@@ -326,6 +326,7 @@ def test_run_autonomous_workflow_all_checks(mock_run, tmp_path):
     assert data["catalog_check"] is True
     assert data["expansion_check"] is True
     assert data["provenance_check"] is True
+    assert data["benchmark_check"] is True
 
 
 @patch("subprocess.run")
@@ -405,3 +406,30 @@ def test_run_autonomous_workflow_checkout_main(mock_run, tmp_path):
         data = json.load(f)
 
     assert data["checkout_main"] is True
+
+
+@patch("subprocess.run")
+def test_run_autonomous_workflow_benchmark_check(mock_run, tmp_path):
+    """Test that benchmark_check option executes synthetic benchmark step and records status."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_bm.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        benchmark_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["benchmark_check"] is True
