@@ -410,6 +410,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Inpatient claim domain field constraints before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--snf-check",
+        action="store_true",
+        help="Verify Skilled Nursing Facility (SNF) claim domain field constraints before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -753,6 +758,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,
             inpatient_check=args.inpatient_check,
+            snf_check=args.snf_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
