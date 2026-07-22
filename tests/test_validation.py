@@ -480,4 +480,30 @@ def test_check_charge_accounting_constraints() -> None:
     assert finding.count == 2
 
 
+def test_check_beneficiary_age_constraints() -> None:
+    bene_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE001", "BENE002", "BENE003"],
+            "bene_birth_dt": [date(1950, 1, 1), date(2025, 1, 1), date(1880, 1, 1)],
+        }
+    )
+    carrier_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003"],
+            "bene_id": ["BENE001", "BENE002", "BENE003"],
+            "clm_from_dt": [date(2021, 5, 10), date(2021, 5, 10), date(2021, 5, 10)],
+        }
+    )
+    findings = RelationalValidator.check_beneficiary_age_constraints(
+        bene_df, carrier_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "AGE-001"
+    assert finding.category == FindingCategory.TEMPORAL
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 2
+
+
+
 

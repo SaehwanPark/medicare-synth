@@ -85,6 +85,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     zip_check = data.get("zip_check", False)
     line_item_check = data.get("line_item_check", False)
     charge_check = data.get("charge_check", False)
+    age_check = data.get("age_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -144,6 +145,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Zip Code Format Verified** | {zip_check} |
 | **Claim Line Item Format Verified** | {line_item_check} |
 | **Claim Charge Accounting Verified** | {charge_check} |
+| **Beneficiary Age Temporal Verified** | {age_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -204,6 +206,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     zip_check = data.get("zip_check", False)
     line_item_check = data.get("line_item_check", False)
     charge_check = data.get("charge_check", False)
+    age_check = data.get("age_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -279,6 +282,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Zip Code Format Verified</strong></td><td>{zip_check}</td></tr>
             <tr><td><strong>Claim Line Item Format Verified</strong></td><td>{line_item_check}</td></tr>
             <tr><td><strong>Claim Charge Accounting Verified</strong></td><td>{charge_check}</td></tr>
+            <tr><td><strong>Beneficiary Age Temporal Verified</strong></td><td>{age_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -343,6 +347,7 @@ def run_autonomous_workflow(
     zip_check: bool = False,
     line_item_check: bool = False,
     charge_check: bool = False,
+    age_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -392,6 +397,7 @@ def run_autonomous_workflow(
         zip_check = True
         line_item_check = True
         charge_check = True
+        age_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -1455,6 +1461,22 @@ def run_autonomous_workflow(
             f"✓ Claim Charge accounting constraints verified ({violating_count} Charge constraint findings)."
         )
 
+    if age_check:
+        print(
+            "\n=== Verification Step: Executing Beneficiary Age Temporal Constraint Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        age_findings = RelationalValidator.check_beneficiary_age_constraints(
+            scenario_slice.bene_df, scenario_slice.carrier_df, "Carrier Claims"
+        )
+        violating_count = sum(f.count for f in age_findings)
+        print(
+            f"✓ Beneficiary Age temporal constraints verified ({violating_count} Age constraint findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1534,6 +1556,7 @@ def run_autonomous_workflow(
             "zip_check": zip_check,
             "line_item_check": line_item_check,
             "charge_check": charge_check,
+            "age_check": age_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1628,6 +1651,7 @@ def run_autonomous_workflow(
             "zip_check": zip_check,
             "line_item_check": line_item_check,
             "charge_check": charge_check,
+            "age_check": age_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
