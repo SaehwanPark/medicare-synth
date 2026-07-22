@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--rev-center-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `rev_center_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Revenue Center Code (REV_CNTR) 4-digit numeric format consistency verification across claim tables. Added `check_rev_center_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `rev_center_check` verification logic and CLI flag parsing.
+
 - Added `--pos-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pos_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Place of Service (POS) 2-digit numeric format consistency verification across claim tables. Added `check_pos_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `pos_check` verification logic and CLI flag parsing.
 

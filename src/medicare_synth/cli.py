@@ -390,6 +390,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Place of Service (POS) 2-digit numeric format consistency across claim records before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--rev-center-check",
+        action="store_true",
+        help="Verify Revenue Center Code 4-digit numeric format consistency across claim records before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -729,6 +734,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             drg_check=args.drg_check,
             taxonomy_check=args.taxonomy_check,
             pos_check=args.pos_check,
+            rev_center_check=args.rev_center_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
