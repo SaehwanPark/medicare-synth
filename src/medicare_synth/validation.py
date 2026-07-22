@@ -774,6 +774,63 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_mortality_temporal_constraints(
+        bene_df: pl.DataFrame, claim_df: pl.DataFrame, claim_type: str
+    ) -> list[Finding]:
+        """Identifies post-mortem claims where service start date (clm_from_dt) exceeds beneficiary death date."""
+        if (
+            bene_df.is_empty()
+            or claim_df.is_empty()
+            or "bene_id" not in bene_df.columns
+            or "bene_id" not in claim_df.columns
+        ):
+            return []
+
+        date_col = None
+        for col in ["clm_from_dt", "srvc_dt"]:
+            if col in claim_df.columns:
+                date_col = col
+                break
+        if date_col is None:
+            return []
+
+        death_col = None
+        for col in ["bene_death_dt", "bene_dod"]:
+            if col in bene_df.columns:
+                death_col = col
+                break
+        if death_col is None:
+            return []
+
+        bene_deceased = bene_df.filter(pl.col(death_col).is_not_null()).select(
+            ["bene_id", death_col]
+        )
+        if bene_deceased.is_empty():
+            return []
+
+        joined = claim_df.join(bene_deceased, on="bene_id", how="inner")
+        invalid = joined.filter(pl.col(date_col) > pl.col(death_col))
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="TMP-003",
+                    category=FindingCategory.TEMPORAL,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} post-mortem claims in {claim_type} with service date exceeding beneficiary death date ({date_col} > {death_col}).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,
@@ -812,6 +869,11 @@ class RelationalValidator:
                 self.check_temporal_inversions(carrier_df, "Carrier Claims")
             )
             findings.extend(
+                self.check_mortality_temporal_constraints(
+                    bene_df, carrier_df, "Carrier Claims"
+                )
+            )
+            findings.extend(
                 self.check_claim_accounting_constraints(carrier_df, "Carrier Claims")
             )
             if "line_num" in carrier_df.columns:
@@ -827,6 +889,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_temporal_inversions(outpatient_df, "Outpatient Claims")
+            )
+            findings.extend(
+                self.check_mortality_temporal_constraints(
+                    bene_df, outpatient_df, "Outpatient Claims"
+                )
             )
             findings.extend(
                 self.check_claim_accounting_constraints(
@@ -849,6 +916,11 @@ class RelationalValidator:
                 )
             )
             findings.extend(
+                self.check_mortality_temporal_constraints(
+                    bene_df, inpatient_df, "Inpatient Claims"
+                )
+            )
+            findings.extend(
                 self.check_claim_accounting_constraints(
                     inpatient_df, "Inpatient Claims"
                 )
@@ -863,6 +935,11 @@ class RelationalValidator:
             findings.extend(
                 self.check_orphaned_claims(bene_df, pde_df, "Prescription Drug Events")
             )
+            findings.extend(
+                self.check_mortality_temporal_constraints(
+                    bene_df, pde_df, "Prescription Drug Events"
+                )
+            )
             findings.extend(self.check_pde_field_constraints(pde_df))
             findings.extend(
                 self.check_record_uniqueness(
@@ -874,6 +951,11 @@ class RelationalValidator:
             findings.extend(self.check_orphaned_claims(bene_df, snf_df, "SNF Claims"))
             findings.extend(
                 self.check_admission_temporal_inversions(snf_df, "SNF Claims")
+            )
+            findings.extend(
+                self.check_mortality_temporal_constraints(
+                    bene_df, snf_df, "SNF Claims"
+                )
             )
             findings.extend(self.check_snf_field_constraints(snf_df))
             findings.extend(
@@ -888,6 +970,11 @@ class RelationalValidator:
             findings.extend(
                 self.check_admission_temporal_inversions(hha_df, "HHA Claims")
             )
+            findings.extend(
+                self.check_mortality_temporal_constraints(
+                    bene_df, hha_df, "HHA Claims"
+                )
+            )
             findings.extend(self.check_hha_field_constraints(hha_df))
             findings.extend(
                 self.check_claim_accounting_constraints(hha_df, "HHA Claims")
@@ -899,6 +986,11 @@ class RelationalValidator:
         if dme_df is not None and not dme_df.is_empty():
             findings.extend(self.check_orphaned_claims(bene_df, dme_df, "DME Claims"))
             findings.extend(self.check_temporal_inversions(dme_df, "DME Claims"))
+            findings.extend(
+                self.check_mortality_temporal_constraints(
+                    bene_df, dme_df, "DME Claims"
+                )
+            )
             findings.extend(self.check_dme_field_constraints(dme_df))
             findings.extend(
                 self.check_claim_accounting_constraints(dme_df, "DME Claims")
@@ -916,6 +1008,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_admission_temporal_inversions(hospice_df, "Hospice Claims")
+            )
+            findings.extend(
+                self.check_mortality_temporal_constraints(
+                    bene_df, hospice_df, "Hospice Claims"
+                )
             )
             findings.extend(self.check_hospice_field_constraints(hospice_df))
             findings.extend(

@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--mortality-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `mortality_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable beneficiary mortality temporal consistency verification across claim tables (`clm_from_dt <= bene_death_dt`). Added `check_mortality_temporal_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `mortality_check` verification logic and CLI flag parsing.
+
 - Added `--privacy-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `privacy_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable k-anonymity privacy score evaluation across all 19 synthetic Medicare data tables prior to staging and committing.
 - Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `privacy_check` verification logic and CLI flag parsing.
 

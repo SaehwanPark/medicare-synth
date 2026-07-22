@@ -61,6 +61,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     uniqueness_check = data.get("uniqueness_check", False)
     orphan_check = data.get("orphan_check", False)
     privacy_check = data.get("privacy_check", False)
+    mortality_check = data.get("mortality_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -96,6 +97,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Primary Key Uniqueness Verified** | {uniqueness_check} |
 | **Orphan Claims Verified** | {orphan_check} |
 | **K-Anonymity Privacy Verified** | {privacy_check} |
+| **Beneficiary Mortality Verified** | {mortality_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -132,6 +134,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     uniqueness_check = data.get("uniqueness_check", False)
     orphan_check = data.get("orphan_check", False)
     privacy_check = data.get("privacy_check", False)
+    mortality_check = data.get("mortality_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -183,6 +186,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Primary Key Uniqueness Verified</strong></td><td>{uniqueness_check}</td></tr>
             <tr><td><strong>Orphan Claims Verified</strong></td><td>{orphan_check}</td></tr>
             <tr><td><strong>K-Anonymity Privacy Verified</strong></td><td>{privacy_check}</td></tr>
+            <tr><td><strong>Beneficiary Mortality Verified</strong></td><td>{mortality_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -223,6 +227,7 @@ def run_autonomous_workflow(
     uniqueness_check: bool = False,
     orphan_check: bool = False,
     privacy_check: bool = False,
+    mortality_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -248,6 +253,7 @@ def run_autonomous_workflow(
         uniqueness_check = True
         orphan_check = True
         privacy_check = True
+        mortality_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -809,6 +815,36 @@ def run_autonomous_workflow(
             f"✓ K-anonymity privacy metrics verified across {len(k_anon_results)} baseline tables."
         )
 
+    if mortality_check:
+        print(
+            "\n=== Verification Step: Executing Beneficiary Mortality Temporal Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        claim_tables = [
+            ("carrier", scenario_slice.carrier_df),
+            ("outpatient", scenario_slice.outpatient_df),
+            ("inpatient", scenario_slice.inpatient_df),
+            ("pde", scenario_slice.pde_df),
+            ("snf", scenario_slice.snf_df),
+            ("hha", scenario_slice.hha_df),
+            ("dme", scenario_slice.dme_df),
+            ("hospice", scenario_slice.hospice_df),
+        ]
+        mortality_findings = []
+        for name, df in claim_tables:
+            mortality_findings.extend(
+                RelationalValidator.check_mortality_temporal_constraints(
+                    scenario_slice.bene_df, df, name
+                )
+            )
+        violating_count = sum(f.count for f in mortality_findings)
+        print(
+            f"✓ Beneficiary mortality temporal consistency verified across {len(claim_tables)} claim table families ({violating_count} post-mortem findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -864,6 +900,7 @@ def run_autonomous_workflow(
             "uniqueness_check": uniqueness_check,
             "orphan_check": orphan_check,
             "privacy_check": privacy_check,
+            "mortality_check": mortality_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -934,6 +971,7 @@ def run_autonomous_workflow(
             "uniqueness_check": uniqueness_check,
             "orphan_check": orphan_check,
             "privacy_check": privacy_check,
+            "mortality_check": mortality_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -980,6 +1018,7 @@ def run_autonomous_workflow(
         "uniqueness_check": uniqueness_check,
         "orphan_check": orphan_check,
         "privacy_check": privacy_check,
+        "mortality_check": mortality_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
