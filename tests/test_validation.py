@@ -423,3 +423,22 @@ def test_check_outpatient_field_constraints() -> None:
     assert finding.category == FindingCategory.FIELD
     assert finding.severity == Severity.HIGH
     assert finding.count == 2
+
+
+def test_check_zip_code_constraints() -> None:
+    bene_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE001", "BENE002", "BENE003", "BENE004"],
+            "bene_zip_cd": ["12345", "123456789", "12345-6789", "INVALID_ZIP"],
+        }
+    )
+    findings = RelationalValidator.check_zip_code_constraints(
+        bene_df, "Beneficiary Summary"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "ZIP-001"
+    assert finding.category == FindingCategory.FIELD
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+

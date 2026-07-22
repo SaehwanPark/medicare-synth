@@ -82,6 +82,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     pde_util_check = data.get("pde_util_check", False)
     carrier_check = data.get("carrier_check", False)
     outpatient_check = data.get("outpatient_check", False)
+    zip_check = data.get("zip_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -138,6 +139,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Part D PDE Utilization Verified** | {pde_util_check} |
 | **Carrier Field Constraints Verified** | {carrier_check} |
 | **Outpatient Field Constraints Verified** | {outpatient_check} |
+| **Zip Code Format Verified** | {zip_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -195,6 +197,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     pde_util_check = data.get("pde_util_check", False)
     carrier_check = data.get("carrier_check", False)
     outpatient_check = data.get("outpatient_check", False)
+    zip_check = data.get("zip_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -267,6 +270,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Part D PDE Utilization Verified</strong></td><td>{pde_util_check}</td></tr>
             <tr><td><strong>Carrier Field Constraints Verified</strong></td><td>{carrier_check}</td></tr>
             <tr><td><strong>Outpatient Field Constraints Verified</strong></td><td>{outpatient_check}</td></tr>
+            <tr><td><strong>Zip Code Format Verified</strong></td><td>{zip_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -328,6 +332,7 @@ def run_autonomous_workflow(
     pde_util_check: bool = False,
     carrier_check: bool = False,
     outpatient_check: bool = False,
+    zip_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -374,6 +379,7 @@ def run_autonomous_workflow(
         pde_util_check = True
         carrier_check = True
         outpatient_check = True
+        zip_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -1389,6 +1395,22 @@ def run_autonomous_workflow(
             f"✓ Outpatient claim field constraints verified ({violating_count} Outpatient constraint findings)."
         )
 
+    if zip_check:
+        print(
+            "\n=== Verification Step: Executing Zip Code Domain Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        zip_findings = RelationalValidator.check_zip_code_constraints(
+            scenario_slice.bene_df, "Beneficiary Summary"
+        )
+        violating_count = sum(f.count for f in zip_findings)
+        print(
+            f"✓ Zip Code domain format constraints verified ({violating_count} Zip Code constraint findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1465,6 +1487,7 @@ def run_autonomous_workflow(
             "pde_util_check": pde_util_check,
             "carrier_check": carrier_check,
             "outpatient_check": outpatient_check,
+            "zip_check": zip_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1556,6 +1579,7 @@ def run_autonomous_workflow(
             "pde_util_check": pde_util_check,
             "carrier_check": carrier_check,
             "outpatient_check": outpatient_check,
+            "zip_check": zip_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1625,6 +1649,7 @@ def run_autonomous_workflow(
         "pde_util_check": pde_util_check,
         "carrier_check": carrier_check,
         "outpatient_check": outpatient_check,
+        "zip_check": zip_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
