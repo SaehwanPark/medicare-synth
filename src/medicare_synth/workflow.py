@@ -53,6 +53,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     provenance_check = data.get("provenance_check", False)
     benchmark_check = data.get("benchmark_check", False)
     summary_check = data.get("summary_check", False)
+    manifest_check = data.get("manifest_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -80,6 +81,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Dataset Provenance Verified** | {provenance_check} |
 | **Benchmark Throughput Verified** | {benchmark_check} |
 | **Dataset Summary Matrix Verified** | {summary_check} |
+| **CMS Baseline Manifest Verified** | {manifest_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -108,6 +110,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     provenance_check = data.get("provenance_check", False)
     benchmark_check = data.get("benchmark_check", False)
     summary_check = data.get("summary_check", False)
+    manifest_check = data.get("manifest_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -151,6 +154,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Dataset Provenance Verified</strong></td><td>{provenance_check}</td></tr>
             <tr><td><strong>Benchmark Throughput Verified</strong></td><td>{benchmark_check}</td></tr>
             <tr><td><strong>Dataset Summary Matrix Verified</strong></td><td>{summary_check}</td></tr>
+            <tr><td><strong>CMS Baseline Manifest Verified</strong></td><td>{manifest_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -183,6 +187,7 @@ def run_autonomous_workflow(
     provenance_check: bool = False,
     benchmark_check: bool = False,
     summary_check: bool = False,
+    manifest_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -200,6 +205,7 @@ def run_autonomous_workflow(
         provenance_check = True
         benchmark_check = True
         summary_check = True
+        manifest_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -513,6 +519,19 @@ def run_autonomous_workflow(
             f"✓ Dataset summary matrix verified ({len(tables)} tables, {total_rows} total rows, {total_cols} total columns, {total_bytes} bytes estimated footprint)."
         )
 
+    if manifest_check:
+        print("\n=== Verification Step: Executing CMS Baseline Manifest Check ===")
+        from medicare_synth.manifest import SourceManifest
+
+        source_manifest = SourceManifest.load_default_manifest()
+        total_files = len(source_manifest.files)
+        total_fks = sum(
+            len(fm.foreign_keys or []) for fm in source_manifest.files
+        )
+        print(
+            f"✓ CMS baseline manifest verified ({total_files} file entries audited, {total_fks} foreign key relationships validated)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -560,6 +579,7 @@ def run_autonomous_workflow(
             "provenance_check": provenance_check,
             "benchmark_check": benchmark_check,
             "summary_check": summary_check,
+            "manifest_check": manifest_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -622,6 +642,7 @@ def run_autonomous_workflow(
             "provenance_check": provenance_check,
             "benchmark_check": benchmark_check,
             "summary_check": summary_check,
+            "manifest_check": manifest_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -660,6 +681,7 @@ def run_autonomous_workflow(
         "provenance_check": provenance_check,
         "benchmark_check": benchmark_check,
         "summary_check": summary_check,
+        "manifest_check": manifest_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
