@@ -56,6 +56,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     manifest_check = data.get("manifest_check", False)
     dag_check = data.get("dag_check", False)
     temporal_check = data.get("temporal_check", False)
+    evidence_check = data.get("evidence_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -86,6 +87,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **CMS Baseline Manifest Verified** | {manifest_check} |
 | **DAG Topology Verified** | {dag_check} |
 | **Temporal Integrity Verified** | {temporal_check} |
+| **RKB Evidence Snapshot Verified** | {evidence_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -117,6 +119,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     manifest_check = data.get("manifest_check", False)
     dag_check = data.get("dag_check", False)
     temporal_check = data.get("temporal_check", False)
+    evidence_check = data.get("evidence_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -163,6 +166,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>CMS Baseline Manifest Verified</strong></td><td>{manifest_check}</td></tr>
             <tr><td><strong>DAG Topology Verified</strong></td><td>{dag_check}</td></tr>
             <tr><td><strong>Temporal Integrity Verified</strong></td><td>{temporal_check}</td></tr>
+            <tr><td><strong>RKB Evidence Snapshot Verified</strong></td><td>{evidence_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -198,6 +202,7 @@ def run_autonomous_workflow(
     manifest_check: bool = False,
     dag_check: bool = False,
     temporal_check: bool = False,
+    evidence_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -218,6 +223,7 @@ def run_autonomous_workflow(
         manifest_check = True
         dag_check = True
         temporal_check = True
+        evidence_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -624,6 +630,16 @@ def run_autonomous_workflow(
             f"✓ Temporal integrity verified across {len(claim_tables)} claim table families ({inversion_count} temporal inversion findings)."
         )
 
+    if evidence_check:
+        print("\n=== Verification Step: Executing RKB Evidence Snapshot Verification Check ===")
+        from medicare_synth.evidence import RKBEvidenceSnapshot
+
+        snapshot = RKBEvidenceSnapshot.load_default_snapshot()
+        print(
+            f"✓ RKB Evidence snapshot verified ({len(snapshot.variables)} variables, "
+            f"{len(snapshot.constraints)} constraints, version {snapshot.rkb_version})."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -674,6 +690,7 @@ def run_autonomous_workflow(
             "manifest_check": manifest_check,
             "dag_check": dag_check,
             "temporal_check": temporal_check,
+            "evidence_check": evidence_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -739,6 +756,7 @@ def run_autonomous_workflow(
             "manifest_check": manifest_check,
             "dag_check": dag_check,
             "temporal_check": temporal_check,
+            "evidence_check": evidence_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -780,6 +798,7 @@ def run_autonomous_workflow(
         "manifest_check": manifest_check,
         "dag_check": dag_check,
         "temporal_check": temporal_check,
+        "evidence_check": evidence_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }

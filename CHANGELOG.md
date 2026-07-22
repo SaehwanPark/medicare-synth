@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--evidence-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `evidence_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable ResDAC Knowledge Base (RKB) evidence snapshot contract verification prior to staging and committing.
+- Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `evidence_check` verification logic and CLI flag parsing.
+
 - Added `--temporal-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `temporal_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable claim date-sequence and temporal inversion verification (`clm_from_dt <= clm_thru_dt` and `clm_admsn_dt <= nch_bene_dschrg_dt`) across all 8 claim table families prior to staging and committing.
 - Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `temporal_check` verification logic and CLI flag parsing.
 

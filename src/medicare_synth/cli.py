@@ -315,6 +315,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify temporal start/end date consistency across claim tables before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--evidence-check",
+        action="store_true",
+        help="Verify ResDAC Knowledge Base evidence snapshot contracts before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -639,6 +644,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             manifest_check=args.manifest_check,
             dag_check=args.dag_check,
             temporal_check=args.temporal_check,
+            evidence_check=args.evidence_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
