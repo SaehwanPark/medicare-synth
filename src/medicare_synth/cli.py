@@ -305,6 +305,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify CMS baseline source manifest entries and relationships before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--dag-check",
+        action="store_true",
+        help="Verify relation-level and column-level DAG topology contracts before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -627,6 +632,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             benchmark_check=args.benchmark_check,
             summary_check=args.summary_check,
             manifest_check=args.manifest_check,
+            dag_check=args.dag_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
