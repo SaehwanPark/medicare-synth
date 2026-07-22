@@ -236,6 +236,44 @@ class RelationalValidator:
         return []
 
     @staticmethod
+    def check_inpatient_field_constraints(
+        inpatient_df: pl.DataFrame,
+    ) -> list[Finding]:
+        """Identifies Inpatient claims with negative utilization days or non-covered days."""
+        if (
+            inpatient_df.is_empty()
+            or "clm_utlztn_day_cnt" not in inpatient_df.columns
+            or "ncvd_days_cnt" not in inpatient_df.columns
+        ):
+            return []
+
+        invalid = inpatient_df.filter(
+            (pl.col("clm_utlztn_day_cnt") < 0) | (pl.col("ncvd_days_cnt") < 0)
+        )
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="FLD-006",
+                    category=FindingCategory.FIELD,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} Inpatient claims with invalid negative utilization days or non-covered days count.",
+                    count=invalid_count,
+                    details={
+                        "table_name": "Inpatient Claims",
+                        "sample_clm_ids": sample_ids,
+                    },
+                )
+            ]
+        return []
+
+    @staticmethod
     def check_snf_field_constraints(snf_df: pl.DataFrame) -> list[Finding]:
         """Identifies SNF claims with negative utilization days or non-covered days."""
         if (
@@ -1510,6 +1548,7 @@ class RelationalValidator:
             findings.extend(
                 self.check_drg_code_constraints(inpatient_df, "Inpatient Claims")
             )
+            findings.extend(self.check_inpatient_field_constraints(inpatient_df))
 
         if pde_df is not None and not pde_df.is_empty():
             findings.extend(

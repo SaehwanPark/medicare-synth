@@ -369,3 +369,21 @@ def test_check_demographic_code_constraints() -> None:
     assert finding.category == FindingCategory.FIELD
     assert finding.severity == Severity.HIGH
     assert finding.count == 2
+
+
+def test_check_inpatient_field_constraints() -> None:
+    inpatient_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003"],
+            "bene_id": ["BENE001", "BENE002", "BENE003"],
+            "clm_utlztn_day_cnt": [5, -1, 3],  # -1 is invalid
+            "ncvd_days_cnt": [0, 0, -2],  # -2 is invalid
+        }
+    )
+    findings = RelationalValidator.check_inpatient_field_constraints(inpatient_df)
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "FLD-006"
+    assert finding.category == FindingCategory.FIELD
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 2
