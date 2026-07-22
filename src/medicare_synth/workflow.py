@@ -45,6 +45,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     git_clean_check = data.get("git_clean_check", False)
     audit_check = data.get("audit_check", False)
     validation_check = data.get("validation_check", False)
+    export_check = data.get("export_check", False)
+    all_checks = data.get("all_checks", False)
 
     md_content = f"""# Autonomous Workflow Execution Report
 
@@ -62,6 +64,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Git Clean State Checked** | {git_clean_check} |
 | **Audit Verified** | {audit_check} |
 | **Relational Validation Verified** | {validation_check} |
+| **Release Export Verified** | {export_check} |
+| **All Verification Checks Enabled** | {all_checks} |
 """
     out_path.write_text(md_content, encoding="utf-8")
     print(f"Markdown workflow report saved to: {out_path}")
@@ -80,6 +84,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     git_clean_check = data.get("git_clean_check", False)
     audit_check = data.get("audit_check", False)
     validation_check = data.get("validation_check", False)
+    export_check = data.get("export_check", False)
+    all_checks = data.get("all_checks", False)
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -113,6 +119,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Git Clean State Checked</strong></td><td>{git_clean_check}</td></tr>
             <tr><td><strong>Audit Verified</strong></td><td>{audit_check}</td></tr>
             <tr><td><strong>Relational Validation Verified</strong></td><td>{validation_check}</td></tr>
+            <tr><td><strong>Release Export Verified</strong></td><td>{export_check}</td></tr>
+            <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
     </table>
 </body>
@@ -135,8 +143,17 @@ def run_autonomous_workflow(
     git_clean_check: bool = False,
     audit_check: bool = False,
     validation_check: bool = False,
+    export_check: bool = False,
+    all_checks: bool = False,
 ) -> int:
     """Run local verification checks and autonomously stage, commit, push, create PR, and merge."""
+    if all_checks:
+        changelog_check = True
+        git_clean_check = True
+        audit_check = True
+        validation_check = True
+        export_check = True
+
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
 
@@ -249,6 +266,43 @@ def run_autonomous_workflow(
                 file=sys.stderr,
             )
 
+    if export_check:
+        print("\n=== Verification Step: Executing Scenario Release Export Check ===")
+        import tempfile
+        from medicare_synth.release import ReleaseExporter
+        from medicare_synth.scenarios import ScenarioCompiler
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            exporter = ReleaseExporter(
+                output_dir=Path(tmp_dir), release_id="v1.0.0-test"
+            )
+            manifest = exporter.export_slice(
+                bene_df=scenario_slice.bene_df,
+                carrier_df=scenario_slice.carrier_df,
+                outpatient_df=scenario_slice.outpatient_df,
+                fmt="all",
+                inpatient_df=scenario_slice.inpatient_df,
+                pde_df=scenario_slice.pde_df,
+                snf_df=scenario_slice.snf_df,
+                hha_df=scenario_slice.hha_df,
+                dme_df=scenario_slice.dme_df,
+                hospice_df=scenario_slice.hospice_df,
+                mbsf_cc_df=scenario_slice.mbsf_cc_df,
+                mbsf_cu_df=scenario_slice.mbsf_cu_df,
+                mbsf_d_df=scenario_slice.mbsf_d_df,
+                mbsf_base_df=scenario_slice.mbsf_base_df,
+                mbsf_oc_df=scenario_slice.mbsf_oc_df,
+                mbsf_ndi_df=scenario_slice.mbsf_ndi_df,
+                mbsf_ra_df=scenario_slice.mbsf_ra_df,
+                mbsf_c_df=scenario_slice.mbsf_c_df,
+                mbsf_ffs_df=scenario_slice.mbsf_ffs_df,
+                mbsf_pde_util_df=scenario_slice.mbsf_pde_util_df,
+            )
+            print(
+                f"✓ Release export verified (manifest generated with {len(manifest.files)} files)."
+            )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -286,6 +340,8 @@ def run_autonomous_workflow(
             "git_clean_check": git_clean_check,
             "audit_check": audit_check,
             "validation_check": validation_check,
+            "export_check": export_check,
+            "all_checks": all_checks,
         }
         if json_report_path:
             _write_json_report(json_report_path, report_data)
@@ -338,6 +394,8 @@ def run_autonomous_workflow(
             "git_clean_check": git_clean_check,
             "audit_check": audit_check,
             "validation_check": validation_check,
+            "export_check": export_check,
+            "all_checks": all_checks,
         }
         if json_report_path:
             _write_json_report(json_report_path, report_data)
@@ -361,6 +419,8 @@ def run_autonomous_workflow(
         "git_clean_check": git_clean_check,
         "audit_check": audit_check,
         "validation_check": validation_check,
+        "export_check": export_check,
+        "all_checks": all_checks,
     }
     if json_report_path:
         _write_json_report(json_report_path, report_data)
@@ -369,3 +429,4 @@ def run_autonomous_workflow(
     if html_report_path:
         _write_html_report(html_report_path, report_data)
     return 0
+
