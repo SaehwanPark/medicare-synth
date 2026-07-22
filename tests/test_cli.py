@@ -93,6 +93,7 @@ def test_cli_auto_workflow_dry_run():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -141,6 +142,7 @@ def test_cli_auto_workflow_json_report(tmp_path):
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -189,6 +191,7 @@ def test_cli_auto_workflow_md_report(tmp_path):
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -236,6 +239,7 @@ def test_cli_auto_workflow_changelog_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -283,6 +287,7 @@ def test_cli_auto_workflow_git_clean_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -331,6 +336,7 @@ def test_cli_auto_workflow_html_report(tmp_path):
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -378,6 +384,7 @@ def test_cli_auto_workflow_audit_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -425,6 +432,7 @@ def test_cli_auto_workflow_validation_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -472,6 +480,7 @@ def test_cli_auto_workflow_export_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -519,6 +528,7 @@ def test_cli_auto_workflow_diff_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -566,6 +576,7 @@ def test_cli_auto_workflow_catalog_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -613,6 +624,7 @@ def test_cli_auto_workflow_expansion_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -660,6 +672,7 @@ def test_cli_auto_workflow_benchmark_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -707,6 +720,7 @@ def test_cli_auto_workflow_summary_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -754,6 +768,7 @@ def test_cli_auto_workflow_manifest_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -801,6 +816,7 @@ def test_cli_auto_workflow_dag_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -848,6 +864,7 @@ def test_cli_auto_workflow_temporal_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -895,6 +912,7 @@ def test_cli_auto_workflow_evidence_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -942,6 +960,7 @@ def test_cli_auto_workflow_provenance_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -989,6 +1008,7 @@ def test_cli_auto_workflow_checkout_main():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=True,
             all_checks=False,
         )
@@ -1036,6 +1056,7 @@ def test_cli_auto_workflow_all_checks():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=True,
         )
@@ -1083,6 +1104,7 @@ def test_cli_auto_workflow_accounting_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1130,6 +1152,7 @@ def test_cli_auto_workflow_uniqueness_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1177,6 +1200,7 @@ def test_cli_auto_workflow_orphan_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1224,6 +1248,7 @@ def test_cli_auto_workflow_privacy_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1271,6 +1296,7 @@ def test_cli_auto_workflow_mortality_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1318,6 +1344,7 @@ def test_cli_auto_workflow_enrollment_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1365,6 +1392,7 @@ def test_cli_auto_workflow_dob_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1412,6 +1440,7 @@ def test_cli_auto_workflow_provider_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1459,6 +1488,7 @@ def test_cli_auto_workflow_icd_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1506,6 +1536,7 @@ def test_cli_auto_workflow_hcpcs_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1553,6 +1584,7 @@ def test_cli_auto_workflow_ndc_check():
             ndc_check=True,
             drg_check=False,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1600,6 +1632,7 @@ def test_cli_auto_workflow_drg_check():
             ndc_check=False,
             drg_check=True,
             taxonomy_check=False,
+            pos_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1647,6 +1680,55 @@ def test_cli_auto_workflow_taxonomy_check():
             ndc_check=False,
             drg_check=False,
             taxonomy_check=True,
+            pos_check=False,
+            checkout_main=False,
+            all_checks=False,
+        )
+
+
+def test_cli_auto_workflow_pos_check():
+    with patch("medicare_synth.cli.run_autonomous_workflow", return_value=0) as mock_wf:
+        code = main(["auto-workflow", "--dry-run", "--pos-check"])
+        assert code == 0
+        mock_wf.assert_called_once_with(
+            commit_msg="feat: implement autonomous workflow subcommand and reconcile docs",
+            title="feat: implement autonomous workflow subcommand and reconcile docs",
+            body="Automated PR created by the autonomous workflow engine. Reconciles docs and adds CLI auto-workflow subcommand.",
+            dry_run=True,
+            skip_merge=False,
+            json_report_path=None,
+            md_report_path=None,
+            html_report_path=None,
+            changelog_check=False,
+            git_clean_check=False,
+            audit_check=False,
+            validation_check=False,
+            export_check=False,
+            diff_check=False,
+            profile_check=False,
+            catalog_check=False,
+            expansion_check=False,
+            provenance_check=False,
+            benchmark_check=False,
+            summary_check=False,
+            manifest_check=False,
+            dag_check=False,
+            temporal_check=False,
+            evidence_check=False,
+            accounting_check=False,
+            uniqueness_check=False,
+            orphan_check=False,
+            privacy_check=False,
+            mortality_check=False,
+            enrollment_check=False,
+            dob_check=False,
+            provider_check=False,
+            icd_check=False,
+            hcpcs_check=False,
+            ndc_check=False,
+            drg_check=False,
+            taxonomy_check=False,
+            pos_check=True,
             checkout_main=False,
             all_checks=False,
         )

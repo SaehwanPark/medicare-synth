@@ -385,6 +385,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Healthcare Provider Taxonomy Code 10-character alphanumeric format consistency across claim records before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--pos-check",
+        action="store_true",
+        help="Verify Place of Service (POS) 2-digit numeric format consistency across claim records before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -723,6 +728,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             ndc_check=args.ndc_check,
             drg_check=args.drg_check,
             taxonomy_check=args.taxonomy_check,
+            pos_check=args.pos_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )

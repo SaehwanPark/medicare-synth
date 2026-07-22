@@ -1204,6 +1204,58 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_pos_code_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with invalid Place of Service (POS) code format (must be 2 numeric digits when present)."""
+        if claim_df.is_empty():
+            return []
+
+        pos_col = None
+        for col in [
+            "place_of_service_cd",
+            "PLACE_OF_SERVICE_CD",
+            "line_place_of_service_cd",
+            "LINE_PLACE_OF_SERVICE_CD",
+            "pos_cd",
+            "POS_CD",
+            "clm_pos_cd",
+            "CLM_POS_CD",
+        ]:
+            if col in claim_df.columns:
+                pos_col = col
+                break
+        if pos_col is None:
+            return []
+
+        non_null_pos = claim_df.filter(pl.col(pos_col).is_not_null())
+        if non_null_pos.is_empty():
+            return []
+
+        invalid = non_null_pos.filter(
+            ~pl.col(pos_col).cast(pl.Utf8).str.contains(r"^[0-9]{2}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="POS-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {claim_type} with invalid Place of Service (POS) code format (must be 2 numeric digits).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,
@@ -1266,6 +1318,9 @@ class RelationalValidator:
             findings.extend(
                 self.check_taxonomy_code_constraints(carrier_df, "Carrier Claims")
             )
+            findings.extend(
+                self.check_pos_code_constraints(carrier_df, "Carrier Claims")
+            )
             if "line_num" in carrier_df.columns:
                 findings.extend(
                     self.check_record_uniqueness(
@@ -1312,6 +1367,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_taxonomy_code_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_pos_code_constraints(
                     outpatient_df, "Outpatient Claims"
                 )
             )
