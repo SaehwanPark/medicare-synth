@@ -285,6 +285,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify vertical and horizontal dataset expansion logic before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--provenance-check",
+        action="store_true",
+        help="Verify field-level dataset provenance status taxonomy before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -603,6 +608,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             profile_check=args.profile_check,
             catalog_check=args.catalog_check,
             expansion_check=args.expansion_check,
+            provenance_check=args.provenance_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
