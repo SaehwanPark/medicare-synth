@@ -265,6 +265,21 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify scenario release package export before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--diff-check",
+        action="store_true",
+        help="Verify schema diff for evidence snapshot before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--profile-check",
+        action="store_true",
+        help="Verify limitations profile disclosures before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--catalog-check",
+        action="store_true",
+        help="Verify scenario catalog indexing and CI fixture export before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--all-checks",
         action="store_true",
         help="Enable all available workflow verification checks before commit/push",
@@ -574,6 +589,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             audit_check=args.audit_check,
             validation_check=args.validation_check,
             export_check=args.export_check,
+            diff_check=args.diff_check,
+            profile_check=args.profile_check,
+            catalog_check=args.catalog_check,
             all_checks=args.all_checks,
         )
 

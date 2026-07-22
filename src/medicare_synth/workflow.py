@@ -48,6 +48,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     export_check = data.get("export_check", False)
     diff_check = data.get("diff_check", False)
     profile_check = data.get("profile_check", False)
+    catalog_check = data.get("catalog_check", False)
     all_checks = data.get("all_checks", False)
 
     md_content = f"""# Autonomous Workflow Execution Report
@@ -69,6 +70,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Release Export Verified** | {export_check} |
 | **Schema Diff Verified** | {diff_check} |
 | **Limitations Profile Verified** | {profile_check} |
+| **Scenario Catalog Verified** | {catalog_check} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
     out_path.write_text(md_content, encoding="utf-8")
@@ -91,6 +93,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     export_check = data.get("export_check", False)
     diff_check = data.get("diff_check", False)
     profile_check = data.get("profile_check", False)
+    catalog_check = data.get("catalog_check", False)
     all_checks = data.get("all_checks", False)
 
     html_content = f"""<!DOCTYPE html>
@@ -128,6 +131,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Release Export Verified</strong></td><td>{export_check}</td></tr>
             <tr><td><strong>Schema Diff Verified</strong></td><td>{diff_check}</td></tr>
             <tr><td><strong>Limitations Profile Verified</strong></td><td>{profile_check}</td></tr>
+            <tr><td><strong>Scenario Catalog Verified</strong></td><td>{catalog_check}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
     </table>
@@ -154,6 +158,7 @@ def run_autonomous_workflow(
     export_check: bool = False,
     diff_check: bool = False,
     profile_check: bool = False,
+    catalog_check: bool = False,
     all_checks: bool = False,
 ) -> int:
     """Run local verification checks and autonomously stage, commit, push, create PR, and merge."""
@@ -165,6 +170,7 @@ def run_autonomous_workflow(
         export_check = True
         diff_check = True
         profile_check = True
+        catalog_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -348,6 +354,18 @@ def run_autonomous_workflow(
             f"✓ Limitations profile verified ({len(prof.statements)} limitation categories disclosed)."
         )
 
+    if catalog_check:
+        print("\n=== Verification Step: Executing Scenario Catalog & CI Fixture Export Check ===")
+        import tempfile
+        from medicare_synth.catalog import ScenarioCatalog
+
+        scenarios = ScenarioCatalog.get_catalog()
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            exported_files = ScenarioCatalog.export_ci_fixtures(tmp_dir, file_format="csv")
+            print(
+                f"✓ Scenario catalog verified ({len(scenarios)} scenarios cataloged, {len(exported_files)} CI fixture files exported)."
+            )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -388,6 +406,7 @@ def run_autonomous_workflow(
             "export_check": export_check,
             "diff_check": diff_check,
             "profile_check": profile_check,
+            "catalog_check": catalog_check,
             "all_checks": all_checks,
         }
         if json_report_path:
@@ -444,6 +463,7 @@ def run_autonomous_workflow(
             "export_check": export_check,
             "diff_check": diff_check,
             "profile_check": profile_check,
+            "catalog_check": catalog_check,
             "all_checks": all_checks,
         }
         if json_report_path:
@@ -471,6 +491,7 @@ def run_autonomous_workflow(
         "export_check": export_check,
         "diff_check": diff_check,
         "profile_check": profile_check,
+        "catalog_check": catalog_check,
         "all_checks": all_checks,
     }
     if json_report_path:
