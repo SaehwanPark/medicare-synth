@@ -460,6 +460,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify claim charge total and deductible/coinsurance non-negativity constraints before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--age-check",
+        action="store_true",
+        help="Verify beneficiary age temporal constraints (0 <= age <= 120) before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -813,6 +818,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             zip_check=args.zip_check,
             line_item_check=args.line_item_check,
             charge_check=args.charge_check,
+            age_check=args.age_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )

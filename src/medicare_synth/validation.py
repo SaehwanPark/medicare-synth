@@ -1102,6 +1102,64 @@ class RelationalValidator:
         return []
 
     @staticmethod
+    def check_beneficiary_age_constraints(
+        bene_df: pl.DataFrame, claim_df: pl.DataFrame, claim_type: str
+    ) -> list[Finding]:
+        """Identifies claims where beneficiary age at service date is outside valid range (0 <= age <= 120 years)."""
+        if (
+            bene_df.is_empty()
+            or claim_df.is_empty()
+            or "bene_id" not in bene_df.columns
+            or "bene_id" not in claim_df.columns
+        ):
+            return []
+
+        date_col = None
+        for col in ["clm_from_dt", "srvc_dt"]:
+            if col in claim_df.columns:
+                date_col = col
+                break
+        if date_col is None:
+            return []
+
+        dob_col = None
+        for col in ["bene_birth_dt", "bene_dob"]:
+            if col in bene_df.columns:
+                dob_col = col
+                break
+        if dob_col is None:
+            return []
+
+        bene_dob_df = bene_df.filter(pl.col(dob_col).is_not_null()).select(
+            ["bene_id", dob_col]
+        )
+        if bene_dob_df.is_empty():
+            return []
+
+        joined = claim_df.join(bene_dob_df, on="bene_id", how="inner")
+        age_expr = pl.col(date_col).dt.year() - pl.col(dob_col).dt.year()
+        invalid = joined.filter((age_expr < 0) | (age_expr > 120))
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="AGE-001",
+                    category=FindingCategory.TEMPORAL,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with beneficiary age outside valid range (0 to 120 years).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
+    @staticmethod
     def check_enrollment_consistency_constraints(
         mbsf_base_df: pl.DataFrame,
     ) -> list[Finding]:
@@ -1661,6 +1719,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_dob_temporal_constraints(
+                    bene_df, carrier_df, "Carrier Claims"
+                )
+            )
+            findings.extend(
+                self.check_beneficiary_age_constraints(
                     bene_df, carrier_df, "Carrier Claims"
                 )
             )
