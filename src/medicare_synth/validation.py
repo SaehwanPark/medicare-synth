@@ -1476,6 +1476,62 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_zip_code_constraints(
+        df: pl.DataFrame, table_type: str = "Dataset Records"
+    ) -> list[Finding]:
+        """Identifies records with invalid Zip Code format (must be 5 or 9 numeric digits, or 5+4 with hyphen)."""
+        if df.is_empty():
+            return []
+
+        zip_col = None
+        for col in [
+            "bene_zip_cd",
+            "BENE_ZIP_CD",
+            "zip_cd",
+            "ZIP_CD",
+            "clm_zip_cd",
+            "CLM_ZIP_CD",
+            "bene_zip",
+            "BENE_ZIP",
+        ]:
+            if col in df.columns:
+                zip_col = col
+                break
+        if zip_col is None:
+            return []
+
+        non_null_zip = df.filter(pl.col(zip_col).is_not_null())
+        if non_null_zip.is_empty():
+            return []
+
+        invalid = non_null_zip.filter(
+            ~pl.col(zip_col).cast(pl.Utf8).str.contains(r"^([0-9]{5}|[0-9]{9}|[0-9]{5}-[0-9]{4})$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("bene_id").slice(0, 5).to_series().to_list()
+                if "bene_id" in invalid.columns
+                else (
+                    invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                    if "clm_id" in invalid.columns
+                    else []
+                )
+            )
+            return [
+                Finding(
+                    rule_id="ZIP-001",
+                    category=FindingCategory.FIELD,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {table_type} with invalid Zip Code format (must be 5 or 9 numeric digits).",
+                    count=invalid_count,
+                    details={"table_type": table_type, "sample_ids": sample_ids},
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,
@@ -1506,6 +1562,7 @@ class RelationalValidator:
             self.check_record_uniqueness(bene_df, ["bene_id"], "Beneficiary Summary")
         )
         findings.extend(self.check_demographic_code_constraints(bene_df))
+        findings.extend(self.check_zip_code_constraints(bene_df, "Beneficiary Summary"))
 
         if carrier_df is not None and not carrier_df.is_empty():
             findings.extend(

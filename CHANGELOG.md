@@ -4,6 +4,10 @@
 
 ### Added
 
+- Added `--zip-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `zip_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Zip Code numeric format consistency verification (`check_zip_code_constraints`) across beneficiary and claim tables before staging and committing.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `zip_check` verification logic and CLI flag parsing (256 total passing unit tests).
+
+
 - Added `--carrier-check` and `--outpatient-check` parameters to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `carrier_check` and `outpatient_check` parameters to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Carrier and Outpatient claim domain field constraint verification (`check_carrier_field_constraints` and `check_outpatient_field_constraints`) before staging and committing.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `carrier_check` and `outpatient_check` verification logic and CLI flag parsing (252 total passing unit tests).
 
