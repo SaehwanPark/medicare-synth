@@ -943,6 +943,51 @@ class RelationalValidator:
         return []
 
     @staticmethod
+    def check_charge_accounting_constraints(
+        claim_df: pl.DataFrame, claim_type: str
+    ) -> list[Finding]:
+        """Identifies claims with negative total charges or deductible/coinsurance amounts (< 0)."""
+        if claim_df.is_empty():
+            return []
+
+        charge_cols = [
+            "clm_tot_chrg_amt",
+            "nch_bene_ip_ddctbl_amt",
+            "nch_bene_ptb_ddctbl_amt",
+            "nch_bene_ptb_coinsrnc_amt",
+            "nch_bene_blood_ddctbl_amt",
+        ]
+        present_cols = [c for c in charge_cols if c in claim_df.columns]
+        if not present_cols:
+            return []
+
+        conditions = [pl.col(c).is_not_null() & (pl.col(c) < 0) for c in present_cols]
+        combined_cond = conditions[0]
+        for cond in conditions[1:]:
+            combined_cond = combined_cond | cond
+
+        invalid = claim_df.filter(combined_cond)
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="ACC-002",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with negative total charge or deductible/coinsurance amount (< 0).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
+    @staticmethod
     def check_mortality_temporal_constraints(
         bene_df: pl.DataFrame, claim_df: pl.DataFrame, claim_type: str
     ) -> list[Finding]:
@@ -1623,6 +1668,9 @@ class RelationalValidator:
                 self.check_claim_accounting_constraints(carrier_df, "Carrier Claims")
             )
             findings.extend(
+                self.check_charge_accounting_constraints(carrier_df, "Carrier Claims")
+            )
+            findings.extend(
                 self.check_provider_npi_constraints(carrier_df, "Carrier Claims")
             )
             findings.extend(
@@ -1666,6 +1714,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_accounting_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_charge_accounting_constraints(
                     outpatient_df, "Outpatient Claims"
                 )
             )
@@ -1730,6 +1783,11 @@ class RelationalValidator:
                 )
             )
             findings.extend(
+                self.check_charge_accounting_constraints(
+                    inpatient_df, "Inpatient Claims"
+                )
+            )
+            findings.extend(
                 self.check_record_uniqueness(
                     inpatient_df, ["clm_id"], "Inpatient Claims"
                 )
@@ -1782,6 +1840,9 @@ class RelationalValidator:
                 self.check_claim_accounting_constraints(snf_df, "SNF Claims")
             )
             findings.extend(
+                self.check_charge_accounting_constraints(snf_df, "SNF Claims")
+            )
+            findings.extend(
                 self.check_record_uniqueness(snf_df, ["clm_id"], "SNF Claims")
             )
 
@@ -1799,6 +1860,9 @@ class RelationalValidator:
             findings.extend(self.check_hha_field_constraints(hha_df))
             findings.extend(
                 self.check_claim_accounting_constraints(hha_df, "HHA Claims")
+            )
+            findings.extend(
+                self.check_charge_accounting_constraints(hha_df, "HHA Claims")
             )
             findings.extend(
                 self.check_record_uniqueness(hha_df, ["clm_id"], "HHA Claims")
@@ -1819,6 +1883,9 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_accounting_constraints(dme_df, "DME Claims")
+            )
+            findings.extend(
+                self.check_charge_accounting_constraints(dme_df, "DME Claims")
             )
             if "line_num" in dme_df.columns:
                 findings.extend(
@@ -1847,6 +1914,9 @@ class RelationalValidator:
             findings.extend(self.check_hospice_field_constraints(hospice_df))
             findings.extend(
                 self.check_claim_accounting_constraints(hospice_df, "Hospice Claims")
+            )
+            findings.extend(
+                self.check_charge_accounting_constraints(hospice_df, "Hospice Claims")
             )
             findings.extend(
                 self.check_record_uniqueness(hospice_df, ["clm_id"], "Hospice Claims")

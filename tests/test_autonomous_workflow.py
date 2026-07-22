@@ -1304,3 +1304,31 @@ def test_run_autonomous_workflow_line_item_check(mock_run, tmp_path):
     assert data["line_item_check"] is True
 
 
+@patch("subprocess.run")
+def test_run_autonomous_workflow_charge_check(mock_run, tmp_path):
+    """Test that charge_check option executes Claim Charge accounting check and records status."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_charge.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        charge_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["charge_check"] is True
+
+
+

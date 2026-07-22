@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--charge-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `charge_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Charge total and deductible/coinsurance non-negativity verification (`check_charge_accounting_constraints`) across claim tables before staging and committing.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `charge_check` verification logic and CLI flag parsing.
+
 - Added `--line-item-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_item_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Line Item count/number format consistency verification (`check_claim_line_item_constraints`) across claim tables before staging and committing.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `line_item_check` verification logic and CLI flag parsing.
 
