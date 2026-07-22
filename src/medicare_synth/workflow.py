@@ -62,6 +62,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     orphan_check = data.get("orphan_check", False)
     privacy_check = data.get("privacy_check", False)
     mortality_check = data.get("mortality_check", False)
+    enrollment_check = data.get("enrollment_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -98,6 +99,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Orphan Claims Verified** | {orphan_check} |
 | **K-Anonymity Privacy Verified** | {privacy_check} |
 | **Beneficiary Mortality Verified** | {mortality_check} |
+| **Beneficiary Enrollment Verified** | {enrollment_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -135,6 +137,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     orphan_check = data.get("orphan_check", False)
     privacy_check = data.get("privacy_check", False)
     mortality_check = data.get("mortality_check", False)
+    enrollment_check = data.get("enrollment_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -187,6 +190,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Orphan Claims Verified</strong></td><td>{orphan_check}</td></tr>
             <tr><td><strong>K-Anonymity Privacy Verified</strong></td><td>{privacy_check}</td></tr>
             <tr><td><strong>Beneficiary Mortality Verified</strong></td><td>{mortality_check}</td></tr>
+            <tr><td><strong>Beneficiary Enrollment Verified</strong></td><td>{enrollment_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -228,6 +232,7 @@ def run_autonomous_workflow(
     orphan_check: bool = False,
     privacy_check: bool = False,
     mortality_check: bool = False,
+    enrollment_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -254,6 +259,7 @@ def run_autonomous_workflow(
         orphan_check = True
         privacy_check = True
         mortality_check = True
+        enrollment_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -438,13 +444,17 @@ def run_autonomous_workflow(
         )
 
     if catalog_check:
-        print("\n=== Verification Step: Executing Scenario Catalog & CI Fixture Export Check ===")
+        print(
+            "\n=== Verification Step: Executing Scenario Catalog & CI Fixture Export Check ==="
+        )
         import tempfile
         from medicare_synth.catalog import ScenarioCatalog
 
         scenarios = ScenarioCatalog.get_catalog()
         with tempfile.TemporaryDirectory() as tmp_dir:
-            exported_files = ScenarioCatalog.export_ci_fixtures(tmp_dir, file_format="csv")
+            exported_files = ScenarioCatalog.export_ci_fixtures(
+                tmp_dir, file_format="csv"
+            )
             print(
                 f"✓ Scenario catalog verified ({len(scenarios)} scenarios cataloged, {len(exported_files)} CI fixture files exported)."
             )
@@ -474,27 +484,29 @@ def run_autonomous_workflow(
         from medicare_synth.scenarios import ScenarioCompiler
 
         scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
-        table_count = len([
-            scenario_slice.bene_df,
-            scenario_slice.carrier_df,
-            scenario_slice.outpatient_df,
-            scenario_slice.inpatient_df,
-            scenario_slice.pde_df,
-            scenario_slice.snf_df,
-            scenario_slice.hha_df,
-            scenario_slice.dme_df,
-            scenario_slice.hospice_df,
-            scenario_slice.mbsf_cc_df,
-            scenario_slice.mbsf_cu_df,
-            scenario_slice.mbsf_d_df,
-            scenario_slice.mbsf_base_df,
-            scenario_slice.mbsf_oc_df,
-            scenario_slice.mbsf_ndi_df,
-            scenario_slice.mbsf_ra_df,
-            scenario_slice.mbsf_c_df,
-            scenario_slice.mbsf_ffs_df,
-            scenario_slice.mbsf_pde_util_df,
-        ])
+        table_count = len(
+            [
+                scenario_slice.bene_df,
+                scenario_slice.carrier_df,
+                scenario_slice.outpatient_df,
+                scenario_slice.inpatient_df,
+                scenario_slice.pde_df,
+                scenario_slice.snf_df,
+                scenario_slice.hha_df,
+                scenario_slice.dme_df,
+                scenario_slice.hospice_df,
+                scenario_slice.mbsf_cc_df,
+                scenario_slice.mbsf_cu_df,
+                scenario_slice.mbsf_d_df,
+                scenario_slice.mbsf_base_df,
+                scenario_slice.mbsf_oc_df,
+                scenario_slice.mbsf_ndi_df,
+                scenario_slice.mbsf_ra_df,
+                scenario_slice.mbsf_c_df,
+                scenario_slice.mbsf_ffs_df,
+                scenario_slice.mbsf_pde_util_df,
+            ]
+        )
         statuses = list(ProvenanceStatus)
         print(
             f"✓ Dataset provenance verified ({table_count} tables audited across {len(statuses)} taxonomy statuses)."
@@ -508,27 +520,29 @@ def run_autonomous_workflow(
         start_t = time.perf_counter()
         scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
         elapsed = time.perf_counter() - start_t
-        total_records = sum([
-            len(scenario_slice.bene_df),
-            len(scenario_slice.carrier_df),
-            len(scenario_slice.outpatient_df),
-            len(scenario_slice.inpatient_df),
-            len(scenario_slice.pde_df),
-            len(scenario_slice.snf_df),
-            len(scenario_slice.hha_df),
-            len(scenario_slice.dme_df),
-            len(scenario_slice.hospice_df),
-            len(scenario_slice.mbsf_cc_df),
-            len(scenario_slice.mbsf_cu_df),
-            len(scenario_slice.mbsf_d_df),
-            len(scenario_slice.mbsf_base_df),
-            len(scenario_slice.mbsf_oc_df),
-            len(scenario_slice.mbsf_ndi_df),
-            len(scenario_slice.mbsf_ra_df),
-            len(scenario_slice.mbsf_c_df),
-            len(scenario_slice.mbsf_ffs_df),
-            len(scenario_slice.mbsf_pde_util_df),
-        ])
+        total_records = sum(
+            [
+                len(scenario_slice.bene_df),
+                len(scenario_slice.carrier_df),
+                len(scenario_slice.outpatient_df),
+                len(scenario_slice.inpatient_df),
+                len(scenario_slice.pde_df),
+                len(scenario_slice.snf_df),
+                len(scenario_slice.hha_df),
+                len(scenario_slice.dme_df),
+                len(scenario_slice.hospice_df),
+                len(scenario_slice.mbsf_cc_df),
+                len(scenario_slice.mbsf_cu_df),
+                len(scenario_slice.mbsf_d_df),
+                len(scenario_slice.mbsf_base_df),
+                len(scenario_slice.mbsf_oc_df),
+                len(scenario_slice.mbsf_ndi_df),
+                len(scenario_slice.mbsf_ra_df),
+                len(scenario_slice.mbsf_c_df),
+                len(scenario_slice.mbsf_ffs_df),
+                len(scenario_slice.mbsf_pde_util_df),
+            ]
+        )
         rate = total_records / max(elapsed, 1e-6)
         print(
             f"✓ Benchmark throughput verified ({total_records} records synthesized in {elapsed:.4f}s: {rate:.1f} rec/s)."
@@ -573,9 +587,7 @@ def run_autonomous_workflow(
 
         source_manifest = SourceManifest.load_default_manifest()
         total_files = len(source_manifest.files)
-        total_fks = sum(
-            len(fm.foreign_keys or []) for fm in source_manifest.files
-        )
+        total_fks = sum(len(fm.foreign_keys or []) for fm in source_manifest.files)
         print(
             f"✓ CMS baseline manifest verified ({total_files} file entries audited, {total_fks} foreign key relationships validated)."
         )
@@ -589,7 +601,11 @@ def run_autonomous_workflow(
         source_manifest = SourceManifest.load_default_manifest()
 
         bene_cols = scenario_slice.bene_df.columns
-        bene_id_col = "bene_id" if "bene_id" in bene_cols else ("BENE_ID" if "BENE_ID" in bene_cols else "DESYNPUF_ID")
+        bene_id_col = (
+            "bene_id"
+            if "bene_id" in bene_cols
+            else ("BENE_ID" if "BENE_ID" in bene_cols else "DESYNPUF_ID")
+        )
         bene_ids = set(scenario_slice.bene_df[bene_id_col].to_list())
         child_tables = {
             "carrier": scenario_slice.carrier_df,
@@ -632,7 +648,9 @@ def run_autonomous_workflow(
         )
 
     if temporal_check:
-        print("\n=== Verification Step: Executing Temporal Integrity Verification Check ===")
+        print(
+            "\n=== Verification Step: Executing Temporal Integrity Verification Check ==="
+        )
         from medicare_synth.scenarios import ScenarioCompiler
         from medicare_synth.validation import RelationalValidator
 
@@ -661,7 +679,9 @@ def run_autonomous_workflow(
         )
 
     if evidence_check:
-        print("\n=== Verification Step: Executing RKB Evidence Snapshot Verification Check ===")
+        print(
+            "\n=== Verification Step: Executing RKB Evidence Snapshot Verification Check ==="
+        )
         from medicare_synth.evidence import RKBEvidenceSnapshot
 
         snapshot = RKBEvidenceSnapshot.load_default_snapshot()
@@ -671,7 +691,9 @@ def run_autonomous_workflow(
         )
 
     if accounting_check:
-        print("\n=== Verification Step: Executing Claim Accounting Verification Check ===")
+        print(
+            "\n=== Verification Step: Executing Claim Accounting Verification Check ==="
+        )
         from medicare_synth.scenarios import ScenarioCompiler
         from medicare_synth.validation import RelationalValidator
 
@@ -696,7 +718,9 @@ def run_autonomous_workflow(
         )
 
     if uniqueness_check:
-        print("\n=== Verification Step: Executing Primary Key Uniqueness Verification Check ===")
+        print(
+            "\n=== Verification Step: Executing Primary Key Uniqueness Verification Check ==="
+        )
         from medicare_synth.scenarios import ScenarioCompiler
         from medicare_synth.validation import RelationalValidator
 
@@ -780,7 +804,9 @@ def run_autonomous_workflow(
         )
 
     if privacy_check:
-        print("\n=== Verification Step: Executing K-Anonymity Privacy Verification Check ===")
+        print(
+            "\n=== Verification Step: Executing K-Anonymity Privacy Verification Check ==="
+        )
         from medicare_synth.audit import AuditEngine
         from medicare_synth.scenarios import ScenarioCompiler
 
@@ -845,6 +871,24 @@ def run_autonomous_workflow(
             f"✓ Beneficiary mortality temporal consistency verified across {len(claim_tables)} claim table families ({violating_count} post-mortem findings)."
         )
 
+    if enrollment_check:
+        print(
+            "\n=== Verification Step: Executing Beneficiary Enrollment Consistency Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        enrollment_findings = (
+            RelationalValidator.check_enrollment_consistency_constraints(
+                scenario_slice.mbsf_base_df
+            )
+        )
+        violating_count = sum(f.count for f in enrollment_findings)
+        print(
+            f"✓ Beneficiary enrollment consistency verified across MBSF Base Enrollment table ({violating_count} consistency findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -901,6 +945,7 @@ def run_autonomous_workflow(
             "orphan_check": orphan_check,
             "privacy_check": privacy_check,
             "mortality_check": mortality_check,
+            "enrollment_check": enrollment_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -972,6 +1017,7 @@ def run_autonomous_workflow(
             "orphan_check": orphan_check,
             "privacy_check": privacy_check,
             "mortality_check": mortality_check,
+            "enrollment_check": enrollment_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -982,7 +1028,9 @@ def run_autonomous_workflow(
         if html_report_path:
             _write_html_report(html_report_path, report_data)
         if checkout_main:
-            print("\n=== Post-Merge Step: Checking out main branch & pulling latest changes ===")
+            print(
+                "\n=== Post-Merge Step: Checking out main branch & pulling latest changes ==="
+            )
             run_cmd(["git", "checkout", "main"])
             run_cmd(["git", "pull", "origin", "main"])
             print("✓ Checked out main branch and synced latest changes.")
@@ -1019,6 +1067,7 @@ def run_autonomous_workflow(
         "orphan_check": orphan_check,
         "privacy_check": privacy_check,
         "mortality_check": mortality_check,
+        "enrollment_check": enrollment_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
@@ -1029,7 +1078,9 @@ def run_autonomous_workflow(
     if html_report_path:
         _write_html_report(html_report_path, report_data)
     if checkout_main:
-        print("\n=== Post-Merge Step: Checking out main branch & pulling latest changes ===")
+        print(
+            "\n=== Post-Merge Step: Checking out main branch & pulling latest changes ==="
+        )
         run_cmd(["git", "checkout", "main"])
         run_cmd(["git", "pull", "origin", "main"])
         print("✓ Checked out main branch and synced latest changes.")

@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--enrollment-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `enrollment_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable beneficiary enrollment consistency verification across MBSF Base records (`0 <= coverage_months <= 12`). Added `check_enrollment_consistency_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `enrollment_check` verification logic and CLI flag parsing.
+
 - Added `--mortality-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `mortality_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable beneficiary mortality temporal consistency verification across claim tables (`clm_from_dt <= bene_death_dt`). Added `check_mortality_temporal_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `mortality_check` verification logic and CLI flag parsing.
 
