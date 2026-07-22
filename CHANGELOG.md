@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--taxonomy-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `taxonomy_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Healthcare Provider Taxonomy Code 10-character alphanumeric format consistency verification across claim tables. Added `check_taxonomy_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `taxonomy_check` verification logic and CLI flag parsing.
+
 - Added `--drg-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `drg_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Diagnosis Related Group (DRG) 3-character alphanumeric format consistency verification for inpatient claims. Added `check_drg_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `drg_check` verification logic and CLI flag parsing.
 

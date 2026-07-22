@@ -295,3 +295,22 @@ def test_check_drg_code_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_taxonomy_code_constraints() -> None:
+    carrier_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003"],
+            "bene_id": ["BENE001", "BENE002", "BENE003"],
+            "prvdr_taxonomy_cd": ["207Q00000X", "INVALID_TAXONOMY_CODE", None],
+        }
+    )
+    findings = RelationalValidator.check_taxonomy_code_constraints(
+        carrier_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "TAX-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1

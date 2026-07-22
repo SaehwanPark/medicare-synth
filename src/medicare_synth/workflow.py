@@ -69,6 +69,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     hcpcs_check = data.get("hcpcs_check", False)
     ndc_check = data.get("ndc_check", False)
     drg_check = data.get("drg_check", False)
+    taxonomy_check = data.get("taxonomy_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -112,6 +113,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **HCPCS Procedure Code Format Verified** | {hcpcs_check} |
 | **NDC Format Verified** | {ndc_check} |
 | **DRG Format Verified** | {drg_check} |
+| **Taxonomy Code Format Verified** | {taxonomy_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -156,6 +158,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     hcpcs_check = data.get("hcpcs_check", False)
     ndc_check = data.get("ndc_check", False)
     drg_check = data.get("drg_check", False)
+    taxonomy_check = data.get("taxonomy_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -215,6 +218,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>HCPCS Procedure Code Format Verified</strong></td><td>{hcpcs_check}</td></tr>
             <tr><td><strong>NDC Format Verified</strong></td><td>{ndc_check}</td></tr>
             <tr><td><strong>DRG Format Verified</strong></td><td>{drg_check}</td></tr>
+            <tr><td><strong>Taxonomy Code Format Verified</strong></td><td>{taxonomy_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -263,6 +267,7 @@ def run_autonomous_workflow(
     hcpcs_check: bool = False,
     ndc_check: bool = False,
     drg_check: bool = False,
+    taxonomy_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -296,6 +301,7 @@ def run_autonomous_workflow(
         hcpcs_check = True
         ndc_check = True
         drg_check = True
+        taxonomy_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -1053,6 +1059,22 @@ def run_autonomous_workflow(
             f"✓ DRG code format verified for Inpatient Claims ({violating_count} DRG format findings)."
         )
 
+    if taxonomy_check:
+        print(
+            "\n=== Verification Step: Executing Healthcare Provider Taxonomy Code Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        tax_findings = RelationalValidator.check_taxonomy_code_constraints(
+            scenario_slice.carrier_df, "Carrier Claims"
+        )
+        violating_count = sum(f.count for f in tax_findings)
+        print(
+            f"✓ Taxonomy code format verified for Carrier Claims ({violating_count} Taxonomy format findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1116,6 +1138,7 @@ def run_autonomous_workflow(
             "hcpcs_check": hcpcs_check,
             "ndc_check": ndc_check,
             "drg_check": drg_check,
+            "taxonomy_check": taxonomy_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1194,6 +1217,7 @@ def run_autonomous_workflow(
             "hcpcs_check": hcpcs_check,
             "ndc_check": ndc_check,
             "drg_check": drg_check,
+            "taxonomy_check": taxonomy_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1250,6 +1274,7 @@ def run_autonomous_workflow(
         "hcpcs_check": hcpcs_check,
         "ndc_check": ndc_check,
         "drg_check": drg_check,
+        "taxonomy_check": taxonomy_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
