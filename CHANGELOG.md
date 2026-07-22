@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--icd-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `icd_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable ICD diagnosis code 3-7 alphanumeric format consistency verification across claim tables. Added `check_icd_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `icd_check` verification logic and CLI flag parsing.
+
 - Added `--provider-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `provider_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable provider NPI 10-digit numeric format consistency verification across claim tables. Added `check_provider_npi_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `provider_check` verification logic and CLI flag parsing.
 
