@@ -450,6 +450,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Zip Code domain format constraints before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--line-item-check",
+        action="store_true",
+        help="Verify claim line item count/number domain format constraints before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -801,6 +806,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             carrier_check=args.carrier_check,
             outpatient_check=args.outpatient_check,
             zip_check=args.zip_check,
+            line_item_check=args.line_item_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )

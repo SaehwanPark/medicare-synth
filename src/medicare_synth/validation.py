@@ -1532,6 +1532,44 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_line_item_constraints(
+        df: pl.DataFrame, table_type: str
+    ) -> list[Finding]:
+        """Identifies claim line items with invalid line number or line item count (< 1)."""
+        if df.is_empty():
+            return []
+
+        line_col = None
+        for candidate in ["line_num", "dme_line_item_count", "line_srvc_cnt"]:
+            if candidate in df.columns:
+                line_col = candidate
+                break
+
+        if line_col is None:
+            return []
+
+        invalid = df.filter(pl.col(line_col).is_not_null() & (pl.col(line_col) < 1))
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="LINE-001",
+                    category=FindingCategory.FIELD,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {table_type} with invalid line item count or number (< 1).",
+                    count=invalid_count,
+                    details={"table_type": table_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,
@@ -1598,6 +1636,9 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_pos_code_constraints(carrier_df, "Carrier Claims")
+            )
+            findings.extend(
+                self.check_claim_line_item_constraints(carrier_df, "Carrier Claims")
             )
             if "line_num" in carrier_df.columns:
                 findings.extend(
@@ -1773,6 +1814,9 @@ class RelationalValidator:
                 self.check_dob_temporal_constraints(bene_df, dme_df, "DME Claims")
             )
             findings.extend(self.check_dme_field_constraints(dme_df))
+            findings.extend(
+                self.check_claim_line_item_constraints(dme_df, "DME Claims")
+            )
             findings.extend(
                 self.check_claim_accounting_constraints(dme_df, "DME Claims")
             )
