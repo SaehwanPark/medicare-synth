@@ -832,6 +832,63 @@ class RelationalValidator:
         return []
 
     @staticmethod
+    def check_dob_temporal_constraints(
+        bene_df: pl.DataFrame, claim_df: pl.DataFrame, claim_type: str
+    ) -> list[Finding]:
+        """Identifies claims where service start date (clm_from_dt) precedes beneficiary birth date."""
+        if (
+            bene_df.is_empty()
+            or claim_df.is_empty()
+            or "bene_id" not in bene_df.columns
+            or "bene_id" not in claim_df.columns
+        ):
+            return []
+
+        date_col = None
+        for col in ["clm_from_dt", "srvc_dt"]:
+            if col in claim_df.columns:
+                date_col = col
+                break
+        if date_col is None:
+            return []
+
+        dob_col = None
+        for col in ["bene_birth_dt", "bene_dob"]:
+            if col in bene_df.columns:
+                dob_col = col
+                break
+        if dob_col is None:
+            return []
+
+        bene_dob_df = bene_df.filter(pl.col(dob_col).is_not_null()).select(
+            ["bene_id", dob_col]
+        )
+        if bene_dob_df.is_empty():
+            return []
+
+        joined = claim_df.join(bene_dob_df, on="bene_id", how="inner")
+        invalid = joined.filter(pl.col(date_col) < pl.col(dob_col))
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="TMP-004",
+                    category=FindingCategory.TEMPORAL,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with service date preceding beneficiary birth date ({date_col} < {dob_col}).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
+    @staticmethod
     def check_enrollment_consistency_constraints(
         mbsf_base_df: pl.DataFrame,
     ) -> list[Finding]:
@@ -923,6 +980,11 @@ class RelationalValidator:
                 )
             )
             findings.extend(
+                self.check_dob_temporal_constraints(
+                    bene_df, carrier_df, "Carrier Claims"
+                )
+            )
+            findings.extend(
                 self.check_claim_accounting_constraints(carrier_df, "Carrier Claims")
             )
             if "line_num" in carrier_df.columns:
@@ -941,6 +1003,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_mortality_temporal_constraints(
+                    bene_df, outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_dob_temporal_constraints(
                     bene_df, outpatient_df, "Outpatient Claims"
                 )
             )
@@ -970,6 +1037,11 @@ class RelationalValidator:
                 )
             )
             findings.extend(
+                self.check_dob_temporal_constraints(
+                    bene_df, inpatient_df, "Inpatient Claims"
+                )
+            )
+            findings.extend(
                 self.check_claim_accounting_constraints(
                     inpatient_df, "Inpatient Claims"
                 )
@@ -986,6 +1058,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_mortality_temporal_constraints(
+                    bene_df, pde_df, "Prescription Drug Events"
+                )
+            )
+            findings.extend(
+                self.check_dob_temporal_constraints(
                     bene_df, pde_df, "Prescription Drug Events"
                 )
             )
@@ -1009,6 +1086,9 @@ class RelationalValidator:
             findings.extend(
                 self.check_mortality_temporal_constraints(bene_df, snf_df, "SNF Claims")
             )
+            findings.extend(
+                self.check_dob_temporal_constraints(bene_df, snf_df, "SNF Claims")
+            )
             findings.extend(self.check_snf_field_constraints(snf_df))
             findings.extend(
                 self.check_claim_accounting_constraints(snf_df, "SNF Claims")
@@ -1025,6 +1105,9 @@ class RelationalValidator:
             findings.extend(
                 self.check_mortality_temporal_constraints(bene_df, hha_df, "HHA Claims")
             )
+            findings.extend(
+                self.check_dob_temporal_constraints(bene_df, hha_df, "HHA Claims")
+            )
             findings.extend(self.check_hha_field_constraints(hha_df))
             findings.extend(
                 self.check_claim_accounting_constraints(hha_df, "HHA Claims")
@@ -1038,6 +1121,9 @@ class RelationalValidator:
             findings.extend(self.check_temporal_inversions(dme_df, "DME Claims"))
             findings.extend(
                 self.check_mortality_temporal_constraints(bene_df, dme_df, "DME Claims")
+            )
+            findings.extend(
+                self.check_dob_temporal_constraints(bene_df, dme_df, "DME Claims")
             )
             findings.extend(self.check_dme_field_constraints(dme_df))
             findings.extend(
@@ -1059,6 +1145,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_mortality_temporal_constraints(
+                    bene_df, hospice_df, "Hospice Claims"
+                )
+            )
+            findings.extend(
+                self.check_dob_temporal_constraints(
                     bene_df, hospice_df, "Hospice Claims"
                 )
             )

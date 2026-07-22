@@ -175,3 +175,29 @@ def test_check_enrollment_consistency_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_dob_temporal_constraints() -> None:
+    bene_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE001", "BENE002"],
+            "bene_birth_dt": [date(1950, 1, 1), date(1960, 5, 10)],
+        }
+    )
+    carrier_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002"],
+            "bene_id": ["BENE001", "BENE002"],
+            "clm_from_dt": [date(1949, 12, 31), date(2021, 8, 1)],  # 1949 violates DOB
+        }
+    )
+    findings = RelationalValidator.check_dob_temporal_constraints(
+        bene_df, carrier_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "TMP-004"
+    assert finding.category == FindingCategory.TEMPORAL
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+
