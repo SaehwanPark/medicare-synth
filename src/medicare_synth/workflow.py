@@ -75,6 +75,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
     inpatient_check = data.get("inpatient_check", False)
+    snf_check = data.get("snf_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -124,6 +125,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Demographic Code Format Verified** | {demographic_check} |
 | **MBSF Domain Constraints Verified** | {mbsf_check} |
 | **Inpatient Field Constraints Verified** | {inpatient_check} |
+| **SNF Field Constraints Verified** | {snf_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -174,6 +176,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
     inpatient_check = data.get("inpatient_check", False)
+    snf_check = data.get("snf_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -239,6 +242,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
             <tr><td><strong>MBSF Domain Constraints Verified</strong></td><td>{mbsf_check}</td></tr>
             <tr><td><strong>Inpatient Field Constraints Verified</strong></td><td>{inpatient_check}</td></tr>
+            <tr><td><strong>SNF Field Constraints Verified</strong></td><td>{snf_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -293,6 +297,7 @@ def run_autonomous_workflow(
     demographic_check: bool = False,
     mbsf_check: bool = False,
     inpatient_check: bool = False,
+    snf_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -332,6 +337,7 @@ def run_autonomous_workflow(
         demographic_check = True
         mbsf_check = True
         inpatient_check = True
+        snf_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -1235,6 +1241,22 @@ def run_autonomous_workflow(
             f"✓ Inpatient domain field constraints verified ({violating_count} Inpatient constraint findings)."
         )
 
+    if snf_check:
+        print(
+            "\n=== Verification Step: Executing SNF Domain Field Constraint Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        snf_findings = RelationalValidator.check_snf_field_constraints(
+            scenario_slice.snf_df
+        )
+        violating_count = sum(f.count for f in snf_findings)
+        print(
+            f"✓ SNF domain field constraints verified ({violating_count} SNF constraint findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1304,6 +1326,7 @@ def run_autonomous_workflow(
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
             "inpatient_check": inpatient_check,
+            "snf_check": snf_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1388,6 +1411,7 @@ def run_autonomous_workflow(
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
             "inpatient_check": inpatient_check,
+            "snf_check": snf_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1450,6 +1474,7 @@ def run_autonomous_workflow(
         "demographic_check": demographic_check,
         "mbsf_check": mbsf_check,
         "inpatient_check": inpatient_check,
+        "snf_check": snf_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
