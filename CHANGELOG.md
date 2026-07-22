@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--provider-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `provider_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable provider NPI 10-digit numeric format consistency verification across claim tables. Added `check_provider_npi_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `provider_check` verification logic and CLI flag parsing.
+
 - Added `--dob-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `dob_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable beneficiary birth date temporal consistency verification across claim tables (`clm_from_dt >= bene_birth_dt`). Added `check_dob_temporal_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `dob_check` verification logic and CLI flag parsing.
 

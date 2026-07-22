@@ -64,6 +64,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     mortality_check = data.get("mortality_check", False)
     enrollment_check = data.get("enrollment_check", False)
     dob_check = data.get("dob_check", False)
+    provider_check = data.get("provider_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -102,6 +103,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Beneficiary Mortality Verified** | {mortality_check} |
 | **Beneficiary Enrollment Verified** | {enrollment_check} |
 | **Beneficiary DOB Temporal Verified** | {dob_check} |
+| **Provider NPI Format Verified** | {provider_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -141,6 +143,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     mortality_check = data.get("mortality_check", False)
     enrollment_check = data.get("enrollment_check", False)
     dob_check = data.get("dob_check", False)
+    provider_check = data.get("provider_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -195,6 +198,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Beneficiary Mortality Verified</strong></td><td>{mortality_check}</td></tr>
             <tr><td><strong>Beneficiary Enrollment Verified</strong></td><td>{enrollment_check}</td></tr>
             <tr><td><strong>Beneficiary DOB Temporal Verified</strong></td><td>{dob_check}</td></tr>
+            <tr><td><strong>Provider NPI Format Verified</strong></td><td>{provider_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -238,6 +242,7 @@ def run_autonomous_workflow(
     mortality_check: bool = False,
     enrollment_check: bool = False,
     dob_check: bool = False,
+    provider_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -266,6 +271,7 @@ def run_autonomous_workflow(
         mortality_check = True
         enrollment_check = True
         dob_check = True
+        provider_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -925,6 +931,28 @@ def run_autonomous_workflow(
             f"✓ Beneficiary birth date temporal consistency verified across {len(claim_tables)} claim table families ({violating_count} pre-birth findings)."
         )
 
+    if provider_check:
+        print(
+            "\n=== Verification Step: Executing Provider NPI Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        claim_tables = [
+            ("carrier", scenario_slice.carrier_df),
+            ("outpatient", scenario_slice.outpatient_df),
+        ]
+        provider_findings = []
+        for name, df in claim_tables:
+            provider_findings.extend(
+                RelationalValidator.check_provider_npi_constraints(df, name)
+            )
+        violating_count = sum(f.count for f in provider_findings)
+        print(
+            f"✓ Provider NPI format verified across {len(claim_tables)} claim table families ({violating_count} NPI format findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -983,6 +1011,7 @@ def run_autonomous_workflow(
             "mortality_check": mortality_check,
             "enrollment_check": enrollment_check,
             "dob_check": dob_check,
+            "provider_check": provider_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1056,6 +1085,7 @@ def run_autonomous_workflow(
             "mortality_check": mortality_check,
             "enrollment_check": enrollment_check,
             "dob_check": dob_check,
+            "provider_check": provider_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1107,6 +1137,7 @@ def run_autonomous_workflow(
         "mortality_check": mortality_check,
         "enrollment_check": enrollment_check,
         "dob_check": dob_check,
+        "provider_check": provider_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
