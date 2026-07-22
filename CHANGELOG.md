@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added `--validation-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `validation_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to verify dataset relational validation integrity before staging and committing.
+- Extended unit test suite in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `validation_check` status verification logic and CLI flag parsing.
 - Added `--audit-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `audit_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to verify dataset privacy and relational join audit status before staging and committing.
 - Extended unit test suite in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `audit_check` status verification logic and CLI flag parsing.
 - Added `--html-report` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `html_report_path` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to generate HTML summary execution reports.
