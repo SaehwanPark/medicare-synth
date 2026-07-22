@@ -350,6 +350,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify beneficiary enrollment consistency across MBSF Base enrollment records before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--dob-check",
+        action="store_true",
+        help="Verify beneficiary birth date temporal consistency across all claim tables before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -681,6 +686,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             privacy_check=args.privacy_check,
             mortality_check=args.mortality_check,
             enrollment_check=args.enrollment_check,
+            dob_check=args.dob_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
