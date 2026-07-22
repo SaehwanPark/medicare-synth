@@ -84,6 +84,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     outpatient_check = data.get("outpatient_check", False)
     zip_check = data.get("zip_check", False)
     line_item_check = data.get("line_item_check", False)
+    charge_check = data.get("charge_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -142,6 +143,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Outpatient Field Constraints Verified** | {outpatient_check} |
 | **Zip Code Format Verified** | {zip_check} |
 | **Claim Line Item Format Verified** | {line_item_check} |
+| **Claim Charge Accounting Verified** | {charge_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -201,6 +203,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     outpatient_check = data.get("outpatient_check", False)
     zip_check = data.get("zip_check", False)
     line_item_check = data.get("line_item_check", False)
+    charge_check = data.get("charge_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -275,6 +278,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Outpatient Field Constraints Verified</strong></td><td>{outpatient_check}</td></tr>
             <tr><td><strong>Zip Code Format Verified</strong></td><td>{zip_check}</td></tr>
             <tr><td><strong>Claim Line Item Format Verified</strong></td><td>{line_item_check}</td></tr>
+            <tr><td><strong>Claim Charge Accounting Verified</strong></td><td>{charge_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -338,6 +342,7 @@ def run_autonomous_workflow(
     outpatient_check: bool = False,
     zip_check: bool = False,
     line_item_check: bool = False,
+    charge_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -386,6 +391,7 @@ def run_autonomous_workflow(
         outpatient_check = True
         zip_check = True
         line_item_check = True
+        charge_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -1433,6 +1439,22 @@ def run_autonomous_workflow(
             f"✓ Claim Line Item format constraints verified ({violating_count} Line Item constraint findings)."
         )
 
+    if charge_check:
+        print(
+            "\n=== Verification Step: Executing Claim Charge Accounting Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        charge_findings = RelationalValidator.check_charge_accounting_constraints(
+            scenario_slice.carrier_df, "Carrier Claims"
+        )
+        violating_count = sum(f.count for f in charge_findings)
+        print(
+            f"✓ Claim Charge accounting constraints verified ({violating_count} Charge constraint findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1511,6 +1533,7 @@ def run_autonomous_workflow(
             "outpatient_check": outpatient_check,
             "zip_check": zip_check,
             "line_item_check": line_item_check,
+            "charge_check": charge_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1604,6 +1627,7 @@ def run_autonomous_workflow(
             "outpatient_check": outpatient_check,
             "zip_check": zip_check,
             "line_item_check": line_item_check,
+            "charge_check": charge_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1675,6 +1699,7 @@ def run_autonomous_workflow(
         "outpatient_check": outpatient_check,
         "zip_check": zip_check,
         "line_item_check": line_item_check,
+        "charge_check": charge_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
