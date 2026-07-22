@@ -238,3 +238,22 @@ def test_check_icd_code_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_hcpcs_code_constraints() -> None:
+    carrier_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003"],
+            "bene_id": ["BENE001", "BENE002", "BENE003"],
+            "hcpcs_cd": ["99213", "INVALID_HCPCS_TOO_LONG", None],
+        }
+    )
+    findings = RelationalValidator.check_hcpcs_code_constraints(
+        carrier_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "HCPCS-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
