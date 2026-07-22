@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--manifest-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `manifest_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable CMS baseline source manifest integrity verification across all 19 synthetic data tables before staging and committing.
+- Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `manifest_check` verification logic and CLI flag parsing.
+
 - Added `--summary-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `summary_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable aggregated dataset summary matrix verification across all 19 Medicare synthetic data tables before staging and committing.
 - Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `summary_check` verification logic and CLI flag parsing.
 
