@@ -66,6 +66,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     dob_check = data.get("dob_check", False)
     provider_check = data.get("provider_check", False)
     icd_check = data.get("icd_check", False)
+    hcpcs_check = data.get("hcpcs_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -106,6 +107,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Beneficiary DOB Temporal Verified** | {dob_check} |
 | **Provider NPI Format Verified** | {provider_check} |
 | **ICD Diagnosis Code Format Verified** | {icd_check} |
+| **HCPCS Procedure Code Format Verified** | {hcpcs_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -147,6 +149,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     dob_check = data.get("dob_check", False)
     provider_check = data.get("provider_check", False)
     icd_check = data.get("icd_check", False)
+    hcpcs_check = data.get("hcpcs_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -203,6 +206,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Beneficiary DOB Temporal Verified</strong></td><td>{dob_check}</td></tr>
             <tr><td><strong>Provider NPI Format Verified</strong></td><td>{provider_check}</td></tr>
             <tr><td><strong>ICD Diagnosis Code Format Verified</strong></td><td>{icd_check}</td></tr>
+            <tr><td><strong>HCPCS Procedure Code Format Verified</strong></td><td>{hcpcs_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -248,6 +252,7 @@ def run_autonomous_workflow(
     dob_check: bool = False,
     provider_check: bool = False,
     icd_check: bool = False,
+    hcpcs_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -278,6 +283,7 @@ def run_autonomous_workflow(
         dob_check = True
         provider_check = True
         icd_check = True
+        hcpcs_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -981,6 +987,28 @@ def run_autonomous_workflow(
             f"✓ ICD diagnosis code format verified across {len(claim_tables)} claim table families ({violating_count} ICD format findings)."
         )
 
+    if hcpcs_check:
+        print(
+            "\n=== Verification Step: Executing HCPCS Procedure Code Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        claim_tables = [
+            ("carrier", scenario_slice.carrier_df),
+            ("outpatient", scenario_slice.outpatient_df),
+        ]
+        hcpcs_findings = []
+        for name, df in claim_tables:
+            hcpcs_findings.extend(
+                RelationalValidator.check_hcpcs_code_constraints(df, name)
+            )
+        violating_count = sum(f.count for f in hcpcs_findings)
+        print(
+            f"✓ HCPCS procedure code format verified across {len(claim_tables)} claim table families ({violating_count} HCPCS format findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1041,6 +1069,7 @@ def run_autonomous_workflow(
             "dob_check": dob_check,
             "provider_check": provider_check,
             "icd_check": icd_check,
+            "hcpcs_check": hcpcs_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1116,6 +1145,7 @@ def run_autonomous_workflow(
             "dob_check": dob_check,
             "provider_check": provider_check,
             "icd_check": icd_check,
+            "hcpcs_check": hcpcs_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1169,6 +1199,7 @@ def run_autonomous_workflow(
         "dob_check": dob_check,
         "provider_check": provider_check,
         "icd_check": icd_check,
+        "hcpcs_check": hcpcs_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }

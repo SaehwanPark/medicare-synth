@@ -365,6 +365,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify ICD diagnosis code 3-7 alphanumeric format consistency across all claim tables before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--hcpcs-check",
+        action="store_true",
+        help="Verify HCPCS procedure code 5-character alphanumeric format consistency across all claim tables before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -699,6 +704,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             dob_check=args.dob_check,
             provider_check=args.provider_check,
             icd_check=args.icd_check,
+            hcpcs_check=args.hcpcs_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )

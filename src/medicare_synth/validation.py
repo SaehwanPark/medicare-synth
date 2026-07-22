@@ -1023,6 +1023,49 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_hcpcs_code_constraints(
+        claim_df: pl.DataFrame, claim_type: str
+    ) -> list[Finding]:
+        """Identifies claims with invalid HCPCS procedure code format (must be 5 alphanumeric characters when present)."""
+        if claim_df.is_empty():
+            return []
+
+        hcpcs_col = None
+        for col in ["hcpcs_cd", "hcpcs_cd_1", "line_hcpcs_cd"]:
+            if col in claim_df.columns:
+                hcpcs_col = col
+                break
+        if hcpcs_col is None:
+            return []
+
+        non_null_hcpcs = claim_df.filter(pl.col(hcpcs_col).is_not_null())
+        if non_null_hcpcs.is_empty():
+            return []
+
+        invalid = non_null_hcpcs.filter(
+            ~pl.col(hcpcs_col).str.contains(r"^[A-Za-z0-9]{5}$")
+        )
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="HCPCS-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with invalid HCPCS procedure code format (must be 5 alphanumeric characters).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,
@@ -1079,6 +1122,9 @@ class RelationalValidator:
             findings.extend(
                 self.check_icd_code_constraints(carrier_df, "Carrier Claims")
             )
+            findings.extend(
+                self.check_hcpcs_code_constraints(carrier_df, "Carrier Claims")
+            )
             if "line_num" in carrier_df.columns:
                 findings.extend(
                     self.check_record_uniqueness(
@@ -1115,6 +1161,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_icd_code_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_hcpcs_code_constraints(
                     outpatient_df, "Outpatient Claims"
                 )
             )
