@@ -395,6 +395,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim Type Code 2-digit numeric format consistency across claim records before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--disposition-check",
+        action="store_true",
+        help="Verify Claim Processing Disposition Code 2-digit numeric format consistency across claim records before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--rev-center-check",
         action="store_true",
         help="Verify Revenue Center Code 4-digit numeric format consistency across claim records before commit/push",
@@ -815,6 +820,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             taxonomy_check=args.taxonomy_check,
             pos_check=args.pos_check,
             claim_type_check=args.claim_type_check,
+            disposition_check=args.disposition_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,

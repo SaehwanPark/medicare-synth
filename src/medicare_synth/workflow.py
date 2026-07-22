@@ -72,6 +72,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     taxonomy_check = data.get("taxonomy_check", False)
     pos_check = data.get("pos_check", False)
     claim_type_check = data.get("claim_type_check", False)
+    disposition_check = data.get("disposition_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -134,6 +135,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Taxonomy Code Format Verified** | {taxonomy_check} |
 | **Place of Service Code Format Verified** | {pos_check} |
 | **Claim Type Code Format Verified** | {claim_type_check} |
+| **Claim Disposition Code Format Verified** | {disposition_check} |
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
 | **MBSF Domain Constraints Verified** | {mbsf_check} |
@@ -197,6 +199,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     taxonomy_check = data.get("taxonomy_check", False)
     pos_check = data.get("pos_check", False)
     claim_type_check = data.get("claim_type_check", False)
+    disposition_check = data.get("disposition_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -275,6 +278,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Taxonomy Code Format Verified</strong></td><td>{taxonomy_check}</td></tr>
             <tr><td><strong>Place of Service Format Verified</strong></td><td>{pos_check}</td></tr>
             <tr><td><strong>Claim Type Format Verified</strong></td><td>{claim_type_check}</td></tr>
+            <tr><td><strong>Claim Disposition Format Verified</strong></td><td>{disposition_check}</td></tr>
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
             <tr><td><strong>MBSF Domain Constraints Verified</strong></td><td>{mbsf_check}</td></tr>
@@ -342,6 +346,7 @@ def run_autonomous_workflow(
     taxonomy_check: bool = False,
     pos_check: bool = False,
     claim_type_check: bool = False,
+    disposition_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -394,6 +399,7 @@ def run_autonomous_workflow(
         taxonomy_check = True
         pos_check = True
         claim_type_check = True
+        disposition_check = True
         rev_center_check = True
         demographic_check = True
         mbsf_check = True
@@ -1521,6 +1527,22 @@ def run_autonomous_workflow(
             f"✓ Claim Utilization day constraints verified ({violating_count} Utilization constraint findings)."
         )
 
+    if disposition_check:
+        print(
+            "\n=== Verification Step: Executing Claim Processing Disposition Code Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        disp_findings = RelationalValidator.check_claim_disposition_constraints(
+            scenario_slice.carrier_df, "Carrier Claims"
+        )
+        violating_count = sum(f.count for f in disp_findings)
+        print(
+            f"✓ Claim Disposition Code format constraints verified ({violating_count} Disposition constraint findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1587,6 +1609,7 @@ def run_autonomous_workflow(
             "taxonomy_check": taxonomy_check,
             "pos_check": pos_check,
             "claim_type_check": claim_type_check,
+            "disposition_check": disposition_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -1684,6 +1707,7 @@ def run_autonomous_workflow(
             "taxonomy_check": taxonomy_check,
             "pos_check": pos_check,
             "claim_type_check": claim_type_check,
+            "disposition_check": disposition_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
