@@ -280,6 +280,16 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify scenario catalog indexing and CI fixture export before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--expansion-check",
+        action="store_true",
+        help="Verify vertical and horizontal dataset expansion logic before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--checkout-main",
+        action="store_true",
+        help="Checkout main branch and pull latest changes after autonomous PR merge",
+    )
+    auto_wf_parser.add_argument(
         "--all-checks",
         action="store_true",
         help="Enable all available workflow verification checks before commit/push",
@@ -592,6 +602,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             diff_check=args.diff_check,
             profile_check=args.profile_check,
             catalog_check=args.catalog_check,
+            expansion_check=args.expansion_check,
+            checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
 

@@ -49,6 +49,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     diff_check = data.get("diff_check", False)
     profile_check = data.get("profile_check", False)
     catalog_check = data.get("catalog_check", False)
+    expansion_check = data.get("expansion_check", False)
+    checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
     md_content = f"""# Autonomous Workflow Execution Report
@@ -71,6 +73,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Schema Diff Verified** | {diff_check} |
 | **Limitations Profile Verified** | {profile_check} |
 | **Scenario Catalog Verified** | {catalog_check} |
+| **Dataset Expansion Verified** | {expansion_check} |
+| **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
     out_path.write_text(md_content, encoding="utf-8")
@@ -94,6 +98,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     diff_check = data.get("diff_check", False)
     profile_check = data.get("profile_check", False)
     catalog_check = data.get("catalog_check", False)
+    expansion_check = data.get("expansion_check", False)
+    checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
     html_content = f"""<!DOCTYPE html>
@@ -132,6 +138,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Schema Diff Verified</strong></td><td>{diff_check}</td></tr>
             <tr><td><strong>Limitations Profile Verified</strong></td><td>{profile_check}</td></tr>
             <tr><td><strong>Scenario Catalog Verified</strong></td><td>{catalog_check}</td></tr>
+            <tr><td><strong>Dataset Expansion Verified</strong></td><td>{expansion_check}</td></tr>
+            <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
     </table>
@@ -159,6 +167,8 @@ def run_autonomous_workflow(
     diff_check: bool = False,
     profile_check: bool = False,
     catalog_check: bool = False,
+    expansion_check: bool = False,
+    checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
     """Run local verification checks and autonomously stage, commit, push, create PR, and merge."""
@@ -171,6 +181,7 @@ def run_autonomous_workflow(
         diff_check = True
         profile_check = True
         catalog_check = True
+        expansion_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -366,6 +377,25 @@ def run_autonomous_workflow(
                 f"✓ Scenario catalog verified ({len(scenarios)} scenarios cataloged, {len(exported_files)} CI fixture files exported)."
             )
 
+    if expansion_check:
+        print("\n=== Verification Step: Executing Dataset Expansion Check ===")
+        from medicare_synth.expansion import HorizontalExpander, VerticalExpander
+        from medicare_synth.scenarios import ScenarioCompiler
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        tbls = {
+            "beneficiary_summary": scenario_slice.bene_df,
+            "carrier_claims": scenario_slice.carrier_df,
+            "outpatient_claims": scenario_slice.outpatient_df,
+        }
+        v_expander = VerticalExpander()
+        v_res = v_expander.expand_slice(tbls)
+        h_expander = HorizontalExpander()
+        h_res = h_expander.expand_subgraph(tbls, scale_factor=2)
+        print(
+            f"✓ Dataset expansion verified (vertical cols: {list(v_res['beneficiary_summary'].columns)}, horizontal rows: {len(h_res['beneficiary_summary'])})."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -391,6 +421,8 @@ def run_autonomous_workflow(
         print(f"Would create PR: gh pr create --title '{title}' --body '{body}'")
         if not skip_merge:
             print("Would autonomously merge PR: gh pr merge --merge --delete-branch")
+        if checkout_main:
+            print("Would checkout main: git checkout main && git pull origin main")
         print("\n✓ Dry-run completed successfully.")
         report_data: dict[str, object] = {
             "status": "success",
@@ -407,6 +439,8 @@ def run_autonomous_workflow(
             "diff_check": diff_check,
             "profile_check": profile_check,
             "catalog_check": catalog_check,
+            "expansion_check": expansion_check,
+            "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
         if json_report_path:
@@ -464,6 +498,8 @@ def run_autonomous_workflow(
             "diff_check": diff_check,
             "profile_check": profile_check,
             "catalog_check": catalog_check,
+            "expansion_check": expansion_check,
+            "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
         if json_report_path:
@@ -472,6 +508,11 @@ def run_autonomous_workflow(
             _write_md_report(md_report_path, report_data)
         if html_report_path:
             _write_html_report(html_report_path, report_data)
+        if checkout_main:
+            print("\n=== Post-Merge Step: Checking out main branch & pulling latest changes ===")
+            run_cmd(["git", "checkout", "main"])
+            run_cmd(["git", "pull", "origin", "main"])
+            print("✓ Checked out main branch and synced latest changes.")
         return 0
 
     print("\n=== Step 7: Autonomous Merge to main ===")
@@ -492,6 +533,8 @@ def run_autonomous_workflow(
         "diff_check": diff_check,
         "profile_check": profile_check,
         "catalog_check": catalog_check,
+        "expansion_check": expansion_check,
+        "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
     if json_report_path:
@@ -500,5 +543,9 @@ def run_autonomous_workflow(
         _write_md_report(md_report_path, report_data)
     if html_report_path:
         _write_html_report(html_report_path, report_data)
+    if checkout_main:
+        print("\n=== Post-Merge Step: Checking out main branch & pulling latest changes ===")
+        run_cmd(["git", "checkout", "main"])
+        run_cmd(["git", "pull", "origin", "main"])
+        print("✓ Checked out main branch and synced latest changes.")
     return 0
-

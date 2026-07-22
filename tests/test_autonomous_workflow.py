@@ -324,4 +324,56 @@ def test_run_autonomous_workflow_all_checks(mock_run, tmp_path):
     assert data["diff_check"] is True
     assert data["profile_check"] is True
     assert data["catalog_check"] is True
+    assert data["expansion_check"] is True
 
+
+@patch("subprocess.run")
+def test_run_autonomous_workflow_expansion_check(mock_run, tmp_path):
+    """Test that expansion_check option executes vertical & horizontal expansion step and records status."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_exp.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        expansion_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["expansion_check"] is True
+
+
+@patch("subprocess.run")
+def test_run_autonomous_workflow_checkout_main(mock_run, tmp_path):
+    """Test that checkout_main option records status and executes git checkout main."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_co.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        checkout_main=True,
+    )
+    assert res_code == 0
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["checkout_main"] is True
