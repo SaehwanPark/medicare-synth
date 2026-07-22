@@ -129,3 +129,28 @@ def test_check_claim_accounting_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_mortality_temporal_constraints() -> None:
+    bene_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE001", "BENE002"],
+            "bene_death_dt": [date(2021, 6, 1), None],
+        }
+    )
+    carrier_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002"],
+            "bene_id": ["BENE001", "BENE002"],
+            "clm_from_dt": [date(2021, 7, 1), date(2021, 8, 1)],
+        }
+    )
+    findings = RelationalValidator.check_mortality_temporal_constraints(
+        bene_df, carrier_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "TMP-003"
+    assert finding.category == FindingCategory.TEMPORAL
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1

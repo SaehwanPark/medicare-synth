@@ -340,6 +340,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify k-anonymity privacy score evaluation across all 19 synthetic tables before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--mortality-check",
+        action="store_true",
+        help="Verify beneficiary mortality temporal consistency across all claim tables before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -669,6 +674,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             uniqueness_check=args.uniqueness_check,
             orphan_check=args.orphan_check,
             privacy_check=args.privacy_check,
+            mortality_check=args.mortality_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
