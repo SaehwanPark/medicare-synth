@@ -445,6 +445,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Hospice claim domain field constraints before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--pde-check",
+        action="store_true",
+        help="Verify Part D Prescription Drug Event (PDE) claim domain field constraints before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--pde-util-check",
         action="store_true",
         help="Verify Part D PDE Utilization domain field constraints before commit/push",
@@ -835,6 +840,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             hha_check=args.hha_check,
             dme_check=args.dme_check,
             hospice_check=args.hospice_check,
+            pde_check=args.pde_check,
             pde_util_check=args.pde_util_check,
             carrier_check=args.carrier_check,
             outpatient_check=args.outpatient_check,
