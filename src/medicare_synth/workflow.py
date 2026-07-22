@@ -58,6 +58,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     temporal_check = data.get("temporal_check", False)
     evidence_check = data.get("evidence_check", False)
     accounting_check = data.get("accounting_check", False)
+    uniqueness_check = data.get("uniqueness_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -90,6 +91,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Temporal Integrity Verified** | {temporal_check} |
 | **RKB Evidence Snapshot Verified** | {evidence_check} |
 | **Claim Accounting Constraints Verified** | {accounting_check} |
+| **Primary Key Uniqueness Verified** | {uniqueness_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -123,6 +125,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     temporal_check = data.get("temporal_check", False)
     evidence_check = data.get("evidence_check", False)
     accounting_check = data.get("accounting_check", False)
+    uniqueness_check = data.get("uniqueness_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -171,6 +174,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Temporal Integrity Verified</strong></td><td>{temporal_check}</td></tr>
             <tr><td><strong>RKB Evidence Snapshot Verified</strong></td><td>{evidence_check}</td></tr>
             <tr><td><strong>Claim Accounting Constraints Verified</strong></td><td>{accounting_check}</td></tr>
+            <tr><td><strong>Primary Key Uniqueness Verified</strong></td><td>{uniqueness_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -208,6 +212,7 @@ def run_autonomous_workflow(
     temporal_check: bool = False,
     evidence_check: bool = False,
     accounting_check: bool = False,
+    uniqueness_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -230,6 +235,7 @@ def run_autonomous_workflow(
         temporal_check = True
         evidence_check = True
         accounting_check = True
+        uniqueness_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -671,6 +677,52 @@ def run_autonomous_workflow(
             f"✓ Claim accounting constraints verified across {len(claim_tables)} claim table families ({acc_count} negative payment findings)."
         )
 
+    if uniqueness_check:
+        print("\n=== Verification Step: Executing Primary Key Uniqueness Verification Check ===")
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        tables_to_check = [
+            ("beneficiary", scenario_slice.bene_df, ["DESYNPUF_ID"]),
+            ("carrier", scenario_slice.carrier_df, ["CLM_ID"]),
+            ("outpatient", scenario_slice.outpatient_df, ["CLM_ID"]),
+            ("inpatient", scenario_slice.inpatient_df, ["CLM_ID"]),
+            ("pde", scenario_slice.pde_df, ["PDE_ID"]),
+            ("snf", scenario_slice.snf_df, ["CLM_ID"]),
+            ("hha", scenario_slice.hha_df, ["CLM_ID"]),
+            ("dme", scenario_slice.dme_df, ["CLM_ID"]),
+            ("hospice", scenario_slice.hospice_df, ["CLM_ID"]),
+            ("mbsf_cc", scenario_slice.mbsf_cc_df, ["DESYNPUF_ID"]),
+            ("mbsf_cu", scenario_slice.mbsf_cu_df, ["DESYNPUF_ID"]),
+            ("mbsf_d", scenario_slice.mbsf_d_df, ["DESYNPUF_ID"]),
+            ("mbsf_base", scenario_slice.mbsf_base_df, ["DESYNPUF_ID"]),
+            ("mbsf_oc", scenario_slice.mbsf_oc_df, ["DESYNPUF_ID"]),
+            ("mbsf_ndi", scenario_slice.mbsf_ndi_df, ["DESYNPUF_ID"]),
+            ("mbsf_ra", scenario_slice.mbsf_ra_df, ["DESYNPUF_ID"]),
+            ("mbsf_c", scenario_slice.mbsf_c_df, ["DESYNPUF_ID"]),
+            ("mbsf_ffs", scenario_slice.mbsf_ffs_df, ["DESYNPUF_ID"]),
+            ("mbsf_pde_util", scenario_slice.mbsf_pde_util_df, ["DESYNPUF_ID"]),
+        ]
+        uniq_findings = []
+        for name, df, keys in tables_to_check:
+            key_cols = [k for k in keys if k in df.columns]
+            if not key_cols:
+                if "bene_id" in df.columns:
+                    key_cols = ["bene_id"]
+                elif "clm_id" in df.columns:
+                    key_cols = ["clm_id"]
+                elif "pde_id" in df.columns:
+                    key_cols = ["pde_id"]
+            if key_cols:
+                uniq_findings.extend(
+                    RelationalValidator.check_record_uniqueness(df, key_cols, name)
+                )
+        uniq_count = sum(f.count for f in uniq_findings)
+        print(
+            f"✓ Record uniqueness verified across {len(tables_to_check)} baseline tables ({uniq_count} primary key duplicate findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -723,6 +775,7 @@ def run_autonomous_workflow(
             "temporal_check": temporal_check,
             "evidence_check": evidence_check,
             "accounting_check": accounting_check,
+            "uniqueness_check": uniqueness_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -790,6 +843,7 @@ def run_autonomous_workflow(
             "temporal_check": temporal_check,
             "evidence_check": evidence_check,
             "accounting_check": accounting_check,
+            "uniqueness_check": uniqueness_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -833,6 +887,7 @@ def run_autonomous_workflow(
         "temporal_check": temporal_check,
         "evidence_check": evidence_check,
         "accounting_check": accounting_check,
+        "uniqueness_check": uniqueness_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }

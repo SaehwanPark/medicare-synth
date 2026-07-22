@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--uniqueness-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `uniqueness_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable primary key uniqueness verification across all 19 synthetic data tables before staging and committing.
+- Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `uniqueness_check` verification logic and CLI flag parsing.
+
 - Added `--accounting-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `accounting_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable claim payment non-negativity and accounting constraint verification across claim tables (`clm_pmt_amt >= 0`) prior to staging and committing. Added `check_claim_accounting_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `accounting_check` verification logic and CLI flag parsing.
 
