@@ -395,6 +395,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Revenue Center Code 4-digit numeric format consistency across claim records before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--demographic-check",
+        action="store_true",
+        help="Verify beneficiary demographic sex and race code format consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -735,6 +740,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             taxonomy_check=args.taxonomy_check,
             pos_check=args.pos_check,
             rev_center_check=args.rev_center_check,
+            demographic_check=args.demographic_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )

@@ -352,3 +352,20 @@ def test_check_rev_center_code_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_demographic_code_constraints() -> None:
+    bene_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE001", "BENE002", "BENE003"],
+            "bene_sex_ident_cd": ["1", "9", "2"],  # "9" is invalid
+            "bene_race_cd": ["1", "2", "X"],  # "X" is invalid
+        }
+    )
+    findings = RelationalValidator.check_demographic_code_constraints(bene_df)
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "FLD-016"
+    assert finding.category == FindingCategory.FIELD
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 2

@@ -746,6 +746,45 @@ class RelationalValidator:
         return []
 
     @staticmethod
+    def check_demographic_code_constraints(bene_df: pl.DataFrame) -> list[Finding]:
+        """Identifies Beneficiary records with invalid sex identification or race codes."""
+        if bene_df.is_empty():
+            return []
+
+        valid_sex = ["0", "1", "2"]
+        valid_race = ["0", "1", "2", "3", "4", "5", "6"]
+
+        filter_expr = pl.lit(False)
+        if "bene_sex_ident_cd" in bene_df.columns:
+            filter_expr = filter_expr | (~pl.col("bene_sex_ident_cd").is_in(valid_sex))
+        if "bene_race_cd" in bene_df.columns:
+            filter_expr = filter_expr | (~pl.col("bene_race_cd").is_in(valid_race))
+
+        invalid = bene_df.filter(filter_expr)
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("bene_id").slice(0, 5).to_series().to_list()
+                if "bene_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="FLD-016",
+                    category=FindingCategory.FIELD,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} beneficiary records with invalid demographic sex or race code format.",
+                    count=invalid_count,
+                    details={
+                        "table_name": "Beneficiary Summary",
+                        "sample_bene_ids": sample_ids,
+                    },
+                )
+            ]
+        return []
+
+    @staticmethod
     def check_claim_accounting_constraints(
         claim_df: pl.DataFrame, claim_type: str
     ) -> list[Finding]:
@@ -1337,6 +1376,7 @@ class RelationalValidator:
         findings.extend(
             self.check_record_uniqueness(bene_df, ["bene_id"], "Beneficiary Summary")
         )
+        findings.extend(self.check_demographic_code_constraints(bene_df))
 
         if carrier_df is not None and not carrier_df.is_empty():
             findings.extend(
