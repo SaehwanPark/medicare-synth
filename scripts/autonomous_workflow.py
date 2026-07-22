@@ -43,6 +43,11 @@ def main() -> None:
         action="store_true",
         help="Create the PR but skip the autonomous merge step",
     )
+    parser.add_argument(
+        "--validation-check",
+        action="store_true",
+        help="Verify dataset relational validation integrity before commit/push",
+    )
 
     args = parser.parse_args()
 
@@ -52,6 +57,7 @@ def main() -> None:
         body=args.body,
         dry_run=args.dry_run,
         skip_merge=args.skip_merge,
+        validation_check=args.validation_check,
     )
     sys.exit(exit_code)
 

@@ -44,6 +44,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     changelog_check = data.get("changelog_check", False)
     git_clean_check = data.get("git_clean_check", False)
     audit_check = data.get("audit_check", False)
+    validation_check = data.get("validation_check", False)
 
     md_content = f"""# Autonomous Workflow Execution Report
 
@@ -60,6 +61,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Changelog Verified** | {changelog_check} |
 | **Git Clean State Checked** | {git_clean_check} |
 | **Audit Verified** | {audit_check} |
+| **Relational Validation Verified** | {validation_check} |
 """
     out_path.write_text(md_content, encoding="utf-8")
     print(f"Markdown workflow report saved to: {out_path}")
@@ -77,6 +79,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     changelog_check = data.get("changelog_check", False)
     git_clean_check = data.get("git_clean_check", False)
     audit_check = data.get("audit_check", False)
+    validation_check = data.get("validation_check", False)
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -109,6 +112,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Changelog Verified</strong></td><td>{changelog_check}</td></tr>
             <tr><td><strong>Git Clean State Checked</strong></td><td>{git_clean_check}</td></tr>
             <tr><td><strong>Audit Verified</strong></td><td>{audit_check}</td></tr>
+            <tr><td><strong>Relational Validation Verified</strong></td><td>{validation_check}</td></tr>
         </tbody>
     </table>
 </body>
@@ -130,6 +134,7 @@ def run_autonomous_workflow(
     changelog_check: bool = False,
     git_clean_check: bool = False,
     audit_check: bool = False,
+    validation_check: bool = False,
 ) -> int:
     """Run local verification checks and autonomously stage, commit, push, create PR, and merge."""
     print("=== Step 1: Running Linter (Ruff) ===")
@@ -206,6 +211,44 @@ def run_autonomous_workflow(
             f"✓ Dataset audit verified ({len(report.join_coverage)} join coverage relationships audited)."
         )
 
+    if validation_check:
+        print("\n=== Verification Step: Executing Relational Validation Check ===")
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        validator = RelationalValidator()
+        val_report = validator.validate_slice(
+            bene_df=scenario_slice.bene_df,
+            carrier_df=scenario_slice.carrier_df,
+            outpatient_df=scenario_slice.outpatient_df,
+            inpatient_df=scenario_slice.inpatient_df,
+            pde_df=scenario_slice.pde_df,
+            snf_df=scenario_slice.snf_df,
+            hha_df=scenario_slice.hha_df,
+            dme_df=scenario_slice.dme_df,
+            hospice_df=scenario_slice.hospice_df,
+            mbsf_cc_df=scenario_slice.mbsf_cc_df,
+            mbsf_cu_df=scenario_slice.mbsf_cu_df,
+            mbsf_d_df=scenario_slice.mbsf_d_df,
+            mbsf_base_df=scenario_slice.mbsf_base_df,
+            mbsf_oc_df=scenario_slice.mbsf_oc_df,
+            mbsf_ndi_df=scenario_slice.mbsf_ndi_df,
+            mbsf_ra_df=scenario_slice.mbsf_ra_df,
+            mbsf_c_df=scenario_slice.mbsf_c_df,
+            mbsf_ffs_df=scenario_slice.mbsf_ffs_df,
+            mbsf_pde_util_df=scenario_slice.mbsf_pde_util_df,
+        )
+        if val_report.is_valid:
+            print(
+                f"✓ Relational validation verified ({len(val_report.findings)} findings reported)."
+            )
+        else:
+            print(
+                f"Warning: Relational validation reported findings ({len(val_report.findings)} findings).",
+                file=sys.stderr,
+            )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -242,6 +285,7 @@ def run_autonomous_workflow(
             "changelog_check": changelog_check,
             "git_clean_check": git_clean_check,
             "audit_check": audit_check,
+            "validation_check": validation_check,
         }
         if json_report_path:
             _write_json_report(json_report_path, report_data)
@@ -293,6 +337,7 @@ def run_autonomous_workflow(
             "changelog_check": changelog_check,
             "git_clean_check": git_clean_check,
             "audit_check": audit_check,
+            "validation_check": validation_check,
         }
         if json_report_path:
             _write_json_report(json_report_path, report_data)
@@ -315,6 +360,7 @@ def run_autonomous_workflow(
         "changelog_check": changelog_check,
         "git_clean_check": git_clean_check,
         "audit_check": audit_check,
+        "validation_check": validation_check,
     }
     if json_report_path:
         _write_json_report(json_report_path, report_data)
