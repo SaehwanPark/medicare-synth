@@ -295,6 +295,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify synthetic dataset generation benchmark throughput before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--summary-check",
+        action="store_true",
+        help="Verify aggregated dataset summary matrix before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -615,6 +620,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             expansion_check=args.expansion_check,
             provenance_check=args.provenance_check,
             benchmark_check=args.benchmark_check,
+            summary_check=args.summary_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )

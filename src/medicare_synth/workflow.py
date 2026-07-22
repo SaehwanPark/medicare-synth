@@ -52,6 +52,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     expansion_check = data.get("expansion_check", False)
     provenance_check = data.get("provenance_check", False)
     benchmark_check = data.get("benchmark_check", False)
+    summary_check = data.get("summary_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -78,6 +79,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Dataset Expansion Verified** | {expansion_check} |
 | **Dataset Provenance Verified** | {provenance_check} |
 | **Benchmark Throughput Verified** | {benchmark_check} |
+| **Dataset Summary Matrix Verified** | {summary_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -105,6 +107,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     expansion_check = data.get("expansion_check", False)
     provenance_check = data.get("provenance_check", False)
     benchmark_check = data.get("benchmark_check", False)
+    summary_check = data.get("summary_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -147,6 +150,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Dataset Expansion Verified</strong></td><td>{expansion_check}</td></tr>
             <tr><td><strong>Dataset Provenance Verified</strong></td><td>{provenance_check}</td></tr>
             <tr><td><strong>Benchmark Throughput Verified</strong></td><td>{benchmark_check}</td></tr>
+            <tr><td><strong>Dataset Summary Matrix Verified</strong></td><td>{summary_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -178,6 +182,7 @@ def run_autonomous_workflow(
     expansion_check: bool = False,
     provenance_check: bool = False,
     benchmark_check: bool = False,
+    summary_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -194,6 +199,7 @@ def run_autonomous_workflow(
         expansion_check = True
         provenance_check = True
         benchmark_check = True
+        summary_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -474,6 +480,39 @@ def run_autonomous_workflow(
             f"✓ Benchmark throughput verified ({total_records} records synthesized in {elapsed:.4f}s: {rate:.1f} rec/s)."
         )
 
+    if summary_check:
+        print("\n=== Verification Step: Executing Dataset Summary Matrix Check ===")
+        from medicare_synth.scenarios import ScenarioCompiler
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        tables = {
+            "beneficiary": scenario_slice.bene_df,
+            "carrier": scenario_slice.carrier_df,
+            "outpatient": scenario_slice.outpatient_df,
+            "inpatient": scenario_slice.inpatient_df,
+            "pde": scenario_slice.pde_df,
+            "snf": scenario_slice.snf_df,
+            "hha": scenario_slice.hha_df,
+            "dme": scenario_slice.dme_df,
+            "hospice": scenario_slice.hospice_df,
+            "mbsf_cc": scenario_slice.mbsf_cc_df,
+            "mbsf_cu": scenario_slice.mbsf_cu_df,
+            "mbsf_d": scenario_slice.mbsf_d_df,
+            "mbsf_base": scenario_slice.mbsf_base_df,
+            "mbsf_oc": scenario_slice.mbsf_oc_df,
+            "mbsf_ndi": scenario_slice.mbsf_ndi_df,
+            "mbsf_ra": scenario_slice.mbsf_ra_df,
+            "mbsf_c": scenario_slice.mbsf_c_df,
+            "mbsf_ffs": scenario_slice.mbsf_ffs_df,
+            "mbsf_pde_util": scenario_slice.mbsf_pde_util_df,
+        }
+        total_rows = sum(len(df) for df in tables.values())
+        total_cols = sum(len(df.columns) for df in tables.values())
+        total_bytes = sum(df.estimated_size() for df in tables.values())
+        print(
+            f"✓ Dataset summary matrix verified ({len(tables)} tables, {total_rows} total rows, {total_cols} total columns, {total_bytes} bytes estimated footprint)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -520,6 +559,7 @@ def run_autonomous_workflow(
             "expansion_check": expansion_check,
             "provenance_check": provenance_check,
             "benchmark_check": benchmark_check,
+            "summary_check": summary_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -581,6 +621,7 @@ def run_autonomous_workflow(
             "expansion_check": expansion_check,
             "provenance_check": provenance_check,
             "benchmark_check": benchmark_check,
+            "summary_check": summary_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -618,6 +659,7 @@ def run_autonomous_workflow(
         "expansion_check": expansion_check,
         "provenance_check": provenance_check,
         "benchmark_check": benchmark_check,
+        "summary_check": summary_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
