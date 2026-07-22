@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--carrier-check` and `--outpatient-check` parameters to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `carrier_check` and `outpatient_check` parameters to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Carrier and Outpatient claim domain field constraint verification (`check_carrier_field_constraints` and `check_outpatient_field_constraints`) before staging and committing.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `carrier_check` and `outpatient_check` verification logic and CLI flag parsing (252 total passing unit tests).
+
 - Added `--hha-check`, `--dme-check`, `--hospice-check`, and `--pde-util-check` parameters to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `hha_check`, `dme_check`, `hospice_check`, `pde_util_check` parameters to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Home Health Agency (HHA), Durable Medical Equipment (DME), Hospice, and Part D PDE Utilization domain field constraint verification before staging and committing.
 - Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `hha_check`, `dme_check`, `hospice_check`, and `pde_util_check` verification logic and CLI flag parsing (248 total passing unit tests).
 

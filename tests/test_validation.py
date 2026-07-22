@@ -387,3 +387,39 @@ def test_check_inpatient_field_constraints() -> None:
     assert finding.category == FindingCategory.FIELD
     assert finding.severity == Severity.HIGH
     assert finding.count == 2
+
+
+def test_check_carrier_field_constraints() -> None:
+    carrier_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002"],
+            "line_num": [0, 1],  # 0 is invalid
+            "clm_from_dt": [date(2021, 5, 10), date(2021, 5, 20)],
+            "clm_thru_dt": [date(2021, 5, 5), date(2021, 5, 25)],  # first row date inversion
+        }
+    )
+    findings = RelationalValidator.check_carrier_field_constraints(carrier_df)
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "FLD-007"
+    assert finding.category == FindingCategory.FIELD
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+
+
+def test_check_outpatient_field_constraints() -> None:
+    outpatient_df = pl.DataFrame(
+        {
+            "clm_id": ["OPT001", "OPT002"],
+            "clm_pmt_amt": [-50.0, 100.0],  # -50.0 is invalid
+            "clm_from_dt": [date(2021, 6, 1), date(2021, 6, 15)],
+            "clm_thru_dt": [date(2021, 6, 5), date(2021, 6, 10)],  # second row date inversion
+        }
+    )
+    findings = RelationalValidator.check_outpatient_field_constraints(outpatient_df)
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "FLD-008"
+    assert finding.category == FindingCategory.FIELD
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 2

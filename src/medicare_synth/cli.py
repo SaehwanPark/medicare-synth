@@ -435,6 +435,16 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Part D PDE Utilization domain field constraints before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--carrier-check",
+        action="store_true",
+        help="Verify Carrier claim domain field constraints before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--outpatient-check",
+        action="store_true",
+        help="Verify Outpatient claim domain field constraints before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -783,6 +793,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             dme_check=args.dme_check,
             hospice_check=args.hospice_check,
             pde_util_check=args.pde_util_check,
+            carrier_check=args.carrier_check,
+            outpatient_check=args.outpatient_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )

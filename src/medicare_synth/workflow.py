@@ -80,6 +80,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     dme_check = data.get("dme_check", False)
     hospice_check = data.get("hospice_check", False)
     pde_util_check = data.get("pde_util_check", False)
+    carrier_check = data.get("carrier_check", False)
+    outpatient_check = data.get("outpatient_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -134,6 +136,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **DME Field Constraints Verified** | {dme_check} |
 | **Hospice Field Constraints Verified** | {hospice_check} |
 | **Part D PDE Utilization Verified** | {pde_util_check} |
+| **Carrier Field Constraints Verified** | {carrier_check} |
+| **Outpatient Field Constraints Verified** | {outpatient_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -189,6 +193,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     dme_check = data.get("dme_check", False)
     hospice_check = data.get("hospice_check", False)
     pde_util_check = data.get("pde_util_check", False)
+    carrier_check = data.get("carrier_check", False)
+    outpatient_check = data.get("outpatient_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -259,6 +265,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>DME Field Constraints Verified</strong></td><td>{dme_check}</td></tr>
             <tr><td><strong>Hospice Field Constraints Verified</strong></td><td>{hospice_check}</td></tr>
             <tr><td><strong>Part D PDE Utilization Verified</strong></td><td>{pde_util_check}</td></tr>
+            <tr><td><strong>Carrier Field Constraints Verified</strong></td><td>{carrier_check}</td></tr>
+            <tr><td><strong>Outpatient Field Constraints Verified</strong></td><td>{outpatient_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -318,6 +326,8 @@ def run_autonomous_workflow(
     dme_check: bool = False,
     hospice_check: bool = False,
     pde_util_check: bool = False,
+    carrier_check: bool = False,
+    outpatient_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -362,6 +372,8 @@ def run_autonomous_workflow(
         dme_check = True
         hospice_check = True
         pde_util_check = True
+        carrier_check = True
+        outpatient_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -1345,6 +1357,38 @@ def run_autonomous_workflow(
             f"✓ Part D PDE Utilization field constraints verified ({violating_count} PDE Utilization constraint findings)."
         )
 
+    if carrier_check:
+        print(
+            "\n=== Verification Step: Executing Carrier Claim Field Constraint Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        carrier_findings = RelationalValidator.check_carrier_field_constraints(
+            scenario_slice.carrier_df
+        )
+        violating_count = sum(f.count for f in carrier_findings)
+        print(
+            f"✓ Carrier claim field constraints verified ({violating_count} Carrier constraint findings)."
+        )
+
+    if outpatient_check:
+        print(
+            "\n=== Verification Step: Executing Outpatient Claim Field Constraint Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        outpatient_findings = RelationalValidator.check_outpatient_field_constraints(
+            scenario_slice.outpatient_df
+        )
+        violating_count = sum(f.count for f in outpatient_findings)
+        print(
+            f"✓ Outpatient claim field constraints verified ({violating_count} Outpatient constraint findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1419,6 +1463,8 @@ def run_autonomous_workflow(
             "dme_check": dme_check,
             "hospice_check": hospice_check,
             "pde_util_check": pde_util_check,
+            "carrier_check": carrier_check,
+            "outpatient_check": outpatient_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1508,6 +1554,8 @@ def run_autonomous_workflow(
             "dme_check": dme_check,
             "hospice_check": hospice_check,
             "pde_util_check": pde_util_check,
+            "carrier_check": carrier_check,
+            "outpatient_check": outpatient_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1575,6 +1623,8 @@ def run_autonomous_workflow(
         "dme_check": dme_check,
         "hospice_check": hospice_check,
         "pde_util_check": pde_util_check,
+        "carrier_check": carrier_check,
+        "outpatient_check": outpatient_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }

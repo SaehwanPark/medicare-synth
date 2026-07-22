@@ -391,6 +391,97 @@ class RelationalValidator:
         return []
 
     @staticmethod
+    def check_carrier_field_constraints(carrier_df: pl.DataFrame) -> list[Finding]:
+        """Identifies Carrier claims with line item numbers < 1 or temporal inversions."""
+        if carrier_df.is_empty():
+            return []
+
+        conditions = []
+        if "line_num" in carrier_df.columns:
+            conditions.append(pl.col("line_num") < 1)
+        if "clm_from_dt" in carrier_df.columns and "clm_thru_dt" in carrier_df.columns:
+            conditions.append(pl.col("clm_from_dt") > pl.col("clm_thru_dt"))
+
+        if not conditions:
+            return []
+
+        combined_condition = conditions[0]
+        for cond in conditions[1:]:
+            combined_condition = combined_condition | cond
+
+        invalid = carrier_df.filter(combined_condition)
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="FLD-007",
+                    category=FindingCategory.FIELD,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} Carrier claim line items with invalid line number or date inversion.",
+                    count=invalid_count,
+                    details={
+                        "table_name": "Carrier Claim Lines",
+                        "sample_clm_ids": sample_ids,
+                    },
+                )
+            ]
+        return []
+
+    @staticmethod
+    def check_outpatient_field_constraints(
+        outpatient_df: pl.DataFrame,
+    ) -> list[Finding]:
+        """Identifies Outpatient claims with negative payment amounts or temporal inversions."""
+        if outpatient_df.is_empty():
+            return []
+
+        conditions = []
+        if "clm_pmt_amt" in outpatient_df.columns:
+            conditions.append(pl.col("clm_pmt_amt") < 0)
+        if (
+            "clm_from_dt" in outpatient_df.columns
+            and "clm_thru_dt" in outpatient_df.columns
+        ):
+            conditions.append(pl.col("clm_from_dt") > pl.col("clm_thru_dt"))
+
+        if not conditions:
+            return []
+
+        combined_condition = conditions[0]
+        for cond in conditions[1:]:
+            combined_condition = combined_condition | cond
+
+        invalid = outpatient_df.filter(combined_condition)
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="FLD-008",
+                    category=FindingCategory.FIELD,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} Outpatient claims with negative payment amount or date inversion.",
+                    count=invalid_count,
+                    details={
+                        "table_name": "Outpatient Claims",
+                        "sample_clm_ids": sample_ids,
+                    },
+                )
+            ]
+        return []
+
+    @staticmethod
     def check_mbsf_cc_field_constraints(mbsf_cc_df: pl.DataFrame) -> list[Finding]:
         """Identifies MBSF Chronic Condition records with invalid indicator values not in {'0', '1', '2'}."""
         if mbsf_cc_df.is_empty():
