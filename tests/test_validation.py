@@ -564,6 +564,19 @@ def test_check_claim_utilization_constraints() -> None:
     assert finding.count == 2
 
 
-
-
-
+def test_check_state_code_constraints() -> None:
+    bene_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE001", "BENE002", "BENE003"],
+            "bene_state_cd": ["01", "INVALID_STATE", None],
+        }
+    )
+    findings = RelationalValidator.check_state_code_constraints(
+        bene_df, "Beneficiary Summary"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "STATE-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
