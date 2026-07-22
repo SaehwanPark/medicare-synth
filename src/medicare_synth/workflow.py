@@ -76,6 +76,10 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     mbsf_check = data.get("mbsf_check", False)
     inpatient_check = data.get("inpatient_check", False)
     snf_check = data.get("snf_check", False)
+    hha_check = data.get("hha_check", False)
+    dme_check = data.get("dme_check", False)
+    hospice_check = data.get("hospice_check", False)
+    pde_util_check = data.get("pde_util_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -126,6 +130,10 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **MBSF Domain Constraints Verified** | {mbsf_check} |
 | **Inpatient Field Constraints Verified** | {inpatient_check} |
 | **SNF Field Constraints Verified** | {snf_check} |
+| **HHA Field Constraints Verified** | {hha_check} |
+| **DME Field Constraints Verified** | {dme_check} |
+| **Hospice Field Constraints Verified** | {hospice_check} |
+| **Part D PDE Utilization Verified** | {pde_util_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -177,6 +185,10 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     mbsf_check = data.get("mbsf_check", False)
     inpatient_check = data.get("inpatient_check", False)
     snf_check = data.get("snf_check", False)
+    hha_check = data.get("hha_check", False)
+    dme_check = data.get("dme_check", False)
+    hospice_check = data.get("hospice_check", False)
+    pde_util_check = data.get("pde_util_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -243,6 +255,10 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>MBSF Domain Constraints Verified</strong></td><td>{mbsf_check}</td></tr>
             <tr><td><strong>Inpatient Field Constraints Verified</strong></td><td>{inpatient_check}</td></tr>
             <tr><td><strong>SNF Field Constraints Verified</strong></td><td>{snf_check}</td></tr>
+            <tr><td><strong>HHA Field Constraints Verified</strong></td><td>{hha_check}</td></tr>
+            <tr><td><strong>DME Field Constraints Verified</strong></td><td>{dme_check}</td></tr>
+            <tr><td><strong>Hospice Field Constraints Verified</strong></td><td>{hospice_check}</td></tr>
+            <tr><td><strong>Part D PDE Utilization Verified</strong></td><td>{pde_util_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -298,6 +314,10 @@ def run_autonomous_workflow(
     mbsf_check: bool = False,
     inpatient_check: bool = False,
     snf_check: bool = False,
+    hha_check: bool = False,
+    dme_check: bool = False,
+    hospice_check: bool = False,
+    pde_util_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -338,6 +358,10 @@ def run_autonomous_workflow(
         mbsf_check = True
         inpatient_check = True
         snf_check = True
+        hha_check = True
+        dme_check = True
+        hospice_check = True
+        pde_util_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -1257,6 +1281,70 @@ def run_autonomous_workflow(
             f"✓ SNF domain field constraints verified ({violating_count} SNF constraint findings)."
         )
 
+    if hha_check:
+        print(
+            "\n=== Verification Step: Executing HHA Domain Field Constraint Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        hha_findings = RelationalValidator.check_hha_field_constraints(
+            scenario_slice.hha_df
+        )
+        violating_count = sum(f.count for f in hha_findings)
+        print(
+            f"✓ HHA domain field constraints verified ({violating_count} HHA constraint findings)."
+        )
+
+    if dme_check:
+        print(
+            "\n=== Verification Step: Executing DME Domain Field Constraint Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        dme_findings = RelationalValidator.check_dme_field_constraints(
+            scenario_slice.dme_df
+        )
+        violating_count = sum(f.count for f in dme_findings)
+        print(
+            f"✓ DME domain field constraints verified ({violating_count} DME constraint findings)."
+        )
+
+    if hospice_check:
+        print(
+            "\n=== Verification Step: Executing Hospice Domain Field Constraint Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        hospice_findings = RelationalValidator.check_hospice_field_constraints(
+            scenario_slice.hospice_df
+        )
+        violating_count = sum(f.count for f in hospice_findings)
+        print(
+            f"✓ Hospice domain field constraints verified ({violating_count} Hospice constraint findings)."
+        )
+
+    if pde_util_check:
+        print(
+            "\n=== Verification Step: Executing Part D PDE Utilization Field Constraint Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        pde_util_findings = RelationalValidator.check_mbsf_pde_util_field_constraints(
+            scenario_slice.mbsf_pde_util_df
+        )
+        violating_count = sum(f.count for f in pde_util_findings)
+        print(
+            f"✓ Part D PDE Utilization field constraints verified ({violating_count} PDE Utilization constraint findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1327,6 +1415,10 @@ def run_autonomous_workflow(
             "mbsf_check": mbsf_check,
             "inpatient_check": inpatient_check,
             "snf_check": snf_check,
+            "hha_check": hha_check,
+            "dme_check": dme_check,
+            "hospice_check": hospice_check,
+            "pde_util_check": pde_util_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1412,6 +1504,10 @@ def run_autonomous_workflow(
             "mbsf_check": mbsf_check,
             "inpatient_check": inpatient_check,
             "snf_check": snf_check,
+            "hha_check": hha_check,
+            "dme_check": dme_check,
+            "hospice_check": hospice_check,
+            "pde_util_check": pde_util_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1475,6 +1571,10 @@ def run_autonomous_workflow(
         "mbsf_check": mbsf_check,
         "inpatient_check": inpatient_check,
         "snf_check": snf_check,
+        "hha_check": hha_check,
+        "dme_check": dme_check,
+        "hospice_check": hospice_check,
+        "pde_util_check": pde_util_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }

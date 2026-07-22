@@ -415,6 +415,26 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Skilled Nursing Facility (SNF) claim domain field constraints before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--hha-check",
+        action="store_true",
+        help="Verify Home Health Agency (HHA) claim domain field constraints before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--dme-check",
+        action="store_true",
+        help="Verify Durable Medical Equipment (DME) claim domain field constraints before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--hospice-check",
+        action="store_true",
+        help="Verify Hospice claim domain field constraints before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--pde-util-check",
+        action="store_true",
+        help="Verify Part D PDE Utilization domain field constraints before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -759,6 +779,10 @@ def main(argv: Optional[list[str]] = None) -> int:
             mbsf_check=args.mbsf_check,
             inpatient_check=args.inpatient_check,
             snf_check=args.snf_check,
+            hha_check=args.hha_check,
+            dme_check=args.dme_check,
+            hospice_check=args.hospice_check,
+            pde_util_check=args.pde_util_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
