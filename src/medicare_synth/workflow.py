@@ -73,6 +73,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     pos_check = data.get("pos_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
+    mbsf_check = data.get("mbsf_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -120,6 +121,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Place of Service Code Format Verified** | {pos_check} |
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
+| **MBSF Domain Constraints Verified** | {mbsf_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -168,6 +170,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     pos_check = data.get("pos_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
+    mbsf_check = data.get("mbsf_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -231,6 +234,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Place of Service Format Verified</strong></td><td>{pos_check}</td></tr>
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
+            <tr><td><strong>MBSF Domain Constraints Verified</strong></td><td>{mbsf_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -283,6 +287,7 @@ def run_autonomous_workflow(
     pos_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
+    mbsf_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -320,6 +325,7 @@ def run_autonomous_workflow(
         pos_check = True
         rev_center_check = True
         demographic_check = True
+        mbsf_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -1141,6 +1147,70 @@ def run_autonomous_workflow(
             f"✓ Demographic code format verified for Beneficiary Summary ({violating_count} Demographic format findings)."
         )
 
+    if mbsf_check:
+        print(
+            "\n=== Verification Step: Executing Master Beneficiary Summary File (MBSF) Field Constraint Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        mbsf_findings = []
+        mbsf_findings.extend(
+            RelationalValidator.check_mbsf_base_field_constraints(
+                scenario_slice.mbsf_base_df
+            )
+        )
+        mbsf_findings.extend(
+            RelationalValidator.check_mbsf_cc_field_constraints(
+                scenario_slice.mbsf_cc_df
+            )
+        )
+        mbsf_findings.extend(
+            RelationalValidator.check_mbsf_cu_field_constraints(
+                scenario_slice.mbsf_cu_df
+            )
+        )
+        mbsf_findings.extend(
+            RelationalValidator.check_mbsf_d_field_constraints(
+                scenario_slice.mbsf_d_df
+            )
+        )
+        mbsf_findings.extend(
+            RelationalValidator.check_mbsf_oc_field_constraints(
+                scenario_slice.mbsf_oc_df
+            )
+        )
+        mbsf_findings.extend(
+            RelationalValidator.check_mbsf_ndi_field_constraints(
+                scenario_slice.mbsf_ndi_df
+            )
+        )
+        mbsf_findings.extend(
+            RelationalValidator.check_mbsf_ra_field_constraints(
+                scenario_slice.mbsf_ra_df
+            )
+        )
+        mbsf_findings.extend(
+            RelationalValidator.check_mbsf_c_field_constraints(
+                scenario_slice.mbsf_c_df
+            )
+        )
+        mbsf_findings.extend(
+            RelationalValidator.check_mbsf_ffs_field_constraints(
+                scenario_slice.mbsf_ffs_df
+            )
+        )
+        mbsf_findings.extend(
+            RelationalValidator.check_mbsf_pde_util_field_constraints(
+                scenario_slice.mbsf_pde_util_df
+            )
+        )
+        violating_count = sum(f.count for f in mbsf_findings)
+        print(
+            f"✓ MBSF domain field constraints verified across 10 MBSF table families ({violating_count} MBSF constraint findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1208,6 +1278,7 @@ def run_autonomous_workflow(
             "pos_check": pos_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
+            "mbsf_check": mbsf_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1290,6 +1361,7 @@ def run_autonomous_workflow(
             "pos_check": pos_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
+            "mbsf_check": mbsf_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1350,6 +1422,7 @@ def run_autonomous_workflow(
         "pos_check": pos_check,
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
+        "mbsf_check": mbsf_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }

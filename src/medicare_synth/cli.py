@@ -400,6 +400,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify beneficiary demographic sex and race code format consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--mbsf-check",
+        action="store_true",
+        help="Verify Master Beneficiary Summary File (MBSF) domain field constraints across all 10 MBSF tables before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -741,6 +746,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             pos_check=args.pos_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
+            mbsf_check=args.mbsf_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
