@@ -375,6 +375,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify NDC 11-character alphanumeric format consistency for Part D PDE records before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--drg-check",
+        action="store_true",
+        help="Verify DRG 3-character alphanumeric format consistency for inpatient claim records before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -711,6 +716,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             icd_check=args.icd_check,
             hcpcs_check=args.hcpcs_check,
             ndc_check=args.ndc_check,
+            drg_check=args.drg_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )

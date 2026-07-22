@@ -276,3 +276,22 @@ def test_check_ndc_code_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_drg_code_constraints() -> None:
+    inpatient_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003"],
+            "bene_id": ["BENE001", "BENE002", "BENE003"],
+            "clm_drg_cd": ["001", "INVALID_DRG_TOO_LONG", None],
+        }
+    )
+    findings = RelationalValidator.check_drg_code_constraints(
+        inpatient_df, "Inpatient Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "DRG-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
