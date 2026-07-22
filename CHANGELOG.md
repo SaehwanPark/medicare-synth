@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--catalog-check`, `--diff-check`, and `--profile-check` parameters to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `catalog_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable scenario catalog indexing verification and complete CLI flag registration.
+- Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `catalog_check`, `diff_check`, `profile_check`, and `all_checks` verification logic and CLI flag parsing.
+
 - Added `--all-checks` and `--export-check` parameters to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `all_checks` and `export_check` parameters to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable composite verification checks and release export verification prior to staging/committing.
 - Extended unit test suite in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `all_checks` and `export_check` verification logic and CLI flag parsing.
 
