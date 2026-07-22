@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--privacy-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `privacy_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable k-anonymity privacy score evaluation across all 19 synthetic Medicare data tables prior to staging and committing.
+- Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `privacy_check` verification logic and CLI flag parsing.
+
 - Added `--orphan-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `orphan_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable foreign key relational orphan key verification across all 18 child synthetic data tables against beneficiary root records prior to staging and committing.
 - Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `orphan_check` verification logic and CLI flag parsing.
 
