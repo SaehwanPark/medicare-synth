@@ -442,3 +442,22 @@ def test_check_zip_code_constraints() -> None:
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
 
+
+def test_check_claim_line_item_constraints() -> None:
+    carrier_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003"],
+            "line_num": [1, 0, 2],  # 0 is invalid
+        }
+    )
+    findings = RelationalValidator.check_claim_line_item_constraints(
+        carrier_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "LINE-001"
+    assert finding.category == FindingCategory.FIELD
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+
+
