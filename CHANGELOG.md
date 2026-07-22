@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--temporal-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `temporal_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable claim date-sequence and temporal inversion verification (`clm_from_dt <= clm_thru_dt` and `clm_admsn_dt <= nch_bene_dschrg_dt`) across all 8 claim table families prior to staging and committing.
+- Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `temporal_check` verification logic and CLI flag parsing.
+
 - Added `--dag-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `dag_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable relation-level and column-level DAG topology contract verification across all 19 synthetic data tables before staging and committing. Verifies beneficiary-root key propagation to all 18 child tables, reports orphan key violations, and confirms 3 topological levels and 19-file manifest coverage.
 - Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `dag_check` verification logic, column-name-agnostic key resolution, and CLI flag parsing.
 
