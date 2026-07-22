@@ -1,0 +1,14 @@
+{
+  "status": "success",
+  "dry_run": false,
+  "branch": "feat/auto-workflow-all-and-export-checks",
+  "commit_msg": "feat: add --all-checks and --export-check parameters to auto-workflow",
+  "pr_url": "https://github.com/SaehwanPark/medicare-synth/pull/44",
+  "merged": true,
+  "changelog_check": true,
+  "git_clean_check": true,
+  "audit_check": true,
+  "validation_check": true,
+  "export_check": true,
+  "all_checks": true
+}

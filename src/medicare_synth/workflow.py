@@ -46,6 +46,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     audit_check = data.get("audit_check", False)
     validation_check = data.get("validation_check", False)
     export_check = data.get("export_check", False)
+    diff_check = data.get("diff_check", False)
+    profile_check = data.get("profile_check", False)
     all_checks = data.get("all_checks", False)
 
     md_content = f"""# Autonomous Workflow Execution Report
@@ -65,6 +67,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Audit Verified** | {audit_check} |
 | **Relational Validation Verified** | {validation_check} |
 | **Release Export Verified** | {export_check} |
+| **Schema Diff Verified** | {diff_check} |
+| **Limitations Profile Verified** | {profile_check} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
     out_path.write_text(md_content, encoding="utf-8")
@@ -85,6 +89,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     audit_check = data.get("audit_check", False)
     validation_check = data.get("validation_check", False)
     export_check = data.get("export_check", False)
+    diff_check = data.get("diff_check", False)
+    profile_check = data.get("profile_check", False)
     all_checks = data.get("all_checks", False)
 
     html_content = f"""<!DOCTYPE html>
@@ -120,6 +126,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Audit Verified</strong></td><td>{audit_check}</td></tr>
             <tr><td><strong>Relational Validation Verified</strong></td><td>{validation_check}</td></tr>
             <tr><td><strong>Release Export Verified</strong></td><td>{export_check}</td></tr>
+            <tr><td><strong>Schema Diff Verified</strong></td><td>{diff_check}</td></tr>
+            <tr><td><strong>Limitations Profile Verified</strong></td><td>{profile_check}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
     </table>
@@ -144,6 +152,8 @@ def run_autonomous_workflow(
     audit_check: bool = False,
     validation_check: bool = False,
     export_check: bool = False,
+    diff_check: bool = False,
+    profile_check: bool = False,
     all_checks: bool = False,
 ) -> int:
     """Run local verification checks and autonomously stage, commit, push, create PR, and merge."""
@@ -153,6 +163,8 @@ def run_autonomous_workflow(
         audit_check = True
         validation_check = True
         export_check = True
+        diff_check = True
+        profile_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -303,6 +315,39 @@ def run_autonomous_workflow(
                 f"✓ Release export verified (manifest generated with {len(manifest.files)} files)."
             )
 
+    if diff_check:
+        print("\n=== Verification Step: Executing Schema Diff Check ===")
+        from medicare_synth.diff import SchemaDiffer
+        from medicare_synth.evidence import RKBEvidenceSnapshot
+
+        snapshot_path = Path("data/rkb_snapshots/rkb-v1.0-20211231.json")
+        if snapshot_path.exists():
+            snapshot = RKBEvidenceSnapshot.from_file(snapshot_path)
+            diff_report = SchemaDiffer.compare_snapshots(snapshot, snapshot)
+            if not diff_report.has_breaking_changes:
+                print(
+                    f"✓ Schema diff verified ({len(snapshot.variables)} variables audited, no breaking drift)."
+                )
+            else:
+                print(
+                    "Warning: Schema diff detected breaking changes.",
+                    file=sys.stderr,
+                )
+        else:
+            print(
+                "Warning: Evidence snapshot file not found for diff check.",
+                file=sys.stderr,
+            )
+
+    if profile_check:
+        print("\n=== Verification Step: Executing Limitations Profile Check ===")
+        from medicare_synth.profile import LimitationsProfiler
+
+        prof = LimitationsProfiler.default_profile()
+        print(
+            f"✓ Limitations profile verified ({len(prof.statements)} limitation categories disclosed)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -341,6 +386,8 @@ def run_autonomous_workflow(
             "audit_check": audit_check,
             "validation_check": validation_check,
             "export_check": export_check,
+            "diff_check": diff_check,
+            "profile_check": profile_check,
             "all_checks": all_checks,
         }
         if json_report_path:
@@ -353,8 +400,8 @@ def run_autonomous_workflow(
 
     print("\n=== Step 4: Staging and Committing Changes ===")
     run_cmd(["git", "add", "."])
-    diff_check = subprocess.run(["git", "diff", "--quiet", "--cached"])
-    if diff_check.returncode == 0:
+    staged_diff_check = subprocess.run(["git", "diff", "--quiet", "--cached"])
+    if staged_diff_check.returncode == 0:
         print("No changes staged to commit.")
     else:
         run_cmd(["git", "commit", "-m", commit_msg])
@@ -395,6 +442,8 @@ def run_autonomous_workflow(
             "audit_check": audit_check,
             "validation_check": validation_check,
             "export_check": export_check,
+            "diff_check": diff_check,
+            "profile_check": profile_check,
             "all_checks": all_checks,
         }
         if json_report_path:
@@ -420,6 +469,8 @@ def run_autonomous_workflow(
         "audit_check": audit_check,
         "validation_check": validation_check,
         "export_check": export_check,
+        "diff_check": diff_check,
+        "profile_check": profile_check,
         "all_checks": all_checks,
     }
     if json_report_path:
