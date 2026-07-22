@@ -1673,6 +1673,46 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_utilization_constraints(
+        df: pl.DataFrame, table_type: str
+    ) -> list[Finding]:
+        """Identifies claim records with invalid negative utilization or non-covered day counts (< 0)."""
+        if df.is_empty():
+            return []
+
+        util_cols = [
+            c for c in ["clm_utlztn_day_cnt", "ncvd_days_cnt"] if c in df.columns
+        ]
+        if not util_cols:
+            return []
+
+        conditions = [(pl.col(c).is_not_null() & (pl.col(c) < 0)) for c in util_cols]
+        combined_condition = conditions[0]
+        for cond in conditions[1:]:
+            combined_condition = combined_condition | cond
+
+        invalid = df.filter(combined_condition)
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="UTIL-001",
+                    category=FindingCategory.FIELD,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {table_type} with invalid negative utilization or non-covered day count (< 0).",
+                    count=invalid_count,
+                    details={"table_type": table_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,

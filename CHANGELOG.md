@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--utilization-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `utilization_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Utilization day count non-negativity verification (`check_claim_utilization_constraints`) across claim tables before staging and committing. Added `check_claim_utilization_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `utilization_check` verification logic and CLI flag parsing.
+
 - Added `--age-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `age_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Beneficiary Age temporal range constraint verification (`check_beneficiary_age_constraints`, `0 <= age <= 120`) across claim tables before staging and committing. Added `check_beneficiary_age_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `age_check` verification logic and CLI flag parsing.
 
