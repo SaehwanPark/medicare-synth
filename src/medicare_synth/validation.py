@@ -1152,6 +1152,58 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_taxonomy_code_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with invalid Healthcare Provider Taxonomy Code format (must be 10 alphanumeric characters when present)."""
+        if claim_df.is_empty():
+            return []
+
+        tax_col = None
+        for col in [
+            "prvdr_taxonomy_cd",
+            "PRVDR_TAXONOMY_CD",
+            "tax_cd",
+            "TAX_CD",
+            "taxonomy_cd",
+            "TAXONOMY_CD",
+            "provider_taxonomy_code",
+            "PROVIDER_TAXONOMY_CODE",
+        ]:
+            if col in claim_df.columns:
+                tax_col = col
+                break
+        if tax_col is None:
+            return []
+
+        non_null_tax = claim_df.filter(pl.col(tax_col).is_not_null())
+        if non_null_tax.is_empty():
+            return []
+
+        invalid = non_null_tax.filter(
+            ~pl.col(tax_col).cast(pl.Utf8).str.contains(r"^[0-9A-Za-z]{10}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="TAX-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {claim_type} with invalid Healthcare Provider Taxonomy Code format (must be 10 alphanumeric characters).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,
@@ -1211,6 +1263,9 @@ class RelationalValidator:
             findings.extend(
                 self.check_hcpcs_code_constraints(carrier_df, "Carrier Claims")
             )
+            findings.extend(
+                self.check_taxonomy_code_constraints(carrier_df, "Carrier Claims")
+            )
             if "line_num" in carrier_df.columns:
                 findings.extend(
                     self.check_record_uniqueness(
@@ -1252,6 +1307,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_hcpcs_code_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_taxonomy_code_constraints(
                     outpatient_df, "Outpatient Claims"
                 )
             )
