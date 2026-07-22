@@ -1763,6 +1763,60 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_disposition_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with invalid Claim Disposition Code format (must be 2 numeric digits when present)."""
+        if claim_df.is_empty():
+            return []
+
+        disp_col = None
+        for col in [
+            "nch_clm_disp_cd",
+            "NCH_CLM_DISP_CD",
+            "nch_clm_dispo_cd",
+            "NCH_CLM_DISPO_CD",
+            "clm_disp_cd",
+            "CLM_DISP_CD",
+            "clm_dispo_cd",
+            "CLM_DISPO_CD",
+            "claim_dispo_cd",
+            "CLAIM_DISPO_CD",
+        ]:
+            if col in claim_df.columns:
+                disp_col = col
+                break
+        if disp_col is None:
+            return []
+
+        non_null_disp = claim_df.filter(pl.col(disp_col).is_not_null())
+        if non_null_disp.is_empty():
+            return []
+
+        invalid = non_null_disp.filter(
+            ~pl.col(disp_col).cast(pl.Utf8).str.contains(r"^[0-9]{2}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="CLM-DISPO-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {claim_type} with invalid Claim Disposition Code format (must be 2 numeric digits).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
 
     def validate_slice(
         self,
@@ -1841,6 +1895,9 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_type_code_constraints(carrier_df, "Carrier Claims")
+            )
+            findings.extend(
+                self.check_claim_disposition_constraints(carrier_df, "Carrier Claims")
             )
             findings.extend(
                 self.check_claim_line_item_constraints(carrier_df, "Carrier Claims")
