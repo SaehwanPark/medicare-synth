@@ -360,6 +360,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify provider NPI 10-digit numeric format consistency across all claim tables before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--icd-check",
+        action="store_true",
+        help="Verify ICD diagnosis code 3-7 alphanumeric format consistency across all claim tables before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -693,6 +698,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             enrollment_check=args.enrollment_check,
             dob_check=args.dob_check,
             provider_check=args.provider_check,
+            icd_check=args.icd_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )

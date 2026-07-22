@@ -88,6 +88,7 @@ def test_cli_auto_workflow_dry_run():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -131,6 +132,7 @@ def test_cli_auto_workflow_json_report(tmp_path):
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -174,6 +176,7 @@ def test_cli_auto_workflow_md_report(tmp_path):
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -216,6 +219,7 @@ def test_cli_auto_workflow_changelog_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -258,6 +262,7 @@ def test_cli_auto_workflow_git_clean_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -301,6 +306,7 @@ def test_cli_auto_workflow_html_report(tmp_path):
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -343,6 +349,7 @@ def test_cli_auto_workflow_audit_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -385,6 +392,7 @@ def test_cli_auto_workflow_validation_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -427,6 +435,7 @@ def test_cli_auto_workflow_export_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -469,6 +478,7 @@ def test_cli_auto_workflow_diff_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -511,6 +521,7 @@ def test_cli_auto_workflow_catalog_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -553,6 +564,7 @@ def test_cli_auto_workflow_expansion_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -595,6 +607,7 @@ def test_cli_auto_workflow_benchmark_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -637,6 +650,7 @@ def test_cli_auto_workflow_summary_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -679,6 +693,7 @@ def test_cli_auto_workflow_manifest_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -721,6 +736,7 @@ def test_cli_auto_workflow_dag_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -763,6 +779,7 @@ def test_cli_auto_workflow_temporal_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -805,6 +822,7 @@ def test_cli_auto_workflow_evidence_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -847,6 +865,7 @@ def test_cli_auto_workflow_provenance_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -889,6 +908,7 @@ def test_cli_auto_workflow_checkout_main():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=True,
             all_checks=False,
         )
@@ -931,6 +951,7 @@ def test_cli_auto_workflow_all_checks():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=True,
         )
@@ -973,6 +994,7 @@ def test_cli_auto_workflow_accounting_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1015,6 +1037,7 @@ def test_cli_auto_workflow_uniqueness_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1057,6 +1080,7 @@ def test_cli_auto_workflow_orphan_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1099,6 +1123,7 @@ def test_cli_auto_workflow_privacy_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1141,6 +1166,7 @@ def test_cli_auto_workflow_mortality_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1183,6 +1209,7 @@ def test_cli_auto_workflow_enrollment_check():
             enrollment_check=True,
             dob_check=False,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1225,6 +1252,7 @@ def test_cli_auto_workflow_dob_check():
             enrollment_check=False,
             dob_check=True,
             provider_check=False,
+            icd_check=False,
             checkout_main=False,
             all_checks=False,
         )
@@ -1267,6 +1295,50 @@ def test_cli_auto_workflow_provider_check():
             enrollment_check=False,
             dob_check=False,
             provider_check=True,
+            icd_check=False,
+            checkout_main=False,
+            all_checks=False,
+        )
+
+
+def test_cli_auto_workflow_icd_check():
+    with patch("medicare_synth.cli.run_autonomous_workflow", return_value=0) as mock_wf:
+        code = main(["auto-workflow", "--dry-run", "--icd-check"])
+        assert code == 0
+        mock_wf.assert_called_once_with(
+            commit_msg="feat: implement autonomous workflow subcommand and reconcile docs",
+            title="feat: implement autonomous workflow subcommand and reconcile docs",
+            body="Automated PR created by the autonomous workflow engine. Reconciles docs and adds CLI auto-workflow subcommand.",
+            dry_run=True,
+            skip_merge=False,
+            json_report_path=None,
+            md_report_path=None,
+            html_report_path=None,
+            changelog_check=False,
+            git_clean_check=False,
+            audit_check=False,
+            validation_check=False,
+            export_check=False,
+            diff_check=False,
+            profile_check=False,
+            catalog_check=False,
+            expansion_check=False,
+            provenance_check=False,
+            benchmark_check=False,
+            summary_check=False,
+            manifest_check=False,
+            dag_check=False,
+            temporal_check=False,
+            evidence_check=False,
+            accounting_check=False,
+            uniqueness_check=False,
+            orphan_check=False,
+            privacy_check=False,
+            mortality_check=False,
+            enrollment_check=False,
+            dob_check=False,
+            provider_check=False,
+            icd_check=True,
             checkout_main=False,
             all_checks=False,
         )
