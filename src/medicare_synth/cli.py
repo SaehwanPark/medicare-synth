@@ -330,6 +330,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify primary key uniqueness across all baseline tables before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--orphan-check",
+        action="store_true",
+        help="Verify zero orphan beneficiary keys across all 18 child tables before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -657,6 +662,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             evidence_check=args.evidence_check,
             accounting_check=args.accounting_check,
             uniqueness_check=args.uniqueness_check,
+            orphan_check=args.orphan_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
