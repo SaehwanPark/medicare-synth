@@ -290,6 +290,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify field-level dataset provenance status taxonomy before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--benchmark-check",
+        action="store_true",
+        help="Verify synthetic dataset generation benchmark throughput before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -609,6 +614,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             catalog_check=args.catalog_check,
             expansion_check=args.expansion_check,
             provenance_check=args.provenance_check,
+            benchmark_check=args.benchmark_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )

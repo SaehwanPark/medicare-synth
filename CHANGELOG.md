@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--benchmark-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `benchmark_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable synthetic data throughput performance benchmarking before staging and committing.
+- Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `benchmark_check` verification logic and CLI flag parsing.
+
 - Added `--provenance-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `provenance_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable field-level dataset provenance taxonomy verification prior to staging and committing.
 - Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `provenance_check` verification logic and CLI flag parsing.
 
