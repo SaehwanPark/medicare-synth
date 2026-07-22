@@ -6,9 +6,7 @@ will preserve CMS synthetic records where possible, attach provenance to every
 extension, and validate relationships among enrollment, claims, lines,
 providers, and care events.
 
-The repository currently contains the project specification, architecture,
-roadmap, and contributor harness. It does not yet provide a CLI, Python API, or
-generated dataset.
+The repository provides a complete Python API (`medicare_synth`), a CLI (`medicare-synth`), 19 domain table implementations (spanning clinical claims and Master Beneficiary Summary File segments), a Polars-backed relational validation engine, scenario compiler, release exporter, privacy audit engine, and autonomous workflow automation engine.
 
 ## Why This Project Exists
 
@@ -22,21 +20,15 @@ estimates.
 The full motivation and strategic design are in the
 [project proposal](docs/medicare-synth-project-proposal_20260720.md).
 
-## Initial Product Boundary
+## Product Boundary & Capabilities
 
-The first credible release is planned to cover one pinned official CMS
-synthetic baseline and a narrow end-to-end slice:
+The current release covers the pinned official CMS synthetic baseline (`CMS-2021-SYN-CLAIMS`) and full schema coverage across 19 domain tables:
 
-- beneficiary enrollment needed for service-date validation
-- carrier claim headers and lines
-- outpatient claim headers and revenue-center lines
-- provenance-bearing evidence for the selected files and years
-- normalization, validation, and CSV/Parquet export
-- deterministic valid and invalid scenarios with expected results
+- **Master Beneficiary Summary File (MBSF)**: Base/Enrollment, Chronic Conditions, Cost & Use, Part D Characteristics, Other Chronic Conditions, National Death Index (NDI), Risk Adjustment, Part C / Medicare Advantage, Fee-For-Service (FFS) Utilization, Part D PDE Utilization
+- **Clinical Claims**: Inpatient, Outpatient, Carrier, Skilled Nursing Facility (SNF), Home Health Agency (HHA), Durable Medical Equipment (DME), Hospice, Prescription Drug Event (PDE)
+- **Pipeline & CLI Engine**: Normalization, Pydantic v2 + Polars relational validation, multi-format export (Parquet/CSV), vertical/horizontal dataset expansion, dataset diffing, limitations profiling, k-anonymity privacy auditing, and `auto-workflow` verification.
 
-Baseline selection, target schema year, schema language, licensing, and artifact
-publication remain open foundation decisions. Track their resolution in
-[ROADMAP.md](ROADMAP.md).
+Subcommands available via `medicare-synth`: `validate`, `scenario`, `manifest`, `export`, `expand`, `catalog`, `diff`, `profile`, `export-ci`, `audit`, `auto-workflow`.
 
 ## Contributor Guide
 
@@ -54,13 +46,11 @@ publication remain open foundation decisions. Track their resolution in
 Current repository checks:
 
 ```shell
-uv sync --dry-run
+uv run pytest
+uv run basedpyright
+uv run ruff check .
 git diff --check
 ```
-
-Python lint, type-check, and test commands will be added when their corresponding
-tools and source surfaces are introduced. Do not treat planned tooling as
-currently configured.
 
 ## Agent Harness
 

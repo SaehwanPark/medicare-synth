@@ -105,39 +105,24 @@ Completed Adoption and Maintenance Deliverables:
 - **MBSF Risk Adjustment Segment Domain Extension**: Implemented `MBSFRiskAdjustmentRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF Risk Adjustment variables/constraints (`CMS_HCC_RISK_SCORE`, `RXHCC_RISK_SCORE`, `PAYMENT_COUNT`, `VAL_MBSF_RA_01`), extended `RelationalValidator` with `check_mbsf_ra_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_risk_adjustment_score` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
 - **MBSF Part C / Medicare Advantage Segment Domain Extension**: Implemented `MBSFPartCRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF Part C variables/constraints (`PTC_CNTRCT_ID_01`, `PTC_PBP_ID_01`, `PTC_PLAN_TYPE_CD_01`, `BENE_MA_CVRAGE_TOT_MONS`, `VAL_MBSF_C_01`), extended `RelationalValidator` with `check_mbsf_c_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_part_c_contract` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
 - **MBSF Fee-For-Service (FFS) Utilization Segment Domain Extension**: Implemented `MBSFFFSUtilizationRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF FFS Utilization variables/constraints (`IP_ADM_CNT`, `OP_VIST_CNT`, `SNF_STAY_CNT`, `CAR_SRVC_CNT`, `HHA_VIST_CNT`, `HOSP_STAY_CNT`, `DME_SRVC_CNT`, `VAL_MBSF_FFS_01`), extended `RelationalValidator` with `check_mbsf_ffs_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_ffs_utilization_count` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **Autonomous Workflow Automation Subcommand**: Added `auto-workflow` subcommand in CLI and `run_autonomous_workflow` engine in `src/medicare_synth/workflow.py` to automate verification checks (linter, type checker, tests, changelog, git clean, audit, relational validation, export, schema diff, limitations profile, scenario catalog, dataset expansion, dataset provenance, benchmark throughput, summary matrix, CMS baseline manifest, DAG topology contract, temporal integrity, RKB evidence snapshot, claim accounting constraints, primary key uniqueness, provider NPI format, and ICD diagnosis code format verification), git staging/commits, pushing, PR creation via GitHub CLI, and autonomous merging.
-- **Adoption & Maintenance Test Suite**: Added unit test suite in `tests/test_mbsf_ffs.py`, `tests/test_mbsf_pde_util.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` (193 total passing unit tests).
-
-
-
-
-
-
+- **Autonomous Workflow Automation Subcommand**: Added `auto-workflow` subcommand in CLI and `run_autonomous_workflow` engine in `src/medicare_synth/workflow.py` to automate verification checks (linter, type checker, tests, changelog, git clean, audit, relational validation, export, schema diff, limitations profile, scenario catalog, dataset expansion, dataset provenance, benchmark throughput, summary matrix, CMS baseline manifest, DAG topology contract, temporal integrity, RKB evidence snapshot, claim accounting constraints, primary key uniqueness, provider NPI format, ICD diagnosis code format, and HCPCS procedure code format verification), git staging/commits, pushing, PR creation via GitHub CLI, and autonomous merging.
+- **Adoption & Maintenance Test Suite**: Extended comprehensive unit test suite in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` (215 total passing unit tests).
 
 Verification requires each decision to cite evidence, state assumptions, and be
-
 reflected in `ARCHITECTURE.md` and `ROADMAP.md`. No synthesis or release may be
 presented as verified before its applicable constraints and tests exist.
 
-Out of scope for the foundation milestone:
+Out of scope for the current milestone:
 
-- broad coverage of all CMS file families or historical layouts
+- broad coverage of historical CCW layouts prior to 2021
 - claims of population representativeness or clinical validity
 - opaque generative models where rules or transparent conditional methods are
   sufficient
-- production-scale generation before baseline normalization and validation
+- production-scale cohort generation outside validation-first constraints
 
 ## Future
 
-- Acquire, checksum, inventory, and preserve the selected CMS baseline and RKB
-  evidence snapshot.
-- Define executable schemas, canonical entities and events, relation and column
-  DAGs, provenance statuses, and constraint reporting.
-- Normalize and round-trip preserved baseline fields before adding synthesis.
-- Publish a validation-first release for beneficiary, carrier, and outpatient
-  structures.
-- Add evidence-graded vertical expansion and relationally coherent horizontal
-  expansion.
-- Publish deterministic valid and invalid scenarios with expected results.
-- Stabilize CLI and Python interfaces, cross-language examples, annual update
-  workflows, and explicit fidelity profiles.
+- Ingest and validate future annual CMS baseline releases (2022+ CCW file layouts) using schema diff workflows.
+- Expand transparent conditional generative models and privacy-preserving synthesis benchmarks.
+- Enhance cross-language reference analytical suites for longitudinal multi-year episode tracking.
+- Extend CLI automation with remote CI pipeline runners and automated release artifact distribution.
