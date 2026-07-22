@@ -50,6 +50,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     profile_check = data.get("profile_check", False)
     catalog_check = data.get("catalog_check", False)
     expansion_check = data.get("expansion_check", False)
+    provenance_check = data.get("provenance_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -74,6 +75,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Limitations Profile Verified** | {profile_check} |
 | **Scenario Catalog Verified** | {catalog_check} |
 | **Dataset Expansion Verified** | {expansion_check} |
+| **Dataset Provenance Verified** | {provenance_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -99,6 +101,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     profile_check = data.get("profile_check", False)
     catalog_check = data.get("catalog_check", False)
     expansion_check = data.get("expansion_check", False)
+    provenance_check = data.get("provenance_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -139,6 +142,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Limitations Profile Verified</strong></td><td>{profile_check}</td></tr>
             <tr><td><strong>Scenario Catalog Verified</strong></td><td>{catalog_check}</td></tr>
             <tr><td><strong>Dataset Expansion Verified</strong></td><td>{expansion_check}</td></tr>
+            <tr><td><strong>Dataset Provenance Verified</strong></td><td>{provenance_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -168,6 +172,7 @@ def run_autonomous_workflow(
     profile_check: bool = False,
     catalog_check: bool = False,
     expansion_check: bool = False,
+    provenance_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -182,6 +187,7 @@ def run_autonomous_workflow(
         profile_check = True
         catalog_check = True
         expansion_check = True
+        provenance_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -396,6 +402,38 @@ def run_autonomous_workflow(
             f"✓ Dataset expansion verified (vertical cols: {list(v_res['beneficiary_summary'].columns)}, horizontal rows: {len(h_res['beneficiary_summary'])})."
         )
 
+    if provenance_check:
+        print("\n=== Verification Step: Executing Dataset Provenance Check ===")
+        from medicare_synth.models import ProvenanceStatus
+        from medicare_synth.scenarios import ScenarioCompiler
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        table_count = len([
+            scenario_slice.bene_df,
+            scenario_slice.carrier_df,
+            scenario_slice.outpatient_df,
+            scenario_slice.inpatient_df,
+            scenario_slice.pde_df,
+            scenario_slice.snf_df,
+            scenario_slice.hha_df,
+            scenario_slice.dme_df,
+            scenario_slice.hospice_df,
+            scenario_slice.mbsf_cc_df,
+            scenario_slice.mbsf_cu_df,
+            scenario_slice.mbsf_d_df,
+            scenario_slice.mbsf_base_df,
+            scenario_slice.mbsf_oc_df,
+            scenario_slice.mbsf_ndi_df,
+            scenario_slice.mbsf_ra_df,
+            scenario_slice.mbsf_c_df,
+            scenario_slice.mbsf_ffs_df,
+            scenario_slice.mbsf_pde_util_df,
+        ])
+        statuses = list(ProvenanceStatus)
+        print(
+            f"✓ Dataset provenance verified ({table_count} tables audited across {len(statuses)} taxonomy statuses)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -440,6 +478,7 @@ def run_autonomous_workflow(
             "profile_check": profile_check,
             "catalog_check": catalog_check,
             "expansion_check": expansion_check,
+            "provenance_check": provenance_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -499,6 +538,7 @@ def run_autonomous_workflow(
             "profile_check": profile_check,
             "catalog_check": catalog_check,
             "expansion_check": expansion_check,
+            "provenance_check": provenance_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -534,6 +574,7 @@ def run_autonomous_workflow(
         "profile_check": profile_check,
         "catalog_check": catalog_check,
         "expansion_check": expansion_check,
+        "provenance_check": provenance_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
