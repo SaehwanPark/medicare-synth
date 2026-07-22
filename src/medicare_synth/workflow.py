@@ -73,6 +73,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     pos_check = data.get("pos_check", False)
     claim_type_check = data.get("claim_type_check", False)
     disposition_check = data.get("disposition_check", False)
+    state_check = data.get("state_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -136,6 +137,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Place of Service Code Format Verified** | {pos_check} |
 | **Claim Type Code Format Verified** | {claim_type_check} |
 | **Claim Disposition Code Format Verified** | {disposition_check} |
+| **State Code Format Verified** | {state_check} |
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
 | **MBSF Domain Constraints Verified** | {mbsf_check} |
@@ -200,6 +202,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     pos_check = data.get("pos_check", False)
     claim_type_check = data.get("claim_type_check", False)
     disposition_check = data.get("disposition_check", False)
+    state_check = data.get("state_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -279,6 +282,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Place of Service Format Verified</strong></td><td>{pos_check}</td></tr>
             <tr><td><strong>Claim Type Format Verified</strong></td><td>{claim_type_check}</td></tr>
             <tr><td><strong>Claim Disposition Format Verified</strong></td><td>{disposition_check}</td></tr>
+            <tr><td><strong>State Code Format Verified</strong></td><td>{state_check}</td></tr>
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
             <tr><td><strong>MBSF Domain Constraints Verified</strong></td><td>{mbsf_check}</td></tr>
@@ -347,6 +351,7 @@ def run_autonomous_workflow(
     pos_check: bool = False,
     claim_type_check: bool = False,
     disposition_check: bool = False,
+    state_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -400,6 +405,7 @@ def run_autonomous_workflow(
         pos_check = True
         claim_type_check = True
         disposition_check = True
+        state_check = True
         rev_center_check = True
         demographic_check = True
         mbsf_check = True
@@ -1543,6 +1549,22 @@ def run_autonomous_workflow(
             f"✓ Claim Disposition Code format constraints verified ({violating_count} Disposition constraint findings)."
         )
 
+    if state_check:
+        print(
+            "\n=== Verification Step: Executing Beneficiary State Code Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        state_findings = RelationalValidator.check_state_code_constraints(
+            scenario_slice.bene_df, "Beneficiary Summary"
+        )
+        violating_count = sum(f.count for f in state_findings)
+        print(
+            f"✓ Beneficiary State Code format constraints verified ({violating_count} State Code constraint findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1610,6 +1632,7 @@ def run_autonomous_workflow(
             "pos_check": pos_check,
             "claim_type_check": claim_type_check,
             "disposition_check": disposition_check,
+            "state_check": state_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -1708,6 +1731,7 @@ def run_autonomous_workflow(
             "pos_check": pos_check,
             "claim_type_check": claim_type_check,
             "disposition_check": disposition_check,
+            "state_check": state_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,

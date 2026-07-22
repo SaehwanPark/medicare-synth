@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--state-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `state_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Beneficiary State Code 2-digit numeric format consistency verification (`check_state_code_constraints`) across beneficiary summary and claim tables before staging and committing. Added `check_state_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `state_check` verification logic and CLI flag parsing.
+
 - Added `--disposition-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `disposition_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Processing Disposition Code 2-digit numeric format consistency verification (`check_claim_disposition_constraints`) across claim tables before staging and committing. Added `check_claim_disposition_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `disposition_check` verification logic and CLI flag parsing.
 
