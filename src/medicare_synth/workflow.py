@@ -82,6 +82,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     hha_check = data.get("hha_check", False)
     dme_check = data.get("dme_check", False)
     hospice_check = data.get("hospice_check", False)
+    pde_check = data.get("pde_check", False)
     pde_util_check = data.get("pde_util_check", False)
     carrier_check = data.get("carrier_check", False)
     outpatient_check = data.get("outpatient_check", False)
@@ -146,6 +147,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **HHA Field Constraints Verified** | {hha_check} |
 | **DME Field Constraints Verified** | {dme_check} |
 | **Hospice Field Constraints Verified** | {hospice_check} |
+| **Part D PDE Field Constraints Verified** | {pde_check} |
 | **Part D PDE Utilization Verified** | {pde_util_check} |
 | **Carrier Field Constraints Verified** | {carrier_check} |
 | **Outpatient Field Constraints Verified** | {outpatient_check} |
@@ -211,6 +213,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     hha_check = data.get("hha_check", False)
     dme_check = data.get("dme_check", False)
     hospice_check = data.get("hospice_check", False)
+    pde_check = data.get("pde_check", False)
     pde_util_check = data.get("pde_util_check", False)
     carrier_check = data.get("carrier_check", False)
     outpatient_check = data.get("outpatient_check", False)
@@ -291,6 +294,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>HHA Field Constraints Verified</strong></td><td>{hha_check}</td></tr>
             <tr><td><strong>DME Field Constraints Verified</strong></td><td>{dme_check}</td></tr>
             <tr><td><strong>Hospice Field Constraints Verified</strong></td><td>{hospice_check}</td></tr>
+            <tr><td><strong>Part D PDE Field Constraints Verified</strong></td><td>{pde_check}</td></tr>
             <tr><td><strong>Part D PDE Utilization Verified</strong></td><td>{pde_util_check}</td></tr>
             <tr><td><strong>Carrier Field Constraints Verified</strong></td><td>{carrier_check}</td></tr>
             <tr><td><strong>Outpatient Field Constraints Verified</strong></td><td>{outpatient_check}</td></tr>
@@ -360,6 +364,7 @@ def run_autonomous_workflow(
     hha_check: bool = False,
     dme_check: bool = False,
     hospice_check: bool = False,
+    pde_check: bool = False,
     pde_util_check: bool = False,
     carrier_check: bool = False,
     outpatient_check: bool = False,
@@ -414,6 +419,7 @@ def run_autonomous_workflow(
         hha_check = True
         dme_check = True
         hospice_check = True
+        pde_check = True
         pde_util_check = True
         carrier_check = True
         outpatient_check = True
@@ -1565,6 +1571,22 @@ def run_autonomous_workflow(
             f"✓ Beneficiary State Code format constraints verified ({violating_count} State Code constraint findings)."
         )
 
+    if pde_check:
+        print(
+            "\n=== Verification Step: Executing Part D Prescription Drug Event Field Constraint Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        pde_findings = RelationalValidator.check_pde_field_constraints(
+            scenario_slice.pde_df
+        )
+        violating_count = sum(f.count for f in pde_findings)
+        print(
+            f"✓ Part D Prescription Drug Event field constraints verified ({violating_count} PDE constraint findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1641,6 +1663,7 @@ def run_autonomous_workflow(
             "hha_check": hha_check,
             "dme_check": dme_check,
             "hospice_check": hospice_check,
+            "pde_check": pde_check,
             "pde_util_check": pde_util_check,
             "carrier_check": carrier_check,
             "outpatient_check": outpatient_check,
@@ -1740,6 +1763,7 @@ def run_autonomous_workflow(
             "hha_check": hha_check,
             "dme_check": dme_check,
             "hospice_check": hospice_check,
+            "pde_check": pde_check,
             "pde_util_check": pde_util_check,
             "carrier_check": carrier_check,
             "outpatient_check": outpatient_check,
@@ -1815,6 +1839,7 @@ def run_autonomous_workflow(
         "hha_check": hha_check,
         "dme_check": dme_check,
         "hospice_check": hospice_check,
+        "pde_check": pde_check,
         "pde_util_check": pde_util_check,
         "carrier_check": carrier_check,
         "outpatient_check": outpatient_check,
