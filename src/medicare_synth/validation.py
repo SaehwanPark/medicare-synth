@@ -831,6 +831,55 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_enrollment_consistency_constraints(
+        mbsf_base_df: pl.DataFrame,
+    ) -> list[Finding]:
+        """Identifies MBSF Base records violating beneficiary entitlement or coverage month consistency."""
+        if mbsf_base_df.is_empty():
+            return []
+
+        invalid_conditions = []
+        for col in [
+            "bene_hi_cvrage_tot_mons",
+            "bene_smi_cvrage_tot_mons",
+            "bene_hmo_cvrage_tot_mons",
+            "bene_ptd_cvrage_tot_mons",
+        ]:
+            if col in mbsf_base_df.columns:
+                invalid_conditions.append((pl.col(col) < 0) | (pl.col(col) > 12))
+
+        if not invalid_conditions:
+            return []
+
+        combined_condition = invalid_conditions[0]
+        for cond in invalid_conditions[1:]:
+            combined_condition = combined_condition | cond
+
+        invalid = mbsf_base_df.filter(combined_condition)
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("bene_id").slice(0, 5).to_series().to_list()
+                if "bene_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="ENR-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} MBSF Base records violating 0-12 coverage month consistency constraints.",
+                    count=invalid_count,
+                    details={
+                        "table_name": "MBSF Base Enrollment",
+                        "sample_bene_ids": sample_ids,
+                    },
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,
@@ -942,6 +991,11 @@ class RelationalValidator:
             )
             findings.extend(self.check_pde_field_constraints(pde_df))
             findings.extend(
+                self.check_claim_accounting_constraints(
+                    pde_df, "Prescription Drug Events"
+                )
+            )
+            findings.extend(
                 self.check_record_uniqueness(
                     pde_df, ["pde_id"], "Prescription Drug Events"
                 )
@@ -953,9 +1007,7 @@ class RelationalValidator:
                 self.check_admission_temporal_inversions(snf_df, "SNF Claims")
             )
             findings.extend(
-                self.check_mortality_temporal_constraints(
-                    bene_df, snf_df, "SNF Claims"
-                )
+                self.check_mortality_temporal_constraints(bene_df, snf_df, "SNF Claims")
             )
             findings.extend(self.check_snf_field_constraints(snf_df))
             findings.extend(
@@ -971,9 +1023,7 @@ class RelationalValidator:
                 self.check_admission_temporal_inversions(hha_df, "HHA Claims")
             )
             findings.extend(
-                self.check_mortality_temporal_constraints(
-                    bene_df, hha_df, "HHA Claims"
-                )
+                self.check_mortality_temporal_constraints(bene_df, hha_df, "HHA Claims")
             )
             findings.extend(self.check_hha_field_constraints(hha_df))
             findings.extend(
@@ -987,9 +1037,7 @@ class RelationalValidator:
             findings.extend(self.check_orphaned_claims(bene_df, dme_df, "DME Claims"))
             findings.extend(self.check_temporal_inversions(dme_df, "DME Claims"))
             findings.extend(
-                self.check_mortality_temporal_constraints(
-                    bene_df, dme_df, "DME Claims"
-                )
+                self.check_mortality_temporal_constraints(bene_df, dme_df, "DME Claims")
             )
             findings.extend(self.check_dme_field_constraints(dme_df))
             findings.extend(
@@ -1060,6 +1108,7 @@ class RelationalValidator:
                 )
             )
             findings.extend(self.check_mbsf_base_field_constraints(mbsf_base_df))
+            findings.extend(self.check_enrollment_consistency_constraints(mbsf_base_df))
             findings.extend(
                 self.check_record_uniqueness(
                     mbsf_base_df, ["bene_id"], "MBSF Base Enrollment"

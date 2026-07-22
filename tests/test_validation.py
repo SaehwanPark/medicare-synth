@@ -154,3 +154,24 @@ def test_check_mortality_temporal_constraints() -> None:
     assert finding.category == FindingCategory.TEMPORAL
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_enrollment_consistency_constraints() -> None:
+    mbsf_base_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE001", "BENE002"],
+            "bene_hi_cvrage_tot_mons": [12, 14],  # 14 violates 0..12 bounds
+            "bene_smi_cvrage_tot_mons": [12, 12],
+            "bene_hmo_cvrage_tot_mons": [0, 0],
+            "bene_ptd_cvrage_tot_mons": [12, 12],
+        }
+    )
+    findings = RelationalValidator.check_enrollment_consistency_constraints(
+        mbsf_base_df
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "ENR-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
