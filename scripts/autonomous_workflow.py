@@ -48,6 +48,11 @@ def main() -> None:
         action="store_true",
         help="Verify dataset relational validation integrity before commit/push",
     )
+    parser.add_argument(
+        "--evidence-check",
+        action="store_true",
+        help="Verify ResDAC Knowledge Base evidence snapshot contracts before commit/push",
+    )
 
     args = parser.parse_args()
 
@@ -58,6 +63,7 @@ def main() -> None:
         dry_run=args.dry_run,
         skip_merge=args.skip_merge,
         validation_check=args.validation_check,
+        evidence_check=args.evidence_check,
     )
     sys.exit(exit_code)
 
