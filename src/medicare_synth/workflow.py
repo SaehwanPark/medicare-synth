@@ -59,6 +59,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     evidence_check = data.get("evidence_check", False)
     accounting_check = data.get("accounting_check", False)
     uniqueness_check = data.get("uniqueness_check", False)
+    orphan_check = data.get("orphan_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -92,6 +93,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **RKB Evidence Snapshot Verified** | {evidence_check} |
 | **Claim Accounting Constraints Verified** | {accounting_check} |
 | **Primary Key Uniqueness Verified** | {uniqueness_check} |
+| **Orphan Claims Verified** | {orphan_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -126,6 +128,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     evidence_check = data.get("evidence_check", False)
     accounting_check = data.get("accounting_check", False)
     uniqueness_check = data.get("uniqueness_check", False)
+    orphan_check = data.get("orphan_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -175,6 +178,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>RKB Evidence Snapshot Verified</strong></td><td>{evidence_check}</td></tr>
             <tr><td><strong>Claim Accounting Constraints Verified</strong></td><td>{accounting_check}</td></tr>
             <tr><td><strong>Primary Key Uniqueness Verified</strong></td><td>{uniqueness_check}</td></tr>
+            <tr><td><strong>Orphan Claims Verified</strong></td><td>{orphan_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -213,6 +217,7 @@ def run_autonomous_workflow(
     evidence_check: bool = False,
     accounting_check: bool = False,
     uniqueness_check: bool = False,
+    orphan_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -236,6 +241,7 @@ def run_autonomous_workflow(
         evidence_check = True
         accounting_check = True
         uniqueness_check = True
+        orphan_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -723,6 +729,44 @@ def run_autonomous_workflow(
             f"✓ Record uniqueness verified across {len(tables_to_check)} baseline tables ({uniq_count} primary key duplicate findings)."
         )
 
+    if orphan_check:
+        print("\n=== Verification Step: Executing Orphan Claim Verification Check ===")
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        child_tables = [
+            ("carrier", scenario_slice.carrier_df),
+            ("outpatient", scenario_slice.outpatient_df),
+            ("inpatient", scenario_slice.inpatient_df),
+            ("pde", scenario_slice.pde_df),
+            ("snf", scenario_slice.snf_df),
+            ("hha", scenario_slice.hha_df),
+            ("dme", scenario_slice.dme_df),
+            ("hospice", scenario_slice.hospice_df),
+            ("mbsf_cc", scenario_slice.mbsf_cc_df),
+            ("mbsf_cu", scenario_slice.mbsf_cu_df),
+            ("mbsf_d", scenario_slice.mbsf_d_df),
+            ("mbsf_base", scenario_slice.mbsf_base_df),
+            ("mbsf_oc", scenario_slice.mbsf_oc_df),
+            ("mbsf_ndi", scenario_slice.mbsf_ndi_df),
+            ("mbsf_ra", scenario_slice.mbsf_ra_df),
+            ("mbsf_c", scenario_slice.mbsf_c_df),
+            ("mbsf_ffs", scenario_slice.mbsf_ffs_df),
+            ("mbsf_pde_util", scenario_slice.mbsf_pde_util_df),
+        ]
+        orphan_findings = []
+        for name, df in child_tables:
+            orphan_findings.extend(
+                RelationalValidator.check_orphaned_claims(
+                    scenario_slice.bene_df, df, name
+                )
+            )
+        orphan_count = sum(f.count for f in orphan_findings)
+        print(
+            f"✓ Orphan claim integrity verified across {len(child_tables)} child table families ({orphan_count} orphan key findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -776,6 +820,7 @@ def run_autonomous_workflow(
             "evidence_check": evidence_check,
             "accounting_check": accounting_check,
             "uniqueness_check": uniqueness_check,
+            "orphan_check": orphan_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -844,6 +889,7 @@ def run_autonomous_workflow(
             "evidence_check": evidence_check,
             "accounting_check": accounting_check,
             "uniqueness_check": uniqueness_check,
+            "orphan_check": orphan_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -888,6 +934,7 @@ def run_autonomous_workflow(
         "evidence_check": evidence_check,
         "accounting_check": accounting_check,
         "uniqueness_check": uniqueness_check,
+        "orphan_check": orphan_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
