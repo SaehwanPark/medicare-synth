@@ -111,3 +111,21 @@ def test_relational_validator_record_uniqueness() -> None:
 
     assert report.is_valid is False
     assert any(f.rule_id == "REC-001" for f in report.findings)
+
+
+def test_check_claim_accounting_constraints() -> None:
+    carrier_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002"],
+            "clm_pmt_amt": [150.0, -10.0],
+        }
+    )
+    findings = RelationalValidator.check_claim_accounting_constraints(
+        carrier_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "ACC-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1

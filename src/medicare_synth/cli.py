@@ -320,6 +320,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify ResDAC Knowledge Base evidence snapshot contracts before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--accounting-check",
+        action="store_true",
+        help="Verify claim payment accounting non-negativity across claim tables before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -645,6 +650,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             dag_check=args.dag_check,
             temporal_check=args.temporal_check,
             evidence_check=args.evidence_check,
+            accounting_check=args.accounting_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )
