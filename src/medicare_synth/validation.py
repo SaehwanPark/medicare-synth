@@ -1256,6 +1256,58 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_rev_center_code_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with invalid Revenue Center (REV_CNTR) code format (must be 4 numeric digits when present)."""
+        if claim_df.is_empty():
+            return []
+
+        rev_col = None
+        for col in [
+            "rev_cntr",
+            "REV_CNTR",
+            "rev_cntr_cd",
+            "REV_CNTR_CD",
+            "clm_rev_cntr_cd",
+            "CLM_REV_CNTR_CD",
+            "line_rev_cntr_cd",
+            "LINE_REV_CNTR_CD",
+        ]:
+            if col in claim_df.columns:
+                rev_col = col
+                break
+        if rev_col is None:
+            return []
+
+        non_null_rev = claim_df.filter(pl.col(rev_col).is_not_null())
+        if non_null_rev.is_empty():
+            return []
+
+        invalid = non_null_rev.filter(
+            ~pl.col(rev_col).cast(pl.Utf8).str.contains(r"^[0-9]{4}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="REV-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {claim_type} with invalid Revenue Center Code format (must be 4 numeric digits).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,
@@ -1372,6 +1424,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_pos_code_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_rev_center_code_constraints(
                     outpatient_df, "Outpatient Claims"
                 )
             )

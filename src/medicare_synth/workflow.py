@@ -71,6 +71,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     drg_check = data.get("drg_check", False)
     taxonomy_check = data.get("taxonomy_check", False)
     pos_check = data.get("pos_check", False)
+    rev_center_check = data.get("rev_center_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -116,6 +117,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **DRG Format Verified** | {drg_check} |
 | **Taxonomy Code Format Verified** | {taxonomy_check} |
 | **Place of Service Format Verified** | {pos_check} |
+| **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -162,6 +164,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     drg_check = data.get("drg_check", False)
     taxonomy_check = data.get("taxonomy_check", False)
     pos_check = data.get("pos_check", False)
+    rev_center_check = data.get("rev_center_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -223,6 +226,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>DRG Format Verified</strong></td><td>{drg_check}</td></tr>
             <tr><td><strong>Taxonomy Code Format Verified</strong></td><td>{taxonomy_check}</td></tr>
             <tr><td><strong>Place of Service Format Verified</strong></td><td>{pos_check}</td></tr>
+            <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -273,6 +277,7 @@ def run_autonomous_workflow(
     drg_check: bool = False,
     taxonomy_check: bool = False,
     pos_check: bool = False,
+    rev_center_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -308,6 +313,7 @@ def run_autonomous_workflow(
         drg_check = True
         taxonomy_check = True
         pos_check = True
+        rev_center_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -1097,6 +1103,22 @@ def run_autonomous_workflow(
             f"✓ Place of Service code format verified for Carrier Claims ({violating_count} POS format findings)."
         )
 
+    if rev_center_check:
+        print(
+            "\n=== Verification Step: Executing Revenue Center Code Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        rev_findings = RelationalValidator.check_rev_center_code_constraints(
+            scenario_slice.outpatient_df, "Outpatient Claims"
+        )
+        violating_count = sum(f.count for f in rev_findings)
+        print(
+            f"✓ Revenue Center code format verified for Outpatient Claims ({violating_count} Rev Center format findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1162,6 +1184,7 @@ def run_autonomous_workflow(
             "drg_check": drg_check,
             "taxonomy_check": taxonomy_check,
             "pos_check": pos_check,
+            "rev_center_check": rev_center_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1242,6 +1265,7 @@ def run_autonomous_workflow(
             "drg_check": drg_check,
             "taxonomy_check": taxonomy_check,
             "pos_check": pos_check,
+            "rev_center_check": rev_center_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1300,6 +1324,7 @@ def run_autonomous_workflow(
         "drg_check": drg_check,
         "taxonomy_check": taxonomy_check,
         "pos_check": pos_check,
+        "rev_center_check": rev_center_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }

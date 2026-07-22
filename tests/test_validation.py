@@ -333,3 +333,22 @@ def test_check_pos_code_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_rev_center_code_constraints() -> None:
+    outpatient_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003"],
+            "bene_id": ["BENE001", "BENE002", "BENE003"],
+            "rev_cntr": ["0300", "INVALID_REV_CNTR", None],
+        }
+    )
+    findings = RelationalValidator.check_rev_center_code_constraints(
+        outpatient_df, "Outpatient Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "REV-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
