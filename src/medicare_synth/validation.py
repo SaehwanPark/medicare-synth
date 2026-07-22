@@ -745,6 +745,35 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_accounting_constraints(
+        claim_df: pl.DataFrame, claim_type: str
+    ) -> list[Finding]:
+        """Identifies claims with negative payment amounts (clm_pmt_amt < 0)."""
+        if claim_df.is_empty() or "clm_pmt_amt" not in claim_df.columns:
+            return []
+
+        invalid = claim_df.filter(pl.col("clm_pmt_amt") < 0)
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="ACC-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with negative payment amount (clm_pmt_amt < 0).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,
@@ -782,6 +811,9 @@ class RelationalValidator:
             findings.extend(
                 self.check_temporal_inversions(carrier_df, "Carrier Claims")
             )
+            findings.extend(
+                self.check_claim_accounting_constraints(carrier_df, "Carrier Claims")
+            )
             if "line_num" in carrier_df.columns:
                 findings.extend(
                     self.check_record_uniqueness(
@@ -797,6 +829,11 @@ class RelationalValidator:
                 self.check_temporal_inversions(outpatient_df, "Outpatient Claims")
             )
             findings.extend(
+                self.check_claim_accounting_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
                 self.check_record_uniqueness(
                     outpatient_df, ["clm_id"], "Outpatient Claims"
                 )
@@ -808,6 +845,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_admission_temporal_inversions(
+                    inpatient_df, "Inpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_accounting_constraints(
                     inpatient_df, "Inpatient Claims"
                 )
             )
@@ -835,6 +877,9 @@ class RelationalValidator:
             )
             findings.extend(self.check_snf_field_constraints(snf_df))
             findings.extend(
+                self.check_claim_accounting_constraints(snf_df, "SNF Claims")
+            )
+            findings.extend(
                 self.check_record_uniqueness(snf_df, ["clm_id"], "SNF Claims")
             )
 
@@ -845,6 +890,9 @@ class RelationalValidator:
             )
             findings.extend(self.check_hha_field_constraints(hha_df))
             findings.extend(
+                self.check_claim_accounting_constraints(hha_df, "HHA Claims")
+            )
+            findings.extend(
                 self.check_record_uniqueness(hha_df, ["clm_id"], "HHA Claims")
             )
 
@@ -852,6 +900,9 @@ class RelationalValidator:
             findings.extend(self.check_orphaned_claims(bene_df, dme_df, "DME Claims"))
             findings.extend(self.check_temporal_inversions(dme_df, "DME Claims"))
             findings.extend(self.check_dme_field_constraints(dme_df))
+            findings.extend(
+                self.check_claim_accounting_constraints(dme_df, "DME Claims")
+            )
             if "line_num" in dme_df.columns:
                 findings.extend(
                     self.check_record_uniqueness(
@@ -867,6 +918,9 @@ class RelationalValidator:
                 self.check_admission_temporal_inversions(hospice_df, "Hospice Claims")
             )
             findings.extend(self.check_hospice_field_constraints(hospice_df))
+            findings.extend(
+                self.check_claim_accounting_constraints(hospice_df, "Hospice Claims")
+            )
             findings.extend(
                 self.check_record_uniqueness(hospice_df, ["clm_id"], "Hospice Claims")
             )

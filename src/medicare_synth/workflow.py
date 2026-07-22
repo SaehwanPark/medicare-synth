@@ -57,6 +57,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     dag_check = data.get("dag_check", False)
     temporal_check = data.get("temporal_check", False)
     evidence_check = data.get("evidence_check", False)
+    accounting_check = data.get("accounting_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -88,6 +89,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **DAG Topology Verified** | {dag_check} |
 | **Temporal Integrity Verified** | {temporal_check} |
 | **RKB Evidence Snapshot Verified** | {evidence_check} |
+| **Claim Accounting Constraints Verified** | {accounting_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -120,6 +122,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     dag_check = data.get("dag_check", False)
     temporal_check = data.get("temporal_check", False)
     evidence_check = data.get("evidence_check", False)
+    accounting_check = data.get("accounting_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -167,6 +170,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>DAG Topology Verified</strong></td><td>{dag_check}</td></tr>
             <tr><td><strong>Temporal Integrity Verified</strong></td><td>{temporal_check}</td></tr>
             <tr><td><strong>RKB Evidence Snapshot Verified</strong></td><td>{evidence_check}</td></tr>
+            <tr><td><strong>Claim Accounting Constraints Verified</strong></td><td>{accounting_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -203,6 +207,7 @@ def run_autonomous_workflow(
     dag_check: bool = False,
     temporal_check: bool = False,
     evidence_check: bool = False,
+    accounting_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -224,6 +229,7 @@ def run_autonomous_workflow(
         dag_check = True
         temporal_check = True
         evidence_check = True
+        accounting_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -640,6 +646,31 @@ def run_autonomous_workflow(
             f"{len(snapshot.constraints)} constraints, version {snapshot.rkb_version})."
         )
 
+    if accounting_check:
+        print("\n=== Verification Step: Executing Claim Accounting Verification Check ===")
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        claim_tables = [
+            ("carrier", scenario_slice.carrier_df),
+            ("outpatient", scenario_slice.outpatient_df),
+            ("inpatient", scenario_slice.inpatient_df),
+            ("snf", scenario_slice.snf_df),
+            ("hha", scenario_slice.hha_df),
+            ("dme", scenario_slice.dme_df),
+            ("hospice", scenario_slice.hospice_df),
+        ]
+        acc_findings = []
+        for name, df in claim_tables:
+            acc_findings.extend(
+                RelationalValidator.check_claim_accounting_constraints(df, name)
+            )
+        acc_count = sum(f.count for f in acc_findings)
+        print(
+            f"✓ Claim accounting constraints verified across {len(claim_tables)} claim table families ({acc_count} negative payment findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -691,6 +722,7 @@ def run_autonomous_workflow(
             "dag_check": dag_check,
             "temporal_check": temporal_check,
             "evidence_check": evidence_check,
+            "accounting_check": accounting_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -757,6 +789,7 @@ def run_autonomous_workflow(
             "dag_check": dag_check,
             "temporal_check": temporal_check,
             "evidence_check": evidence_check,
+            "accounting_check": accounting_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -799,6 +832,7 @@ def run_autonomous_workflow(
         "dag_check": dag_check,
         "temporal_check": temporal_check,
         "evidence_check": evidence_check,
+        "accounting_check": accounting_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
