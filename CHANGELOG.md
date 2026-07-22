@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--ndc-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `ndc_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable National Drug Code (NDC) 11-character alphanumeric format consistency verification for Part D PDE records. Added `check_ndc_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `ndc_check` verification logic and CLI flag parsing.
+
 - Added `--hcpcs-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `hcpcs_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable HCPCS procedure code 5-character alphanumeric format consistency verification across claim tables. Added `check_hcpcs_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `hcpcs_check` verification logic and CLI flag parsing.
 

@@ -67,6 +67,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     provider_check = data.get("provider_check", False)
     icd_check = data.get("icd_check", False)
     hcpcs_check = data.get("hcpcs_check", False)
+    ndc_check = data.get("ndc_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -108,6 +109,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Provider NPI Format Verified** | {provider_check} |
 | **ICD Diagnosis Code Format Verified** | {icd_check} |
 | **HCPCS Procedure Code Format Verified** | {hcpcs_check} |
+| **NDC Format Verified** | {ndc_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -150,6 +152,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     provider_check = data.get("provider_check", False)
     icd_check = data.get("icd_check", False)
     hcpcs_check = data.get("hcpcs_check", False)
+    ndc_check = data.get("ndc_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -207,6 +210,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Provider NPI Format Verified</strong></td><td>{provider_check}</td></tr>
             <tr><td><strong>ICD Diagnosis Code Format Verified</strong></td><td>{icd_check}</td></tr>
             <tr><td><strong>HCPCS Procedure Code Format Verified</strong></td><td>{hcpcs_check}</td></tr>
+            <tr><td><strong>NDC Format Verified</strong></td><td>{ndc_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -253,6 +257,7 @@ def run_autonomous_workflow(
     provider_check: bool = False,
     icd_check: bool = False,
     hcpcs_check: bool = False,
+    ndc_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -284,6 +289,7 @@ def run_autonomous_workflow(
         provider_check = True
         icd_check = True
         hcpcs_check = True
+        ndc_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -1009,6 +1015,22 @@ def run_autonomous_workflow(
             f"✓ HCPCS procedure code format verified across {len(claim_tables)} claim table families ({violating_count} HCPCS format findings)."
         )
 
+    if ndc_check:
+        print(
+            "\n=== Verification Step: Executing NDC Code Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        ndc_findings = RelationalValidator.check_ndc_code_constraints(
+            scenario_slice.pde_df, "Prescription Drug Events"
+        )
+        violating_count = sum(f.count for f in ndc_findings)
+        print(
+            f"✓ NDC code format verified for Prescription Drug Events ({violating_count} NDC format findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1070,6 +1092,7 @@ def run_autonomous_workflow(
             "provider_check": provider_check,
             "icd_check": icd_check,
             "hcpcs_check": hcpcs_check,
+            "ndc_check": ndc_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1146,6 +1169,7 @@ def run_autonomous_workflow(
             "provider_check": provider_check,
             "icd_check": icd_check,
             "hcpcs_check": hcpcs_check,
+            "ndc_check": ndc_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1200,6 +1224,7 @@ def run_autonomous_workflow(
         "provider_check": provider_check,
         "icd_check": icd_check,
         "hcpcs_check": hcpcs_check,
+        "ndc_check": ndc_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }

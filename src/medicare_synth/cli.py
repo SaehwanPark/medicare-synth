@@ -370,6 +370,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify HCPCS procedure code 5-character alphanumeric format consistency across all claim tables before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--ndc-check",
+        action="store_true",
+        help="Verify NDC 11-character alphanumeric format consistency for Part D PDE records before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--checkout-main",
         action="store_true",
         help="Checkout main branch and pull latest changes after autonomous PR merge",
@@ -705,6 +710,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             provider_check=args.provider_check,
             icd_check=args.icd_check,
             hcpcs_check=args.hcpcs_check,
+            ndc_check=args.ndc_check,
             checkout_main=args.checkout_main,
             all_checks=args.all_checks,
         )

@@ -257,3 +257,22 @@ def test_check_hcpcs_code_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_ndc_code_constraints() -> None:
+    pde_df = pl.DataFrame(
+        {
+            "pde_id": ["PDE001", "PDE002", "PDE003"],
+            "bene_id": ["BENE001", "BENE002", "BENE003"],
+            "prod_srvc_id": ["00002322930", "INVALID_NDC_TOO_LONG", None],
+        }
+    )
+    findings = RelationalValidator.check_ndc_code_constraints(
+        pde_df, "Prescription Drug Events"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "NDC-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1

@@ -1066,6 +1066,49 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_ndc_code_constraints(
+        pde_df: pl.DataFrame, dataset_name: str = "Prescription Drug Events"
+    ) -> list[Finding]:
+        """Identifies PDE records with invalid National Drug Code (NDC) format (must be 11 alphanumeric characters when present)."""
+        if pde_df.is_empty():
+            return []
+
+        ndc_col = None
+        for col in ["prod_srvc_id", "PROD_SRVC_ID", "ndc_cd"]:
+            if col in pde_df.columns:
+                ndc_col = col
+                break
+        if ndc_col is None:
+            return []
+
+        non_null_ndc = pde_df.filter(pl.col(ndc_col).is_not_null())
+        if non_null_ndc.is_empty():
+            return []
+
+        invalid = non_null_ndc.filter(
+            ~pl.col(ndc_col).str.contains(r"^[A-Za-z0-9]{11}$")
+        )
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("pde_id").slice(0, 5).to_series().to_list()
+                if "pde_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="NDC-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {dataset_name} with invalid NDC format (must be 11 alphanumeric characters).",
+                    count=invalid_count,
+                    details={"dataset_name": dataset_name, "sample_pde_ids": sample_ids},
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,
@@ -1220,6 +1263,7 @@ class RelationalValidator:
                 )
             )
             findings.extend(self.check_pde_field_constraints(pde_df))
+            findings.extend(self.check_ndc_code_constraints(pde_df))
             findings.extend(
                 self.check_claim_accounting_constraints(
                     pde_df, "Prescription Drug Events"
