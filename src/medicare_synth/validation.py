@@ -1109,6 +1109,49 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_drg_code_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Inpatient Claims"
+    ) -> list[Finding]:
+        """Identifies claims with invalid Diagnosis Related Group (DRG) code format (must be 3 alphanumeric characters when present)."""
+        if claim_df.is_empty():
+            return []
+
+        drg_col = None
+        for col in ["clm_drg_cd", "CLM_DRG_CD", "drg_cd", "DRG_CD"]:
+            if col in claim_df.columns:
+                drg_col = col
+                break
+        if drg_col is None:
+            return []
+
+        non_null_drg = claim_df.filter(pl.col(drg_col).is_not_null())
+        if non_null_drg.is_empty():
+            return []
+
+        invalid = non_null_drg.filter(
+            ~pl.col(drg_col).cast(pl.Utf8).str.contains(r"^[0-9A-Za-z]{3}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="DRG-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with invalid DRG code format (must be 3 alphanumeric characters).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
     def validate_slice(
         self,
         bene_df: pl.DataFrame,
@@ -1246,6 +1289,9 @@ class RelationalValidator:
                 self.check_record_uniqueness(
                     inpatient_df, ["clm_id"], "Inpatient Claims"
                 )
+            )
+            findings.extend(
+                self.check_drg_code_constraints(inpatient_df, "Inpatient Claims")
             )
 
         if pde_df is not None and not pde_df.is_empty():

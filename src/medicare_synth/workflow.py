@@ -68,6 +68,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     icd_check = data.get("icd_check", False)
     hcpcs_check = data.get("hcpcs_check", False)
     ndc_check = data.get("ndc_check", False)
+    drg_check = data.get("drg_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -110,6 +111,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **ICD Diagnosis Code Format Verified** | {icd_check} |
 | **HCPCS Procedure Code Format Verified** | {hcpcs_check} |
 | **NDC Format Verified** | {ndc_check} |
+| **DRG Format Verified** | {drg_check} |
 | **Main Checked Out** | {checkout_main} |
 | **All Verification Checks Enabled** | {all_checks} |
 """
@@ -153,6 +155,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     icd_check = data.get("icd_check", False)
     hcpcs_check = data.get("hcpcs_check", False)
     ndc_check = data.get("ndc_check", False)
+    drg_check = data.get("drg_check", False)
     checkout_main = data.get("checkout_main", False)
     all_checks = data.get("all_checks", False)
 
@@ -211,6 +214,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>ICD Diagnosis Code Format Verified</strong></td><td>{icd_check}</td></tr>
             <tr><td><strong>HCPCS Procedure Code Format Verified</strong></td><td>{hcpcs_check}</td></tr>
             <tr><td><strong>NDC Format Verified</strong></td><td>{ndc_check}</td></tr>
+            <tr><td><strong>DRG Format Verified</strong></td><td>{drg_check}</td></tr>
             <tr><td><strong>Main Checked Out</strong></td><td>{checkout_main}</td></tr>
             <tr><td><strong>All Verification Checks Enabled</strong></td><td>{all_checks}</td></tr>
         </tbody>
@@ -258,6 +262,7 @@ def run_autonomous_workflow(
     icd_check: bool = False,
     hcpcs_check: bool = False,
     ndc_check: bool = False,
+    drg_check: bool = False,
     checkout_main: bool = False,
     all_checks: bool = False,
 ) -> int:
@@ -290,6 +295,7 @@ def run_autonomous_workflow(
         icd_check = True
         hcpcs_check = True
         ndc_check = True
+        drg_check = True
 
     print("=== Step 1: Running Linter (Ruff) ===")
     run_cmd(["uv", "run", "ruff", "check", "."])
@@ -1031,6 +1037,22 @@ def run_autonomous_workflow(
             f"✓ NDC code format verified for Prescription Drug Events ({violating_count} NDC format findings)."
         )
 
+    if drg_check:
+        print(
+            "\n=== Verification Step: Executing DRG Code Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        drg_findings = RelationalValidator.check_drg_code_constraints(
+            scenario_slice.inpatient_df, "Inpatient Claims"
+        )
+        violating_count = sum(f.count for f in drg_findings)
+        print(
+            f"✓ DRG code format verified for Inpatient Claims ({violating_count} DRG format findings)."
+        )
+
     print("\n✓ Verification checks passed successfully.")
 
     branch_res = run_cmd(["git", "branch", "--show-current"])
@@ -1093,6 +1115,7 @@ def run_autonomous_workflow(
             "icd_check": icd_check,
             "hcpcs_check": hcpcs_check,
             "ndc_check": ndc_check,
+            "drg_check": drg_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1170,6 +1193,7 @@ def run_autonomous_workflow(
             "icd_check": icd_check,
             "hcpcs_check": hcpcs_check,
             "ndc_check": ndc_check,
+            "drg_check": drg_check,
             "checkout_main": checkout_main,
             "all_checks": all_checks,
         }
@@ -1225,6 +1249,7 @@ def run_autonomous_workflow(
         "icd_check": icd_check,
         "hcpcs_check": hcpcs_check,
         "ndc_check": ndc_check,
+        "drg_check": drg_check,
         "checkout_main": checkout_main,
         "all_checks": all_checks,
     }
