@@ -1005,3 +1005,30 @@ def test_run_autonomous_workflow_demographic_check(mock_run, tmp_path):
         data = json.load(f)
 
     assert data["demographic_check"] is True
+
+
+@patch("subprocess.run")
+def test_run_autonomous_workflow_mbsf_check(mock_run, tmp_path):
+    """Test that mbsf_check option executes MBSF field constraint check and records status."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_mbsf.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        mbsf_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["mbsf_check"] is True

@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--mbsf-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `mbsf_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Master Beneficiary Summary File (MBSF) domain field constraint verification across all 10 MBSF tables before staging and committing.
+- Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `mbsf_check` verification logic and CLI flag parsing.
+
 - Added `--demographic-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `demographic_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Beneficiary demographic sex and race code format consistency verification (`check_demographic_code_constraints`).
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `demographic_check` verification logic and CLI flag parsing.
 
