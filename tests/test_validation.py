@@ -505,5 +505,25 @@ def test_check_beneficiary_age_constraints() -> None:
     assert finding.count == 2
 
 
+def test_check_claim_utilization_constraints() -> None:
+    inpatient_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003"],
+            "clm_utlztn_day_cnt": [5, -1, 3],  # -1 is invalid
+            "ncvd_days_cnt": [0, 0, -2],  # -2 is invalid
+        }
+    )
+    findings = RelationalValidator.check_claim_utilization_constraints(
+        inpatient_df, "Inpatient Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "UTIL-001"
+    assert finding.category == FindingCategory.FIELD
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 2
+
+
+
 
 
