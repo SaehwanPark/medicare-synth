@@ -259,6 +259,16 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify dataset relational validation integrity before commit/push",
     )
+    auto_wf_parser.add_argument(
+        "--export-check",
+        action="store_true",
+        help="Verify scenario release package export before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--all-checks",
+        action="store_true",
+        help="Enable all available workflow verification checks before commit/push",
+    )
 
     args = parser.parse_args(argv)
 
@@ -563,6 +573,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             git_clean_check=args.git_clean_check,
             audit_check=args.audit_check,
             validation_check=args.validation_check,
+            export_check=args.export_check,
+            all_checks=args.all_checks,
         )
 
     else:
