@@ -954,6 +954,33 @@ def test_run_autonomous_workflow_pos_check(mock_run, tmp_path):
 
 
 @patch("subprocess.run")
+def test_run_autonomous_workflow_claim_type_check(mock_run, tmp_path):
+    """Test that claim_type_check option executes Claim Type Code format check and records status."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_claim_type.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        claim_type_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["claim_type_check"] is True
+
+
+@patch("subprocess.run")
 def test_run_autonomous_workflow_rev_center_check(mock_run, tmp_path):
     """Test that rev_center_check option executes Revenue Center Code format check and records status."""
     import json

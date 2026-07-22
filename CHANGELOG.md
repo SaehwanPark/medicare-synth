@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--claim-type-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `claim_type_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Type Code 2-digit numeric format consistency verification (`check_claim_type_code_constraints`) across claim tables before staging and committing. Added `check_claim_type_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `claim_type_check` verification logic and CLI flag parsing.
+
 - Added `--utilization-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `utilization_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Utilization day count non-negativity verification (`check_claim_utilization_constraints`) across claim tables before staging and committing. Added `check_claim_utilization_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `utilization_check` verification logic and CLI flag parsing.
 
