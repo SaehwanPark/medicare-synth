@@ -75,6 +75,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     disposition_check = data.get("disposition_check", False)
     state_check = data.get("state_check", False)
     county_check = data.get("county_check", False)
+    discharge_status_check = data.get("discharge_status_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -141,6 +142,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Disposition Code Format Verified** | {disposition_check} |
 | **State Code Format Verified** | {state_check} |
 | **County Code Format Verified** | {county_check} |
+| **Discharge Status Code Format Verified** | {discharge_status_check} |
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
 | **MBSF Domain Constraints Verified** | {mbsf_check} |
@@ -208,6 +210,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     disposition_check = data.get("disposition_check", False)
     state_check = data.get("state_check", False)
     county_check = data.get("county_check", False)
+    discharge_status_check = data.get("discharge_status_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -290,6 +293,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim Disposition Format Verified</strong></td><td>{disposition_check}</td></tr>
             <tr><td><strong>State Code Format Verified</strong></td><td>{state_check}</td></tr>
             <tr><td><strong>County Code Format Verified</strong></td><td>{county_check}</td></tr>
+            <tr><td><strong>Discharge Status Code Format Verified</strong></td><td>{discharge_status_check}</td></tr>
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
             <tr><td><strong>MBSF Domain Constraints Verified</strong></td><td>{mbsf_check}</td></tr>
@@ -361,6 +365,7 @@ def run_autonomous_workflow(
     disposition_check: bool = False,
     state_check: bool = False,
     county_check: bool = False,
+    discharge_status_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -417,6 +422,7 @@ def run_autonomous_workflow(
         disposition_check = True
         state_check = True
         county_check = True
+        discharge_status_check = True
         rev_center_check = True
         demographic_check = True
         mbsf_check = True
@@ -1593,6 +1599,26 @@ def run_autonomous_workflow(
             f"✓ Beneficiary County Code format constraints verified ({violating_count} County Code constraint findings)."
         )
 
+    if discharge_status_check:
+        print(
+            "\n=== Verification Step: Executing Patient Discharge Status Code Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        discharge_findings = []
+        if scenario_slice.inpatient_df is not None:
+            discharge_findings.extend(
+                RelationalValidator.check_claim_discharge_status_constraints(
+                    scenario_slice.inpatient_df, "Inpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in discharge_findings)
+        print(
+            f"✓ Patient Discharge Status Code format constraints verified ({violating_count} Discharge Status Code constraint findings)."
+        )
+
     if pde_check:
         print(
             "\n=== Verification Step: Executing Part D Prescription Drug Event Field Constraint Verification Check ==="
@@ -1678,6 +1704,7 @@ def run_autonomous_workflow(
             "disposition_check": disposition_check,
             "state_check": state_check,
             "county_check": county_check,
+            "discharge_status_check": discharge_status_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -1779,6 +1806,7 @@ def run_autonomous_workflow(
             "disposition_check": disposition_check,
             "state_check": state_check,
             "county_check": county_check,
+            "discharge_status_check": discharge_status_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -1858,6 +1886,7 @@ def run_autonomous_workflow(
         "disposition_check": disposition_check,
         "state_check": state_check,
         "county_check": county_check,
+        "discharge_status_check": discharge_status_check,
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
         "mbsf_check": mbsf_check,

@@ -1927,6 +1927,59 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_discharge_status_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with invalid Patient Discharge Status Code format (must be 2 numeric digits when present)."""
+        if claim_df.is_empty():
+            return []
+
+        status_col = None
+        for col in [
+            "ptnt_dschrg_stus_cd",
+            "PTNT_DSCHRG_STUS_CD",
+            "stus_cd",
+            "STUS_CD",
+            "nch_ptnt_stus_ind_cd",
+            "NCH_PTNT_STUS_IND_CD",
+            "clm_dschrg_stus_cd",
+            "CLM_DSCHRG_STUS_CD",
+        ]:
+            if col in claim_df.columns:
+                status_col = col
+                break
+        if status_col is None:
+            return []
+
+        non_null_status = claim_df.filter(pl.col(status_col).is_not_null())
+        if non_null_status.is_empty():
+            return []
+
+        invalid = non_null_status.filter(
+            ~pl.col(status_col).cast(pl.Utf8).str.contains(r"^[0-9]{2}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="DISCHARGE-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with invalid Patient Discharge Status Code format (must be 2 numeric digits).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
+
 
     def validate_slice(
         self,
@@ -2120,6 +2173,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_drg_code_constraints(inpatient_df, "Inpatient Claims")
+            )
+            findings.extend(
+                self.check_claim_discharge_status_constraints(
+                    inpatient_df, "Inpatient Claims"
+                )
             )
             findings.extend(self.check_inpatient_field_constraints(inpatient_df))
 
