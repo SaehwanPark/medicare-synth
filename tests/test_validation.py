@@ -707,3 +707,21 @@ def test_check_claim_query_code_constraints() -> None:
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
 
+
+def test_check_claim_pass_thru_per_diem_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "clm_pass_thru_per_diem_amt": [15.5, 0.0, -25.0, None],
+        }
+    )
+    findings = RelationalValidator.check_claim_pass_thru_per_diem_constraints(
+        claim_df, "Inpatient Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "PASSTHRU-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+
