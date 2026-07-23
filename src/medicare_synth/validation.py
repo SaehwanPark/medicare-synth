@@ -2031,6 +2031,59 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_primary_payer_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with invalid Claim Primary Payer Code format (must be 1 alphanumeric character when present)."""
+        if claim_df.is_empty():
+            return []
+
+        payer_col = None
+        for col in [
+            "nch_prmry_pyr_cd",
+            "NCH_PRMRY_PYR_CD",
+            "clm_prmry_pyr_cd",
+            "CLM_PRMRY_PYR_CD",
+            "prmry_pyr_cd",
+            "PRMRY_PYR_CD",
+            "primary_payer_code",
+            "PRIMARY_PAYER_CODE",
+        ]:
+            if col in claim_df.columns:
+                payer_col = col
+                break
+        if payer_col is None:
+            return []
+
+        non_null_payer = claim_df.filter(pl.col(payer_col).is_not_null())
+        if non_null_payer.is_empty():
+            return []
+
+        invalid = non_null_payer.filter(
+            ~pl.col(payer_col).cast(pl.Utf8).str.contains(r"^[0-9A-Za-z]{1}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="PRMRY-PYR-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with invalid Claim Primary Payer Code format (must be 1 alphanumeric character).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
+
 
 
 
