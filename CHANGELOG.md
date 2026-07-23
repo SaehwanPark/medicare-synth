@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--admission-source-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `admission_source_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Admission Source Code 1-character alphanumeric format consistency verification (`check_claim_admission_source_constraints`) across claim tables before staging and committing. Added `check_claim_admission_source_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `admission_source_check` verification logic and CLI flag parsing.
+
 - Added `--discharge-status-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `discharge_status_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Patient Discharge Status Code 2-digit numeric format consistency verification (`check_claim_discharge_status_constraints`) across claim tables before staging and committing. Added `check_claim_discharge_status_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `discharge_status_check` verification logic and CLI flag parsing.
 

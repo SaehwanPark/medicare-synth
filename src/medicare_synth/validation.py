@@ -1979,6 +1979,59 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_admission_source_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with invalid Claim Admission Source Code format (must be 1 alphanumeric character when present)."""
+        if claim_df.is_empty():
+            return []
+
+        source_col = None
+        for col in [
+            "clm_admsn_src_cd",
+            "CLM_ADMSN_SRC_CD",
+            "admsn_src_cd",
+            "ADMSN_SRC_CD",
+            "nch_clm_admsn_src_cd",
+            "NCH_CLM_ADMSN_SRC_CD",
+            "src_cd",
+            "SRC_CD",
+        ]:
+            if col in claim_df.columns:
+                source_col = col
+                break
+        if source_col is None:
+            return []
+
+        non_null_source = claim_df.filter(pl.col(source_col).is_not_null())
+        if non_null_source.is_empty():
+            return []
+
+        invalid = non_null_source.filter(
+            ~pl.col(source_col).cast(pl.Utf8).str.contains(r"^[0-9A-Za-z]{1}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="ADMSN-SRC-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with invalid Claim Admission Source Code format (must be 1 alphanumeric character).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
+
 
 
     def validate_slice(

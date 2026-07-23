@@ -415,6 +415,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Patient Discharge Status Code 2-digit numeric format consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--admission-source-check",
+        action="store_true",
+        help="Verify Claim Admission Source Code 1-character alphanumeric format consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--rev-center-check",
         action="store_true",
         help="Verify Revenue Center Code 4-digit numeric format consistency across claim records before commit/push",
@@ -844,6 +849,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             state_check=args.state_check,
             county_check=args.county_check,
             discharge_status_check=args.discharge_status_check,
+            admission_source_check=args.admission_source_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,
