@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--county-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `county_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Beneficiary County Code 3-digit numeric format consistency verification (`check_county_code_constraints`) across beneficiary summary tables before staging and committing. Added `check_county_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `county_check` verification logic and CLI flag parsing.
+
 - Added `--pde-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pde_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Part D Prescription Drug Event (PDE) field constraint verification (`check_pde_field_constraints`) across PDE tables before staging and committing.
 - Extended unit test suites in `tests/test_autonomous_workflow.py` and `tests/test_cli.py` to cover `pde_check` verification logic and CLI flag parsing.
 

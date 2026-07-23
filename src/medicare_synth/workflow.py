@@ -74,6 +74,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     claim_type_check = data.get("claim_type_check", False)
     disposition_check = data.get("disposition_check", False)
     state_check = data.get("state_check", False)
+    county_check = data.get("county_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -139,6 +140,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Type Code Format Verified** | {claim_type_check} |
 | **Claim Disposition Code Format Verified** | {disposition_check} |
 | **State Code Format Verified** | {state_check} |
+| **County Code Format Verified** | {county_check} |
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
 | **MBSF Domain Constraints Verified** | {mbsf_check} |
@@ -205,6 +207,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     claim_type_check = data.get("claim_type_check", False)
     disposition_check = data.get("disposition_check", False)
     state_check = data.get("state_check", False)
+    county_check = data.get("county_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -286,6 +289,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim Type Format Verified</strong></td><td>{claim_type_check}</td></tr>
             <tr><td><strong>Claim Disposition Format Verified</strong></td><td>{disposition_check}</td></tr>
             <tr><td><strong>State Code Format Verified</strong></td><td>{state_check}</td></tr>
+            <tr><td><strong>County Code Format Verified</strong></td><td>{county_check}</td></tr>
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
             <tr><td><strong>MBSF Domain Constraints Verified</strong></td><td>{mbsf_check}</td></tr>
@@ -356,6 +360,7 @@ def run_autonomous_workflow(
     claim_type_check: bool = False,
     disposition_check: bool = False,
     state_check: bool = False,
+    county_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -411,6 +416,7 @@ def run_autonomous_workflow(
         claim_type_check = True
         disposition_check = True
         state_check = True
+        county_check = True
         rev_center_check = True
         demographic_check = True
         mbsf_check = True
@@ -1571,6 +1577,22 @@ def run_autonomous_workflow(
             f"✓ Beneficiary State Code format constraints verified ({violating_count} State Code constraint findings)."
         )
 
+    if county_check:
+        print(
+            "\n=== Verification Step: Executing Beneficiary County Code Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        county_findings = RelationalValidator.check_county_code_constraints(
+            scenario_slice.bene_df, "Beneficiary Summary"
+        )
+        violating_count = sum(f.count for f in county_findings)
+        print(
+            f"✓ Beneficiary County Code format constraints verified ({violating_count} County Code constraint findings)."
+        )
+
     if pde_check:
         print(
             "\n=== Verification Step: Executing Part D Prescription Drug Event Field Constraint Verification Check ==="
@@ -1655,6 +1677,7 @@ def run_autonomous_workflow(
             "claim_type_check": claim_type_check,
             "disposition_check": disposition_check,
             "state_check": state_check,
+            "county_check": county_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -1755,6 +1778,7 @@ def run_autonomous_workflow(
             "claim_type_check": claim_type_check,
             "disposition_check": disposition_check,
             "state_check": state_check,
+            "county_check": county_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -1831,6 +1855,9 @@ def run_autonomous_workflow(
         "taxonomy_check": taxonomy_check,
         "pos_check": pos_check,
         "claim_type_check": claim_type_check,
+        "disposition_check": disposition_check,
+        "state_check": state_check,
+        "county_check": county_check,
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
         "mbsf_check": mbsf_check,
