@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--admission-type-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `admission_type_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Admission Type Code 1-character alphanumeric format consistency verification (`check_claim_admission_type_constraints`) across claim tables before staging and committing. Added `check_claim_admission_type_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `admission_type_check` verification logic and CLI flag parsing.
+
 - Added `--primary-payer-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `primary_payer_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Primary Payer Code 1-character alphanumeric format consistency verification (`check_claim_primary_payer_constraints`) across claim tables before staging and committing. Added `check_claim_primary_payer_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `primary_payer_check` verification logic and CLI flag parsing.
 
