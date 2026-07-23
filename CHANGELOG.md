@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--passthru-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `passthru_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Pass-Through Per Diem non-negativity verification (`check_claim_pass_thru_per_diem_constraints`) across claim tables before staging and committing. Added `check_claim_pass_thru_per_diem_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `passthru_check` verification logic and CLI flag parsing.
+
 - Added `--query-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `query_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Query Code 1-character alphanumeric format consistency verification (`check_claim_query_code_constraints`) across claim tables before staging and committing. Added `check_claim_query_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `query_check` verification logic and CLI flag parsing.
 

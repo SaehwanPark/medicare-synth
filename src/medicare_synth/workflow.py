@@ -80,6 +80,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     admission_type_check = data.get("admission_type_check", False)
     frequency_check = data.get("frequency_check", False)
     query_check = data.get("query_check", False)
+    passthru_check = data.get("passthru_check", False)
     primary_payer_check = data.get("primary_payer_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
@@ -152,6 +153,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Admission Type Code Format Verified** | {admission_type_check} |
 | **Claim Frequency Code Format Verified** | {frequency_check} |
 | **Claim Query Code Format Verified** | {query_check} |
+| **Claim Pass-Through Per Diem Verified** | {passthru_check} |
 | **Claim Primary Payer Code Format Verified** | {primary_payer_check} |
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
@@ -225,6 +227,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     admission_type_check = data.get("admission_type_check", False)
     frequency_check = data.get("frequency_check", False)
     query_check = data.get("query_check", False)
+    passthru_check = data.get("passthru_check", False)
     primary_payer_check = data.get("primary_payer_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
@@ -313,6 +316,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim Admission Type Code Format Verified</strong></td><td>{admission_type_check}</td></tr>
             <tr><td><strong>Claim Frequency Code Format Verified</strong></td><td>{frequency_check}</td></tr>
             <tr><td><strong>Claim Query Code Format Verified</strong></td><td>{query_check}</td></tr>
+            <tr><td><strong>Claim Pass-Through Per Diem Verified</strong></td><td>{passthru_check}</td></tr>
             <tr><td><strong>Claim Primary Payer Code Format Verified</strong></td><td>{primary_payer_check}</td></tr>
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
@@ -390,6 +394,7 @@ def run_autonomous_workflow(
     admission_type_check: bool = False,
     frequency_check: bool = False,
     query_check: bool = False,
+    passthru_check: bool = False,
     primary_payer_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
@@ -452,6 +457,7 @@ def run_autonomous_workflow(
         admission_type_check = True
         frequency_check = True
         query_check = True
+        passthru_check = True
         primary_payer_check = True
         rev_center_check = True
         demographic_check = True
@@ -1729,6 +1735,26 @@ def run_autonomous_workflow(
             f"✓ Claim Query Code format constraints verified ({violating_count} Query Code constraint findings)."
         )
 
+    if passthru_check:
+        print(
+            "\n=== Verification Step: Executing Claim Pass-Through Per Diem Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        passthru_findings = []
+        if scenario_slice.inpatient_df is not None:
+            passthru_findings.extend(
+                RelationalValidator.check_claim_pass_thru_per_diem_constraints(
+                    scenario_slice.inpatient_df, "Inpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in passthru_findings)
+        print(
+            f"✓ Claim Pass-Through Per Diem constraints verified ({violating_count} Pass-Through Per Diem constraint findings)."
+        )
+
     if primary_payer_check:
         print(
             "\n=== Verification Step: Executing Claim Primary Payer Code Format Verification Check ==="
@@ -1839,6 +1865,7 @@ def run_autonomous_workflow(
             "admission_type_check": admission_type_check,
             "frequency_check": frequency_check,
             "query_check": query_check,
+            "passthru_check": passthru_check,
             "primary_payer_check": primary_payer_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -1946,6 +1973,7 @@ def run_autonomous_workflow(
             "admission_type_check": admission_type_check,
             "frequency_check": frequency_check,
             "query_check": query_check,
+            "passthru_check": passthru_check,
             "primary_payer_check": primary_payer_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -2031,6 +2059,7 @@ def run_autonomous_workflow(
         "admission_type_check": admission_type_check,
         "frequency_check": frequency_check,
         "query_check": query_check,
+        "passthru_check": passthru_check,
         "primary_payer_check": primary_payer_check,
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
