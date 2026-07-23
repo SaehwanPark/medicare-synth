@@ -1872,6 +1872,61 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_county_code_constraints(
+        df: pl.DataFrame, table_type: str = "Beneficiary Summary"
+    ) -> list[Finding]:
+        """Identifies records with invalid County Code format (must be 3 numeric digits when present)."""
+        if df.is_empty():
+            return []
+
+        county_col = None
+        for col in [
+            "bene_county_cd",
+            "BENE_COUNTY_CD",
+            "county_cd",
+            "COUNTY_CD",
+            "bene_county_code",
+            "BENE_COUNTY_CODE",
+        ]:
+            if col in df.columns:
+                county_col = col
+                break
+        if county_col is None:
+            return []
+
+        non_null_county = df.filter(pl.col(county_col).is_not_null())
+        if non_null_county.is_empty():
+            return []
+
+        invalid = non_null_county.filter(
+            ~pl.col(county_col).cast(pl.Utf8).str.contains(r"^[0-9]{3}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            id_col = (
+                "bene_id"
+                if "bene_id" in invalid.columns
+                else ("clm_id" if "clm_id" in invalid.columns else None)
+            )
+            sample_ids = (
+                invalid.select(id_col).slice(0, 5).to_series().to_list()
+                if id_col
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="COUNTY-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {table_type} with invalid County Code format (must be 3 numeric digits).",
+                    count=invalid_count,
+                    details={"table_type": table_type, "sample_ids": sample_ids},
+                )
+            ]
+        return []
+
 
     def validate_slice(
         self,
@@ -1905,6 +1960,7 @@ class RelationalValidator:
         findings.extend(self.check_demographic_code_constraints(bene_df))
         findings.extend(self.check_zip_code_constraints(bene_df, "Beneficiary Summary"))
         findings.extend(self.check_state_code_constraints(bene_df, "Beneficiary Summary"))
+        findings.extend(self.check_county_code_constraints(bene_df, "Beneficiary Summary"))
 
         if carrier_df is not None and not carrier_df.is_empty():
             findings.extend(

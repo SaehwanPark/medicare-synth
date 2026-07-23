@@ -580,3 +580,21 @@ def test_check_state_code_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_county_code_constraints() -> None:
+    bene_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE001", "BENE002", "BENE003"],
+            "bene_county_cd": ["010", "INVALID_COUNTY", None],
+        }
+    )
+    findings = RelationalValidator.check_county_code_constraints(
+        bene_df, "Beneficiary Summary"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "COUNTY-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
