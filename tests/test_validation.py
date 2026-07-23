@@ -634,3 +634,21 @@ def test_check_claim_admission_source_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_claim_primary_payer_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "nch_prmry_pyr_cd": ["A", "1", "INVALID_PAYER", None],
+        }
+    )
+    findings = RelationalValidator.check_claim_primary_payer_constraints(
+        claim_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "PRMRY-PYR-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
