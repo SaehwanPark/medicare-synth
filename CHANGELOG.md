@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--discharge-status-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `discharge_status_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Patient Discharge Status Code 2-digit numeric format consistency verification (`check_claim_discharge_status_constraints`) across claim tables before staging and committing. Added `check_claim_discharge_status_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `discharge_status_check` verification logic and CLI flag parsing.
+
 - Added `--county-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `county_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Beneficiary County Code 3-digit numeric format consistency verification (`check_county_code_constraints`) across beneficiary summary tables before staging and committing. Added `check_county_code_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` to cover `county_check` verification logic and CLI flag parsing.
 
