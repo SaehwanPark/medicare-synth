@@ -78,6 +78,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     discharge_status_check = data.get("discharge_status_check", False)
     admission_source_check = data.get("admission_source_check", False)
     admission_type_check = data.get("admission_type_check", False)
+    frequency_check = data.get("frequency_check", False)
     primary_payer_check = data.get("primary_payer_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
@@ -148,6 +149,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Discharge Status Code Format Verified** | {discharge_status_check} |
 | **Admission Source Code Format Verified** | {admission_source_check} |
 | **Claim Admission Type Code Format Verified** | {admission_type_check} |
+| **Claim Frequency Code Format Verified** | {frequency_check} |
 | **Claim Primary Payer Code Format Verified** | {primary_payer_check} |
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
@@ -219,6 +221,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     discharge_status_check = data.get("discharge_status_check", False)
     admission_source_check = data.get("admission_source_check", False)
     admission_type_check = data.get("admission_type_check", False)
+    frequency_check = data.get("frequency_check", False)
     primary_payer_check = data.get("primary_payer_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
@@ -305,6 +308,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Discharge Status Code Format Verified</strong></td><td>{discharge_status_check}</td></tr>
             <tr><td><strong>Admission Source Code Format Verified</strong></td><td>{admission_source_check}</td></tr>
             <tr><td><strong>Claim Admission Type Code Format Verified</strong></td><td>{admission_type_check}</td></tr>
+            <tr><td><strong>Claim Frequency Code Format Verified</strong></td><td>{frequency_check}</td></tr>
             <tr><td><strong>Claim Primary Payer Code Format Verified</strong></td><td>{primary_payer_check}</td></tr>
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
@@ -380,6 +384,7 @@ def run_autonomous_workflow(
     discharge_status_check: bool = False,
     admission_source_check: bool = False,
     admission_type_check: bool = False,
+    frequency_check: bool = False,
     primary_payer_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
@@ -440,6 +445,7 @@ def run_autonomous_workflow(
         discharge_status_check = True
         admission_source_check = True
         admission_type_check = True
+        frequency_check = True
         primary_payer_check = True
         rev_center_check = True
         demographic_check = True
@@ -1677,6 +1683,26 @@ def run_autonomous_workflow(
             f"✓ Claim Admission Type Code format constraints verified ({violating_count} Admission Type Code constraint findings)."
         )
 
+    if frequency_check:
+        print(
+            "\n=== Verification Step: Executing Claim Frequency Code Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        freq_findings = []
+        if scenario_slice.inpatient_df is not None:
+            freq_findings.extend(
+                RelationalValidator.check_claim_frequency_code_constraints(
+                    scenario_slice.inpatient_df, "Inpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in freq_findings)
+        print(
+            f"✓ Claim Frequency Code format constraints verified ({violating_count} Frequency Code constraint findings)."
+        )
+
     if primary_payer_check:
         print(
             "\n=== Verification Step: Executing Claim Primary Payer Code Format Verification Check ==="
@@ -1785,6 +1811,7 @@ def run_autonomous_workflow(
             "discharge_status_check": discharge_status_check,
             "admission_source_check": admission_source_check,
             "admission_type_check": admission_type_check,
+            "frequency_check": frequency_check,
             "primary_payer_check": primary_payer_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -1890,6 +1917,7 @@ def run_autonomous_workflow(
             "discharge_status_check": discharge_status_check,
             "admission_source_check": admission_source_check,
             "admission_type_check": admission_type_check,
+            "frequency_check": frequency_check,
             "primary_payer_check": primary_payer_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -1973,6 +2001,7 @@ def run_autonomous_workflow(
         "discharge_status_check": discharge_status_check,
         "admission_source_check": admission_source_check,
         "admission_type_check": admission_type_check,
+        "frequency_check": frequency_check,
         "primary_payer_check": primary_payer_check,
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,

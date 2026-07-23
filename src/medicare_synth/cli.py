@@ -425,6 +425,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim Admission Type Code 1-character alphanumeric format consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--frequency-check",
+        action="store_true",
+        help="Verify Claim Frequency Code 1-character alphanumeric format consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--primary-payer-check",
         action="store_true",
         help="Verify Claim Primary Payer Code 1-character alphanumeric format consistency before commit/push",
@@ -861,6 +866,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             discharge_status_check=args.discharge_status_check,
             admission_source_check=args.admission_source_check,
             admission_type_check=args.admission_type_check,
+            frequency_check=args.frequency_check,
             primary_payer_check=args.primary_payer_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,

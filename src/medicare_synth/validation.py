@@ -2133,6 +2133,57 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_frequency_code_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with invalid Claim Frequency Code format (must be 1 alphanumeric character when present)."""
+        if claim_df.is_empty():
+            return []
+
+        type_col = None
+        for col in [
+            "clm_freq_cd",
+            "CLM_FREQ_CD",
+            "frequency_code",
+            "FREQUENCY_CODE",
+            "clm_frequency_code",
+            "CLM_FREQUENCY_CODE",
+        ]:
+            if col in claim_df.columns:
+                type_col = col
+                break
+        if type_col is None:
+            return []
+
+        non_null_type = claim_df.filter(pl.col(type_col).is_not_null())
+        if non_null_type.is_empty():
+            return []
+
+        invalid = non_null_type.filter(
+            ~pl.col(type_col).cast(pl.Utf8).str.contains(r"^[0-9A-Za-z]{1}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="FREQ-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with invalid Claim Frequency Code format (must be 1 alphanumeric character).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
+
 
 
 
@@ -2337,6 +2388,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_admission_type_constraints(
+                    inpatient_df, "Inpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_frequency_code_constraints(
                     inpatient_df, "Inpatient Claims"
                 )
             )
