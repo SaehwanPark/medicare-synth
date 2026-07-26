@@ -47,7 +47,7 @@ def _write_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
     manifest_path = tmp_path / "manifest.json"
     manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
     evidence_path = tmp_path / "evidence.json"
-    evidence_path.write_text(json.dumps({"rkb_version": "fixture", "snapshot_date": "2026-07-26", "schema_year": 2022, "description": "fixture", "source_repository": "CMS", "variables": {}, "constraints": []}), encoding="utf-8")
+    evidence_path.write_text(json.dumps({"rkb_version": "fixture", "snapshot_date": "2026-07-26", "schema_year": 2022, "description": "fixture", "source_repository": "CMS", "variables": {name: {"name": name, "label": name, "data_type": "date", "format": "YYYY-MM-DD", "provenance_status": "preserved", "description": "fixture"} for name in ("BENE_BIRTH_DT", "BENE_DEATH_DT", "CLM_FROM_DT", "CLM_THRU_DT")}, "constraints": []}), encoding="utf-8")
     return tmp_path, manifest_path, evidence_path
 
 

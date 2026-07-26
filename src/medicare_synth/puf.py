@@ -32,7 +32,21 @@ def _source_column(frame: pl.DataFrame, name: str) -> str:
     return candidates[name.upper()]
 
 
-def _project(frame: pl.DataFrame, mapping: dict[str, str]) -> pl.DataFrame:
+def _date_format(evidence: RKBEvidenceSnapshot, source: str) -> str:
+    variable = evidence.get_variable(source)
+    if variable is None or variable.format is None:
+        raise PufImportError(f"date format is not defined by evidence: {source}")
+    formats = {"YYYYMMDD": "%Y%m%d", "YYYY-MM-DD": "%Y-%m-%d"}
+    if variable.format not in formats:
+        raise PufImportError(f"unsupported documented date format: {variable.format}")
+    return formats[variable.format]
+
+
+def _project(
+    frame: pl.DataFrame,
+    mapping: dict[str, str],
+    evidence: RKBEvidenceSnapshot,
+) -> pl.DataFrame:
     expressions: list[pl.Expr] = []
     for target, source in mapping.items():
         actual = _source_column(frame, source)
@@ -42,7 +56,7 @@ def _project(frame: pl.DataFrame, mapping: dict[str, str]) -> pl.DataFrame:
                 pl.when(pl.col(actual).is_null() | (pl.col(actual) == ""))
                 .then(None)
                 .otherwise(pl.col(actual))
-                .str.strptime(pl.Date, format="%Y-%m-%d", strict=True)
+                .str.strptime(pl.Date, format=_date_format(evidence, source), strict=True)
                 .alias(target)
             )
         expressions.append(expression)
@@ -89,6 +103,7 @@ class PufImporter:
                 "bene_sex_ident_cd": "BENE_SEX_IDENT_CD",
                 "bene_race_cd": "BENE_RACE_CD",
             },
+            evidence,
         ).sort("bene_id")
         carrier = _project(
             read("carrier"),
@@ -101,6 +116,7 @@ class PufImporter:
                 "prvdr_npi": "PRVDR_NPI",
                 "icd_dgns_cd1": "ICD_DGNS_CD1",
             },
+            evidence,
         ).with_columns(pl.col("line_num").cast(pl.Int64, strict=True)).sort(
             ["clm_id", "line_num"]
         )

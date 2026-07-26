@@ -651,6 +651,12 @@ def main(argv: Optional[list[str]] = None) -> int:
                 evidence_path=args.evidence,
                 service_year=args.service_year,
             )
+            validation = RelationalValidator().validate_beneficiary_carrier_slice(
+                puf_slice.beneficiary_df, puf_slice.carrier_df
+            )
+            if not validation.is_valid:
+                print(validation.model_dump_json(indent=2), file=sys.stderr)
+                return 1
             manifest = ReleaseExporter(args.output_dir, release_id=f"v1.0.0-puf-{args.service_year}").export_puf_slice(
                 puf_slice, fmt=args.format
             )

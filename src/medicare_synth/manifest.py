@@ -114,6 +114,11 @@ class SourceManifest(BaseModel):
         errors: list[str] = []
         for file_manifest in self.files:
             path = source_dir / file_manifest.filename
+            try:
+                path.resolve().relative_to(source_dir.resolve())
+            except ValueError:
+                errors.append(f"file is outside source directory: {file_manifest.filename}")
+                continue
             if not file_manifest.verify_checksum(path):
                 errors.append(f"checksum or missing file: {file_manifest.filename}")
                 continue
