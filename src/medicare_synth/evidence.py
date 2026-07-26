@@ -25,6 +25,19 @@ class VariableContract(BaseModel):
     provenance_status: str
     description: str
     valid_values: Optional[List[str]] = None
+    source_refs: List[str] = []
+
+
+class EvidenceSource(BaseModel):
+    """Traceable source document used to establish an evidence contract."""
+
+    model_config = ConfigDict(frozen=True)
+
+    source_id: str
+    url: str
+    version: Optional[str] = None
+    retrieval_date: str
+    sha256: Optional[str] = None
 
 
 class ConstraintContract(BaseModel):
@@ -50,6 +63,7 @@ class RKBEvidenceSnapshot(BaseModel):
     source_repository: str
     variables: Dict[str, VariableContract]
     constraints: List[ConstraintContract]
+    sources: List[EvidenceSource] = []
 
     @classmethod
     def from_file(cls, snapshot_path: Path) -> "RKBEvidenceSnapshot":

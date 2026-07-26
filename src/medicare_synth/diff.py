@@ -117,6 +117,22 @@ class SchemaDiffer:
                     )
                 )
 
+            for attribute_name in ("format", "max_length"):
+                old_value = getattr(v_a, attribute_name)
+                new_value = getattr(v_b, attribute_name)
+                if old_value != new_value:
+                    modified_changes.append(
+                        VariableChange(
+                            variable_name=var_name,
+                            change_type=DiffChangeType.MODIFIED,
+                            severity=DiffSeverity.WARNING,
+                            attribute_name=attribute_name,
+                            old_value=old_value,
+                            new_value=new_value,
+                            description=f"Variable '{var_name}' {attribute_name} changed.",
+                        )
+                    )
+
             # Check valid_values change
             if v_a.valid_values != v_b.valid_values:
                 modified_changes.append(

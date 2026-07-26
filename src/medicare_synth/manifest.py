@@ -7,6 +7,7 @@ for official CMS synthetic claims collections.
 import hashlib
 import json
 from pathlib import Path
+import re
 from typing import Any, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -37,6 +38,17 @@ class FileManifest(BaseModel):
     source_url: str
     primary_key: List[str]
     foreign_keys: Optional[List[ForeignKeyContract]] = None
+    delimiter: str = ","
+    archive_member: Optional[str] = None
+
+    @classmethod
+    def model_validate(cls, obj: Any, **kwargs: Any) -> "FileManifest":
+        value = super().model_validate(obj, **kwargs)
+        if not re.fullmatch(r"[0-9a-fA-F]{64}", value.sha256):
+            raise ValueError("sha256 must be a 64-character hexadecimal digest")
+        if len(value.delimiter) != 1:
+            raise ValueError("delimiter must be one character")
+        return value
 
     def verify_checksum(self, file_path: Path) -> bool:
         """Verify SHA-256 checksum of an existing local file against manifest specification."""
@@ -47,6 +59,18 @@ class FileManifest(BaseModel):
             for chunk in iter(lambda: f.read(65536), b""):
                 hasher.update(chunk)
         return hasher.hexdigest().lower() == self.sha256.lower()
+
+    def verify_rows_and_header(self, file_path: Path) -> bool:
+        """Verify the declared delimiter, header, and row count for a delimited file."""
+        if not file_path.is_file() or not self.verify_checksum(file_path):
+            return False
+        with file_path.open("r", encoding="utf-8-sig", newline="") as handle:
+            header = handle.readline().rstrip("\r\n")
+            if header.split(self.delimiter) != self.primary_key and not set(self.primary_key).issubset(
+                set(header.split(self.delimiter))
+            ):
+                return False
+            return sum(1 for _ in handle) == self.expected_record_count
 
 
 class SourceManifest(BaseModel):
@@ -84,3 +108,20 @@ class SourceManifest(BaseModel):
             if fm.file_id == file_id:
                 return fm
         return None
+
+    def verify_directory(self, source_dir: Path) -> list[str]:
+        """Return deterministic verification errors for all declared source files."""
+        errors: list[str] = []
+        for file_manifest in self.files:
+            path = source_dir / file_manifest.filename
+            try:
+                path.resolve().relative_to(source_dir.resolve())
+            except ValueError:
+                errors.append(f"file is outside source directory: {file_manifest.filename}")
+                continue
+            if not file_manifest.verify_checksum(path):
+                errors.append(f"checksum or missing file: {file_manifest.filename}")
+                continue
+            if file_manifest.format.lower() in {"csv", "text", "txt"} and not file_manifest.verify_rows_and_header(path):
+                errors.append(f"header or row count mismatch: {file_manifest.filename}")
+        return errors
