@@ -74,6 +74,26 @@ class ValidationReport(BaseModel):
 class RelationalValidator:
     """Polars-backed relational and temporal validator for Medicare dataset slices."""
 
+    def validate_beneficiary_carrier_slice(
+        self, beneficiary_df: pl.DataFrame, carrier_df: pl.DataFrame
+    ) -> ValidationReport:
+        """Validate the PUF beneficiary/carrier relationship without annual assumptions."""
+        findings: list[Finding] = []
+        findings.extend(self.check_record_uniqueness(beneficiary_df, ["bene_id"], "Beneficiary"))
+        findings.extend(
+            self.check_record_uniqueness(carrier_df, ["clm_id", "line_num"], "Carrier")
+        )
+        findings.extend(self.check_orphaned_claims(beneficiary_df, carrier_df, "Carrier"))
+        findings.extend(self.check_temporal_inversions(carrier_df, "Carrier"))
+        findings.extend(self.check_carrier_field_constraints(carrier_df))
+        findings.extend(
+            self.check_dob_temporal_constraints(beneficiary_df, carrier_df, "Carrier")
+        )
+        findings.extend(
+            self.check_mortality_temporal_constraints(beneficiary_df, carrier_df, "Carrier")
+        )
+        return ValidationReport(findings=findings)
+
     @staticmethod
     def check_orphaned_claims(
         bene_df: pl.DataFrame, claim_df: pl.DataFrame, claim_type: str

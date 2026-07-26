@@ -107,6 +107,8 @@ class ReleaseManifest(BaseModel):
     files: Dict[str, FileReleaseEntry] = Field(
         default_factory=dict, description="Exported data files metadata"
     )
+    source_manifest: str | None = None
+    evidence_snapshot: str | None = None
 
 
 class ReleaseExporter:
@@ -122,6 +124,65 @@ class ReleaseExporter:
         self.output_dir = Path(output_dir)
         self.release_id = release_id
         self.validator = RelationalValidator()
+
+    def export_puf_slice(
+        self,
+        puf_slice: "object",
+        fmt: Literal["csv", "parquet", "all"] = "all",
+    ) -> ReleaseManifest:
+        """Export the bounded PUF slice and its validation/evidence metadata."""
+        from medicare_synth.puf import PufSlice
+
+        if not isinstance(puf_slice, PufSlice):
+            raise TypeError("puf_slice must be a PufSlice")
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        report = self.validator.validate_beneficiary_carrier_slice(
+            puf_slice.beneficiary_df, puf_slice.carrier_df
+        )
+        (self.output_dir / "validation_report.json").write_text(
+            report.model_dump_json(indent=2), encoding="utf-8"
+        )
+        files: Dict[str, FileReleaseEntry] = {}
+        formats = ["csv", "parquet"] if fmt == "all" else [fmt]
+        for table_name, frame in {
+            "beneficiary": puf_slice.beneficiary_df,
+            "carrier": puf_slice.carrier_df,
+        }.items():
+            for file_format in formats:
+                filename = f"{table_name}.{file_format}"
+                path = self.output_dir / filename
+                if file_format == "csv":
+                    frame.write_csv(path)
+                else:
+                    frame.write_parquet(path)
+                files[f"{table_name}_{file_format}"] = FileReleaseEntry(
+                    filename=filename,
+                    format=file_format,
+                    row_count=frame.height,
+                    sha256=self._compute_sha256(path),
+                    size_bytes=path.stat().st_size,
+                )
+        manifest = ReleaseManifest(
+            release_id=self.release_id,
+            schema_year=puf_slice.source_manifest.schema_year,
+            collection_id=puf_slice.source_manifest.collection_id,
+            created_at=datetime.now(timezone.utc).isoformat(),
+            validation_passed=report.is_valid,
+            files=files,
+            source_manifest=puf_slice.source_manifest.version,
+            evidence_snapshot=puf_slice.evidence_snapshot.rkb_version,
+        )
+        (self.output_dir / "release_manifest.json").write_text(
+            manifest.model_dump_json(indent=2), encoding="utf-8"
+        )
+        (self.output_dir / "sql_reference_schema.sql").write_text(
+            "CREATE TABLE beneficiary (BENE_ID VARCHAR PRIMARY KEY);\n"
+            "CREATE TABLE carrier (CLM_ID VARCHAR, LINE_NUM INTEGER, "
+            "BENE_ID VARCHAR REFERENCES beneficiary(BENE_ID), "
+            "PRIMARY KEY (CLM_ID, LINE_NUM));\n",
+            encoding="utf-8",
+        )
+        return manifest
 
     @staticmethod
     def _compute_sha256(file_path: Path) -> str:

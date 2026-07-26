@@ -126,3 +126,14 @@ Exit criteria:
 - annual changes can be reviewed without silently changing prior releases [Completed]
 - every published profile states structural, relational, temporal, accounting,
   distributional, and inferential limitations [Completed]
+
+## 7. 2022 CMS PUF beneficiary/carrier slice
+
+Status: Implementation pending official source acquisition
+
+The separate CMS Synthetic Medicare Claims PUF is bounded to
+`beneficiary_2022.csv` and `carrier.csv`; other claim families and MBSF
+segments are deferred. The importer, validator, release path, and CLI are
+implemented, but completion is blocked until official files and real SHA-256
+checksums are locally acquired. Sentinel digests are not acceptable release
+metadata.

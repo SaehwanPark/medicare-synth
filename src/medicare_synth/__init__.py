@@ -13,7 +13,7 @@ from medicare_synth.audit import (
 )
 from medicare_synth.catalog import ScenarioCatalog, ScenarioEntry
 from medicare_synth.diff import DiffReport, SchemaDiffer
-from medicare_synth.evidence import RKBEvidenceSnapshot, VariableContract
+from medicare_synth.evidence import EvidenceSource, RKBEvidenceSnapshot, VariableContract
 from medicare_synth.expansion import (
     HorizontalExpander,
     TabDatSynthAdapter,
@@ -42,6 +42,7 @@ from medicare_synth.models import (
 )
 from medicare_synth.normalizer import BaselineNormalizer
 from medicare_synth.profile import LimitationsProfile, LimitationsProfiler
+from medicare_synth.puf import PufImportError, PufImporter, PufSlice
 from medicare_synth.release import FidelityProfile, ReleaseExporter, ReleaseManifest
 from medicare_synth.scenarios import ScenarioCompiler
 from medicare_synth.validation import (
@@ -61,6 +62,7 @@ __all__ = [
     "CarrierClaimLineRecord",
     "ColumnAuditMetric",
     "DiffReport",
+    "EvidenceSource",
     "DurableMedicalEquipmentClaimRecord",
     "FidelityProfile",
     "FileManifest",
@@ -73,6 +75,9 @@ __all__ = [
     "KAnonymityResult",
     "LimitationsProfile",
     "LimitationsProfiler",
+    "PufImportError",
+    "PufImporter",
+    "PufSlice",
     "MBSFBaseEnrollmentRecord",
     "MBSFChronicConditionsRecord",
     "MBSFCostAndUseRecord",

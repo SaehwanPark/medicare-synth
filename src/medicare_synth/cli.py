@@ -18,6 +18,7 @@ from medicare_synth.evidence import RKBEvidenceSnapshot
 from medicare_synth.expansion import HorizontalExpander, VerticalExpander
 from medicare_synth.manifest import SourceManifest
 from medicare_synth.profile import LimitationsProfiler
+from medicare_synth.puf import PufImporter
 from medicare_synth.release import ReleaseExporter
 from medicare_synth.scenarios import ScenarioCompiler
 from medicare_synth.validation import RelationalValidator
@@ -70,6 +71,16 @@ def main(argv: Optional[list[str]] = None) -> int:
         default="baseline",
         help="Manifest type to display (baseline or evidence)",
     )
+
+    puf_parser = subparsers.add_parser(
+        "puf", help="Import, validate, and export the bounded 2022 CMS PUF slice"
+    )
+    puf_parser.add_argument("--source-dir", type=Path, required=True)
+    puf_parser.add_argument("--manifest", type=Path, required=True)
+    puf_parser.add_argument("--evidence", type=Path, required=True)
+    puf_parser.add_argument("--output-dir", type=Path, required=True)
+    puf_parser.add_argument("--service-year", type=int, default=2022)
+    puf_parser.add_argument("--format", choices=["csv", "parquet", "all"], default="all")
 
     # Subcommand: export
     exp_parser = subparsers.add_parser(
@@ -631,6 +642,24 @@ def main(argv: Optional[list[str]] = None) -> int:
             print(f"Snapshot Date: {snapshot.snapshot_date}")
             print(f"Variables: {len(snapshot.variables)}")
         return 0
+
+    elif args.command == "puf":
+        try:
+            puf_slice = PufImporter().load(
+                source_dir=args.source_dir,
+                manifest_path=args.manifest,
+                evidence_path=args.evidence,
+                service_year=args.service_year,
+            )
+            manifest = ReleaseExporter(args.output_dir, release_id=f"v1.0.0-puf-{args.service_year}").export_puf_slice(
+                puf_slice, fmt=args.format
+            )
+        except (OSError, ValueError) as error:
+            print(f"Error: {error}", file=sys.stderr)
+            return 1
+        print(f"Exported Release Bundle: {manifest.release_id}")
+        print(f"Validation Passed: {manifest.validation_passed}")
+        return 0 if manifest.validation_passed else 1
 
     elif args.command == "export":
         try:
