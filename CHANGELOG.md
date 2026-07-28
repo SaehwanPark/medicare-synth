@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `type_of_bill_check` and `coinsurance_day_check` parameters to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Type of Bill Code 3-character alphanumeric format verification (`check_claim_type_of_bill_constraints`) and Claim Coinsurance Day Count non-negativity verification (`check_claim_coinsurance_day_constraints`) across claim tables before staging and committing. Added `check_claim_type_of_bill_constraints` and `check_claim_coinsurance_day_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py`.
+- Extended unit test suites in `tests/test_validation.py` and `tests/test_autonomous_workflow.py` to cover `type_of_bill_check` and `coinsurance_day_check` verification logic.
+
 - Added the additive CMS Synthetic Medicare Claims PUF beneficiary/carrier
   boundary, source-aware manifest/evidence fields, deterministic importer,
   validation, release export, and `puf` CLI command. The 2021 defaults remain

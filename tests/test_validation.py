@@ -725,3 +725,40 @@ def test_check_claim_pass_thru_per_diem_constraints() -> None:
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
 
+
+def test_check_claim_type_of_bill_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "clm_type_of_bill_cd": ["111", "131", "INVALID_BILL", None],
+        }
+    )
+    findings = RelationalValidator.check_claim_type_of_bill_constraints(
+        claim_df, "Outpatient Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "BILL-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+
+
+def test_check_claim_coinsurance_day_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "nch_coinsrnc_day_cnt": [5, 0, -3, None],
+        }
+    )
+    findings = RelationalValidator.check_claim_coinsurance_day_constraints(
+        claim_df, "Inpatient Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "COINSRNC-DAY-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+
+
