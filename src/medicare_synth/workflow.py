@@ -83,6 +83,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     passthru_check = data.get("passthru_check", False)
     non_payment_reason_check = data.get("non_payment_reason_check", False)
     primary_payer_check = data.get("primary_payer_check", False)
+    type_of_bill_check = data.get("type_of_bill_check", False)
+    coinsurance_day_check = data.get("coinsurance_day_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -157,6 +159,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Pass-Through Per Diem Verified** | {passthru_check} |
 | **Claim Non-Payment Reason Code Format Verified** | {non_payment_reason_check} |
 | **Claim Primary Payer Code Format Verified** | {primary_payer_check} |
+| **Claim Type of Bill Code Format Verified** | {type_of_bill_check} |
+| **Claim Coinsurance Day Count Verified** | {coinsurance_day_check} |
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
 | **MBSF Domain Constraints Verified** | {mbsf_check} |
@@ -232,6 +236,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     passthru_check = data.get("passthru_check", False)
     non_payment_reason_check = data.get("non_payment_reason_check", False)
     primary_payer_check = data.get("primary_payer_check", False)
+    type_of_bill_check = data.get("type_of_bill_check", False)
+    coinsurance_day_check = data.get("coinsurance_day_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -322,6 +328,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim Pass-Through Per Diem Verified</strong></td><td>{passthru_check}</td></tr>
             <tr><td><strong>Claim Non-Payment Reason Code Format Verified</strong></td><td>{non_payment_reason_check}</td></tr>
             <tr><td><strong>Claim Primary Payer Code Format Verified</strong></td><td>{primary_payer_check}</td></tr>
+            <tr><td><strong>Claim Type of Bill Code Format Verified</strong></td><td>{type_of_bill_check}</td></tr>
+            <tr><td><strong>Claim Coinsurance Day Count Verified</strong></td><td>{coinsurance_day_check}</td></tr>
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
             <tr><td><strong>MBSF Domain Constraints Verified</strong></td><td>{mbsf_check}</td></tr>
@@ -401,6 +409,8 @@ def run_autonomous_workflow(
     passthru_check: bool = False,
     non_payment_reason_check: bool = False,
     primary_payer_check: bool = False,
+    type_of_bill_check: bool = False,
+    coinsurance_day_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -465,6 +475,8 @@ def run_autonomous_workflow(
         passthru_check = True
         non_payment_reason_check = True
         primary_payer_check = True
+        type_of_bill_check = True
+        coinsurance_day_check = True
         rev_center_check = True
         demographic_check = True
         mbsf_check = True
@@ -1801,6 +1813,46 @@ def run_autonomous_workflow(
             f"✓ Claim Primary Payer Code format constraints verified ({violating_count} Primary Payer Code constraint findings)."
         )
 
+    if type_of_bill_check:
+        print(
+            "\n=== Verification Step: Executing Claim Type of Bill Code Format Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        bill_findings = []
+        if scenario_slice.outpatient_df is not None:
+            bill_findings.extend(
+                RelationalValidator.check_claim_type_of_bill_constraints(
+                    scenario_slice.outpatient_df, "Outpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in bill_findings)
+        print(
+            f"✓ Claim Type of Bill Code format constraints verified ({violating_count} Type of Bill Code constraint findings)."
+        )
+
+    if coinsurance_day_check:
+        print(
+            "\n=== Verification Step: Executing Claim Coinsurance Day Count Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        coinsrnc_findings = []
+        if scenario_slice.inpatient_df is not None:
+            coinsrnc_findings.extend(
+                RelationalValidator.check_claim_coinsurance_day_constraints(
+                    scenario_slice.inpatient_df, "Inpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in coinsrnc_findings)
+        print(
+            f"✓ Claim Coinsurance Day Count constraints verified ({violating_count} Coinsurance Day Count constraint findings)."
+        )
+
     if pde_check:
         print(
             "\n=== Verification Step: Executing Part D Prescription Drug Event Field Constraint Verification Check ==="
@@ -1894,6 +1946,8 @@ def run_autonomous_workflow(
             "passthru_check": passthru_check,
             "non_payment_reason_check": non_payment_reason_check,
             "primary_payer_check": primary_payer_check,
+            "type_of_bill_check": type_of_bill_check,
+            "coinsurance_day_check": coinsurance_day_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -2003,6 +2057,8 @@ def run_autonomous_workflow(
             "passthru_check": passthru_check,
             "non_payment_reason_check": non_payment_reason_check,
             "primary_payer_check": primary_payer_check,
+            "type_of_bill_check": type_of_bill_check,
+            "coinsurance_day_check": coinsurance_day_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -2090,6 +2146,8 @@ def run_autonomous_workflow(
         "passthru_check": passthru_check,
         "non_payment_reason_check": non_payment_reason_check,
         "primary_payer_check": primary_payer_check,
+        "type_of_bill_check": type_of_bill_check,
+        "coinsurance_day_check": coinsurance_day_check,
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
         "mbsf_check": mbsf_check,

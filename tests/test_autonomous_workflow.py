@@ -1708,3 +1708,58 @@ def test_run_autonomous_workflow_passthru_check(mock_run, tmp_path):
 
     assert data["passthru_check"] is True
 
+
+@patch("subprocess.run")
+def test_run_autonomous_workflow_type_of_bill_check(mock_run, tmp_path):
+    """Test that type_of_bill_check option executes Claim Type of Bill Code check and records status."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_bill.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        type_of_bill_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["type_of_bill_check"] is True
+
+
+@patch("subprocess.run")
+def test_run_autonomous_workflow_coinsurance_day_check(mock_run, tmp_path):
+    """Test that coinsurance_day_check option executes Claim Coinsurance Day Count check and records status."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_coinsrnc.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        coinsurance_day_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["coinsurance_day_check"] is True
+
+

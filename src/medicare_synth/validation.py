@@ -2351,6 +2351,104 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_type_of_bill_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with invalid Claim Type of Bill Code format (must be 3 alphanumeric characters when present)."""
+        if claim_df.is_empty():
+            return []
+
+        type_col = None
+        for col in [
+            "clm_type_of_bill_cd",
+            "CLM_TYPE_OF_BILL_CD",
+            "type_of_bill_cd",
+            "TYPE_OF_BILL_CD",
+            "type_of_bill_code",
+            "TYPE_OF_BILL_CODE",
+        ]:
+            if col in claim_df.columns:
+                type_col = col
+                break
+        if type_col is None:
+            return []
+
+        non_null_type = claim_df.filter(pl.col(type_col).is_not_null())
+        if non_null_type.is_empty():
+            return []
+
+        invalid = non_null_type.filter(
+            ~pl.col(type_col).cast(pl.Utf8).str.contains(r"^[0-9A-Za-z]{3}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="BILL-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with invalid Claim Type of Bill Code format (must be 3 alphanumeric characters).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
+    @staticmethod
+    def check_claim_coinsurance_day_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with negative Coinsurance Day Count (< 0 when present)."""
+        if claim_df.is_empty():
+            return []
+
+        day_col = None
+        for col in [
+            "nch_coinsrnc_day_cnt",
+            "NCH_COINSRNC_DAY_CNT",
+            "clm_coinsrnc_day_cnt",
+            "CLM_COINSRNC_DAY_CNT",
+            "coinsrnc_day_cnt",
+            "COINSRNC_DAY_CNT",
+        ]:
+            if col in claim_df.columns:
+                day_col = col
+                break
+        if day_col is None:
+            return []
+
+        non_null_df = claim_df.filter(pl.col(day_col).is_not_null())
+        if non_null_df.is_empty():
+            return []
+
+        invalid = non_null_df.filter(pl.col(day_col) < 0)
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="COINSRNC-DAY-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with negative Coinsurance Day Count (< 0).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
 
 
 
@@ -2531,6 +2629,16 @@ class RelationalValidator:
                 )
             )
             findings.extend(
+                self.check_claim_type_of_bill_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_coinsurance_day_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
                 self.check_record_uniqueness(
                     outpatient_df, ["clm_id"], "Outpatient Claims"
                 )
@@ -2572,6 +2680,16 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_non_payment_reason_constraints(
+                    inpatient_df, "Inpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_type_of_bill_constraints(
+                    inpatient_df, "Inpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_coinsurance_day_constraints(
                     inpatient_df, "Inpatient Claims"
                 )
             )
@@ -2649,6 +2767,12 @@ class RelationalValidator:
                 self.check_claim_non_payment_reason_constraints(snf_df, "SNF Claims")
             )
             findings.extend(
+                self.check_claim_type_of_bill_constraints(snf_df, "SNF Claims")
+            )
+            findings.extend(
+                self.check_claim_coinsurance_day_constraints(snf_df, "SNF Claims")
+            )
+            findings.extend(
                 self.check_record_uniqueness(snf_df, ["clm_id"], "SNF Claims")
             )
 
@@ -2672,6 +2796,9 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_non_payment_reason_constraints(hha_df, "HHA Claims")
+            )
+            findings.extend(
+                self.check_claim_type_of_bill_constraints(hha_df, "HHA Claims")
             )
             findings.extend(
                 self.check_record_uniqueness(hha_df, ["clm_id"], "HHA Claims")
