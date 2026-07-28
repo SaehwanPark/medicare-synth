@@ -1,0 +1,44 @@
+{
+  "collection_id": "cms-synthetic-medicare-claims-puf",
+  "title": "Synthetic Medicare Enrollment, Fee-for-Service Claims, and Prescription Drug Event",
+  "schema_year": 2022,
+  "version": "2023-04",
+  "description": "Evidence manifest for the bounded 2022 beneficiary and carrier slice published by CMS.",
+  "source_organization": "Centers for Medicare & Medicaid Services",
+  "retrieval_date": "2026-07-28",
+  "license": "https://data.cms.gov/",
+  "files": [
+    {
+      "file_id": "beneficiary_2022",
+      "filename": "beneficiary_2022.csv",
+      "file_domain": "beneficiary",
+      "grain": "one row per synthetic beneficiary at the end of 2022",
+      "format": "csv",
+      "expected_record_count": 8671,
+      "sha256": "6cc91be7b779c92888fb10b8a593ca59818405091137e171ce3af4ebbd1d6132",
+      "source_url": "https://data.cms.gov/sites/default/files/2023-04/831cfb41-3a7a-4ce0-b02f-04d27df56b31/beneficiary_2022.csv",
+      "primary_key": ["BENE_ID"],
+      "delimiter": "|"
+    },
+    {
+      "file_id": "carrier",
+      "filename": "carrier.csv",
+      "file_domain": "carrier",
+      "grain": "one row per carrier claim line",
+      "format": "csv",
+      "expected_record_count": 1121004,
+      "sha256": "ff63b2070eab6754f8664670b415cbcd65fe759249afa2a7e147eb82563dffce",
+      "source_url": "https://data.cms.gov/sites/default/files/2023-04/b6fe03a8-82e2-49b7-a9fe-9eb68c8ac4d0/Carrier.zip",
+      "primary_key": ["CLM_ID", "LINE_NUM"],
+      "foreign_keys": [
+        {
+          "field": "BENE_ID",
+          "target_file_id": "beneficiary_2022",
+          "target_field": "BENE_ID"
+        }
+      ],
+      "delimiter": "|",
+      "archive_member": "carrier.csv"
+    }
+  ]
+}

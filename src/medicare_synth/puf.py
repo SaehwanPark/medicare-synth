@@ -25,18 +25,24 @@ class PufSlice:
     provenance: dict[str, ProvenanceStatus]
 
 
-def _source_column(frame: pl.DataFrame, name: str) -> str:
+def _source_column(frame: pl.DataFrame, name: str | tuple[str, ...]) -> str:
     candidates = {column.upper(): column for column in frame.columns}
-    if name.upper() not in candidates:
-        raise PufImportError(f"required source column is missing: {name}")
-    return candidates[name.upper()]
+    names = (name,) if isinstance(name, str) else name
+    for candidate in names:
+        if candidate.upper() in candidates:
+            return candidates[candidate.upper()]
+    raise PufImportError(f"required source column is missing: {' or '.join(names)}")
 
 
 def _date_format(evidence: RKBEvidenceSnapshot, source: str) -> str:
     variable = evidence.get_variable(source)
     if variable is None or variable.format is None:
         raise PufImportError(f"date format is not defined by evidence: {source}")
-    formats = {"YYYYMMDD": "%Y%m%d", "YYYY-MM-DD": "%Y-%m-%d"}
+    formats = {
+        "YYYYMMDD": "%Y%m%d",
+        "YYYY-MM-DD": "%Y-%m-%d",
+        "DD-Mon-YYYY": "%d-%b-%Y",
+    }
     if variable.format not in formats:
         raise PufImportError(f"unsupported documented date format: {variable.format}")
     return formats[variable.format]
@@ -44,7 +50,7 @@ def _date_format(evidence: RKBEvidenceSnapshot, source: str) -> str:
 
 def _project(
     frame: pl.DataFrame,
-    mapping: dict[str, str],
+    mapping: dict[str, str | tuple[str, ...]],
     evidence: RKBEvidenceSnapshot,
 ) -> pl.DataFrame:
     expressions: list[pl.Expr] = []
@@ -52,11 +58,16 @@ def _project(
         actual = _source_column(frame, source)
         expression = pl.col(actual).alias(target)
         if target.endswith("_dt"):
+            evidence_source = source if isinstance(source, str) else source[0]
             expression = (
                 pl.when(pl.col(actual).is_null() | (pl.col(actual) == ""))
                 .then(None)
                 .otherwise(pl.col(actual))
-                .str.strptime(pl.Date, format=_date_format(evidence, source), strict=True)
+                .str.strptime(
+                    pl.Date,
+                    format=_date_format(evidence, evidence_source),
+                    strict=True,
+                )
                 .alias(target)
             )
         expressions.append(expression)
@@ -100,7 +111,7 @@ class PufImporter:
                 "bene_id": "BENE_ID",
                 "bene_birth_dt": "BENE_BIRTH_DT",
                 "bene_death_dt": "BENE_DEATH_DT",
-                "bene_sex_ident_cd": "BENE_SEX_IDENT_CD",
+                "bene_sex_ident_cd": ("BENE_SEX_IDENT_CD", "SEX_IDENT_CD"),
                 "bene_race_cd": "BENE_RACE_CD",
             },
             evidence,
@@ -113,7 +124,7 @@ class PufImporter:
                 "bene_id": "BENE_ID",
                 "clm_from_dt": "CLM_FROM_DT",
                 "clm_thru_dt": "CLM_THRU_DT",
-                "prvdr_npi": "PRVDR_NPI",
+                "prvdr_npi": ("PRVDR_NPI", "PRF_PHYSN_NPI", "RFR_PHYSN_NPI"),
                 "icd_dgns_cd1": "ICD_DGNS_CD1",
             },
             evidence,

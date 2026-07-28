@@ -7,8 +7,8 @@
 - Added the additive CMS Synthetic Medicare Claims PUF beneficiary/carrier
   boundary, source-aware manifest/evidence fields, deterministic importer,
   validation, release export, and `puf` CLI command. The 2021 defaults remain
-  unchanged; release metadata awaits official file acquisition and real
-  SHA-256 verification.
+  unchanged. The 2022 source manifest now records CMS-published files, real
+  row counts, and verified SHA-256 digests.
 
 ### Added
 
