@@ -2449,14 +2449,87 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_blood_deductible_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with negative Blood Pints Quantity (< 0) or negative Blood Deductible Amount (< 0)."""
+        if claim_df.is_empty():
+            return []
 
+        findings: list[Finding] = []
 
+        # Check blood pints quantity
+        pints_col = None
+        for col in [
+            "nch_blood_pnts_ffrn_qty",
+            "NCH_BLOOD_PNTS_FFRN_QTY",
+            "blood_pnts_ffrn_qty",
+            "BLOOD_PNTS_FFRN_QTY",
+            "blood_pints_qty",
+            "BLOOD_PINTS_QTY",
+        ]:
+            if col in claim_df.columns:
+                pints_col = col
+                break
 
+        if pints_col is not None:
+            non_null_pints = claim_df.filter(pl.col(pints_col).is_not_null())
+            if not non_null_pints.is_empty():
+                invalid_pints = non_null_pints.filter(pl.col(pints_col) < 0)
+                if len(invalid_pints) > 0:
+                    sample_ids = (
+                        invalid_pints.select("clm_id").slice(0, 5).to_series().to_list()
+                        if "clm_id" in invalid_pints.columns
+                        else []
+                    )
+                    findings.append(
+                        Finding(
+                            rule_id="BLOOD-PINTS-001",
+                            category=FindingCategory.ADMINISTRATIVE,
+                            severity=Severity.HIGH,
+                            message=f"Found {len(invalid_pints)} claims in {claim_type} with negative Blood Pints Quantity (< 0).",
+                            count=len(invalid_pints),
+                            details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                        )
+                    )
 
+        # Check blood deductible amount
+        amt_col = None
+        for col in [
+            "nch_clm_blood_ddctbl_amt",
+            "NCH_CLM_BLOOD_DDCTBL_AMT",
+            "clm_blood_ddctbl_amt",
+            "CLM_BLOOD_DDCTBL_AMT",
+            "blood_ddctbl_amt",
+            "BLOOD_DDCTBL_AMT",
+        ]:
+            if col in claim_df.columns:
+                amt_col = col
+                break
 
+        if amt_col is not None:
+            non_null_amt = claim_df.filter(pl.col(amt_col).is_not_null())
+            if not non_null_amt.is_empty():
+                invalid_amt = non_null_amt.filter(pl.col(amt_col) < 0)
+                if len(invalid_amt) > 0:
+                    sample_ids = (
+                        invalid_amt.select("clm_id").slice(0, 5).to_series().to_list()
+                        if "clm_id" in invalid_amt.columns
+                        else []
+                    )
+                    findings.append(
+                        Finding(
+                            rule_id="BLOOD-AMT-001",
+                            category=FindingCategory.ADMINISTRATIVE,
+                            severity=Severity.HIGH,
+                            message=f"Found {len(invalid_amt)} claims in {claim_type} with negative Blood Deductible Amount (< 0).",
+                            count=len(invalid_amt),
+                            details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                        )
+                    )
 
-
-
+        return findings
 
     def validate_slice(
         self,
@@ -2554,6 +2627,11 @@ class RelationalValidator:
                     carrier_df, "Carrier Claims"
                 )
             )
+            findings.extend(
+                self.check_claim_blood_deductible_constraints(
+                    carrier_df, "Carrier Claims"
+                )
+            )
             if "line_num" in carrier_df.columns:
                 findings.extend(
                     self.check_record_uniqueness(
@@ -2639,6 +2717,11 @@ class RelationalValidator:
                 )
             )
             findings.extend(
+                self.check_claim_blood_deductible_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
                 self.check_record_uniqueness(
                     outpatient_df, ["clm_id"], "Outpatient Claims"
                 )
@@ -2690,6 +2773,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_coinsurance_day_constraints(
+                    inpatient_df, "Inpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_blood_deductible_constraints(
                     inpatient_df, "Inpatient Claims"
                 )
             )
@@ -2771,6 +2859,9 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_coinsurance_day_constraints(snf_df, "SNF Claims")
+            )
+            findings.extend(
+                self.check_claim_blood_deductible_constraints(snf_df, "SNF Claims")
             )
             findings.extend(
                 self.check_record_uniqueness(snf_df, ["clm_id"], "SNF Claims")

@@ -85,6 +85,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     primary_payer_check = data.get("primary_payer_check", False)
     type_of_bill_check = data.get("type_of_bill_check", False)
     coinsurance_day_check = data.get("coinsurance_day_check", False)
+    blood_deductible_check = data.get("blood_deductible_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -161,6 +162,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Primary Payer Code Format Verified** | {primary_payer_check} |
 | **Claim Type of Bill Code Format Verified** | {type_of_bill_check} |
 | **Claim Coinsurance Day Count Verified** | {coinsurance_day_check} |
+| **Claim Blood Deductible / Pints Count Verified** | {blood_deductible_check} |
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
 | **MBSF Domain Constraints Verified** | {mbsf_check} |
@@ -238,6 +240,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     primary_payer_check = data.get("primary_payer_check", False)
     type_of_bill_check = data.get("type_of_bill_check", False)
     coinsurance_day_check = data.get("coinsurance_day_check", False)
+    blood_deductible_check = data.get("blood_deductible_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -330,6 +333,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim Primary Payer Code Format Verified</strong></td><td>{primary_payer_check}</td></tr>
             <tr><td><strong>Claim Type of Bill Code Format Verified</strong></td><td>{type_of_bill_check}</td></tr>
             <tr><td><strong>Claim Coinsurance Day Count Verified</strong></td><td>{coinsurance_day_check}</td></tr>
+            <tr><td><strong>Claim Blood Deductible / Pints Count Verified</strong></td><td>{blood_deductible_check}</td></tr>
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
             <tr><td><strong>MBSF Domain Constraints Verified</strong></td><td>{mbsf_check}</td></tr>
@@ -411,6 +415,7 @@ def run_autonomous_workflow(
     primary_payer_check: bool = False,
     type_of_bill_check: bool = False,
     coinsurance_day_check: bool = False,
+    blood_deductible_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -477,6 +482,7 @@ def run_autonomous_workflow(
         primary_payer_check = True
         type_of_bill_check = True
         coinsurance_day_check = True
+        blood_deductible_check = True
         rev_center_check = True
         demographic_check = True
         mbsf_check = True
@@ -1853,6 +1859,26 @@ def run_autonomous_workflow(
             f"✓ Claim Coinsurance Day Count constraints verified ({violating_count} Coinsurance Day Count constraint findings)."
         )
 
+    if blood_deductible_check:
+        print(
+            "\n=== Verification Step: Executing Claim Blood Deductible / Pints Count Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        blood_findings = []
+        if scenario_slice.inpatient_df is not None:
+            blood_findings.extend(
+                RelationalValidator.check_claim_blood_deductible_constraints(
+                    scenario_slice.inpatient_df, "Inpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in blood_findings)
+        print(
+            f"✓ Claim Blood Deductible / Pints Count constraints verified ({violating_count} Blood Deductible / Pints constraint findings)."
+        )
+
     if pde_check:
         print(
             "\n=== Verification Step: Executing Part D Prescription Drug Event Field Constraint Verification Check ==="
@@ -1948,6 +1974,7 @@ def run_autonomous_workflow(
             "primary_payer_check": primary_payer_check,
             "type_of_bill_check": type_of_bill_check,
             "coinsurance_day_check": coinsurance_day_check,
+            "blood_deductible_check": blood_deductible_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -2059,6 +2086,7 @@ def run_autonomous_workflow(
             "primary_payer_check": primary_payer_check,
             "type_of_bill_check": type_of_bill_check,
             "coinsurance_day_check": coinsurance_day_check,
+            "blood_deductible_check": blood_deductible_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -2148,6 +2176,7 @@ def run_autonomous_workflow(
         "primary_payer_check": primary_payer_check,
         "type_of_bill_check": type_of_bill_check,
         "coinsurance_day_check": coinsurance_day_check,
+        "blood_deductible_check": blood_deductible_check,
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
         "mbsf_check": mbsf_check,

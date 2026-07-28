@@ -762,3 +762,20 @@ def test_check_claim_coinsurance_day_constraints() -> None:
     assert finding.count == 1
 
 
+def test_check_claim_blood_deductible_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "nch_blood_pnts_ffrn_qty": [2, 0, -1, None],
+            "nch_clm_blood_ddctbl_amt": [50.0, 0.0, -10.0, None],
+        }
+    )
+    findings = RelationalValidator.check_claim_blood_deductible_constraints(
+        claim_df, "Inpatient Claims"
+    )
+    assert len(findings) == 2
+    rule_ids = {f.rule_id for f in findings}
+    assert rule_ids == {"BLOOD-PINTS-001", "BLOOD-AMT-001"}
+
+
+
