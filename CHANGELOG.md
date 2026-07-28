@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_total_charge_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Total Charge Amount (`clm_tot_chrg_amt` >= 0) across claim records. Added `--total-charge-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `total_charge_amt_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `total_charge_amt_check` verification logic and CLI flag parsing (328 total passing unit tests).
+
 - Added `check_claim_payment_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Medicare Payment Amount (`clm_pmt_amt` >= 0) across claim records. Added `--payment-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `payment_amt_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `payment_amt_check` verification logic and CLI flag parsing (325 total passing unit tests).
 
