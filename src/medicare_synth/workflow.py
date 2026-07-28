@@ -87,6 +87,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     coinsurance_day_check = data.get("coinsurance_day_check", False)
     blood_deductible_check = data.get("blood_deductible_check", False)
     coinsurance_amt_check = data.get("coinsurance_amt_check", False)
+    deductible_amt_check = data.get("deductible_amt_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -165,6 +166,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Coinsurance Day Count Verified** | {coinsurance_day_check} |
 | **Claim Blood Deductible / Pints Count Verified** | {blood_deductible_check} |
 | **Claim Coinsurance Amount Verified** | {coinsurance_amt_check} |
+| **Claim Beneficiary Deductible Amount Verified** | {deductible_amt_check} |
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
 | **MBSF Domain Constraints Verified** | {mbsf_check} |
@@ -244,6 +246,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     coinsurance_day_check = data.get("coinsurance_day_check", False)
     blood_deductible_check = data.get("blood_deductible_check", False)
     coinsurance_amt_check = data.get("coinsurance_amt_check", False)
+    deductible_amt_check = data.get("deductible_amt_check", False)
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -338,6 +341,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim Coinsurance Day Count Verified</strong></td><td>{coinsurance_day_check}</td></tr>
             <tr><td><strong>Claim Blood Deductible / Pints Count Verified</strong></td><td>{blood_deductible_check}</td></tr>
             <tr><td><strong>Claim Coinsurance Amount Verified</strong></td><td>{coinsurance_amt_check}</td></tr>
+            <tr><td><strong>Claim Beneficiary Deductible Amount Verified</strong></td><td>{deductible_amt_check}</td></tr>
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
             <tr><td><strong>MBSF Domain Constraints Verified</strong></td><td>{mbsf_check}</td></tr>
@@ -421,6 +425,7 @@ def run_autonomous_workflow(
     coinsurance_day_check: bool = False,
     blood_deductible_check: bool = False,
     coinsurance_amt_check: bool = False,
+    deductible_amt_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -489,6 +494,7 @@ def run_autonomous_workflow(
         coinsurance_day_check = True
         blood_deductible_check = True
         coinsurance_amt_check = True
+        deductible_amt_check = True
         rev_center_check = True
         demographic_check = True
         mbsf_check = True
@@ -1905,6 +1911,26 @@ def run_autonomous_workflow(
             f"✓ Claim Coinsurance Amount constraints verified ({violating_count} Coinsurance Amount constraint findings)."
         )
 
+    if deductible_amt_check:
+        print(
+            "\n=== Verification Step: Executing Claim Beneficiary Deductible Amount Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        ded_amt_findings = []
+        if scenario_slice.inpatient_df is not None:
+            ded_amt_findings.extend(
+                RelationalValidator.check_claim_deductible_amount_constraints(
+                    scenario_slice.inpatient_df, "Inpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in ded_amt_findings)
+        print(
+            f"✓ Claim Beneficiary Deductible Amount constraints verified ({violating_count} Beneficiary Deductible Amount constraint findings)."
+        )
+
     if pde_check:
         print(
             "\n=== Verification Step: Executing Part D Prescription Drug Event Field Constraint Verification Check ==="
@@ -2002,6 +2028,7 @@ def run_autonomous_workflow(
             "coinsurance_day_check": coinsurance_day_check,
             "blood_deductible_check": blood_deductible_check,
             "coinsurance_amt_check": coinsurance_amt_check,
+            "deductible_amt_check": deductible_amt_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -2115,6 +2142,7 @@ def run_autonomous_workflow(
             "coinsurance_day_check": coinsurance_day_check,
             "blood_deductible_check": blood_deductible_check,
             "coinsurance_amt_check": coinsurance_amt_check,
+            "deductible_amt_check": deductible_amt_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -2206,6 +2234,7 @@ def run_autonomous_workflow(
         "coinsurance_day_check": coinsurance_day_check,
         "blood_deductible_check": blood_deductible_check,
         "coinsurance_amt_check": coinsurance_amt_check,
+        "deductible_amt_check": deductible_amt_check,
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
         "mbsf_check": mbsf_check,
