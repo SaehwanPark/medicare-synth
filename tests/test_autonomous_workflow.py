@@ -1869,3 +1869,30 @@ def test_run_autonomous_workflow_payment_amt_check(mock_run, tmp_path):
         data = json.load(f)
 
     assert data["payment_amt_check"] is True
+
+
+@patch("subprocess.run")
+def test_run_autonomous_workflow_total_charge_amt_check(mock_run, tmp_path):
+    """Test that total_charge_amt_check option executes Claim Total Charge Amount check and records status."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_total_charge_amt.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        total_charge_amt_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["total_charge_amt_check"] is True
