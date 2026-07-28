@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_deductible_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Beneficiary Deductible Amount (`nch_clm_bene_ddctbl_amt` >= 0) across claim records. Added `--deductible-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `deductible_amt_check` verification logic and CLI flag parsing (320 total passing unit tests).
+
 - Added `check_claim_coinsurance_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Coinsurance Amount (`nch_clm_coinsrnc_amt` >= 0) across claim records. Added `--coinsurance-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `coinsurance_amt_check` verification logic and CLI flag parsing.
 
