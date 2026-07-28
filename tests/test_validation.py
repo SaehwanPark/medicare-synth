@@ -778,4 +778,23 @@ def test_check_claim_blood_deductible_constraints() -> None:
     assert rule_ids == {"BLOOD-PINTS-001", "BLOOD-AMT-001"}
 
 
+def test_check_claim_coinsurance_amount_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "nch_clm_coinsrnc_amt": [100.0, 0.0, -25.0, None],
+        }
+    )
+    findings = RelationalValidator.check_claim_coinsurance_amount_constraints(
+        claim_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "COINSRNC-AMT-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+
+
+
 
