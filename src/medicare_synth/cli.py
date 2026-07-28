@@ -486,6 +486,16 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim Beneficiary Deductible Amount non-negativity consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--primary-payer-paid-amt-check",
+        action="store_true",
+        help="Verify Claim Primary Payer Paid Amount non-negativity consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--payment-amt-check",
+        action="store_true",
+        help="Verify Claim Medicare Payment Amount non-negativity consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--rev-center-check",
         action="store_true",
         help="Verify Revenue Center Code 4-digit numeric format consistency across claim records before commit/push",
@@ -951,6 +961,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             blood_deductible_check=args.blood_deductible_check,
             coinsurance_amt_check=args.coinsurance_amt_check,
             deductible_amt_check=args.deductible_amt_check,
+            primary_payer_paid_amt_check=args.primary_payer_paid_amt_check,
+            payment_amt_check=args.payment_amt_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,
