@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_coinsurance_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Coinsurance Amount (`nch_clm_coinsrnc_amt` >= 0) across claim records. Added `--coinsurance-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `coinsurance_amt_check` verification logic and CLI flag parsing.
+
 - Added `check_claim_blood_deductible_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Blood Pints Quantity (`nch_blood_pnts_ffrn_qty` >= 0) and Blood Deductible Amount (`nch_clm_blood_ddctbl_amt` >= 0) across claim records. Added `--blood-deductible-check`, `--type-of-bill-check`, `--coinsurance-day-check`, and `--non-payment-reason-check` parameters to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `blood_deductible_check`, `type_of_bill_check`, `coinsurance_day_check`, and `non_payment_reason_check` verification logic and CLI flag parsing.
 
