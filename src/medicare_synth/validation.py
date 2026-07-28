@@ -2301,6 +2301,57 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_non_payment_reason_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with invalid Claim Non-Payment Reason Code format (must be 1 to 2 alphanumeric characters when present)."""
+        if claim_df.is_empty():
+            return []
+
+        type_col = None
+        for col in [
+            "clm_non_py_rsn_cd",
+            "CLM_NON_PY_RSN_CD",
+            "non_payment_reason_cd",
+            "NON_PAYMENT_REASON_CD",
+            "clm_non_payment_reason_code",
+            "CLM_NON_PAYMENT_REASON_CODE",
+        ]:
+            if col in claim_df.columns:
+                type_col = col
+                break
+        if type_col is None:
+            return []
+
+        non_null_type = claim_df.filter(pl.col(type_col).is_not_null())
+        if non_null_type.is_empty():
+            return []
+
+        invalid = non_null_type.filter(
+            ~pl.col(type_col).cast(pl.Utf8).str.contains(r"^[0-9A-Za-z]{1,2}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="NONPAY-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with invalid Claim Non-Payment Reason Code format (must be 1 to 2 alphanumeric characters).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
+
 
 
 
@@ -2400,6 +2451,11 @@ class RelationalValidator:
                     carrier_df, "Carrier Claims"
                 )
             )
+            findings.extend(
+                self.check_claim_non_payment_reason_constraints(
+                    carrier_df, "Carrier Claims"
+                )
+            )
             if "line_num" in carrier_df.columns:
                 findings.extend(
                     self.check_record_uniqueness(
@@ -2470,6 +2526,11 @@ class RelationalValidator:
                 )
             )
             findings.extend(
+                self.check_claim_non_payment_reason_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
                 self.check_record_uniqueness(
                     outpatient_df, ["clm_id"], "Outpatient Claims"
                 )
@@ -2506,6 +2567,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_pass_thru_per_diem_constraints(
+                    inpatient_df, "Inpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_non_payment_reason_constraints(
                     inpatient_df, "Inpatient Claims"
                 )
             )
@@ -2580,6 +2646,9 @@ class RelationalValidator:
                 self.check_charge_accounting_constraints(snf_df, "SNF Claims")
             )
             findings.extend(
+                self.check_claim_non_payment_reason_constraints(snf_df, "SNF Claims")
+            )
+            findings.extend(
                 self.check_record_uniqueness(snf_df, ["clm_id"], "SNF Claims")
             )
 
@@ -2600,6 +2669,9 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_charge_accounting_constraints(hha_df, "HHA Claims")
+            )
+            findings.extend(
+                self.check_claim_non_payment_reason_constraints(hha_df, "HHA Claims")
             )
             findings.extend(
                 self.check_record_uniqueness(hha_df, ["clm_id"], "HHA Claims")
@@ -2623,6 +2695,9 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_charge_accounting_constraints(dme_df, "DME Claims")
+            )
+            findings.extend(
+                self.check_claim_non_payment_reason_constraints(dme_df, "DME Claims")
             )
             if "line_num" in dme_df.columns:
                 findings.extend(
@@ -2654,6 +2729,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_charge_accounting_constraints(hospice_df, "Hospice Claims")
+            )
+            findings.extend(
+                self.check_claim_non_payment_reason_constraints(
+                    hospice_df, "Hospice Claims"
+                )
             )
             findings.extend(
                 self.check_record_uniqueness(hospice_df, ["clm_id"], "Hospice Claims")
