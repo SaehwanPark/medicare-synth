@@ -456,6 +456,26 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim Primary Payer Code 1-character alphanumeric format consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--non-payment-reason-check",
+        action="store_true",
+        help="Verify Claim Non-Payment Reason Code format consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--type-of-bill-check",
+        action="store_true",
+        help="Verify Claim Type of Bill Code format consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--coinsurance-day-check",
+        action="store_true",
+        help="Verify Claim Coinsurance Day Count non-negativity consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--blood-deductible-check",
+        action="store_true",
+        help="Verify Claim Blood Deductible and Pints Count non-negativity consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--rev-center-check",
         action="store_true",
         help="Verify Revenue Center Code 4-digit numeric format consistency across claim records before commit/push",
@@ -915,6 +935,10 @@ def main(argv: Optional[list[str]] = None) -> int:
             query_check=args.query_check,
             passthru_check=args.passthru_check,
             primary_payer_check=args.primary_payer_check,
+            non_payment_reason_check=args.non_payment_reason_check,
+            type_of_bill_check=args.type_of_bill_check,
+            coinsurance_day_check=args.coinsurance_day_check,
+            blood_deductible_check=args.blood_deductible_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,
