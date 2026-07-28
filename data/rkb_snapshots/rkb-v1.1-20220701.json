@@ -1,0 +1,110 @@
+{
+  "rkb_version": "1.1.0",
+  "snapshot_date": "2022-07-01",
+  "schema_year": 2022,
+  "description": "Bounded evidence snapshot for the 2022 CMS Synthetic Medicare Claims beneficiary and carrier slice.",
+  "source_repository": "CMS Synthetic Medicare Claims PUF collection and User Guide",
+  "variables": {
+    "BENE_BIRTH_DT": {
+      "name": "BENE_BIRTH_DT",
+      "label": "Beneficiary Date of Birth",
+      "data_type": "date",
+      "format": "DD-Mon-YYYY",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Date of birth of the synthetic beneficiary.",
+      "source_refs": ["cms-synthetic-puf-user-guide"]
+    },
+    "BENE_DEATH_DT": {
+      "name": "BENE_DEATH_DT",
+      "label": "Beneficiary Date of Death",
+      "data_type": "date",
+      "format": "DD-Mon-YYYY",
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "Date of death when present.",
+      "source_refs": ["cms-synthetic-puf-user-guide"]
+    },
+    "CLM_FROM_DT": {
+      "name": "CLM_FROM_DT",
+      "label": "Claim Start Date",
+      "data_type": "date",
+      "format": "DD-Mon-YYYY",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Start date of the carrier claim line service period.",
+      "source_refs": ["cms-synthetic-puf-user-guide"]
+    },
+    "CLM_THRU_DT": {
+      "name": "CLM_THRU_DT",
+      "label": "Claim Through Date",
+      "data_type": "date",
+      "format": "DD-Mon-YYYY",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "End date of the carrier claim line service period.",
+      "source_refs": ["cms-synthetic-puf-user-guide"]
+    },
+    "BENE_ID": {
+      "name": "BENE_ID",
+      "label": "Synthetic Beneficiary Identifier",
+      "data_type": "string",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Identifier used to link beneficiary and claim files.",
+      "source_refs": ["cms-synthetic-puf-user-guide"]
+    },
+    "CLM_ID": {
+      "name": "CLM_ID",
+      "label": "Claim Identifier",
+      "data_type": "string",
+      "nullable": false,
+      "provenance_status": "preserved",
+      "description": "Carrier claim identifier.",
+      "source_refs": ["cms-synthetic-puf-user-guide"]
+    },
+    "ICD_DGNS_CD1": {
+      "name": "ICD_DGNS_CD1",
+      "label": "First Diagnosis Code",
+      "data_type": "string",
+      "nullable": true,
+      "provenance_status": "preserved",
+      "description": "First diagnosis code when present on the carrier claim line.",
+      "source_refs": ["cms-synthetic-puf-user-guide"]
+    }
+  },
+  "constraints": [
+    {
+      "constraint_id": "beneficiary-id-unique",
+      "category": "relational",
+      "description": "BENE_ID is unique in the beneficiary-year file.",
+      "rule": "unique(beneficiary_2022.BENE_ID)"
+    },
+    {
+      "constraint_id": "carrier-line-key-unique",
+      "category": "relational",
+      "description": "Carrier claim lines are identified by CLM_ID and LINE_NUM.",
+      "rule": "unique(carrier.CLM_ID, carrier.LINE_NUM)"
+    },
+    {
+      "constraint_id": "carrier-beneficiary-link",
+      "category": "relational",
+      "description": "Every carrier line links to a beneficiary in the 2022 beneficiary file.",
+      "rule": "carrier.BENE_ID in beneficiary_2022.BENE_ID"
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "cms-synthetic-puf-user-guide",
+      "url": "https://data.cms.gov/sites/default/files/2023-05/d51e1218-68c3-4c7c-9598-0b81f22fe903/User%20Guide%20-%20CMS%20Synthetic%20RIF%20Files%20May%202023_AM508_v2.pdf",
+      "version": "May 2023",
+      "retrieval_date": "2026-07-28"
+    },
+    {
+      "source_id": "cms-synthetic-puf-collection",
+      "url": "https://data.cms.gov/collection/synthetic-medicare-enrollment-fee-for-service-claims-and-prescription-drug-event",
+      "version": "2023-04 publication",
+      "retrieval_date": "2026-07-28"
+    }
+  ]
+}

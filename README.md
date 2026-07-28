@@ -56,7 +56,7 @@ uv run medicare-synth validate --scenario valid_baseline_cohort
 uv run medicare-synth export --scenario valid_baseline_cohort --output-dir ./dist/release_v1 --format all
 
 # Import and export the bounded 2022 CMS PUF slice from local source files
-uv run medicare-synth puf --source-dir ./data/cms_puf_2022 --manifest ./data/manifests/cms_synthetic_puf_2022_beneficiary_carrier_manifest.json --evidence ./data/rkb_snapshots/rkb-v1.1-YYYYMMDD.json --output-dir ./dist/puf_2022 --format all
+uv run medicare-synth puf --source-dir ./data/cms_puf_2022 --manifest ./data/manifests/cms_2022_syn_puf_manifest.json --evidence ./data/rkb_snapshots/rkb-v1.1-20220701.json --output-dir ./dist/puf_2022 --format all
 
 # Expand dataset vertically (feature synthesis) or horizontally (subgraph re-keying)
 uv run medicare-synth expand --mode vertical --scenario valid_baseline_cohort --scale 2.0

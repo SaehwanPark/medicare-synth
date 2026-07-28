@@ -59,6 +59,58 @@ def test_import_preserves_carrier_lines_and_filters_service_year(tmp_path: Path)
     assert result.carrier_df.select(["clm_id", "line_num"]).rows() == [("C1", 1), ("C1", 2)]
 
 
+def test_import_accepts_cms_source_aliases_and_month_name_dates(tmp_path: Path) -> None:
+    beneficiary_path = tmp_path / "beneficiary_2022.csv"
+    beneficiary_path.write_text(
+        "BENE_ID|BENE_BIRTH_DT|BENE_DEATH_DT|SEX_IDENT_CD|BENE_RACE_CD\n"
+        "0001|01-Jan-1940||1|1\n",
+        encoding="utf-8",
+    )
+    carrier_path = tmp_path / "carrier.csv"
+    carrier_path.write_text(
+        "CLM_ID|LINE_NUM|BENE_ID|CLM_FROM_DT|CLM_THRU_DT|PRF_PHYSN_NPI|ICD_DGNS_CD1\n"
+        "C1|1|0001|01-Feb-2022|02-Feb-2022|1234567890|A123\n",
+        encoding="utf-8",
+    )
+
+    def digest(path: Path) -> str:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    manifest = {
+        "collection_id": "fixture",
+        "title": "fixture",
+        "schema_year": 2022,
+        "version": "fixture",
+        "description": "fixture",
+        "source_organization": "CMS",
+        "retrieval_date": "2026-07-28",
+        "license": "CMS",
+        "files": [
+            {"file_id": "beneficiary_2022", "filename": "beneficiary_2022.csv", "file_domain": "beneficiary", "grain": "beneficiary_year", "format": "csv", "expected_record_count": 1, "sha256": digest(beneficiary_path), "source_url": "https://example.invalid/b", "primary_key": ["BENE_ID"], "delimiter": "|"},
+            {"file_id": "carrier", "filename": "carrier.csv", "file_domain": "carrier", "grain": "claim_line", "format": "csv", "expected_record_count": 1, "sha256": digest(carrier_path), "source_url": "https://example.invalid/c", "primary_key": ["CLM_ID", "LINE_NUM"], "delimiter": "|"},
+        ],
+    }
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    evidence_path = tmp_path / "evidence.json"
+    evidence_path.write_text(json.dumps({
+        "rkb_version": "fixture",
+        "snapshot_date": "2026-07-28",
+        "schema_year": 2022,
+        "description": "fixture",
+        "source_repository": "CMS",
+        "variables": {
+            name: {"name": name, "label": name, "data_type": "date", "format": "DD-Mon-YYYY", "provenance_status": "preserved", "description": "fixture"}
+            for name in ("BENE_BIRTH_DT", "BENE_DEATH_DT", "CLM_FROM_DT", "CLM_THRU_DT")
+        },
+        "constraints": [],
+    }), encoding="utf-8")
+
+    result = PufImporter().load(tmp_path, manifest_path, evidence_path)
+    assert result.beneficiary_df.select("bene_sex_ident_cd").to_series().to_list() == ["1"]
+    assert result.carrier_df.select("prvdr_npi").to_series().to_list() == ["1234567890"]
+
+
 def test_validator_reports_orphan_and_duplicate_line(tmp_path: Path) -> None:
     bene = pl.DataFrame({"bene_id": ["0001"]})
     carrier = pl.DataFrame({"clm_id": ["C1", "C1"], "line_num": [1, 1], "bene_id": ["0001", "9999"], "clm_from_dt": ["2022-01-01", "2022-01-01"], "clm_thru_dt": ["2022-01-01", "2022-01-01"]})
