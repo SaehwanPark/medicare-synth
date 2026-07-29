@@ -471,6 +471,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim PPS Capital DSH Amount non-negativity format consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--pps-capital-fsp-check",
+        action="store_true",
+        help="Verify Claim PPS Capital FSP Amount non-negativity format consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--primary-payer-check",
         action="store_true",
         help="Verify Claim Primary Payer Code 1-character alphanumeric format consistency before commit/push",
@@ -988,6 +993,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             pps_capital_outlier_check=args.pps_capital_outlier_check,
             pps_capital_ime_check=args.pps_capital_ime_check,
             pps_capital_dsh_check=args.pps_capital_dsh_check,
+            pps_capital_fsp_check=args.pps_capital_fsp_check,
             primary_payer_check=args.primary_payer_check,
             non_payment_reason_check=args.non_payment_reason_check,
             type_of_bill_check=args.type_of_bill_check,

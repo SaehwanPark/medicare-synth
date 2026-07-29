@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_pps_capital_fsp_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim PPS Capital Hospital Specific Portion Payment Amount (`clm_pps_cptl_fsp_amt` >= 0) across claim records. Added `--pps-capital-fsp-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pps_capital_fsp_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `pps_capital_fsp_check` verification logic and CLI flag parsing (345 total passing unit tests).
+
 - Added `check_claim_pps_capital_dsh_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim PPS Capital DSH Adjustment Amount (`clm_pps_cptl_dsh_amt` >= 0) across claim records. Added `--pps-capital-dsh-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pps_capital_dsh_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `pps_capital_dsh_check` verification logic and CLI flag parsing (342 total passing unit tests).
 
