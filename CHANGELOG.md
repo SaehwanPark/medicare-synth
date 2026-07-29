@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_pps_capital_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim PPS Capital Federal Payment Amount (`clm_pps_cptl_fdrle_pmt_amt` >= 0) across claim records. Added `--pps-capital-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pps_capital_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `pps_capital_check` verification logic and CLI flag parsing (333 total passing unit tests).
+
 - Added `check_claim_non_covered_charge_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Non-Covered Charge Amount (`nch_clm_non_cvrd_chrg_amt` >= 0) across claim records. Added `--non-covered-charge-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `non_covered_charge_amt_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `non_covered_charge_amt_check` verification logic and CLI flag parsing (331 total passing unit tests).
 
