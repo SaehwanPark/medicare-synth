@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_pps_operating_outlier_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim PPS Operating Outlier Amount (`clm_pps_oprtg_outlier_amt` >= 0) across claim records. Added `--pps-operating-outlier-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pps_operating_outlier_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `pps_operating_outlier_check` verification logic and CLI flag parsing (354 total passing unit tests).
+
 - Added `check_claim_pps_operating_federal_payment_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim PPS Operating Federal Payment Amount (`clm_pps_oprtg_fdrle_pmt_amt` >= 0) across claim records. Added `--pps-operating-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pps_operating_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `pps_operating_check` verification logic and CLI flag parsing (351 total passing unit tests).
 
