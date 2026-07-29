@@ -4,7 +4,11 @@
 
 ### Added
 
+- Added `check_claim_pps_operating_dsh_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim PPS Operating Disproportionate Share Hospital Adjustment Amount (`clm_pps_oprtg_dsh_amt` >= 0) across claim records. Added `--pps-operating-dsh-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pps_operating_dsh_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `pps_operating_dsh_check` verification logic and CLI flag parsing (362 total passing unit tests).
+
 - Added `check_claim_pps_operating_ime_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim PPS Operating Indirect Medical Education Payment Amount (`clm_pps_oprtg_ime_amt` >= 0) across claim records. Added `--pps-operating-ime-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pps_operating_ime_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `pps_operating_ime_check` verification logic and CLI flag parsing.
 
 - Added `check_claim_pps_operating_hsp_payment_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim PPS Operating Hospital Specific Portion Payment Amount (`clm_pps_oprtg_hsp_pmt_amt` >= 0) across claim records. Added `--pps-operating-hsp-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pps_operating_hsp_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.

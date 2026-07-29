@@ -501,6 +501,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim PPS Operating Indirect Medical Education Payment Amount non-negativity format consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--pps-operating-dsh-check",
+        action="store_true",
+        help="Verify Claim PPS Operating Disproportionate Share Hospital Adjustment Amount non-negativity format consistency before commit/push",
+    )
+
+    auto_wf_parser.add_argument(
         "--primary-payer-check",
         action="store_true",
         help="Verify Claim Primary Payer Code 1-character alphanumeric format consistency before commit/push",
@@ -1024,6 +1030,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             pps_operating_outlier_check=args.pps_operating_outlier_check,
             pps_operating_hsp_check=args.pps_operating_hsp_check,
             pps_operating_ime_check=args.pps_operating_ime_check,
+            pps_operating_dsh_check=args.pps_operating_dsh_check,
             primary_payer_check=args.primary_payer_check,
             non_payment_reason_check=args.non_payment_reason_check,
             type_of_bill_check=args.type_of_bill_check,
