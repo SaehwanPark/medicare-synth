@@ -2881,6 +2881,54 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_pps_operating_ime_amount_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Records"
+    ) -> list[Finding]:
+        """Identifies claims with negative Claim PPS Operating Indirect Medical Education Payment Amount (< 0 when present)."""
+        if claim_df.is_empty():
+            return []
+
+        amt_col = None
+        for col in [
+            "clm_pps_oprtg_ime_amt",
+            "CLM_PPS_OPRTG_IME_AMT",
+            "pps_oprtg_ime_amt",
+            "PPS_OPRTG_IME_AMT",
+            "pps_operating_ime_amt",
+            "PPS_OPERATING_IME_AMT",
+        ]:
+            if col in claim_df.columns:
+                amt_col = col
+                break
+        if amt_col is None:
+            return []
+
+        non_null_df = claim_df.filter(pl.col(amt_col).is_not_null())
+        if non_null_df.is_empty():
+            return []
+
+        invalid = non_null_df.filter(pl.col(amt_col) < 0)
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="PPS-OPRTG-004",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} claims in {claim_type} with negative PPS Operating Indirect Medical Education Payment Amount (< 0).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
 
 
     @staticmethod
@@ -3625,6 +3673,11 @@ class RelationalValidator:
                 )
             )
             findings.extend(
+                self.check_claim_pps_operating_ime_amount_constraints(
+                    inpatient_df, "Inpatient Claims"
+                )
+            )
+            findings.extend(
                 self.check_record_uniqueness(
                     inpatient_df, ["clm_id"], "Inpatient Claims"
                 )
@@ -3735,6 +3788,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_pps_operating_hsp_payment_amount_constraints(
+                    snf_df, "SNF Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_pps_operating_ime_amount_constraints(
                     snf_df, "SNF Claims"
                 )
             )
