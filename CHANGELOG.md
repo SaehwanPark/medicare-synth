@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_pps_capital_outlier_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim PPS Capital Outlier Amount (`clm_pps_cptl_outlier_amt` >= 0) across claim records. Added `--pps-capital-outlier-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pps_capital_outlier_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `pps_capital_outlier_check` verification logic and CLI flag parsing (336 total passing unit tests).
+
 - Added `check_claim_pps_capital_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim PPS Capital Federal Payment Amount (`clm_pps_cptl_fdrle_pmt_amt` >= 0) across claim records. Added `--pps-capital-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `pps_capital_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `pps_capital_check` verification logic and CLI flag parsing (333 total passing unit tests).
 
