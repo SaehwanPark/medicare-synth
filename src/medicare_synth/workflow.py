@@ -87,6 +87,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     pps_capital_dsh_check = data.get("pps_capital_dsh_check", False)
     pps_capital_fsp_check = data.get("pps_capital_fsp_check", False)
     pps_capital_exception_check = data.get("pps_capital_exception_check", False)
+    pps_operating_check = data.get("pps_operating_check", False)
     non_payment_reason_check = data.get("non_payment_reason_check", False)
     primary_payer_check = data.get("primary_payer_check", False)
     type_of_bill_check = data.get("type_of_bill_check", False)
@@ -180,6 +181,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim PPS Capital DSH Amount Verified** | {pps_capital_dsh_check} |
 | **Claim PPS Capital FSP Amount Verified** | {pps_capital_fsp_check} |
 | **Claim PPS Capital Exception Amount Verified** | {pps_capital_exception_check} |
+| **Claim PPS Operating Federal Payment Amount Verified** | {pps_operating_check} |
 | **Claim Non-Payment Reason Code Format Verified** | {non_payment_reason_check} |
 | **Claim Primary Payer Code Format Verified** | {primary_payer_check} |
 | **Claim Type of Bill Code Format Verified** | {type_of_bill_check} |
@@ -270,6 +272,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     pps_capital_dsh_check = data.get("pps_capital_dsh_check", False)
     pps_capital_fsp_check = data.get("pps_capital_fsp_check", False)
     pps_capital_exception_check = data.get("pps_capital_exception_check", False)
+    pps_operating_check = data.get("pps_operating_check", False)
     non_payment_reason_check = data.get("non_payment_reason_check", False)
     primary_payer_check = data.get("primary_payer_check", False)
     type_of_bill_check = data.get("type_of_bill_check", False)
@@ -379,6 +382,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim PPS Capital DSH Amount Verified</strong></td><td>{pps_capital_dsh_check}</td></tr>
             <tr><td><strong>Claim PPS Capital FSP Amount Verified</strong></td><td>{pps_capital_fsp_check}</td></tr>
             <tr><td><strong>Claim PPS Capital Exception Amount Verified</strong></td><td>{pps_capital_exception_check}</td></tr>
+            <tr><td><strong>Claim PPS Operating Federal Payment Amount Verified</strong></td><td>{pps_operating_check}</td></tr>
             <tr><td><strong>Claim Non-Payment Reason Code Format Verified</strong></td><td>{non_payment_reason_check}</td></tr>
             <tr><td><strong>Claim Primary Payer Code Format Verified</strong></td><td>{primary_payer_check}</td></tr>
             <tr><td><strong>Claim Type of Bill Code Format Verified</strong></td><td>{type_of_bill_check}</td></tr>
@@ -473,6 +477,7 @@ def run_autonomous_workflow(
     pps_capital_dsh_check: bool = False,
     pps_capital_fsp_check: bool = False,
     pps_capital_exception_check: bool = False,
+    pps_operating_check: bool = False,
     non_payment_reason_check: bool = False,
     primary_payer_check: bool = False,
     type_of_bill_check: bool = False,
@@ -552,6 +557,7 @@ def run_autonomous_workflow(
         pps_capital_dsh_check = True
         pps_capital_fsp_check = True
         pps_capital_exception_check = True
+        pps_operating_check = True
         non_payment_reason_check = True
         primary_payer_check = True
         type_of_bill_check = True
@@ -1979,6 +1985,26 @@ def run_autonomous_workflow(
             f"✓ Claim PPS Capital Exception Amount constraints verified ({violating_count} PPS Capital Exception constraint findings)."
         )
 
+    if pps_operating_check:
+        print(
+            "\n=== Verification Step: Executing Claim PPS Operating Federal Payment Amount Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        pps_oprtg_findings = []
+        if scenario_slice.inpatient_df is not None:
+            pps_oprtg_findings.extend(
+                RelationalValidator.check_claim_pps_operating_federal_payment_amount_constraints(
+                    scenario_slice.inpatient_df, "Inpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in pps_oprtg_findings)
+        print(
+            f"✓ Claim PPS Operating Federal Payment Amount constraints verified ({violating_count} PPS Operating constraint findings)."
+        )
+
     if non_payment_reason_check:
         print(
             "\n=== Verification Step: Executing Claim Non-Payment Reason Code Format Verification Check ==="
@@ -2320,6 +2346,7 @@ def run_autonomous_workflow(
             "pps_capital_dsh_check": pps_capital_dsh_check,
             "pps_capital_fsp_check": pps_capital_fsp_check,
             "pps_capital_exception_check": pps_capital_exception_check,
+            "pps_operating_check": pps_operating_check,
             "non_payment_reason_check": non_payment_reason_check,
             "primary_payer_check": primary_payer_check,
             "type_of_bill_check": type_of_bill_check,
@@ -2444,6 +2471,7 @@ def run_autonomous_workflow(
             "pps_capital_dsh_check": pps_capital_dsh_check,
             "pps_capital_fsp_check": pps_capital_fsp_check,
             "pps_capital_exception_check": pps_capital_exception_check,
+            "pps_operating_check": pps_operating_check,
             "non_payment_reason_check": non_payment_reason_check,
             "primary_payer_check": primary_payer_check,
             "type_of_bill_check": type_of_bill_check,
@@ -2546,6 +2574,7 @@ def run_autonomous_workflow(
         "pps_capital_dsh_check": pps_capital_dsh_check,
         "pps_capital_fsp_check": pps_capital_fsp_check,
         "pps_capital_exception_check": pps_capital_exception_check,
+        "pps_operating_check": pps_operating_check,
         "non_payment_reason_check": non_payment_reason_check,
         "primary_payer_check": primary_payer_check,
         "type_of_bill_check": type_of_bill_check,
