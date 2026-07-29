@@ -562,6 +562,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim Non-Covered Charge Amount non-negativity consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--outlier-payment-amt-check",
+        action="store_true",
+        help="Verify Claim Outlier Payment Amount non-negativity consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--rev-center-check",
         action="store_true",
         help="Verify Revenue Center Code 4-digit numeric format consistency across claim records before commit/push",
@@ -1042,6 +1047,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             payment_amt_check=args.payment_amt_check,
             total_charge_amt_check=args.total_charge_amt_check,
             non_covered_charge_amt_check=args.non_covered_charge_amt_check,
+            outlier_payment_amt_check=args.outlier_payment_amt_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,
