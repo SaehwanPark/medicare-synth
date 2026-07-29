@@ -1926,6 +1926,34 @@ def test_run_autonomous_workflow_non_covered_charge_amt_check(mock_run, tmp_path
 
 
 @patch("subprocess.run")
+def test_run_autonomous_workflow_outlier_payment_amt_check(mock_run, tmp_path):
+    """Test that outlier_payment_amt_check option executes Claim Outlier Payment Amount check and records status."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_outlier_payment_amt.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        outlier_payment_amt_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["outlier_payment_amt_check"] is True
+
+
+
+@patch("subprocess.run")
 def test_run_autonomous_workflow_pps_capital_check(mock_run, tmp_path):
     """Test that pps_capital_check option executes Claim PPS Capital Federal Payment Amount check and records status."""
     import json
