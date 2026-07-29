@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_line_payment_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Line NCH Payment Amount (`line_nch_pmt_amt` >= 0) across claim line items. Added `--line-payment-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_payment_amt_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_payment_amt_check` verification logic and CLI flag parsing (374 total passing unit tests).
+
 - Added `check_claim_line_coinsurance_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Line Coinsurance Amount (`line_coinsrnc_amt` >= 0) across claim line items. Added `line_coinsurance_amt_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py` and `tests/test_autonomous_workflow.py` to cover `line_coinsurance_amt_check` verification logic (371 total passing unit tests).
 
