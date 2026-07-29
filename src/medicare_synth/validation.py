@@ -3410,6 +3410,57 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+
+    def check_claim_line_allowed_charge_amount_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Line Items"
+    ) -> list[Finding]:
+        """Identifies claim line items with negative Claim Line Allowed Charge Amount (< 0)."""
+        if claim_df.is_empty():
+            return []
+
+        col_name = None
+        for col in [
+            "line_allowd_chrg_amt",
+            "LINE_ALLOWD_CHRG_AMT",
+            "line_aloowd_chrg_amt",
+            "LINE_ALOOWD_CHRG_AMT",
+            "line_allowed_amt",
+            "LINE_ALLOWED_AMT",
+            "allowd_chrg_amt",
+            "ALLOWD_CHRG_AMT",
+        ]:
+            if col in claim_df.columns:
+                col_name = col
+                break
+
+        if col_name is None:
+            return []
+
+        non_null_df = claim_df.filter(pl.col(col_name).is_not_null())
+        if non_null_df.is_empty():
+            return []
+
+        invalid = non_null_df.filter(pl.col(col_name) < 0)
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="LINE-ALLOWD-AMT-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {claim_type} with negative Line Allowed Charge Amount (< 0).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
 
     def validate_slice(
         self,
@@ -3539,6 +3590,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_outlier_payment_amount_constraints(
+                    carrier_df, "Carrier Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_line_allowed_charge_amount_constraints(
                     carrier_df, "Carrier Claims"
                 )
             )
