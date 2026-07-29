@@ -3718,6 +3718,11 @@ class RelationalValidator:
                 )
             )
             findings.extend(
+                self.check_claim_line_allowed_charge_amount_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
                 self.check_record_uniqueness(
                     outpatient_df, ["clm_id"], "Outpatient Claims"
                 )

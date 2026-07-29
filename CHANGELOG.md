@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `--line-allowed-charge-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_allowed_charge_amt_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py` to enable Claim Line Allowed Charge Amount non-negativity verification (`check_claim_line_allowed_charge_amount_constraints`) across claim tables before staging and committing.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_allowed_charge_amt_check` verification logic and CLI flag parsing (369 total passing unit tests).
+
 - Added `check_claim_outlier_payment_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Outlier Payment Amount (`clm_outlier_pmt_amt` >= 0) across claim records. Added `--outlier-payment-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `outlier_payment_amt_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `outlier_payment_amt_check` verification logic and CLI flag parsing (366 total passing unit tests).
 
