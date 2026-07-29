@@ -956,3 +956,21 @@ def test_check_claim_pps_capital_dsh_amount_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_claim_pps_capital_fsp_amount_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "clm_pps_cptl_fsp_amt": [250.0, 0.0, -10.0, None],
+        }
+    )
+    findings = RelationalValidator.check_claim_pps_capital_fsp_amount_constraints(
+        claim_df, "Inpatient Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "PPS-FSP-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
