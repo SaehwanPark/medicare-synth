@@ -451,6 +451,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim Pass-Through Per Diem non-negative format consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--pps-capital-check",
+        action="store_true",
+        help="Verify Claim PPS Capital Federal Payment Amount non-negativity format consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--primary-payer-check",
         action="store_true",
         help="Verify Claim Primary Payer Code 1-character alphanumeric format consistency before commit/push",
@@ -964,6 +969,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             frequency_check=args.frequency_check,
             query_check=args.query_check,
             passthru_check=args.passthru_check,
+            pps_capital_check=args.pps_capital_check,
             primary_payer_check=args.primary_payer_check,
             non_payment_reason_check=args.non_payment_reason_check,
             type_of_bill_check=args.type_of_bill_check,
