@@ -373,8 +373,6 @@ def test_check_claim_disposition_constraints() -> None:
     assert finding.count == 1
 
 
-
-
 def test_check_rev_center_code_constraints() -> None:
     outpatient_df = pl.DataFrame(
         {
@@ -1121,3 +1119,19 @@ def test_check_claim_line_allowed_charge_amount_constraints() -> None:
     assert finding.count == 1
 
 
+def test_check_claim_line_coinsurance_amount_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "line_coinsrnc_amt": [25.0, 0.0, -5.0, None],
+        }
+    )
+    findings = RelationalValidator.check_claim_line_coinsurance_amount_constraints(
+        claim_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "LINE-COINSRNC-AMT-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
