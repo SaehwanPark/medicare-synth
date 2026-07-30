@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_line_performing_physician_npi_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify 10-digit format of Claim Line Performing Physician NPI (`prf_physn_npi` as 10 numeric digits when present) across claim line items and wired into `validate_slice`. Added `--line-performing-physician-npi-check` (`--line-npi-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_performing_physician_npi_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_performing_physician_npi_check` verification logic and CLI flag parsing (405 total passing unit tests).
+
 - Added `check_claim_line_type_of_service_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify format of Claim Line Type of Service Code (`line_cms_type_srvc_cd` as 1-2 alphanumeric characters when present) across claim line items and wired into `validate_slice`. Added `--line-type-of-service-check` (`--line-tos-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_type_of_service_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_type_of_service_check` verification logic and CLI flag parsing (402 total passing unit tests).
 
