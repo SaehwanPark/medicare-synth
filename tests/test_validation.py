@@ -1226,3 +1226,22 @@ def test_check_claim_line_non_covered_charge_amount_constraints() -> None:
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
 
+
+def test_check_claim_line_beneficiary_payment_amount_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "line_bene_pmt_amt": [150.0, 0.0, -15.0, None],
+        }
+    )
+    findings = RelationalValidator.check_claim_line_beneficiary_payment_amount_constraints(
+        claim_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "LINE-BENE-PMT-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+
+

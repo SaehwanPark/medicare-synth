@@ -3758,6 +3758,57 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_line_beneficiary_payment_amount_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Line Items"
+    ) -> list[Finding]:
+        """Identifies claim line items with negative Claim Line Beneficiary Payment Amount (< 0)."""
+        if claim_df.is_empty():
+            return []
+
+        col_name = None
+        for col in [
+            "line_bene_pmt_amt",
+            "LINE_BENE_PMT_AMT",
+            "line_bene_payment_amt",
+            "LINE_BENE_PAYMENT_AMT",
+            "line_bene_pd_amt",
+            "LINE_BENE_PD_AMT",
+            "line_beneficiary_pmt_amt",
+            "LINE_BENEFICIARY_PMT_AMT",
+        ]:
+            if col in claim_df.columns:
+                col_name = col
+                break
+
+        if col_name is None:
+            return []
+
+        non_null_df = claim_df.filter(pl.col(col_name).is_not_null())
+        if non_null_df.is_empty():
+            return []
+
+        invalid = non_null_df.filter(pl.col(col_name) < 0)
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="LINE-BENE-PMT-001",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {claim_type} with negative Line Beneficiary Payment Amount (< 0).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
 
     def validate_slice(
         self,
@@ -3925,6 +3976,11 @@ class RelationalValidator:
                     carrier_df, "Carrier Claims"
                 )
             )
+            findings.extend(
+                self.check_claim_line_beneficiary_payment_amount_constraints(
+                    carrier_df, "Carrier Claims"
+                )
+            )
             if "line_num" in carrier_df.columns:
                 findings.extend(
                     self.check_record_uniqueness(
@@ -4076,6 +4132,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_line_non_covered_charge_amount_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_line_beneficiary_payment_amount_constraints(
                     outpatient_df, "Outpatient Claims"
                 )
             )

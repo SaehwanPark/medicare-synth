@@ -131,6 +131,9 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     line_non_covered_charge_amt_check = data.get(
         "line_non_covered_charge_amt_check", False
     )
+    line_beneficiary_payment_amt_check = data.get(
+        "line_beneficiary_payment_amt_check", False
+    )
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -233,6 +236,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Line Submitted Charge Amount Verified** | {line_submitted_charge_amt_check} |
 | **Claim Line Primary Payer Paid Amount Verified** | {line_primary_payer_paid_amt_check} |
 | **Claim Line Non-Covered Charge Amount Verified** | {line_non_covered_charge_amt_check} |
+| **Claim Line Beneficiary Payment Amount Verified** | {line_beneficiary_payment_amt_check} |
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
 | **MBSF Domain Constraints Verified** | {mbsf_check} |
@@ -356,6 +360,9 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     line_non_covered_charge_amt_check = data.get(
         "line_non_covered_charge_amt_check", False
     )
+    line_beneficiary_payment_amt_check = data.get(
+        "line_beneficiary_payment_amt_check", False
+    )
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
     mbsf_check = data.get("mbsf_check", False)
@@ -474,6 +481,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim Line Submitted Charge Amount Verified</strong></td><td>{line_submitted_charge_amt_check}</td></tr>
             <tr><td><strong>Claim Line Primary Payer Paid Amount Verified</strong></td><td>{line_primary_payer_paid_amt_check}</td></tr>
             <tr><td><strong>Claim Line Non-Covered Charge Amount Verified</strong></td><td>{line_non_covered_charge_amt_check}</td></tr>
+            <tr><td><strong>Claim Line Beneficiary Payment Amount Verified</strong></td><td>{line_beneficiary_payment_amt_check}</td></tr>
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
             <tr><td><strong>MBSF Domain Constraints Verified</strong></td><td>{mbsf_check}</td></tr>
@@ -581,6 +589,7 @@ def run_autonomous_workflow(
     line_submitted_charge_amt_check: bool = False,
     line_primary_payer_paid_amt_check: bool = False,
     line_non_covered_charge_amt_check: bool = False,
+    line_beneficiary_payment_amt_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -673,6 +682,7 @@ def run_autonomous_workflow(
         line_submitted_charge_amt_check = True
         line_primary_payer_paid_amt_check = True
         line_non_covered_charge_amt_check = True
+        line_beneficiary_payment_amt_check = True
         rev_center_check = True
         demographic_check = True
         mbsf_check = True
@@ -2647,6 +2657,32 @@ def run_autonomous_workflow(
             f"✓ Claim Line Non-Covered Charge Amount constraints verified ({violating_count} Line Non-Covered Charge Amount constraint findings)."
         )
 
+    if line_beneficiary_payment_amt_check:
+        print(
+            "\n=== Verification Step: Executing Claim Line Beneficiary Payment Amount Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        line_bene_pmt_findings = []
+        if scenario_slice.carrier_df is not None:
+            line_bene_pmt_findings.extend(
+                RelationalValidator.check_claim_line_beneficiary_payment_amount_constraints(
+                    scenario_slice.carrier_df, "Carrier Claims"
+                )
+            )
+        if scenario_slice.outpatient_df is not None:
+            line_bene_pmt_findings.extend(
+                RelationalValidator.check_claim_line_beneficiary_payment_amount_constraints(
+                    scenario_slice.outpatient_df, "Outpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in line_bene_pmt_findings)
+        print(
+            f"✓ Claim Line Beneficiary Payment Amount constraints verified ({violating_count} Line Beneficiary Payment Amount constraint findings)."
+        )
+
     if pde_check:
         print(
             "\n=== Verification Step: Executing Part D Prescription Drug Event Field Constraint Verification Check ==="
@@ -2767,6 +2803,7 @@ def run_autonomous_workflow(
             "line_submitted_charge_amt_check": line_submitted_charge_amt_check,
             "line_primary_payer_paid_amt_check": line_primary_payer_paid_amt_check,
             "line_non_covered_charge_amt_check": line_non_covered_charge_amt_check,
+            "line_beneficiary_payment_amt_check": line_beneficiary_payment_amt_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -2903,6 +2940,7 @@ def run_autonomous_workflow(
             "line_submitted_charge_amt_check": line_submitted_charge_amt_check,
             "line_primary_payer_paid_amt_check": line_primary_payer_paid_amt_check,
             "line_non_covered_charge_amt_check": line_non_covered_charge_amt_check,
+            "line_beneficiary_payment_amt_check": line_beneficiary_payment_amt_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -3017,6 +3055,7 @@ def run_autonomous_workflow(
         "line_submitted_charge_amt_check": line_submitted_charge_amt_check,
         "line_primary_payer_paid_amt_check": line_primary_payer_paid_amt_check,
         "line_non_covered_charge_amt_check": line_non_covered_charge_amt_check,
+        "line_beneficiary_payment_amt_check": line_beneficiary_payment_amt_check,
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
         "mbsf_check": mbsf_check,
