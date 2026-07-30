@@ -1245,3 +1245,19 @@ def test_check_claim_line_beneficiary_payment_amount_constraints() -> None:
     assert finding.count == 1
 
 
+def test_check_claim_line_service_count_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "line_srvc_cnt": [5, 1, -2, None],
+        }
+    )
+    findings = RelationalValidator.check_claim_line_service_count_constraints(
+        claim_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "LINE-SRVC-CNT-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
