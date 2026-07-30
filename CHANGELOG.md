@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_line_hcpcs_modifier_constraints` (`MDFR-001`) to `RelationalValidator` in `src/medicare_synth/validation.py` to verify 2-character alphanumeric format of Claim Line HCPCS Initial Modifier Code (`hcpcs_1st_mdfr_cd` when present) across carrier, outpatient, and DME claim line items and wired into `validate_slice`. Added `--line-hcpcs-modifier-check` (`--line-mdfr-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_hcpcs_modifier_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_hcpcs_modifier_check` verification logic and CLI flag parsing (407 total passing unit tests).
+
 - Added `check_claim_line_performing_physician_npi_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify 10-digit format of Claim Line Performing Physician NPI (`prf_physn_npi` as 10 numeric digits when present) across claim line items and wired into `validate_slice`. Added `--line-performing-physician-npi-check` (`--line-npi-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_performing_physician_npi_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_performing_physician_npi_check` verification logic and CLI flag parsing (405 total passing unit tests).
 

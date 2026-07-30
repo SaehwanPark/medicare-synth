@@ -639,6 +639,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify Claim Line Performing Physician NPI 10-digit format consistency before commit/push",
     )
+    auto_wf_parser.add_argument(
+        "--line-hcpcs-modifier-check",
+        "--line-mdfr-check",
+        action="store_true",
+        help="Verify Claim Line HCPCS Initial Modifier Code 2-character format consistency before commit/push",
+    )
 
     auto_wf_parser.add_argument(
         "--rev-center-check",
@@ -1135,6 +1141,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             line_place_of_service_check=args.line_place_of_service_check,
             line_type_of_service_check=args.line_type_of_service_check,
             line_performing_physician_npi_check=args.line_performing_physician_npi_check,
+            line_hcpcs_modifier_check=args.line_hcpcs_modifier_check,
 
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
