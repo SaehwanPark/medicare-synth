@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_line_beneficiary_payment_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Line Beneficiary Payment Amount (`line_bene_pmt_amt` >= 0) across claim line items. Added `--line-beneficiary-payment-amt-check` (`--line-bene-pmt-amt-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_beneficiary_payment_amt_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_beneficiary_payment_amt_check` verification logic and CLI flag parsing (388 total passing unit tests).
+
 - Added `check_claim_line_non_covered_charge_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Line Non-Covered Charge Amount (`line_ncvd_chrg_amt` >= 0) across claim line items. Added `--line-non-covered-charge-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_non_covered_charge_amt_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_non_covered_charge_amt_check` verification logic and CLI flag parsing (385 total passing unit tests).
 
