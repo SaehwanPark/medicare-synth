@@ -142,6 +142,9 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     inpatient_check = data.get("inpatient_check", False)
     snf_check = data.get("snf_check", False)
     hha_check = data.get("hha_check", False)
+    line_service_count_check = data.get("line_service_count_check", False)
+    line_processing_indicator_check = data.get("line_processing_indicator_check", False)
+    line_pos_check = data.get("line_place_of_service_check", False)
     dme_check = data.get("dme_check", False)
     hospice_check = data.get("hospice_check", False)
     pde_check = data.get("pde_check", False)
@@ -240,6 +243,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Line Non-Covered Charge Amount Verified** | {line_non_covered_charge_amt_check} |
 | **Claim Line Beneficiary Payment Amount Verified** | {line_beneficiary_payment_amt_check} |
 | **Claim Line Service Count Verified** | {line_service_count_check} |
+| **Claim Line Processing Indicator Code Format Verified** | {line_processing_indicator_check} |
+| **Claim Line Place of Service Code Format Verified** | {line_pos_check} |
 
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
@@ -600,6 +605,7 @@ def run_autonomous_workflow(
     line_beneficiary_payment_amt_check: bool = False,
     line_service_count_check: bool = False,
     line_processing_indicator_check: bool = False,
+    line_place_of_service_check: bool = False,
 
     rev_center_check: bool = False,
     demographic_check: bool = False,
@@ -2748,6 +2754,32 @@ def run_autonomous_workflow(
             f"✓ Claim Line Processing Indicator Code constraints verified ({violating_count} Line Processing Indicator constraint findings)."
         )
 
+    if line_place_of_service_check:
+        print(
+            "\n=== Verification Step: Executing Claim Line Place of Service Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        line_pos_findings = []
+        if scenario_slice.carrier_df is not None:
+            line_pos_findings.extend(
+                RelationalValidator.check_claim_line_place_of_service_constraints(
+                    scenario_slice.carrier_df, "Carrier Claims"
+                )
+            )
+        if scenario_slice.outpatient_df is not None:
+            line_pos_findings.extend(
+                RelationalValidator.check_claim_line_place_of_service_constraints(
+                    scenario_slice.outpatient_df, "Outpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in line_pos_findings)
+        print(
+            f"✓ Claim Line Place of Service Code constraints verified ({violating_count} Line Place of Service constraint findings)."
+        )
+
 
     if pde_check:
         print(
@@ -2872,6 +2904,7 @@ def run_autonomous_workflow(
             "line_beneficiary_payment_amt_check": line_beneficiary_payment_amt_check,
             "line_service_count_check": line_service_count_check,
             "line_processing_indicator_check": line_processing_indicator_check,
+            "line_place_of_service_check": line_place_of_service_check,
 
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -3012,6 +3045,7 @@ def run_autonomous_workflow(
             "line_beneficiary_payment_amt_check": line_beneficiary_payment_amt_check,
             "line_service_count_check": line_service_count_check,
             "line_processing_indicator_check": line_processing_indicator_check,
+            "line_place_of_service_check": line_place_of_service_check,
 
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -3130,6 +3164,7 @@ def run_autonomous_workflow(
         "line_beneficiary_payment_amt_check": line_beneficiary_payment_amt_check,
         "line_service_count_check": line_service_count_check,
         "line_processing_indicator_check": line_processing_indicator_check,
+        "line_place_of_service_check": line_place_of_service_check,
 
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
