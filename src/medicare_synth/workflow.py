@@ -599,6 +599,7 @@ def run_autonomous_workflow(
     line_non_covered_charge_amt_check: bool = False,
     line_beneficiary_payment_amt_check: bool = False,
     line_service_count_check: bool = False,
+    line_processing_indicator_check: bool = False,
 
     rev_center_check: bool = False,
     demographic_check: bool = False,
@@ -2721,6 +2722,32 @@ def run_autonomous_workflow(
             f"✓ Claim Line Service Count constraints verified ({violating_count} Line Service Count constraint findings)."
         )
 
+    if line_processing_indicator_check:
+        print(
+            "\n=== Verification Step: Executing Claim Line Processing Indicator Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        line_prcsg_findings = []
+        if scenario_slice.carrier_df is not None:
+            line_prcsg_findings.extend(
+                RelationalValidator.check_claim_line_processing_indicator_constraints(
+                    scenario_slice.carrier_df, "Carrier Claims"
+                )
+            )
+        if scenario_slice.outpatient_df is not None:
+            line_prcsg_findings.extend(
+                RelationalValidator.check_claim_line_processing_indicator_constraints(
+                    scenario_slice.outpatient_df, "Outpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in line_prcsg_findings)
+        print(
+            f"✓ Claim Line Processing Indicator Code constraints verified ({violating_count} Line Processing Indicator constraint findings)."
+        )
+
 
     if pde_check:
         print(
@@ -2844,6 +2871,7 @@ def run_autonomous_workflow(
             "line_non_covered_charge_amt_check": line_non_covered_charge_amt_check,
             "line_beneficiary_payment_amt_check": line_beneficiary_payment_amt_check,
             "line_service_count_check": line_service_count_check,
+            "line_processing_indicator_check": line_processing_indicator_check,
 
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -2983,6 +3011,7 @@ def run_autonomous_workflow(
             "line_non_covered_charge_amt_check": line_non_covered_charge_amt_check,
             "line_beneficiary_payment_amt_check": line_beneficiary_payment_amt_check,
             "line_service_count_check": line_service_count_check,
+            "line_processing_indicator_check": line_processing_indicator_check,
 
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -3100,6 +3129,7 @@ def run_autonomous_workflow(
         "line_non_covered_charge_amt_check": line_non_covered_charge_amt_check,
         "line_beneficiary_payment_amt_check": line_beneficiary_payment_amt_check,
         "line_service_count_check": line_service_count_check,
+        "line_processing_indicator_check": line_processing_indicator_check,
 
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,

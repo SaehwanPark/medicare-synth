@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_line_processing_indicator_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify format of Claim Line Processing Indicator Code (`line_prcsg_ind_cd` as 1-2 alphanumeric characters when present) across claim line items and wired `check_claim_line_service_count_constraints` and `check_claim_line_processing_indicator_constraints` into `validate_slice`. Added `--line-processing-indicator-check` (`--line-prcsg-ind-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_processing_indicator_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_processing_indicator_check` verification logic and CLI flag parsing (393 total passing unit tests).
+
 - Added `check_claim_line_service_count_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Line Service Count (`line_srvc_cnt` >= 0) across claim line items. Added `--line-service-count-check` (`--line-srvc-cnt-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_service_count_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py` and `tests/test_autonomous_workflow.py` to cover `line_service_count_check` verification logic and CLI flag parsing (390 total passing unit tests).
 
