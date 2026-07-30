@@ -572,6 +572,18 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim Line Allowed Charge Amount non-negativity consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--line-coinsurance-amt-check",
+        "--line-coinsrnc-amt-check",
+        action="store_true",
+        help="Verify Claim Line Coinsurance Amount non-negativity consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--line-payment-amt-check",
+        "--line-pmt-amt-check",
+        action="store_true",
+        help="Verify Claim Line NCH Payment Amount non-negativity consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--line-deductible-amt-check",
         action="store_true",
         help="Verify Claim Line Deductible Amount non-negativity consistency before commit/push",
@@ -1099,6 +1111,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             non_covered_charge_amt_check=args.non_covered_charge_amt_check,
             outlier_payment_amt_check=args.outlier_payment_amt_check,
             line_allowed_charge_amt_check=args.line_allowed_charge_amt_check,
+            line_coinsurance_amt_check=args.line_coinsurance_amt_check,
+            line_payment_amt_check=args.line_payment_amt_check,
             line_deductible_amt_check=args.line_deductible_amt_check,
             line_submitted_charge_amt_check=args.line_submitted_charge_amt_check,
             line_primary_payer_paid_amt_check=args.line_primary_payer_paid_amt_check,
