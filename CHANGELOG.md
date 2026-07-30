@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_line_submitted_charge_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Line Submitted Charge Amount (`line_sbmtd_chrg_amt` >= 0) across claim line items. Added `--line-submitted-charge-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_submitted_charge_amt_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_submitted_charge_amt_check` verification logic and CLI flag parsing (379 total passing unit tests).
+
 - Added `check_claim_line_deductible_amount_constraints` to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Line Beneficiary Deductible Amount (`line_bene_ptb_ddctbl_amt` >= 0) across claim line items. Added `--line-deductible-amt-check` parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_deductible_amt_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_deductible_amt_check` verification logic and CLI flag parsing (376 total passing unit tests).
 
