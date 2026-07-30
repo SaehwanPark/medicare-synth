@@ -587,6 +587,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim Line Primary Payer Paid Amount non-negativity consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--line-non-covered-charge-amt-check",
+        action="store_true",
+        help="Verify Claim Line Non-Covered Charge Amount non-negativity consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--rev-center-check",
         action="store_true",
         help="Verify Revenue Center Code 4-digit numeric format consistency across claim records before commit/push",
@@ -1072,6 +1077,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             line_deductible_amt_check=args.line_deductible_amt_check,
             line_submitted_charge_amt_check=args.line_submitted_charge_amt_check,
             line_primary_payer_paid_amt_check=args.line_primary_payer_paid_amt_check,
+            line_non_covered_charge_amt_check=args.line_non_covered_charge_amt_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,
