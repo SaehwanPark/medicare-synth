@@ -609,6 +609,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify Claim Line Processing Indicator Code format consistency before commit/push",
     )
+    auto_wf_parser.add_argument(
+        "--line-place-of-service-check",
+        "--line-pos-check",
+        action="store_true",
+        help="Verify Claim Line Place of Service Code format consistency before commit/push",
+    )
 
     auto_wf_parser.add_argument(
         "--rev-center-check",
@@ -1100,6 +1106,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             line_beneficiary_payment_amt_check=args.line_beneficiary_payment_amt_check,
             line_service_count_check=args.line_service_count_check,
             line_processing_indicator_check=args.line_processing_indicator_check,
+            line_place_of_service_check=args.line_place_of_service_check,
 
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
