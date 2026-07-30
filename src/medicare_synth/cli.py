@@ -603,6 +603,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify Claim Line Service Count non-negativity consistency before commit/push",
     )
+    auto_wf_parser.add_argument(
+        "--line-processing-indicator-check",
+        "--line-prcsg-ind-check",
+        action="store_true",
+        help="Verify Claim Line Processing Indicator Code format consistency before commit/push",
+    )
 
     auto_wf_parser.add_argument(
         "--rev-center-check",
@@ -1093,6 +1099,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             line_non_covered_charge_amt_check=args.line_non_covered_charge_amt_check,
             line_beneficiary_payment_amt_check=args.line_beneficiary_payment_amt_check,
             line_service_count_check=args.line_service_count_check,
+            line_processing_indicator_check=args.line_processing_indicator_check,
 
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
