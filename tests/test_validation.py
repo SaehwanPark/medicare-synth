@@ -1548,3 +1548,39 @@ def test_check_claim_line_revenue_center_unit_count_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_claim_line_revenue_center_rate_amount_constraints() -> None:
+    valid_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002"],
+            "rev_cntr_rate_amt": [150.0, 0.0],
+        }
+    )
+    assert (
+        len(
+            RelationalValidator.check_claim_line_revenue_center_rate_amount_constraints(
+                valid_df
+            )
+        )
+        == 0
+    )
+
+    invalid_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003"],
+            "rev_cntr_rate_amt": [200.0, -50.0, None],
+        }
+    )
+    findings = (
+        RelationalValidator.check_claim_line_revenue_center_rate_amount_constraints(
+            invalid_df, "Carrier Claims"
+        )
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "REV-RATE-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+

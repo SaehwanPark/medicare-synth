@@ -691,6 +691,13 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify Claim Line Revenue Center Unit Count non-negativity before commit/push",
     )
+    auto_wf_parser.add_argument(
+        "--line-revenue-center-rate-amount-check",
+        "--line-rev-rate-check",
+        dest="line_revenue_center_rate_amount_check",
+        action="store_true",
+        help="Verify Claim Line Revenue Center Rate Amount non-negativity before commit/push",
+    )
 
     auto_wf_parser.add_argument(
         "--rev-center-check",
@@ -1195,6 +1202,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             line_referring_physician_npi_check=args.line_referring_physician_npi_check,
             line_temporal_check=args.line_temporal_check,
             line_revenue_center_unit_count_check=args.line_revenue_center_unit_count_check,
+            line_revenue_center_rate_amount_check=args.line_revenue_center_rate_amount_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,
