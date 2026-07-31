@@ -148,6 +148,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     line_tos_check = data.get("line_type_of_service_check", False)
     line_npi_check = data.get("line_performing_physician_npi_check", False)
     line_mdfr_check = data.get("line_hcpcs_modifier_check", False)
+    line_2nd_mdfr_check = data.get("line_second_hcpcs_modifier_check", False)
     dme_check = data.get("dme_check", False)
     hospice_check = data.get("hospice_check", False)
     pde_check = data.get("pde_check", False)
@@ -251,6 +252,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Line Type of Service Code Format Verified** | {line_tos_check} |
 | **Claim Line Performing Physician NPI Format Verified** | {line_npi_check} |
 | **Claim Line HCPCS Initial Modifier Code Format Verified** | {line_mdfr_check} |
+| **Claim Line HCPCS Second Modifier Code Format Verified** | {line_2nd_mdfr_check} |
 
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
@@ -615,6 +617,7 @@ def run_autonomous_workflow(
     line_type_of_service_check: bool = False,
     line_performing_physician_npi_check: bool = False,
     line_hcpcs_modifier_check: bool = False,
+    line_second_hcpcs_modifier_check: bool = False,
 
     rev_center_check: bool = False,
     demographic_check: bool = False,
@@ -714,6 +717,7 @@ def run_autonomous_workflow(
         line_type_of_service_check = True
         line_performing_physician_npi_check = True
         line_hcpcs_modifier_check = True
+        line_second_hcpcs_modifier_check = True
 
         rev_center_check = True
         demographic_check = True
@@ -2871,6 +2875,32 @@ def run_autonomous_workflow(
             f"✓ Claim Line HCPCS Initial Modifier Code constraints verified ({violating_count} Line HCPCS Modifier constraint findings)."
         )
 
+    if line_second_hcpcs_modifier_check:
+        print(
+            "\n=== Verification Step: Executing Claim Line HCPCS Second Modifier Code Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        line_2nd_mdfr_findings = []
+        if scenario_slice.carrier_df is not None:
+            line_2nd_mdfr_findings.extend(
+                RelationalValidator.check_claim_line_second_hcpcs_modifier_constraints(
+                    scenario_slice.carrier_df, "Carrier Claims"
+                )
+            )
+        if scenario_slice.outpatient_df is not None:
+            line_2nd_mdfr_findings.extend(
+                RelationalValidator.check_claim_line_second_hcpcs_modifier_constraints(
+                    scenario_slice.outpatient_df, "Outpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in line_2nd_mdfr_findings)
+        print(
+            f"✓ Claim Line HCPCS Second Modifier Code constraints verified ({violating_count} Line HCPCS Second Modifier constraint findings)."
+        )
+
 
     if pde_check:
         print(
@@ -2999,6 +3029,7 @@ def run_autonomous_workflow(
             "line_type_of_service_check": line_type_of_service_check,
             "line_performing_physician_npi_check": line_performing_physician_npi_check,
             "line_hcpcs_modifier_check": line_hcpcs_modifier_check,
+            "line_second_hcpcs_modifier_check": line_second_hcpcs_modifier_check,
 
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -3143,6 +3174,7 @@ def run_autonomous_workflow(
             "line_type_of_service_check": line_type_of_service_check,
             "line_performing_physician_npi_check": line_performing_physician_npi_check,
             "line_hcpcs_modifier_check": line_hcpcs_modifier_check,
+            "line_second_hcpcs_modifier_check": line_second_hcpcs_modifier_check,
 
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -3265,6 +3297,7 @@ def run_autonomous_workflow(
         "line_type_of_service_check": line_type_of_service_check,
         "line_performing_physician_npi_check": line_performing_physician_npi_check,
         "line_hcpcs_modifier_check": line_hcpcs_modifier_check,
+        "line_second_hcpcs_modifier_check": line_second_hcpcs_modifier_check,
 
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
