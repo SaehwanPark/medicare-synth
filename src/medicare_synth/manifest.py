@@ -66,9 +66,9 @@ class FileManifest(BaseModel):
             return False
         with file_path.open("r", encoding="utf-8-sig", newline="") as handle:
             header = handle.readline().rstrip("\r\n")
-            if header.split(self.delimiter) != self.primary_key and not set(self.primary_key).issubset(
-                set(header.split(self.delimiter))
-            ):
+            if header.split(self.delimiter) != self.primary_key and not set(
+                self.primary_key
+            ).issubset(set(header.split(self.delimiter))):
                 return False
             return sum(1 for _ in handle) == self.expected_record_count
 
@@ -117,11 +117,17 @@ class SourceManifest(BaseModel):
             try:
                 path.resolve().relative_to(source_dir.resolve())
             except ValueError:
-                errors.append(f"file is outside source directory: {file_manifest.filename}")
+                errors.append(
+                    f"file is outside source directory: {file_manifest.filename}"
+                )
                 continue
             if not file_manifest.verify_checksum(path):
                 errors.append(f"checksum or missing file: {file_manifest.filename}")
                 continue
-            if file_manifest.format.lower() in {"csv", "text", "txt"} and not file_manifest.verify_rows_and_header(path):
+            if file_manifest.format.lower() in {
+                "csv",
+                "text",
+                "txt",
+            } and not file_manifest.verify_rows_and_header(path):
                 errors.append(f"header or row count mismatch: {file_manifest.filename}")
         return errors

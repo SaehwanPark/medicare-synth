@@ -433,7 +433,10 @@ def test_check_carrier_field_constraints() -> None:
             "clm_id": ["CLM001", "CLM002"],
             "line_num": [0, 1],  # 0 is invalid
             "clm_from_dt": [date(2021, 5, 10), date(2021, 5, 20)],
-            "clm_thru_dt": [date(2021, 5, 5), date(2021, 5, 25)],  # first row date inversion
+            "clm_thru_dt": [
+                date(2021, 5, 5),
+                date(2021, 5, 25),
+            ],  # first row date inversion
         }
     )
     findings = RelationalValidator.check_carrier_field_constraints(carrier_df)
@@ -451,7 +454,10 @@ def test_check_outpatient_field_constraints() -> None:
             "clm_id": ["OPT001", "OPT002"],
             "clm_pmt_amt": [-50.0, 100.0],  # -50.0 is invalid
             "clm_from_dt": [date(2021, 6, 1), date(2021, 6, 15)],
-            "clm_thru_dt": [date(2021, 6, 5), date(2021, 6, 10)],  # second row date inversion
+            "clm_thru_dt": [
+                date(2021, 6, 5),
+                date(2021, 6, 10),
+            ],  # second row date inversion
         }
     )
     findings = RelationalValidator.check_outpatient_field_constraints(outpatient_df)
@@ -902,7 +908,6 @@ def test_check_claim_outlier_payment_amount_constraints() -> None:
     assert finding.count == 1
 
 
-
 def test_check_claim_pps_capital_constraints() -> None:
     claim_df = pl.DataFrame(
         {
@@ -1054,8 +1059,10 @@ def test_check_claim_pps_operating_hsp_payment_amount_constraints() -> None:
             "clm_pps_oprtg_hsp_pmt_amt": [300.0, 0.0, -30.0, None],
         }
     )
-    findings = RelationalValidator.check_claim_pps_operating_hsp_payment_amount_constraints(
-        claim_df, "Inpatient Claims"
+    findings = (
+        RelationalValidator.check_claim_pps_operating_hsp_payment_amount_constraints(
+            claim_df, "Inpatient Claims"
+        )
     )
     assert len(findings) == 1
     finding = findings[0]
@@ -1198,8 +1205,10 @@ def test_check_claim_line_primary_payer_paid_amount_constraints() -> None:
             "line_prfrd_pmt_amt": [100.0, 0.0, -15.0, None],
         }
     )
-    findings = RelationalValidator.check_claim_line_primary_payer_paid_amount_constraints(
-        claim_df, "Carrier Claims"
+    findings = (
+        RelationalValidator.check_claim_line_primary_payer_paid_amount_constraints(
+            claim_df, "Carrier Claims"
+        )
     )
     assert len(findings) == 1
     finding = findings[0]
@@ -1216,8 +1225,10 @@ def test_check_claim_line_non_covered_charge_amount_constraints() -> None:
             "line_ncvd_chrg_amt": [200.0, 0.0, -25.0, None],
         }
     )
-    findings = RelationalValidator.check_claim_line_non_covered_charge_amount_constraints(
-        claim_df, "Carrier Claims"
+    findings = (
+        RelationalValidator.check_claim_line_non_covered_charge_amount_constraints(
+            claim_df, "Carrier Claims"
+        )
     )
     assert len(findings) == 1
     finding = findings[0]
@@ -1234,8 +1245,10 @@ def test_check_claim_line_beneficiary_payment_amount_constraints() -> None:
             "line_bene_pmt_amt": [150.0, 0.0, -15.0, None],
         }
     )
-    findings = RelationalValidator.check_claim_line_beneficiary_payment_amount_constraints(
-        claim_df, "Carrier Claims"
+    findings = (
+        RelationalValidator.check_claim_line_beneficiary_payment_amount_constraints(
+            claim_df, "Carrier Claims"
+        )
     )
     assert len(findings) == 1
     finding = findings[0]
@@ -1324,8 +1337,10 @@ def test_check_claim_line_performing_physician_npi_constraints() -> None:
             "prf_physn_npi": ["1234567890", "9876543210", "INVALID_NPI", None],
         }
     )
-    findings = RelationalValidator.check_claim_line_performing_physician_npi_constraints(
-        claim_df, "Carrier Claims"
+    findings = (
+        RelationalValidator.check_claim_line_performing_physician_npi_constraints(
+            claim_df, "Carrier Claims"
+        )
     )
     assert len(findings) == 1
     finding = findings[0]
@@ -1407,7 +1422,6 @@ def test_check_claim_line_fourth_hcpcs_modifier_constraints() -> None:
     assert finding.count == 1
 
 
-
 def test_check_claim_line_rendering_physician_npi_constraints() -> None:
     claim_df = pl.DataFrame(
         {
@@ -1444,6 +1458,24 @@ def test_check_claim_line_ordering_physician_npi_constraints() -> None:
     assert finding.count == 1
 
 
+def test_check_claim_line_referring_physician_npi_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "rfrg_physn_npi": ["1234567890", "9876543210", "INVALID_NPI", None],
+        }
+    )
+    findings = RelationalValidator.check_claim_line_referring_physician_npi_constraints(
+        claim_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "LINE-NPI-004"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+
+
 def test_check_claim_line_service_date_temporal_inversions() -> None:
     valid_df = pl.DataFrame(
         {
@@ -1452,13 +1484,24 @@ def test_check_claim_line_service_date_temporal_inversions() -> None:
             "line_last_expns_dt": [date(2021, 1, 5), date(2021, 5, 10)],
         }
     )
-    assert len(RelationalValidator.check_claim_line_service_date_temporal_inversions(valid_df)) == 0
+    assert (
+        len(
+            RelationalValidator.check_claim_line_service_date_temporal_inversions(
+                valid_df
+            )
+        )
+        == 0
+    )
 
     inverted_df = pl.DataFrame(
         {
             "clm_id": ["CLM001", "CLM002", "CLM003"],
             "line_1st_expns_dt": [date(2021, 1, 10), date(2021, 5, 10), None],
-            "line_last_expns_dt": [date(2021, 1, 5), date(2021, 5, 10), date(2021, 6, 1)],
+            "line_last_expns_dt": [
+                date(2021, 1, 5),
+                date(2021, 5, 10),
+                date(2021, 6, 1),
+            ],
         }
     )
     findings = RelationalValidator.check_claim_line_service_date_temporal_inversions(
@@ -1480,7 +1523,11 @@ def test_check_claim_line_revenue_center_unit_count_constraints() -> None:
         }
     )
     assert (
-        len(RelationalValidator.check_claim_line_revenue_center_unit_count_constraints(valid_df))
+        len(
+            RelationalValidator.check_claim_line_revenue_center_unit_count_constraints(
+                valid_df
+            )
+        )
         == 0
     )
 
@@ -1490,8 +1537,10 @@ def test_check_claim_line_revenue_center_unit_count_constraints() -> None:
             "rev_cntr_unit_cnt": [2.0, -1.0, None],
         }
     )
-    findings = RelationalValidator.check_claim_line_revenue_center_unit_count_constraints(
-        invalid_df, "Carrier Claims"
+    findings = (
+        RelationalValidator.check_claim_line_revenue_center_unit_count_constraints(
+            invalid_df, "Carrier Claims"
+        )
     )
     assert len(findings) == 1
     finding = findings[0]

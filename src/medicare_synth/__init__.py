@@ -13,7 +13,11 @@ from medicare_synth.audit import (
 )
 from medicare_synth.catalog import ScenarioCatalog, ScenarioEntry
 from medicare_synth.diff import DiffReport, SchemaDiffer
-from medicare_synth.evidence import EvidenceSource, RKBEvidenceSnapshot, VariableContract
+from medicare_synth.evidence import (
+    EvidenceSource,
+    RKBEvidenceSnapshot,
+    VariableContract,
+)
 from medicare_synth.expansion import (
     HorizontalExpander,
     TabDatSynthAdapter,

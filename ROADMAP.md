@@ -145,7 +145,7 @@ Status: In progress
 
 Outputs:
 
-- Additive claim line constraint validators for performing physician NPI (`LINE-NPI-001`), rendering physician NPI (`LINE-NPI-002`), ordering physician NPI (`LINE-NPI-003`), HCPCS initial modifier (`MDFR-001`), HCPCS second modifier (`MDFR-002`), HCPCS third modifier (`MDFR-003`), HCPCS fourth modifier (`MDFR-004`), line service date temporal inversions (`LINE-TMP-001`), revenue center unit count (`REV-UNIT-001`), place of service, type of service, processing indicator, service count, and all line-level amount fields
+- Additive claim line constraint validators for performing physician NPI (`LINE-NPI-001`), rendering physician NPI (`LINE-NPI-002`), ordering physician NPI (`LINE-NPI-003`), referring physician NPI (`LINE-NPI-004`), HCPCS initial modifier (`MDFR-001`), HCPCS second modifier (`MDFR-002`), HCPCS third modifier (`MDFR-003`), HCPCS fourth modifier (`MDFR-004`), line service date temporal inversions (`LINE-TMP-001`), revenue center unit count (`REV-UNIT-001`), place of service, type of service, processing indicator, service count, and all line-level amount fields
 - Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI sub-command
 - Focused behavioral tests for each check
 

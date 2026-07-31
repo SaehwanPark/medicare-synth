@@ -2006,8 +2006,6 @@ def test_run_autonomous_workflow_line_coinsurance_amt_check(mock_run, tmp_path):
     assert data["line_coinsurance_amt_check"] is True
 
 
-
-
 @patch("subprocess.run")
 def test_run_autonomous_workflow_pps_capital_check(mock_run, tmp_path):
     """Test that pps_capital_check option executes Claim PPS Capital Federal Payment Amount check and records status."""
@@ -2547,7 +2545,9 @@ def test_run_autonomous_workflow_line_type_of_service_check(mock_run, tmp_path):
 
 
 @patch("subprocess.run")
-def test_run_autonomous_workflow_line_performing_physician_npi_check(mock_run, tmp_path):
+def test_run_autonomous_workflow_line_performing_physician_npi_check(
+    mock_run, tmp_path
+):
     """Test that line_performing_physician_npi_check option executes Claim Line Performing Physician NPI check and records status."""
     import json
     from medicare_synth.workflow import run_autonomous_workflow
@@ -2681,7 +2681,6 @@ def test_run_autonomous_workflow_line_fourth_hcpcs_modifier_check(mock_run, tmp_
     assert data["line_fourth_hcpcs_modifier_check"] is True
 
 
-
 @patch("subprocess.run")
 def test_run_autonomous_workflow_line_rendering_physician_npi_check(mock_run, tmp_path):
     """Test that line_rendering_physician_npi_check option executes Claim Line Rendering/Ordering Physician NPI check and records status."""
@@ -2737,7 +2736,9 @@ def test_run_autonomous_workflow_line_temporal_check(mock_run, tmp_path):
 
 
 @patch("subprocess.run")
-def test_run_autonomous_workflow_line_revenue_center_unit_count_check(mock_run, tmp_path):
+def test_run_autonomous_workflow_line_revenue_center_unit_count_check(
+    mock_run, tmp_path
+):
     """Test that line_revenue_center_unit_count_check option executes Claim Line Revenue Center Unit Count check and records status."""
     import json
     from medicare_synth.workflow import run_autonomous_workflow

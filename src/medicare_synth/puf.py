@@ -116,20 +116,22 @@ class PufImporter:
             },
             evidence,
         ).sort("bene_id")
-        carrier = _project(
-            read("carrier"),
-            {
-                "clm_id": "CLM_ID",
-                "line_num": "LINE_NUM",
-                "bene_id": "BENE_ID",
-                "clm_from_dt": "CLM_FROM_DT",
-                "clm_thru_dt": "CLM_THRU_DT",
-                "prvdr_npi": ("PRVDR_NPI", "PRF_PHYSN_NPI", "RFR_PHYSN_NPI"),
-                "icd_dgns_cd1": "ICD_DGNS_CD1",
-            },
-            evidence,
-        ).with_columns(pl.col("line_num").cast(pl.Int64, strict=True)).sort(
-            ["clm_id", "line_num"]
+        carrier = (
+            _project(
+                read("carrier"),
+                {
+                    "clm_id": "CLM_ID",
+                    "line_num": "LINE_NUM",
+                    "bene_id": "BENE_ID",
+                    "clm_from_dt": "CLM_FROM_DT",
+                    "clm_thru_dt": "CLM_THRU_DT",
+                    "prvdr_npi": ("PRVDR_NPI", "PRF_PHYSN_NPI", "RFR_PHYSN_NPI"),
+                    "icd_dgns_cd1": "ICD_DGNS_CD1",
+                },
+                evidence,
+            )
+            .with_columns(pl.col("line_num").cast(pl.Int64, strict=True))
+            .sort(["clm_id", "line_num"])
         )
         if carrier.select(pl.col("clm_from_dt").dt.year().min()).item() is not None:
             carrier = carrier.filter(pl.col("clm_from_dt").dt.year() == service_year)

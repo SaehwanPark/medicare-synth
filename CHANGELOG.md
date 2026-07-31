@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_line_referring_physician_npi_constraints` (`LINE-NPI-004`) to `RelationalValidator` in `src/medicare_synth/validation.py` to verify 10-digit numeric NPI format of Claim Line Referring Physician NPI (`rfrg_physn_npi`, `line_rfrg_physn_npi`, or `referring_physician_npi` when present) across carrier, outpatient, and DME claim line items and wired into `validate_slice`. Added `--line-referring-physician-npi-check` (`--line-rfrg-npi-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_referring_physician_npi_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`. Updated markdown and HTML workflow report templates.
+- Extended unit test suite in `tests/test_validation.py` to cover `LINE-NPI-004` referring physician NPI constraint verification (426 total passing unit tests).
+
 - Added `check_claim_line_ordering_physician_npi_constraints` (`LINE-NPI-003`) to `RelationalValidator` in `src/medicare_synth/validation.py` to verify 10-digit numeric NPI format of Claim Line Ordering Physician NPI (`ord_physn_npi`, `line_ord_physn_npi`, or `ordering_physician_npi` when present) across carrier and outpatient claim line items and wired into `validate_slice`.
 - Extended unit test suite in `tests/test_validation.py` to cover `LINE-NPI-003` ordering physician NPI constraint verification (425 total passing unit tests).
 
