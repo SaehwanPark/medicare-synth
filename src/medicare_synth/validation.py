@@ -4171,6 +4171,57 @@ class RelationalValidator:
         return []
 
     @staticmethod
+    def check_claim_line_third_hcpcs_modifier_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Line Items"
+    ) -> list[Finding]:
+        """Identifies claim line items with invalid HCPCS Third Modifier Code format (must be 2 alphanumeric characters when present)."""
+        if claim_df.is_empty():
+            return []
+
+        mdfr_col = None
+        for col in [
+            "hcpcs_3rd_mdfr_cd",
+            "HCPCS_3RD_MDFR_CD",
+            "line_hcpcs_3rd_mdfr_cd",
+            "LINE_HCPCS_3RD_MDFR_CD",
+            "hcpcs_mdfr_cd_3",
+            "HCPCS_MDFR_CD_3",
+        ]:
+            if col in claim_df.columns:
+                mdfr_col = col
+                break
+
+        if mdfr_col is None:
+            return []
+
+        non_null_mdfr = claim_df.filter(pl.col(mdfr_col).is_not_null())
+        if non_null_mdfr.is_empty():
+            return []
+
+        invalid = non_null_mdfr.filter(
+            ~pl.col(mdfr_col).cast(pl.Utf8).str.contains(r"^[0-9A-Za-z]{2}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="MDFR-003",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {claim_type} with invalid Claim Line HCPCS Third Modifier Code format (must be 2 alphanumeric characters).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
+    @staticmethod
     def check_claim_line_rendering_physician_npi_constraints(
         claim_df: pl.DataFrame, claim_type: str = "Claim Line Items"
     ) -> list[Finding]:
@@ -4437,6 +4488,11 @@ class RelationalValidator:
                 )
             )
             findings.extend(
+                self.check_claim_line_third_hcpcs_modifier_constraints(
+                    carrier_df, "Carrier Claims"
+                )
+            )
+            findings.extend(
                 self.check_claim_line_rendering_physician_npi_constraints(
                     carrier_df, "Carrier Claims"
                 )
@@ -4632,6 +4688,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_line_second_hcpcs_modifier_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_line_third_hcpcs_modifier_constraints(
                     outpatient_df, "Outpatient Claims"
                 )
             )
@@ -4975,6 +5036,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_line_second_hcpcs_modifier_constraints(
+                    dme_df, "DME Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_line_third_hcpcs_modifier_constraints(
                     dme_df, "DME Claims"
                 )
             )
