@@ -150,6 +150,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     line_mdfr_check = data.get("line_hcpcs_modifier_check", False)
     line_2nd_mdfr_check = data.get("line_second_hcpcs_modifier_check", False)
     line_3rd_mdfr_check = data.get("line_third_hcpcs_modifier_check", False)
+    line_4th_mdfr_check = data.get("line_fourth_hcpcs_modifier_check", False)
     line_rndrng_npi_check = data.get("line_rendering_physician_npi_check", False)
     dme_check = data.get("dme_check", False)
     hospice_check = data.get("hospice_check", False)
@@ -256,6 +257,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Line HCPCS Initial Modifier Code Format Verified** | {line_mdfr_check} |
 | **Claim Line HCPCS Second Modifier Code Format Verified** | {line_2nd_mdfr_check} |
 | **Claim Line HCPCS Third Modifier Code Format Verified** | {line_3rd_mdfr_check} |
+| **Claim Line HCPCS Fourth Modifier Code Format Verified** | {line_4th_mdfr_check} |
 | **Claim Line Rendering/Ordering Physician NPI Format Verified** | {line_rndrng_npi_check} |
 
 | **Revenue Center Code Format Verified** | {rev_center_check} |
@@ -625,6 +627,7 @@ def run_autonomous_workflow(
     line_hcpcs_modifier_check: bool = False,
     line_second_hcpcs_modifier_check: bool = False,
     line_third_hcpcs_modifier_check: bool = False,
+    line_fourth_hcpcs_modifier_check: bool = False,
     line_rendering_physician_npi_check: bool = False,
 
     rev_center_check: bool = False,
@@ -727,6 +730,7 @@ def run_autonomous_workflow(
         line_hcpcs_modifier_check = True
         line_second_hcpcs_modifier_check = True
         line_third_hcpcs_modifier_check = True
+        line_fourth_hcpcs_modifier_check = True
         line_rendering_physician_npi_check = True
 
         rev_center_check = True
@@ -2937,6 +2941,32 @@ def run_autonomous_workflow(
             f"✓ Claim Line HCPCS Third Modifier Code constraints verified ({violating_count} Line HCPCS Third Modifier constraint findings)."
         )
 
+    if line_fourth_hcpcs_modifier_check:
+        print(
+            "\n=== Verification Step: Executing Claim Line HCPCS Fourth Modifier Code Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        line_4th_mdfr_findings = []
+        if scenario_slice.carrier_df is not None:
+            line_4th_mdfr_findings.extend(
+                RelationalValidator.check_claim_line_fourth_hcpcs_modifier_constraints(
+                    scenario_slice.carrier_df, "Carrier Claims"
+                )
+            )
+        if scenario_slice.outpatient_df is not None:
+            line_4th_mdfr_findings.extend(
+                RelationalValidator.check_claim_line_fourth_hcpcs_modifier_constraints(
+                    scenario_slice.outpatient_df, "Outpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in line_4th_mdfr_findings)
+        print(
+            f"✓ Claim Line HCPCS Fourth Modifier Code constraints verified ({violating_count} Line HCPCS Fourth Modifier constraint findings)."
+        )
+
     if line_rendering_physician_npi_check:
         print(
             "\n=== Verification Step: Executing Claim Line Rendering/Ordering Physician NPI Verification Check ==="
@@ -3093,6 +3123,7 @@ def run_autonomous_workflow(
             "line_hcpcs_modifier_check": line_hcpcs_modifier_check,
             "line_second_hcpcs_modifier_check": line_second_hcpcs_modifier_check,
             "line_third_hcpcs_modifier_check": line_third_hcpcs_modifier_check,
+            "line_fourth_hcpcs_modifier_check": line_fourth_hcpcs_modifier_check,
             "line_rendering_physician_npi_check": line_rendering_physician_npi_check,
 
             "rev_center_check": rev_center_check,
@@ -3240,6 +3271,7 @@ def run_autonomous_workflow(
             "line_hcpcs_modifier_check": line_hcpcs_modifier_check,
             "line_second_hcpcs_modifier_check": line_second_hcpcs_modifier_check,
             "line_third_hcpcs_modifier_check": line_third_hcpcs_modifier_check,
+            "line_fourth_hcpcs_modifier_check": line_fourth_hcpcs_modifier_check,
             "line_rendering_physician_npi_check": line_rendering_physician_npi_check,
 
             "rev_center_check": rev_center_check,
@@ -3365,6 +3397,7 @@ def run_autonomous_workflow(
         "line_hcpcs_modifier_check": line_hcpcs_modifier_check,
         "line_second_hcpcs_modifier_check": line_second_hcpcs_modifier_check,
         "line_third_hcpcs_modifier_check": line_third_hcpcs_modifier_check,
+        "line_fourth_hcpcs_modifier_check": line_fourth_hcpcs_modifier_check,
         "line_rendering_physician_npi_check": line_rendering_physician_npi_check,
 
         "rev_center_check": rev_center_check,
