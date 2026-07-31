@@ -152,6 +152,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     line_3rd_mdfr_check = data.get("line_third_hcpcs_modifier_check", False)
     line_4th_mdfr_check = data.get("line_fourth_hcpcs_modifier_check", False)
     line_rndrng_npi_check = data.get("line_rendering_physician_npi_check", False)
+    line_temporal_check = data.get("line_temporal_check", False)
     dme_check = data.get("dme_check", False)
     hospice_check = data.get("hospice_check", False)
     pde_check = data.get("pde_check", False)
@@ -259,6 +260,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Line HCPCS Third Modifier Code Format Verified** | {line_3rd_mdfr_check} |
 | **Claim Line HCPCS Fourth Modifier Code Format Verified** | {line_4th_mdfr_check} |
 | **Claim Line Rendering/Ordering Physician NPI Format Verified** | {line_rndrng_npi_check} |
+| **Claim Line Service Date Temporal Inversion Verified** | {line_temporal_check} |
 
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
@@ -388,6 +390,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     )
     line_service_count_check = data.get("line_service_count_check", False)
     line_rendering_physician_npi_check = data.get("line_rendering_physician_npi_check", False)
+    line_temporal_check = data.get("line_temporal_check", False)
 
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
@@ -510,6 +513,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim Line Beneficiary Payment Amount Verified</strong></td><td>{line_beneficiary_payment_amt_check}</td></tr>
             <tr><td><strong>Claim Line Service Count Verified</strong></td><td>{line_service_count_check}</td></tr>
             <tr><td><strong>Claim Line Rendering/Ordering Physician NPI Format Verified</strong></td><td>{line_rendering_physician_npi_check}</td></tr>
+            <tr><td><strong>Claim Line Service Date Temporal Inversion Verified</strong></td><td>{line_temporal_check}</td></tr>
 
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
@@ -629,6 +633,7 @@ def run_autonomous_workflow(
     line_third_hcpcs_modifier_check: bool = False,
     line_fourth_hcpcs_modifier_check: bool = False,
     line_rendering_physician_npi_check: bool = False,
+    line_temporal_check: bool = False,
 
     rev_center_check: bool = False,
     demographic_check: bool = False,
@@ -732,6 +737,7 @@ def run_autonomous_workflow(
         line_third_hcpcs_modifier_check = True
         line_fourth_hcpcs_modifier_check = True
         line_rendering_physician_npi_check = True
+        line_temporal_check = True
 
         rev_center_check = True
         demographic_check = True
@@ -2993,6 +2999,32 @@ def run_autonomous_workflow(
             f"✓ Claim Line Rendering/Ordering Physician NPI constraints verified ({violating_count} Line Rendering NPI constraint findings)."
         )
 
+    if line_temporal_check:
+        print(
+            "\n=== Verification Step: Executing Claim Line Service Date Temporal Inversion Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        line_temporal_findings = []
+        if scenario_slice.carrier_df is not None:
+            line_temporal_findings.extend(
+                RelationalValidator.check_claim_line_service_date_temporal_inversions(
+                    scenario_slice.carrier_df, "Carrier Claims"
+                )
+            )
+        if scenario_slice.outpatient_df is not None:
+            line_temporal_findings.extend(
+                RelationalValidator.check_claim_line_service_date_temporal_inversions(
+                    scenario_slice.outpatient_df, "Outpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in line_temporal_findings)
+        print(
+            f"✓ Claim Line Service Date Temporal Inversion constraints verified ({violating_count} Line Temporal Inversion constraint findings)."
+        )
+
 
     if pde_check:
         print(
@@ -3125,6 +3157,7 @@ def run_autonomous_workflow(
             "line_third_hcpcs_modifier_check": line_third_hcpcs_modifier_check,
             "line_fourth_hcpcs_modifier_check": line_fourth_hcpcs_modifier_check,
             "line_rendering_physician_npi_check": line_rendering_physician_npi_check,
+            "line_temporal_check": line_temporal_check,
 
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -3273,6 +3306,7 @@ def run_autonomous_workflow(
             "line_third_hcpcs_modifier_check": line_third_hcpcs_modifier_check,
             "line_fourth_hcpcs_modifier_check": line_fourth_hcpcs_modifier_check,
             "line_rendering_physician_npi_check": line_rendering_physician_npi_check,
+            "line_temporal_check": line_temporal_check,
 
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
@@ -3399,6 +3433,7 @@ def run_autonomous_workflow(
         "line_third_hcpcs_modifier_check": line_third_hcpcs_modifier_check,
         "line_fourth_hcpcs_modifier_check": line_fourth_hcpcs_modifier_check,
         "line_rendering_physician_npi_check": line_rendering_physician_npi_check,
+        "line_temporal_check": line_temporal_check,
 
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,

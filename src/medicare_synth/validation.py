@@ -4332,6 +4332,69 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_line_service_date_temporal_inversions(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Line Items"
+    ) -> list[Finding]:
+        """Identifies claim line items with temporal inversion where line service start date exceeds line service end date."""
+        if claim_df.is_empty():
+            return []
+
+        start_col = None
+        for col in [
+            "line_1st_expns_dt",
+            "LINE_1ST_EXPNS_DT",
+            "line_from_dt",
+            "LINE_FROM_DT",
+            "line_srvc_start_dt",
+            "LINE_SRVC_START_DT",
+        ]:
+            if col in claim_df.columns:
+                start_col = col
+                break
+
+        end_col = None
+        for col in [
+            "line_last_expns_dt",
+            "LINE_LAST_EXPNS_DT",
+            "line_thru_dt",
+            "LINE_THRU_DT",
+            "line_srvc_end_dt",
+            "LINE_SRVC_END_DT",
+        ]:
+            if col in claim_df.columns:
+                end_col = col
+                break
+
+        if start_col is None or end_col is None:
+            return []
+
+        valid_dates = claim_df.filter(
+            pl.col(start_col).is_not_null() & pl.col(end_col).is_not_null()
+        )
+        if valid_dates.is_empty():
+            return []
+
+        invalid = valid_dates.filter(pl.col(start_col) > pl.col(end_col))
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="LINE-TMP-001",
+                    category=FindingCategory.TEMPORAL,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {claim_type} with claim line service date temporal inversion (service start date > service end date).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
 
     def validate_slice(
         self,
@@ -4554,6 +4617,11 @@ class RelationalValidator:
                     carrier_df, "Carrier Claims"
                 )
             )
+            findings.extend(
+                self.check_claim_line_service_date_temporal_inversions(
+                    carrier_df, "Carrier Claims"
+                )
+            )
             if "line_num" in carrier_df.columns:
                 findings.extend(
                     self.check_record_uniqueness(
@@ -4760,6 +4828,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_line_rendering_physician_npi_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_line_service_date_temporal_inversions(
                     outpatient_df, "Outpatient Claims"
                 )
             )

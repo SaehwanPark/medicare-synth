@@ -669,6 +669,13 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify Claim Line Rendering/Ordering Physician NPI 10-digit numeric format consistency before commit/push",
     )
+    auto_wf_parser.add_argument(
+        "--line-service-date-temporal-check",
+        "--line-temporal-check",
+        dest="line_temporal_check",
+        action="store_true",
+        help="Verify Claim Line Service Date Temporal Inversion consistency before commit/push",
+    )
 
     auto_wf_parser.add_argument(
         "--rev-center-check",
@@ -1170,6 +1177,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             line_third_hcpcs_modifier_check=args.line_third_hcpcs_modifier_check,
             line_fourth_hcpcs_modifier_check=args.line_fourth_hcpcs_modifier_check,
             line_rendering_physician_npi_check=args.line_rendering_physician_npi_check,
+            line_temporal_check=args.line_temporal_check,
 
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,

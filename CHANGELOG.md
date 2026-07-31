@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_line_service_date_temporal_inversions` (`LINE-TMP-001`) to `RelationalValidator` in `src/medicare_synth/validation.py` to verify temporal consistency of Claim Line Service Dates (`line_1st_expns_dt` <= `line_last_expns_dt` when present) across carrier and outpatient claim line items and wired into `validate_slice`. Added `--line-service-date-temporal-check` (`--line-temporal-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_temporal_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`. Updated markdown and HTML workflow report templates.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_temporal_check` verification logic and CLI flag parsing.
+
 - Added `check_claim_line_fourth_hcpcs_modifier_constraints` (`MDFR-004`) to `RelationalValidator` in `src/medicare_synth/validation.py` to verify 2-character alphanumeric format of Claim Line HCPCS Fourth Modifier Code (`hcpcs_4th_mdfr_cd` when present) across carrier, outpatient, and DME claim line items and wired into `validate_slice`. Added `--line-fourth-hcpcs-modifier-check` (`--line-4th-mdfr-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_fourth_hcpcs_modifier_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`. Updated markdown and HTML workflow report templates.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_fourth_hcpcs_modifier_check` verification logic and CLI flag parsing.
 

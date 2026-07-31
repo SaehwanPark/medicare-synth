@@ -1424,3 +1424,31 @@ def test_check_claim_line_rendering_physician_npi_constraints() -> None:
     assert finding.category == FindingCategory.ADMINISTRATIVE
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_claim_line_service_date_temporal_inversions() -> None:
+    valid_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002"],
+            "line_1st_expns_dt": [date(2021, 1, 1), date(2021, 5, 10)],
+            "line_last_expns_dt": [date(2021, 1, 5), date(2021, 5, 10)],
+        }
+    )
+    assert len(RelationalValidator.check_claim_line_service_date_temporal_inversions(valid_df)) == 0
+
+    inverted_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003"],
+            "line_1st_expns_dt": [date(2021, 1, 10), date(2021, 5, 10), None],
+            "line_last_expns_dt": [date(2021, 1, 5), date(2021, 5, 10), date(2021, 6, 1)],
+        }
+    )
+    findings = RelationalValidator.check_claim_line_service_date_temporal_inversions(
+        inverted_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "LINE-TMP-001"
+    assert finding.category == FindingCategory.TEMPORAL
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
