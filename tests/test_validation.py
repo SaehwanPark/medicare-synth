@@ -1426,6 +1426,24 @@ def test_check_claim_line_rendering_physician_npi_constraints() -> None:
     assert finding.count == 1
 
 
+def test_check_claim_line_ordering_physician_npi_constraints() -> None:
+    claim_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003", "CLM004"],
+            "ord_physn_npi": ["1234567890", "9876543210", "INVALID_NPI", None],
+        }
+    )
+    findings = RelationalValidator.check_claim_line_ordering_physician_npi_constraints(
+        claim_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "LINE-NPI-003"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
+
+
 def test_check_claim_line_service_date_temporal_inversions() -> None:
     valid_df = pl.DataFrame(
         {
