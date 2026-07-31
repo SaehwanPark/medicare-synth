@@ -139,6 +139,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     line_rfrg_npi_check = data.get("line_referring_physician_npi_check", False)
     line_temporal_check = data.get("line_temporal_check", False)
     line_rev_unit_check = data.get("line_revenue_center_unit_count_check", False)
+    line_rev_rate_check = data.get("line_revenue_center_rate_amount_check", False)
     dme_check = data.get("dme_check", False)
     hospice_check = data.get("hospice_check", False)
     pde_check = data.get("pde_check", False)
@@ -249,6 +250,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Line Referring Physician NPI Format Verified** | {line_rfrg_npi_check} |
 | **Claim Line Service Date Temporal Inversion Verified** | {line_temporal_check} |
 | **Claim Line Revenue Center Unit Count Verified** | {line_rev_unit_check} |
+| **Claim Line Revenue Center Rate Amount Verified** | {line_rev_rate_check} |
 
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
@@ -369,6 +371,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     )
     line_temporal_check = data.get("line_temporal_check", False)
     line_rev_unit_check = data.get("line_revenue_center_unit_count_check", False)
+    line_rev_rate_check = data.get("line_revenue_center_rate_amount_check", False)
 
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
@@ -494,6 +497,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim Line Referring Physician NPI Format Verified</strong></td><td>{line_referring_physician_npi_check}</td></tr>
             <tr><td><strong>Claim Line Service Date Temporal Inversion Verified</strong></td><td>{line_temporal_check}</td></tr>
             <tr><td><strong>Claim Line Revenue Center Unit Count Verified</strong></td><td>{line_rev_unit_check}</td></tr>
+            <tr><td><strong>Claim Line Revenue Center Rate Amount Verified</strong></td><td>{line_rev_rate_check}</td></tr>
 
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
@@ -616,6 +620,7 @@ def run_autonomous_workflow(
     line_referring_physician_npi_check: bool = False,
     line_temporal_check: bool = False,
     line_revenue_center_unit_count_check: bool = False,
+    line_revenue_center_rate_amount_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -721,6 +726,7 @@ def run_autonomous_workflow(
         line_referring_physician_npi_check = True
         line_temporal_check = True
         line_revenue_center_unit_count_check = True
+        line_revenue_center_rate_amount_check = True
 
         rev_center_check = True
         demographic_check = True
@@ -3028,6 +3034,32 @@ def run_autonomous_workflow(
             f"✓ Claim Line Revenue Center Unit Count constraints verified ({violating_count} Revenue Center Unit Count constraint findings)."
         )
 
+    if line_revenue_center_rate_amount_check:
+        print(
+            "\n=== Verification Step: Executing Claim Line Revenue Center Rate Amount Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        line_rev_rate_findings = []
+        if scenario_slice.carrier_df is not None:
+            line_rev_rate_findings.extend(
+                RelationalValidator.check_claim_line_revenue_center_rate_amount_constraints(
+                    scenario_slice.carrier_df, "Carrier Claims"
+                )
+            )
+        if scenario_slice.outpatient_df is not None:
+            line_rev_rate_findings.extend(
+                RelationalValidator.check_claim_line_revenue_center_rate_amount_constraints(
+                    scenario_slice.outpatient_df, "Outpatient Claims"
+                )
+            )
+        violating_count = sum(f.count for f in line_rev_rate_findings)
+        print(
+            f"✓ Claim Line Revenue Center Rate Amount constraints verified ({violating_count} Revenue Center Rate Amount constraint findings)."
+        )
+
     if pde_check:
         print(
             "\n=== Verification Step: Executing Part D Prescription Drug Event Field Constraint Verification Check ==="
@@ -3161,6 +3193,7 @@ def run_autonomous_workflow(
             "line_rendering_physician_npi_check": line_rendering_physician_npi_check,
             "line_temporal_check": line_temporal_check,
             "line_revenue_center_unit_count_check": line_revenue_center_unit_count_check,
+            "line_revenue_center_rate_amount_check": line_revenue_center_rate_amount_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -3311,6 +3344,7 @@ def run_autonomous_workflow(
             "line_referring_physician_npi_check": line_referring_physician_npi_check,
             "line_temporal_check": line_temporal_check,
             "line_revenue_center_unit_count_check": line_revenue_center_unit_count_check,
+            "line_revenue_center_rate_amount_check": line_revenue_center_rate_amount_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -3438,6 +3472,7 @@ def run_autonomous_workflow(
         "line_rendering_physician_npi_check": line_rendering_physician_npi_check,
         "line_temporal_check": line_temporal_check,
         "line_revenue_center_unit_count_check": line_revenue_center_unit_count_check,
+        "line_revenue_center_rate_amount_check": line_revenue_center_rate_amount_check,
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
         "mbsf_check": mbsf_check,
