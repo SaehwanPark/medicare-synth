@@ -2655,6 +2655,34 @@ def test_run_autonomous_workflow_line_third_hcpcs_modifier_check(mock_run, tmp_p
 
 
 @patch("subprocess.run")
+def test_run_autonomous_workflow_line_fourth_hcpcs_modifier_check(mock_run, tmp_path):
+    """Test that line_fourth_hcpcs_modifier_check option executes Claim Line HCPCS Fourth Modifier Code check and records status."""
+    import json
+    from medicare_synth.workflow import run_autonomous_workflow
+
+    mock_res = MagicMock()
+    mock_res.returncode = 0
+    mock_res.stdout = "feat/test-branch"
+    mock_res.stderr = ""
+    mock_run.return_value = mock_res
+
+    report_file = tmp_path / "wf_report_line_4th_mdfr.json"
+    res_code = run_autonomous_workflow(
+        dry_run=True,
+        json_report_path=str(report_file),
+        line_fourth_hcpcs_modifier_check=True,
+    )
+    assert res_code == 0
+    assert report_file.exists()
+
+    with open(report_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["line_fourth_hcpcs_modifier_check"] is True
+
+
+
+@patch("subprocess.run")
 def test_run_autonomous_workflow_line_rendering_physician_npi_check(mock_run, tmp_path):
     """Test that line_rendering_physician_npi_check option executes Claim Line Rendering/Ordering Physician NPI check and records status."""
     import json
