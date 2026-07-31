@@ -4170,6 +4170,64 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_claim_line_rendering_physician_npi_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Line Items"
+    ) -> list[Finding]:
+        """Identifies claim line items with invalid Rendering/Ordering Physician NPI format (must be 10 numeric digits when present).
+
+        Covers rndrng_physn_npi (rendering), op_physn_npi (ordering), and othr_physn_npi (other)
+        aliases used across carrier, outpatient, and DME claim lines.
+        """
+        if claim_df.is_empty():
+            return []
+
+        npi_col = None
+        for col in [
+            "rndrng_physn_npi",
+            "RNDRNG_PHYSN_NPI",
+            "op_physn_npi",
+            "OP_PHYSN_NPI",
+            "othr_physn_npi",
+            "OTHR_PHYSN_NPI",
+            "rendering_physician_npi",
+            "RENDERING_PHYSICIAN_NPI",
+            "ordering_physician_npi",
+            "ORDERING_PHYSICIAN_NPI",
+        ]:
+            if col in claim_df.columns:
+                npi_col = col
+                break
+
+        if npi_col is None:
+            return []
+
+        non_null_npi = claim_df.filter(pl.col(npi_col).is_not_null())
+        if non_null_npi.is_empty():
+            return []
+
+        invalid = non_null_npi.filter(
+            ~pl.col(npi_col).cast(pl.Utf8).str.contains(r"^\d{10}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="LINE-NPI-002",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {claim_type} with invalid Claim Line Rendering/Ordering Physician NPI format (must be 10 numeric digits).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
 
 
     def validate_slice(
@@ -4378,6 +4436,11 @@ class RelationalValidator:
                     carrier_df, "Carrier Claims"
                 )
             )
+            findings.extend(
+                self.check_claim_line_rendering_physician_npi_constraints(
+                    carrier_df, "Carrier Claims"
+                )
+            )
             if "line_num" in carrier_df.columns:
                 findings.extend(
                     self.check_record_uniqueness(
@@ -4569,6 +4632,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_line_second_hcpcs_modifier_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_line_rendering_physician_npi_constraints(
                     outpatient_df, "Outpatient Claims"
                 )
             )
@@ -4907,6 +4975,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_line_second_hcpcs_modifier_constraints(
+                    dme_df, "DME Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_line_rendering_physician_npi_constraints(
                     dme_df, "DME Claims"
                 )
             )

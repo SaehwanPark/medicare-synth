@@ -129,7 +129,7 @@ Exit criteria:
 
 ## 7. 2022 CMS PUF beneficiary/carrier slice
 
-Status: Source acquired and implementation verified; PR handoff pending
+Status: Complete
 
 The separate CMS Synthetic Medicare Claims PUF is bounded to
 `beneficiary_2022.csv` and `carrier.csv`; other claim families and MBSF
@@ -138,3 +138,19 @@ implemented. Official CMS files are retained under ignored `data/`, while
 tracked manifest and evidence snapshot files record the source URLs, row
 counts, delimiter, grain, and real SHA-256 checksums. Sentinel digests are not
 acceptable release metadata.
+
+## 8. Claim Line Field Validation Expansion
+
+Status: In progress
+
+Outputs:
+
+- Additive claim line constraint validators for performing physician NPI (`LINE-NPI-001`), rendering/ordering physician NPI (`LINE-NPI-002`), HCPCS initial modifier (`MDFR-001`), HCPCS second modifier (`MDFR-002`), place of service, type of service, processing indicator, service count, and all line-level amount fields
+- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI sub-command
+- Focused behavioral tests for each check
+
+Exit criteria:
+
+- Each validator has at least one passing and one failing fixture test
+- All checks are individually activatable via CLI flag and `all_checks` shortcut
+- Full test suite and linter remain green after each addition
