@@ -80,7 +80,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     puf_parser.add_argument("--evidence", type=Path, required=True)
     puf_parser.add_argument("--output-dir", type=Path, required=True)
     puf_parser.add_argument("--service-year", type=int, default=2022)
-    puf_parser.add_argument("--format", choices=["csv", "parquet", "all"], default="all")
+    puf_parser.add_argument(
+        "--format", choices=["csv", "parquet", "all"], default="all"
+    )
 
     # Subcommand: export
     exp_parser = subparsers.add_parser(
@@ -670,6 +672,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim Line Rendering/Ordering Physician NPI 10-digit numeric format consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--line-referring-physician-npi-check",
+        "--line-rfrg-npi-check",
+        action="store_true",
+        help="Verify Claim Line Referring Physician NPI 10-digit numeric format consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--line-service-date-temporal-check",
         "--line-temporal-check",
         dest="line_temporal_check",
@@ -886,9 +894,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             if not validation.is_valid:
                 print(validation.model_dump_json(indent=2), file=sys.stderr)
                 return 1
-            manifest = ReleaseExporter(args.output_dir, release_id=f"v1.0.0-puf-{args.service_year}").export_puf_slice(
-                puf_slice, fmt=args.format
-            )
+            manifest = ReleaseExporter(
+                args.output_dir, release_id=f"v1.0.0-puf-{args.service_year}"
+            ).export_puf_slice(puf_slice, fmt=args.format)
         except (OSError, ValueError) as error:
             print(f"Error: {error}", file=sys.stderr)
             return 1
@@ -1184,9 +1192,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             line_third_hcpcs_modifier_check=args.line_third_hcpcs_modifier_check,
             line_fourth_hcpcs_modifier_check=args.line_fourth_hcpcs_modifier_check,
             line_rendering_physician_npi_check=args.line_rendering_physician_npi_check,
+            line_referring_physician_npi_check=args.line_referring_physician_npi_check,
             line_temporal_check=args.line_temporal_check,
             line_revenue_center_unit_count_check=args.line_revenue_center_unit_count_check,
-
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,

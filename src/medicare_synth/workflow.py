@@ -99,32 +99,16 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     blood_deductible_check = data.get("blood_deductible_check", False)
     coinsurance_amt_check = data.get("coinsurance_amt_check", False)
     deductible_amt_check = data.get("deductible_amt_check", False)
-    primary_payer_paid_amt_check = data.get(
-        "primary_payer_paid_amt_check", False
-    )
+    primary_payer_paid_amt_check = data.get("primary_payer_paid_amt_check", False)
     payment_amt_check = data.get("payment_amt_check", False)
     total_charge_amt_check = data.get("total_charge_amt_check", False)
-    non_covered_charge_amt_check = data.get(
-        "non_covered_charge_amt_check", False
-    )
-    outlier_payment_amt_check = data.get(
-        "outlier_payment_amt_check", False
-    )
-    line_allowed_charge_amt_check = data.get(
-        "line_allowed_charge_amt_check", False
-    )
-    line_coinsurance_amt_check = data.get(
-        "line_coinsurance_amt_check", False
-    )
-    line_payment_amt_check = data.get(
-        "line_payment_amt_check", False
-    )
-    line_deductible_amt_check = data.get(
-        "line_deductible_amt_check", False
-    )
-    line_submitted_charge_amt_check = data.get(
-        "line_submitted_charge_amt_check", False
-    )
+    non_covered_charge_amt_check = data.get("non_covered_charge_amt_check", False)
+    outlier_payment_amt_check = data.get("outlier_payment_amt_check", False)
+    line_allowed_charge_amt_check = data.get("line_allowed_charge_amt_check", False)
+    line_coinsurance_amt_check = data.get("line_coinsurance_amt_check", False)
+    line_payment_amt_check = data.get("line_payment_amt_check", False)
+    line_deductible_amt_check = data.get("line_deductible_amt_check", False)
+    line_submitted_charge_amt_check = data.get("line_submitted_charge_amt_check", False)
     line_primary_payer_paid_amt_check = data.get(
         "line_primary_payer_paid_amt_check", False
     )
@@ -152,6 +136,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     line_3rd_mdfr_check = data.get("line_third_hcpcs_modifier_check", False)
     line_4th_mdfr_check = data.get("line_fourth_hcpcs_modifier_check", False)
     line_rndrng_npi_check = data.get("line_rendering_physician_npi_check", False)
+    line_rfrg_npi_check = data.get("line_referring_physician_npi_check", False)
     line_temporal_check = data.get("line_temporal_check", False)
     line_rev_unit_check = data.get("line_revenue_center_unit_count_check", False)
     dme_check = data.get("dme_check", False)
@@ -261,6 +246,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Line HCPCS Third Modifier Code Format Verified** | {line_3rd_mdfr_check} |
 | **Claim Line HCPCS Fourth Modifier Code Format Verified** | {line_4th_mdfr_check} |
 | **Claim Line Rendering/Ordering Physician NPI Format Verified** | {line_rndrng_npi_check} |
+| **Claim Line Referring Physician NPI Format Verified** | {line_rfrg_npi_check} |
 | **Claim Line Service Date Temporal Inversion Verified** | {line_temporal_check} |
 | **Claim Line Revenue Center Unit Count Verified** | {line_rev_unit_check} |
 
@@ -355,32 +341,16 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     blood_deductible_check = data.get("blood_deductible_check", False)
     coinsurance_amt_check = data.get("coinsurance_amt_check", False)
     deductible_amt_check = data.get("deductible_amt_check", False)
-    primary_payer_paid_amt_check = data.get(
-        "primary_payer_paid_amt_check", False
-    )
+    primary_payer_paid_amt_check = data.get("primary_payer_paid_amt_check", False)
     payment_amt_check = data.get("payment_amt_check", False)
     total_charge_amt_check = data.get("total_charge_amt_check", False)
-    non_covered_charge_amt_check = data.get(
-        "non_covered_charge_amt_check", False
-    )
-    outlier_payment_amt_check = data.get(
-        "outlier_payment_amt_check", False
-    )
-    line_allowed_charge_amt_check = data.get(
-        "line_allowed_charge_amt_check", False
-    )
-    line_coinsurance_amt_check = data.get(
-        "line_coinsurance_amt_check", False
-    )
-    line_payment_amt_check = data.get(
-        "line_payment_amt_check", False
-    )
-    line_deductible_amt_check = data.get(
-        "line_deductible_amt_check", False
-    )
-    line_submitted_charge_amt_check = data.get(
-        "line_submitted_charge_amt_check", False
-    )
+    non_covered_charge_amt_check = data.get("non_covered_charge_amt_check", False)
+    outlier_payment_amt_check = data.get("outlier_payment_amt_check", False)
+    line_allowed_charge_amt_check = data.get("line_allowed_charge_amt_check", False)
+    line_coinsurance_amt_check = data.get("line_coinsurance_amt_check", False)
+    line_payment_amt_check = data.get("line_payment_amt_check", False)
+    line_deductible_amt_check = data.get("line_deductible_amt_check", False)
+    line_submitted_charge_amt_check = data.get("line_submitted_charge_amt_check", False)
     line_primary_payer_paid_amt_check = data.get(
         "line_primary_payer_paid_amt_check", False
     )
@@ -391,7 +361,12 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
         "line_beneficiary_payment_amt_check", False
     )
     line_service_count_check = data.get("line_service_count_check", False)
-    line_rendering_physician_npi_check = data.get("line_rendering_physician_npi_check", False)
+    line_rendering_physician_npi_check = data.get(
+        "line_rendering_physician_npi_check", False
+    )
+    line_referring_physician_npi_check = data.get(
+        "line_referring_physician_npi_check", False
+    )
     line_temporal_check = data.get("line_temporal_check", False)
     line_rev_unit_check = data.get("line_revenue_center_unit_count_check", False)
 
@@ -516,6 +491,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim Line Beneficiary Payment Amount Verified</strong></td><td>{line_beneficiary_payment_amt_check}</td></tr>
             <tr><td><strong>Claim Line Service Count Verified</strong></td><td>{line_service_count_check}</td></tr>
             <tr><td><strong>Claim Line Rendering/Ordering Physician NPI Format Verified</strong></td><td>{line_rendering_physician_npi_check}</td></tr>
+            <tr><td><strong>Claim Line Referring Physician NPI Format Verified</strong></td><td>{line_referring_physician_npi_check}</td></tr>
             <tr><td><strong>Claim Line Service Date Temporal Inversion Verified</strong></td><td>{line_temporal_check}</td></tr>
             <tr><td><strong>Claim Line Revenue Center Unit Count Verified</strong></td><td>{line_rev_unit_check}</td></tr>
 
@@ -637,9 +613,9 @@ def run_autonomous_workflow(
     line_third_hcpcs_modifier_check: bool = False,
     line_fourth_hcpcs_modifier_check: bool = False,
     line_rendering_physician_npi_check: bool = False,
+    line_referring_physician_npi_check: bool = False,
     line_temporal_check: bool = False,
     line_revenue_center_unit_count_check: bool = False,
-
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -742,6 +718,7 @@ def run_autonomous_workflow(
         line_third_hcpcs_modifier_check = True
         line_fourth_hcpcs_modifier_check = True
         line_rendering_physician_npi_check = True
+        line_referring_physician_npi_check = True
         line_temporal_check = True
         line_revenue_center_unit_count_check = True
 
@@ -1624,9 +1601,7 @@ def run_autonomous_workflow(
             )
         )
         mbsf_findings.extend(
-            RelationalValidator.check_mbsf_d_field_constraints(
-                scenario_slice.mbsf_d_df
-            )
+            RelationalValidator.check_mbsf_d_field_constraints(scenario_slice.mbsf_d_df)
         )
         mbsf_findings.extend(
             RelationalValidator.check_mbsf_oc_field_constraints(
@@ -1644,9 +1619,7 @@ def run_autonomous_workflow(
             )
         )
         mbsf_findings.extend(
-            RelationalValidator.check_mbsf_c_field_constraints(
-                scenario_slice.mbsf_c_df
-            )
+            RelationalValidator.check_mbsf_c_field_constraints(scenario_slice.mbsf_c_df)
         )
         mbsf_findings.extend(
             RelationalValidator.check_mbsf_ffs_field_constraints(
@@ -1671,10 +1644,8 @@ def run_autonomous_workflow(
         from medicare_synth.validation import RelationalValidator
 
         scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
-        inpatient_findings = (
-            RelationalValidator.check_inpatient_field_constraints(
-                scenario_slice.inpatient_df
-            )
+        inpatient_findings = RelationalValidator.check_inpatient_field_constraints(
+            scenario_slice.inpatient_df
         )
         violating_count = sum(f.count for f in inpatient_findings)
         print(
@@ -3057,7 +3028,6 @@ def run_autonomous_workflow(
             f"✓ Claim Line Revenue Center Unit Count constraints verified ({violating_count} Revenue Center Unit Count constraint findings)."
         )
 
-
     if pde_check:
         print(
             "\n=== Verification Step: Executing Part D Prescription Drug Event Field Constraint Verification Check ==="
@@ -3191,7 +3161,6 @@ def run_autonomous_workflow(
             "line_rendering_physician_npi_check": line_rendering_physician_npi_check,
             "line_temporal_check": line_temporal_check,
             "line_revenue_center_unit_count_check": line_revenue_center_unit_count_check,
-
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -3339,9 +3308,9 @@ def run_autonomous_workflow(
             "line_third_hcpcs_modifier_check": line_third_hcpcs_modifier_check,
             "line_fourth_hcpcs_modifier_check": line_fourth_hcpcs_modifier_check,
             "line_rendering_physician_npi_check": line_rendering_physician_npi_check,
+            "line_referring_physician_npi_check": line_referring_physician_npi_check,
             "line_temporal_check": line_temporal_check,
             "line_revenue_center_unit_count_check": line_revenue_center_unit_count_check,
-
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -3469,7 +3438,6 @@ def run_autonomous_workflow(
         "line_rendering_physician_npi_check": line_rendering_physician_npi_check,
         "line_temporal_check": line_temporal_check,
         "line_revenue_center_unit_count_check": line_revenue_center_unit_count_check,
-
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
         "mbsf_check": mbsf_check,

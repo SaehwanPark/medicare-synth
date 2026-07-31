@@ -79,18 +79,24 @@ class RelationalValidator:
     ) -> ValidationReport:
         """Validate the PUF beneficiary/carrier relationship without annual assumptions."""
         findings: list[Finding] = []
-        findings.extend(self.check_record_uniqueness(beneficiary_df, ["bene_id"], "Beneficiary"))
+        findings.extend(
+            self.check_record_uniqueness(beneficiary_df, ["bene_id"], "Beneficiary")
+        )
         findings.extend(
             self.check_record_uniqueness(carrier_df, ["clm_id", "line_num"], "Carrier")
         )
-        findings.extend(self.check_orphaned_claims(beneficiary_df, carrier_df, "Carrier"))
+        findings.extend(
+            self.check_orphaned_claims(beneficiary_df, carrier_df, "Carrier")
+        )
         findings.extend(self.check_temporal_inversions(carrier_df, "Carrier"))
         findings.extend(self.check_carrier_field_constraints(carrier_df))
         findings.extend(
             self.check_dob_temporal_constraints(beneficiary_df, carrier_df, "Carrier")
         )
         findings.extend(
-            self.check_mortality_temporal_constraints(beneficiary_df, carrier_df, "Carrier")
+            self.check_mortality_temporal_constraints(
+                beneficiary_df, carrier_df, "Carrier"
+            )
         )
         return ValidationReport(findings=findings)
 
@@ -1248,9 +1254,7 @@ class RelationalValidator:
         if non_null_npi.is_empty():
             return []
 
-        invalid = non_null_npi.filter(
-            ~pl.col(npi_col).str.contains(r"^\d{10}$")
-        )
+        invalid = non_null_npi.filter(~pl.col(npi_col).str.contains(r"^\d{10}$"))
         invalid_count = invalid.height
 
         if invalid_count > 0:
@@ -1395,7 +1399,10 @@ class RelationalValidator:
                     severity=Severity.HIGH,
                     message=f"Found {invalid_count} records in {dataset_name} with invalid NDC format (must be 11 alphanumeric characters).",
                     count=invalid_count,
-                    details={"dataset_name": dataset_name, "sample_pde_ids": sample_ids},
+                    details={
+                        "dataset_name": dataset_name,
+                        "sample_pde_ids": sample_ids,
+                    },
                 )
             ]
         return []
@@ -1629,7 +1636,9 @@ class RelationalValidator:
             return []
 
         invalid = non_null_zip.filter(
-            ~pl.col(zip_col).cast(pl.Utf8).str.contains(r"^([0-9]{5}|[0-9]{9}|[0-9]{5}-[0-9]{4})$")
+            ~pl.col(zip_col)
+            .cast(pl.Utf8)
+            .str.contains(r"^([0-9]{5}|[0-9]{9}|[0-9]{5}-[0-9]{4})$")
         )
         invalid_count = len(invalid)
 
@@ -2977,10 +2986,6 @@ class RelationalValidator:
             ]
         return []
 
-
-
-
-
     @staticmethod
     def check_claim_blood_deductible_constraints(
         claim_df: pl.DataFrame, claim_type: str = "Claim Records"
@@ -3022,7 +3027,10 @@ class RelationalValidator:
                             severity=Severity.HIGH,
                             message=f"Found {len(invalid_pints)} claims in {claim_type} with negative Blood Pints Quantity (< 0).",
                             count=len(invalid_pints),
-                            details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                            details={
+                                "claim_type": claim_type,
+                                "sample_clm_ids": sample_ids,
+                            },
                         )
                     )
 
@@ -3057,7 +3065,10 @@ class RelationalValidator:
                             severity=Severity.HIGH,
                             message=f"Found {len(invalid_amt)} claims in {claim_type} with negative Blood Deductible Amount (< 0).",
                             count=len(invalid_amt),
-                            details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                            details={
+                                "claim_type": claim_type,
+                                "sample_clm_ids": sample_ids,
+                            },
                         )
                     )
 
@@ -3411,7 +3422,6 @@ class RelationalValidator:
         return []
 
     @staticmethod
-
     def check_claim_line_allowed_charge_amount_constraints(
         claim_df: pl.DataFrame, claim_type: str = "Claim Line Items"
     ) -> list[Finding]:
@@ -4272,7 +4282,6 @@ class RelationalValidator:
             ]
         return []
 
-
     @staticmethod
     def check_claim_line_rendering_physician_npi_constraints(
         claim_df: pl.DataFrame, claim_type: str = "Claim Line Items"
@@ -4379,6 +4388,59 @@ class RelationalValidator:
                     category=FindingCategory.ADMINISTRATIVE,
                     severity=Severity.HIGH,
                     message=f"Found {invalid_count} records in {claim_type} with invalid Claim Line Ordering Physician NPI format (must be 10 numeric digits).",
+                    count=invalid_count,
+                    details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
+                )
+            ]
+        return []
+
+    @staticmethod
+    def check_claim_line_referring_physician_npi_constraints(
+        claim_df: pl.DataFrame, claim_type: str = "Claim Line Items"
+    ) -> list[Finding]:
+        """Identifies claim line items with invalid Referring Physician NPI format (must be 10 numeric digits when present)."""
+        if claim_df.is_empty():
+            return []
+
+        npi_col = None
+        for col in [
+            "rfrg_physn_npi",
+            "RFRG_PHYSN_NPI",
+            "line_rfrg_physn_npi",
+            "LINE_RFRG_PHYSN_NPI",
+            "line_referring_physician_npi",
+            "LINE_REFERRING_PHYSICIAN_NPI",
+            "referring_physician_npi",
+            "REFERRING_PHYSICIAN_NPI",
+        ]:
+            if col in claim_df.columns:
+                npi_col = col
+                break
+
+        if npi_col is None:
+            return []
+
+        non_null_npi = claim_df.filter(pl.col(npi_col).is_not_null())
+        if non_null_npi.is_empty():
+            return []
+
+        invalid = non_null_npi.filter(
+            ~pl.col(npi_col).cast(pl.Utf8).str.contains(r"^\d{10}$")
+        )
+        invalid_count = len(invalid)
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("clm_id").slice(0, 5).to_series().to_list()
+                if "clm_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="LINE-NPI-004",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=f"Found {invalid_count} records in {claim_type} with invalid Claim Line Referring Physician NPI format (must be 10 numeric digits).",
                     count=invalid_count,
                     details={"claim_type": claim_type, "sample_clm_ids": sample_ids},
                 )
@@ -4528,8 +4590,12 @@ class RelationalValidator:
         )
         findings.extend(self.check_demographic_code_constraints(bene_df))
         findings.extend(self.check_zip_code_constraints(bene_df, "Beneficiary Summary"))
-        findings.extend(self.check_state_code_constraints(bene_df, "Beneficiary Summary"))
-        findings.extend(self.check_county_code_constraints(bene_df, "Beneficiary Summary"))
+        findings.extend(
+            self.check_state_code_constraints(bene_df, "Beneficiary Summary")
+        )
+        findings.extend(
+            self.check_county_code_constraints(bene_df, "Beneficiary Summary")
+        )
 
         if carrier_df is not None and not carrier_df.is_empty():
             findings.extend(
@@ -4724,6 +4790,11 @@ class RelationalValidator:
                 )
             )
             findings.extend(
+                self.check_claim_line_referring_physician_npi_constraints(
+                    carrier_df, "Carrier Claims"
+                )
+            )
+            findings.extend(
                 self.check_claim_line_service_date_temporal_inversions(
                     carrier_df, "Carrier Claims"
                 )
@@ -4768,29 +4839,19 @@ class RelationalValidator:
                 )
             )
             findings.extend(
-                self.check_provider_npi_constraints(
-                    outpatient_df, "Outpatient Claims"
-                )
+                self.check_provider_npi_constraints(outpatient_df, "Outpatient Claims")
             )
             findings.extend(
-                self.check_icd_code_constraints(
-                    outpatient_df, "Outpatient Claims"
-                )
+                self.check_icd_code_constraints(outpatient_df, "Outpatient Claims")
             )
             findings.extend(
-                self.check_hcpcs_code_constraints(
-                    outpatient_df, "Outpatient Claims"
-                )
+                self.check_hcpcs_code_constraints(outpatient_df, "Outpatient Claims")
             )
             findings.extend(
-                self.check_taxonomy_code_constraints(
-                    outpatient_df, "Outpatient Claims"
-                )
+                self.check_taxonomy_code_constraints(outpatient_df, "Outpatient Claims")
             )
             findings.extend(
-                self.check_pos_code_constraints(
-                    outpatient_df, "Outpatient Claims"
-                )
+                self.check_pos_code_constraints(outpatient_df, "Outpatient Claims")
             )
             findings.extend(
                 self.check_rev_center_code_constraints(
@@ -4944,6 +5005,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_line_ordering_physician_npi_constraints(
+                    outpatient_df, "Outpatient Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_line_referring_physician_npi_constraints(
                     outpatient_df, "Outpatient Claims"
                 )
             )
@@ -5178,13 +5244,19 @@ class RelationalValidator:
                 self.check_claim_pps_capital_outlier_constraints(snf_df, "SNF Claims")
             )
             findings.extend(
-                self.check_claim_pps_capital_ime_amount_constraints(snf_df, "SNF Claims")
+                self.check_claim_pps_capital_ime_amount_constraints(
+                    snf_df, "SNF Claims"
+                )
             )
             findings.extend(
-                self.check_claim_pps_capital_dsh_amount_constraints(snf_df, "SNF Claims")
+                self.check_claim_pps_capital_dsh_amount_constraints(
+                    snf_df, "SNF Claims"
+                )
             )
             findings.extend(
-                self.check_claim_pps_capital_fsp_amount_constraints(snf_df, "SNF Claims")
+                self.check_claim_pps_capital_fsp_amount_constraints(
+                    snf_df, "SNF Claims"
+                )
             )
             findings.extend(
                 self.check_claim_pps_operating_federal_payment_amount_constraints(
@@ -5271,14 +5343,10 @@ class RelationalValidator:
                 )
             )
             findings.extend(
-                self.check_claim_line_place_of_service_constraints(
-                    dme_df, "DME Claims"
-                )
+                self.check_claim_line_place_of_service_constraints(dme_df, "DME Claims")
             )
             findings.extend(
-                self.check_claim_line_type_of_service_constraints(
-                    dme_df, "DME Claims"
-                )
+                self.check_claim_line_type_of_service_constraints(dme_df, "DME Claims")
             )
             findings.extend(
                 self.check_claim_line_performing_physician_npi_constraints(
@@ -5286,9 +5354,7 @@ class RelationalValidator:
                 )
             )
             findings.extend(
-                self.check_claim_line_hcpcs_modifier_constraints(
-                    dme_df, "DME Claims"
-                )
+                self.check_claim_line_hcpcs_modifier_constraints(dme_df, "DME Claims")
             )
             findings.extend(
                 self.check_claim_line_second_hcpcs_modifier_constraints(
@@ -5307,6 +5373,11 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_claim_line_rendering_physician_npi_constraints(
+                    dme_df, "DME Claims"
+                )
+            )
+            findings.extend(
+                self.check_claim_line_referring_physician_npi_constraints(
                     dme_df, "DME Claims"
                 )
             )
