@@ -141,16 +141,16 @@ acceptable release metadata.
 
 ## 8. Claim Line Field Validation Expansion
 
-Status: In progress
+Status: Complete
 
 Outputs:
 
-- Additive claim line constraint validators for performing physician NPI (`LINE-NPI-001`), rendering physician NPI (`LINE-NPI-002`), ordering physician NPI (`LINE-NPI-003`), referring physician NPI (`LINE-NPI-004`), HCPCS initial modifier (`MDFR-001`), HCPCS second modifier (`MDFR-002`), HCPCS third modifier (`MDFR-003`), HCPCS fourth modifier (`MDFR-004`), line service date temporal inversions (`LINE-TMP-001`), revenue center unit count (`REV-UNIT-001`), revenue center rate amount (`REV-RATE-001`), place of service, type of service, processing indicator, service count, and all line-level amount fields
-- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI sub-command
-- Focused behavioral tests for each check
+- Additive claim line constraint validators for performing physician NPI (`LINE-NPI-001`), rendering physician NPI (`LINE-NPI-002`), ordering physician NPI (`LINE-NPI-003`), referring physician NPI (`LINE-NPI-004`), HCPCS initial modifier (`MDFR-001`), HCPCS second modifier (`MDFR-002`), HCPCS third modifier (`MDFR-003`), HCPCS fourth modifier (`MDFR-004`), line service date temporal inversions (`LINE-TMP-001`), revenue center unit count (`REV-UNIT-001`), revenue center rate amount (`REV-RATE-001`), place of service (`POS-002`), type of service (`TOS-001`), processing indicator (`PRCSG-001`), service count (`LINE-SRVC-CNT-001`), and all line-level amount fields (`LINE-ALLOWD-AMT-001`, `LINE-COINSRNC-AMT-001`, `LINE-PMT-AMT-001`, `LINE-DDCTBL-AMT-001`, `LINE-SBMTD-CHRG-001`, `LINE-PRPAY-AMT-001`, `LINE-NCVD-CHRG-001`, `LINE-BENE-PMT-001`) [Completed]
+- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI sub-command [Completed]
+- Focused behavioral tests for each check [Completed]
 
 Exit criteria:
 
-- Each validator has at least one passing and one failing fixture test
-- All checks are individually activatable via CLI flag and `all_checks` shortcut
-- Full test suite and linter remain green after each addition
+- Each validator has at least one passing and one failing fixture test [Completed]
+- All checks are individually activatable via CLI flag and `all_checks` shortcut [Completed]
+- Full test suite and linter remain green after each addition [Completed]

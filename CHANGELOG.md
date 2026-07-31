@@ -4,6 +4,8 @@
 
 ### Added
 
+- Closed Milestone 8 (Claim Line Field Validation Expansion): verified all 19 claim line constraint validators (`LINE-NPI-001`–`LINE-NPI-004`, `MDFR-001`–`MDFR-004`, `LINE-TMP-001`, `REV-UNIT-001`, `REV-RATE-001`, `POS-002`, `TOS-001`, `PRCSG-001`, `LINE-SRVC-CNT-001`, `LINE-ALLOWD-AMT-001`, `LINE-COINSRNC-AMT-001`, `LINE-PMT-AMT-001`, `LINE-DDCTBL-AMT-001`, `LINE-SBMTD-CHRG-001`, `LINE-PRPAY-AMT-001`, `LINE-NCVD-CHRG-001`, `LINE-BENE-PMT-001`) are implemented, individually activatable via CLI flag and `all_checks` shortcut, and covered by passing and failing behavioral fixture tests. Updated `ROADMAP.md` status to Complete (429 total passing unit tests, ruff and basedpyright clean).
+
 - Added `check_claim_line_revenue_center_rate_amount_constraints` (`REV-RATE-001`) to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-negativity of Claim Line Revenue Center Rate Amount (`rev_cntr_rate_amt` >= 0 when present) across carrier and outpatient claim line items and wired into `validate_slice`. Added `--line-revenue-center-rate-amount-check` (`--line-rev-rate-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_revenue_center_rate_amount_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`. Updated markdown and HTML workflow report templates.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_revenue_center_rate_amount_check` verification logic and CLI flag parsing (429 total passing unit tests).
 
