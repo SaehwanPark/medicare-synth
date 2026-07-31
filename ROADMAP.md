@@ -154,3 +154,26 @@ Exit criteria:
 - Each validator has at least one passing and one failing fixture test [Completed]
 - All checks are individually activatable via CLI flag and `all_checks` shortcut [Completed]
 - Full test suite and linter remain green after each addition [Completed]
+
+## 9. Beneficiary Enrollment Indicator Validation Expansion
+
+Status: Complete
+
+Outputs:
+
+- Additive MBSF Base validators for monthly Medicare Entitlement/Buy-In Indicator
+  (`ENR-002`: `mdcr_entlmt_buyin_ind_01`–`_12` must be in CCW 2021 valid set
+  `{"0","1","2","3","A","B","C"}`) and monthly Dual Eligibility Status Code
+  (`ENR-003`: `dual_stus_cd_01`–`_12` must be in CMS-MIS valid set
+  `{"00","02","04","06","08","09","10","99"}`) [Completed]
+- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI
+  sub-command via `--mbsf-enrollment-buyin-check` and `--mbsf-dual-status-check`
+  flags; included in `all_checks` shortcut [Completed]
+- Focused behavioral tests for valid, invalid, null-skip, and no-column-present
+  cases for each check [Completed]
+
+Exit criteria:
+
+- Each validator has at least one passing and one failing fixture test [Completed]
+- Both checks are individually activatable via CLI flag and `all_checks` shortcut [Completed]
+- Full test suite and linter remain green after all additions [Completed]
