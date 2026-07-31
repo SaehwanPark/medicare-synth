@@ -1452,3 +1452,32 @@ def test_check_claim_line_service_date_temporal_inversions() -> None:
     assert finding.category == FindingCategory.TEMPORAL
     assert finding.severity == Severity.HIGH
     assert finding.count == 1
+
+
+def test_check_claim_line_revenue_center_unit_count_constraints() -> None:
+    valid_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002"],
+            "rev_cntr_unit_cnt": [1.0, 5.0],
+        }
+    )
+    assert (
+        len(RelationalValidator.check_claim_line_revenue_center_unit_count_constraints(valid_df))
+        == 0
+    )
+
+    invalid_df = pl.DataFrame(
+        {
+            "clm_id": ["CLM001", "CLM002", "CLM003"],
+            "rev_cntr_unit_cnt": [2.0, -1.0, None],
+        }
+    )
+    findings = RelationalValidator.check_claim_line_revenue_center_unit_count_constraints(
+        invalid_df, "Carrier Claims"
+    )
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.rule_id == "REV-UNIT-001"
+    assert finding.category == FindingCategory.ADMINISTRATIVE
+    assert finding.severity == Severity.HIGH
+    assert finding.count == 1
