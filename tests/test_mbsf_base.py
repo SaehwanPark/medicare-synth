@@ -149,3 +149,101 @@ def test_cli_mbsf_base_scenario():
 
     ret_invalid = main(["validate", "--scenario", "invalid_mbsf_base_coverage_months"])
     assert ret_invalid == 1
+
+
+def test_check_mbsf_enrollment_buyin_indicator_constraints_valid():
+    """Tests ENR-002: valid buy-in indicator codes produce no findings."""
+    validator = RelationalValidator()
+
+    valid_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE_A", "BENE_B"],
+            "mdcr_entlmt_buyin_ind_01": ["3", "C"],
+            "mdcr_entlmt_buyin_ind_02": ["A", "B"],
+            "mdcr_entlmt_buyin_ind_03": [None, "0"],  # NULL is valid (no enrollment)
+        }
+    )
+    findings = validator.check_mbsf_enrollment_buyin_indicator_constraints(valid_df)
+    assert len(findings) == 0
+
+
+def test_check_mbsf_enrollment_buyin_indicator_constraints_invalid():
+    """Tests ENR-002: invalid buy-in indicator code produces exactly one ENR-002 finding."""
+    validator = RelationalValidator()
+
+    invalid_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE_X"],
+            "mdcr_entlmt_buyin_ind_01": ["X"],   # Invalid: not in {"0","1","2","3","A","B","C"}
+            "mdcr_entlmt_buyin_ind_02": ["3"],
+        }
+    )
+    findings = validator.check_mbsf_enrollment_buyin_indicator_constraints(invalid_df)
+    assert len(findings) == 1
+    assert findings[0].rule_id == "ENR-002"
+    assert findings[0].count == 1
+
+
+def test_check_mbsf_enrollment_buyin_indicator_constraints_no_columns():
+    """Tests ENR-002: empty column set returns no findings (early-exit path)."""
+    validator = RelationalValidator()
+
+    # DataFrame with no monthly buy-in columns present.
+    df_no_cols = pl.DataFrame({"bene_id": ["BENE_A"], "rfrnc_yr": [2021]})
+    findings = validator.check_mbsf_enrollment_buyin_indicator_constraints(df_no_cols)
+    assert len(findings) == 0
+
+
+def test_check_mbsf_dual_status_code_constraints_valid():
+    """Tests ENR-003: valid dual status codes produce no findings."""
+    validator = RelationalValidator()
+
+    valid_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE_A", "BENE_B"],
+            "dual_stus_cd_01": ["00", "02"],
+            "dual_stus_cd_02": ["99", None],  # NULL is valid
+            "dual_stus_cd_03": ["10", "08"],
+        }
+    )
+    findings = validator.check_mbsf_dual_status_code_constraints(valid_df)
+    assert len(findings) == 0
+
+
+def test_check_mbsf_dual_status_code_constraints_invalid():
+    """Tests ENR-003: invalid dual status code produces exactly one ENR-003 finding."""
+    validator = RelationalValidator()
+
+    invalid_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE_Y"],
+            "dual_stus_cd_01": ["ZZ"],   # Invalid: not in valid CMS-MIS set
+            "dual_stus_cd_02": ["00"],
+        }
+    )
+    findings = validator.check_mbsf_dual_status_code_constraints(invalid_df)
+    assert len(findings) == 1
+    assert findings[0].rule_id == "ENR-003"
+    assert findings[0].count == 1
+
+
+def test_check_mbsf_dual_status_code_constraints_no_columns():
+    """Tests ENR-003: empty column set returns no findings (early-exit path)."""
+    validator = RelationalValidator()
+
+    df_no_cols = pl.DataFrame({"bene_id": ["BENE_A"], "rfrnc_yr": [2021]})
+    findings = validator.check_mbsf_dual_status_code_constraints(df_no_cols)
+    assert len(findings) == 0
+
+
+def test_cli_auto_workflow_mbsf_buyin_and_dual_status_check():
+    """Tests that --mbsf-enrollment-buyin-check and --mbsf-dual-status-check flags are accepted by the CLI."""
+    ret = main(
+        [
+            "auto-workflow",
+            "--dry-run",
+            "--mbsf-enrollment-buyin-check",
+            "--mbsf-dual-status-check",
+        ]
+    )
+    assert ret == 0

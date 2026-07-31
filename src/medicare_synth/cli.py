@@ -698,6 +698,18 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify Claim Line Revenue Center Rate Amount non-negativity before commit/push",
     )
+    auto_wf_parser.add_argument(
+        "--mbsf-enrollment-buyin-check",
+        dest="mbsf_enrollment_buyin_check",
+        action="store_true",
+        help="Verify MBSF Enrollment Buy-In Indicator codes are in valid CCW 2021 set before commit/push",
+    )
+    auto_wf_parser.add_argument(
+        "--mbsf-dual-status-check",
+        dest="mbsf_dual_status_check",
+        action="store_true",
+        help="Verify MBSF Dual Eligibility Status Codes are in valid CMS-MIS set before commit/push",
+    )
 
     auto_wf_parser.add_argument(
         "--rev-center-check",
@@ -1203,6 +1215,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             line_temporal_check=args.line_temporal_check,
             line_revenue_center_unit_count_check=args.line_revenue_center_unit_count_check,
             line_revenue_center_rate_amount_check=args.line_revenue_center_rate_amount_check,
+            mbsf_enrollment_buyin_check=args.mbsf_enrollment_buyin_check,
+            mbsf_dual_status_check=args.mbsf_dual_status_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,

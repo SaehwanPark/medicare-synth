@@ -140,6 +140,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     line_temporal_check = data.get("line_temporal_check", False)
     line_rev_unit_check = data.get("line_revenue_center_unit_count_check", False)
     line_rev_rate_check = data.get("line_revenue_center_rate_amount_check", False)
+    mbsf_enrollment_buyin_check = data.get("mbsf_enrollment_buyin_check", False)
+    mbsf_dual_status_check = data.get("mbsf_dual_status_check", False)
     dme_check = data.get("dme_check", False)
     hospice_check = data.get("hospice_check", False)
     pde_check = data.get("pde_check", False)
@@ -251,6 +253,8 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **Claim Line Service Date Temporal Inversion Verified** | {line_temporal_check} |
 | **Claim Line Revenue Center Unit Count Verified** | {line_rev_unit_check} |
 | **Claim Line Revenue Center Rate Amount Verified** | {line_rev_rate_check} |
+| **MBSF Enrollment Buy-In Indicator Verified** | {mbsf_enrollment_buyin_check} |
+| **MBSF Dual Eligibility Status Code Verified** | {mbsf_dual_status_check} |
 
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
@@ -372,6 +376,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     line_temporal_check = data.get("line_temporal_check", False)
     line_rev_unit_check = data.get("line_revenue_center_unit_count_check", False)
     line_rev_rate_check = data.get("line_revenue_center_rate_amount_check", False)
+    mbsf_enrollment_buyin_check = data.get("mbsf_enrollment_buyin_check", False)
+    mbsf_dual_status_check = data.get("mbsf_dual_status_check", False)
 
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
@@ -498,6 +504,8 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>Claim Line Service Date Temporal Inversion Verified</strong></td><td>{line_temporal_check}</td></tr>
             <tr><td><strong>Claim Line Revenue Center Unit Count Verified</strong></td><td>{line_rev_unit_check}</td></tr>
             <tr><td><strong>Claim Line Revenue Center Rate Amount Verified</strong></td><td>{line_rev_rate_check}</td></tr>
+            <tr><td><strong>MBSF Enrollment Buy-In Indicator Verified</strong></td><td>{mbsf_enrollment_buyin_check}</td></tr>
+            <tr><td><strong>MBSF Dual Eligibility Status Code Verified</strong></td><td>{mbsf_dual_status_check}</td></tr>
 
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
@@ -621,6 +629,8 @@ def run_autonomous_workflow(
     line_temporal_check: bool = False,
     line_revenue_center_unit_count_check: bool = False,
     line_revenue_center_rate_amount_check: bool = False,
+    mbsf_enrollment_buyin_check: bool = False,
+    mbsf_dual_status_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -727,6 +737,8 @@ def run_autonomous_workflow(
         line_temporal_check = True
         line_revenue_center_unit_count_check = True
         line_revenue_center_rate_amount_check = True
+        mbsf_enrollment_buyin_check = True
+        mbsf_dual_status_check = True
 
         rev_center_check = True
         demographic_check = True
@@ -3060,6 +3072,38 @@ def run_autonomous_workflow(
             f"✓ Claim Line Revenue Center Rate Amount constraints verified ({violating_count} Revenue Center Rate Amount constraint findings)."
         )
 
+    if mbsf_enrollment_buyin_check:
+        print(
+            "\n=== Verification Step: Executing MBSF Enrollment Buy-In Indicator Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        buyin_findings = RelationalValidator.check_mbsf_enrollment_buyin_indicator_constraints(
+            scenario_slice.mbsf_base_df
+        )
+        violating_count = sum(f.count for f in buyin_findings)
+        print(
+            f"✓ MBSF Enrollment Buy-In Indicator constraints verified ({violating_count} Buy-In Indicator constraint findings)."
+        )
+
+    if mbsf_dual_status_check:
+        print(
+            "\n=== Verification Step: Executing MBSF Dual Eligibility Status Code Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        dual_findings = RelationalValidator.check_mbsf_dual_status_code_constraints(
+            scenario_slice.mbsf_base_df
+        )
+        violating_count = sum(f.count for f in dual_findings)
+        print(
+            f"✓ MBSF Dual Eligibility Status Code constraints verified ({violating_count} Dual Status Code constraint findings)."
+        )
+
     if pde_check:
         print(
             "\n=== Verification Step: Executing Part D Prescription Drug Event Field Constraint Verification Check ==="
@@ -3194,6 +3238,8 @@ def run_autonomous_workflow(
             "line_temporal_check": line_temporal_check,
             "line_revenue_center_unit_count_check": line_revenue_center_unit_count_check,
             "line_revenue_center_rate_amount_check": line_revenue_center_rate_amount_check,
+            "mbsf_enrollment_buyin_check": mbsf_enrollment_buyin_check,
+            "mbsf_dual_status_check": mbsf_dual_status_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -3345,6 +3391,8 @@ def run_autonomous_workflow(
             "line_temporal_check": line_temporal_check,
             "line_revenue_center_unit_count_check": line_revenue_center_unit_count_check,
             "line_revenue_center_rate_amount_check": line_revenue_center_rate_amount_check,
+            "mbsf_enrollment_buyin_check": mbsf_enrollment_buyin_check,
+            "mbsf_dual_status_check": mbsf_dual_status_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -3473,6 +3521,8 @@ def run_autonomous_workflow(
         "line_temporal_check": line_temporal_check,
         "line_revenue_center_unit_count_check": line_revenue_center_unit_count_check,
         "line_revenue_center_rate_amount_check": line_revenue_center_rate_amount_check,
+        "mbsf_enrollment_buyin_check": mbsf_enrollment_buyin_check,
+        "mbsf_dual_status_check": mbsf_dual_status_check,
         "rev_center_check": rev_center_check,
         "demographic_check": demographic_check,
         "mbsf_check": mbsf_check,

@@ -1235,6 +1235,126 @@ class RelationalValidator:
         return []
 
     @staticmethod
+    def check_mbsf_enrollment_buyin_indicator_constraints(
+        mbsf_base_df: pl.DataFrame,
+    ) -> list[Finding]:
+        """Identifies MBSF Base records with invalid Medicare Entitlement/Buy-In Indicator codes (ENR-002).
+
+        Per CCW 2021 MBSF Base codebook, each monthly indicator (mdcr_entlmt_buyin_ind_01–12)
+        must be in {"0","1","2","3","A","B","C"} when present and non-null.
+        NULL values indicate no enrollment for that month and are excluded from the check.
+        """
+        if mbsf_base_df.is_empty():
+            return []
+
+        # CCW 2021 valid buy-in indicator codes.
+        valid_codes = {"0", "1", "2", "3", "A", "B", "C"}
+        buyin_cols = [
+            f"mdcr_entlmt_buyin_ind_{i:02d}" for i in range(1, 13)
+        ]
+        present_cols = [c for c in buyin_cols if c in mbsf_base_df.columns]
+        if not present_cols:
+            return []
+
+        invalid_conditions = []
+        for col in present_cols:
+            invalid_conditions.append(
+                pl.col(col).is_not_null()
+                & ~pl.col(col).is_in(list(valid_codes))
+            )
+
+        combined_condition = invalid_conditions[0]
+        for cond in invalid_conditions[1:]:
+            combined_condition = combined_condition | cond
+
+        invalid = mbsf_base_df.filter(combined_condition)
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("bene_id").slice(0, 5).to_series().to_list()
+                if "bene_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="ENR-002",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=(
+                        f"Found {invalid_count} MBSF Base records with invalid Medicare "
+                        f"Entitlement/Buy-In Indicator code outside CCW 2021 valid set "
+                        f"{{'0','1','2','3','A','B','C'}}."
+                    ),
+                    count=invalid_count,
+                    details={
+                        "table_name": "MBSF Base Enrollment",
+                        "sample_bene_ids": sample_ids,
+                    },
+                )
+            ]
+        return []
+
+    @staticmethod
+    def check_mbsf_dual_status_code_constraints(
+        mbsf_base_df: pl.DataFrame,
+    ) -> list[Finding]:
+        """Identifies MBSF Base records with invalid Dual Eligibility Status Codes (ENR-003).
+
+        Per CMS-MIS dual eligibility codebook, each monthly code (dual_stus_cd_01–12)
+        must be in {"00","02","04","06","08","09","10","99"} when present and non-null.
+        NULL values indicate no eligibility record for that month and are excluded.
+        """
+        if mbsf_base_df.is_empty():
+            return []
+
+        # CMS-MIS 2021 valid dual eligibility status codes.
+        valid_codes = {"00", "02", "04", "06", "08", "09", "10", "99"}
+        dual_cols = [f"dual_stus_cd_{i:02d}" for i in range(1, 13)]
+        present_cols = [c for c in dual_cols if c in mbsf_base_df.columns]
+        if not present_cols:
+            return []
+
+        invalid_conditions = []
+        for col in present_cols:
+            invalid_conditions.append(
+                pl.col(col).is_not_null()
+                & ~pl.col(col).is_in(list(valid_codes))
+            )
+
+        combined_condition = invalid_conditions[0]
+        for cond in invalid_conditions[1:]:
+            combined_condition = combined_condition | cond
+
+        invalid = mbsf_base_df.filter(combined_condition)
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("bene_id").slice(0, 5).to_series().to_list()
+                if "bene_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="ENR-003",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=(
+                        f"Found {invalid_count} MBSF Base records with invalid Dual "
+                        f"Eligibility Status Code outside CMS-MIS valid set "
+                        f"{{'00','02','04','06','08','09','10','99'}}."
+                    ),
+                    count=invalid_count,
+                    details={
+                        "table_name": "MBSF Base Enrollment",
+                        "sample_bene_ids": sample_ids,
+                    },
+                )
+            ]
+        return []
+
+    @staticmethod
     def check_provider_npi_constraints(
         claim_df: pl.DataFrame, claim_type: str
     ) -> list[Finding]:
@@ -5523,6 +5643,12 @@ class RelationalValidator:
             )
             findings.extend(self.check_mbsf_base_field_constraints(mbsf_base_df))
             findings.extend(self.check_enrollment_consistency_constraints(mbsf_base_df))
+            findings.extend(
+                self.check_mbsf_enrollment_buyin_indicator_constraints(mbsf_base_df)
+            )
+            findings.extend(
+                self.check_mbsf_dual_status_code_constraints(mbsf_base_df)
+            )
             findings.extend(
                 self.check_record_uniqueness(
                     mbsf_base_df, ["bene_id"], "MBSF Base Enrollment"
