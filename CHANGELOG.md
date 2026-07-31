@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added `check_claim_line_third_hcpcs_modifier_constraints` (`MDFR-003`) to `RelationalValidator` in `src/medicare_synth/validation.py` to verify 2-character alphanumeric format of Claim Line HCPCS Third Modifier Code (`hcpcs_3rd_mdfr_cd` when present) across carrier, outpatient, and DME claim line items and wired into `validate_slice`. Added `--line-third-hcpcs-modifier-check` (`--line-3rd-mdfr-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_third_hcpcs_modifier_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`. Updated markdown and HTML workflow report templates.
+- Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_third_hcpcs_modifier_check` verification logic and CLI flag parsing.
+
 - Added `check_claim_line_rendering_physician_npi_constraints` (`LINE-NPI-002`) to `RelationalValidator` in `src/medicare_synth/validation.py` to verify 10-digit numeric NPI format of Claim Line Rendering/Ordering Physician NPI (`rndrng_physn_npi`, `op_physn_npi`, or `othr_physn_npi` when present) across carrier, outpatient, and DME claim line items and wired into `validate_slice`. Added `--line-rendering-physician-npi-check` (`--line-rndrng-npi-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `line_rendering_physician_npi_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`. Updated markdown and HTML workflow report templates.
 - Extended unit test suites in `tests/test_validation.py`, `tests/test_cli.py`, and `tests/test_autonomous_workflow.py` to cover `line_rendering_physician_npi_check` verification logic and CLI flag parsing (414 total passing unit tests).
 

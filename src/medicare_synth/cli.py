@@ -652,6 +652,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Verify Claim Line HCPCS Second Modifier Code 2-character format consistency before commit/push",
     )
     auto_wf_parser.add_argument(
+        "--line-third-hcpcs-modifier-check",
+        "--line-3rd-mdfr-check",
+        action="store_true",
+        help="Verify Claim Line HCPCS Third Modifier Code 2-character format consistency before commit/push",
+    )
+    auto_wf_parser.add_argument(
         "--line-rendering-physician-npi-check",
         "--line-rndrng-npi-check",
         action="store_true",
@@ -1155,6 +1161,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             line_performing_physician_npi_check=args.line_performing_physician_npi_check,
             line_hcpcs_modifier_check=args.line_hcpcs_modifier_check,
             line_second_hcpcs_modifier_check=args.line_second_hcpcs_modifier_check,
+            line_third_hcpcs_modifier_check=args.line_third_hcpcs_modifier_check,
             line_rendering_physician_npi_check=args.line_rendering_physician_npi_check,
 
             rev_center_check=args.rev_center_check,
