@@ -165,3 +165,80 @@ def test_mbsf_ndi_cli_subcommands(capsys):
         )
         assert code == 0
         assert (Path(tmpdir) / "audit_report.json").exists()
+
+
+# ── NDI-002: ndi_diuse_cd ICD-10 format behavioral tests ──────────────────────
+
+
+def test_mbsf_ndi_cause_of_death_valid_codes():
+    """NDI-002 passes for valid ICD-10 formatted codes (null/None are skipped)."""
+    valid_df = pl.DataFrame(
+        {
+            "bene_id": ["B001", "B002", "B003", "B004"],
+            "ndi_match_ind": ["1", "1", "1", "0"],
+            "ndi_diuse_cd": ["A00", "Z87", "J45.9", None],  # None must be skipped
+        }
+    )
+    findings = RelationalValidator.check_mbsf_ndi_cause_of_death_code_constraints(
+        valid_df
+    )
+    assert len(findings) == 0, f"Expected no findings for valid codes, got {findings}"
+
+
+def test_mbsf_ndi_cause_of_death_invalid_codes():
+    """NDI-002 fires for codes that do not match ICD-10 format."""
+    invalid_df = pl.DataFrame(
+        {
+            "bene_id": ["B001", "B002"],
+            "ndi_match_ind": ["1", "1"],
+            "ndi_diuse_cd": ["123", "TOOLONGVALUE"],  # numeric-only; too long
+        }
+    )
+    findings = RelationalValidator.check_mbsf_ndi_cause_of_death_code_constraints(
+        invalid_df
+    )
+    assert len(findings) == 1
+    assert findings[0].rule_id == "NDI-002"
+    assert findings[0].severity == Severity.HIGH
+    assert findings[0].category == FindingCategory.FIELD
+    assert findings[0].count == 2
+
+
+def test_mbsf_ndi_cause_of_death_null_skip():
+    """NDI-002 skips null/None ndi_diuse_cd values without raising a finding."""
+    null_df = pl.DataFrame(
+        {
+            "bene_id": ["B001"],
+            "ndi_match_ind": ["0"],
+            "ndi_diuse_cd": [None],
+        }
+    )
+    findings = RelationalValidator.check_mbsf_ndi_cause_of_death_code_constraints(
+        null_df
+    )
+    assert len(findings) == 0
+
+
+def test_mbsf_ndi_cause_of_death_no_column_early_exit():
+    """NDI-002 returns [] immediately when ndi_diuse_cd column is absent."""
+    no_col_df = pl.DataFrame(
+        {
+            "bene_id": ["B001"],
+            "ndi_match_ind": ["1"],
+        }
+    )
+    findings = RelationalValidator.check_mbsf_ndi_cause_of_death_code_constraints(
+        no_col_df
+    )
+    assert findings == []
+
+
+def test_mbsf_ndi_cause_of_death_empty_df_early_exit():
+    """NDI-002 returns [] immediately for an empty DataFrame."""
+    empty_df = pl.DataFrame({"bene_id": [], "ndi_diuse_cd": []}).cast(
+        {"bene_id": pl.String, "ndi_diuse_cd": pl.String}
+    )
+    findings = RelationalValidator.check_mbsf_ndi_cause_of_death_code_constraints(
+        empty_df
+    )
+    assert findings == []

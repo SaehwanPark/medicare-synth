@@ -177,3 +177,26 @@ Exit criteria:
 - Each validator has at least one passing and one failing fixture test [Completed]
 - Both checks are individually activatable via CLI flag and `all_checks` shortcut [Completed]
 - Full test suite and linter remain green after all additions [Completed]
+
+## 10. MBSF NDI Cause-of-Death Code Format Validation
+
+Status: Complete
+
+Outputs:
+
+- Additive MBSF NDI validator for Underlying Cause of Death ICD-10 Code
+  (`NDI-002`: `ndi_diuse_cd` when non-null must match ICD-10 format
+  `^[A-Za-z]\d{2}([A-Za-z0-9]{1,4}|\.[A-Za-z0-9]{1,4})?$`, accepting both
+  period-less CMS representation and period form; max 7 chars per RKB) [Completed]
+- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI
+  sub-command via `--mbsf-ndi-cause-of-death-check` flag; included in
+  `all_checks` shortcut [Completed]
+- Focused behavioral tests for valid codes (including null skip), invalid codes,
+  pure null-value DataFrame, no-column early exit, and empty DataFrame early exit
+  [Completed]
+
+Exit criteria:
+
+- Validator has at least one passing and one failing fixture test [Completed]
+- Check is individually activatable via CLI flag and `all_checks` shortcut [Completed]
+- Full test suite and linter remain green after addition [Completed]
