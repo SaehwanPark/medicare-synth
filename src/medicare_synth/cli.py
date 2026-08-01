@@ -710,6 +710,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify MBSF Dual Eligibility Status Codes are in valid CMS-MIS set before commit/push",
     )
+    auto_wf_parser.add_argument(
+        "--mbsf-ndi-cause-of-death-check",
+        dest="mbsf_ndi_cause_of_death_check",
+        action="store_true",
+        help="Verify MBSF NDI ndi_diuse_cd values match ICD-10 format before commit/push",
+    )
 
     auto_wf_parser.add_argument(
         "--rev-center-check",
@@ -1217,6 +1223,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             line_revenue_center_rate_amount_check=args.line_revenue_center_rate_amount_check,
             mbsf_enrollment_buyin_check=args.mbsf_enrollment_buyin_check,
             mbsf_dual_status_check=args.mbsf_dual_status_check,
+            mbsf_ndi_cause_of_death_check=args.mbsf_ndi_cause_of_death_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,

@@ -728,6 +728,62 @@ class RelationalValidator:
         return []
 
     @staticmethod
+    def check_mbsf_ndi_cause_of_death_code_constraints(
+        mbsf_ndi_df: pl.DataFrame,
+    ) -> list[Finding]:
+        """Identifies MBSF NDI records where ndi_diuse_cd does not match ICD-10 format (NDI-002).
+
+        Per RKB rkb-v1.0-20211231.json NDI_DIUSE_CD: nullable ICD-10 code string (max 7 chars).
+        Valid format: one letter, two digits, optionally a period, then 1–4 alphanumeric characters.
+        Regex: ^[A-Za-z]\\d{2}(\\.[A-Za-z0-9]{1,4})?$
+        Null / None values are skipped (not treated as invalid).
+        """
+        if mbsf_ndi_df.is_empty():
+            return []
+
+        if "ndi_diuse_cd" not in mbsf_ndi_df.columns:
+            return []
+
+        # CMS data omits the decimal separator (e.g. I2510 instead of I25.10).
+        # Valid ICD-10 structure: 1 letter, 2 digits, then 0-4 optional alphanumeric
+        # chars, with or without a period separator before the subdivision.
+        # Max length per RKB: 7 chars.
+        icd10_pattern = r"^[A-Za-z]\d{2}([A-Za-z0-9]{1,4}|\.[A-Za-z0-9]{1,4})?$"
+        # Polars infers dtype=Null for all-None columns; cast to String before string ops.
+        working_df = mbsf_ndi_df
+        if working_df.schema.get("ndi_diuse_cd") == pl.Null:
+            working_df = working_df.with_columns(
+                pl.col("ndi_diuse_cd").cast(pl.String)
+            )
+        invalid = working_df.filter(
+            pl.col("ndi_diuse_cd").is_not_null()
+            & (pl.col("ndi_diuse_cd").str.len_chars() > 0)
+            & ~pl.col("ndi_diuse_cd").str.contains(icd10_pattern)
+        )
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("bene_id").slice(0, 5).to_series().to_list()
+                if "bene_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="NDI-002",
+                    category=FindingCategory.FIELD,
+                    severity=Severity.HIGH,
+                    message=(
+                        f"Found {invalid_count} MBSF NDI records where ndi_diuse_cd "
+                        "does not match ICD-10 format (^[A-Za-z]\\d{2}(\\.\\w{{1,4}})?$)."
+                    ),
+                    count=invalid_count,
+                    details={"table_name": "MBSF NDI", "sample_bene_ids": sample_ids},
+                )
+            ]
+        return []
+
+    @staticmethod
     def check_mbsf_ra_field_constraints(mbsf_ra_df: pl.DataFrame) -> list[Finding]:
         """Identifies MBSF Risk Adjustment records with negative risk scores or payment counts out of bounds."""
         if mbsf_ra_df.is_empty():
@@ -5673,6 +5729,9 @@ class RelationalValidator:
                 self.check_orphaned_claims(bene_df, mbsf_ndi_df, "MBSF NDI")
             )
             findings.extend(self.check_mbsf_ndi_field_constraints(mbsf_ndi_df))
+            findings.extend(
+                self.check_mbsf_ndi_cause_of_death_code_constraints(mbsf_ndi_df)
+            )
             findings.extend(
                 self.check_record_uniqueness(mbsf_ndi_df, ["bene_id"], "MBSF NDI")
             )
