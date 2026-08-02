@@ -244,6 +244,60 @@ def test_cli_auto_workflow_mbsf_buyin_and_dual_status_check():
             "--dry-run",
             "--mbsf-enrollment-buyin-check",
             "--mbsf-dual-status-check",
+            "--mbsf-entitlement-reason-check",
         ]
     )
     assert ret == 0
+
+
+def test_check_mbsf_entitlement_reason_code_constraints_valid():
+    """Tests ENR-004: valid entitlement reason codes produce no findings."""
+    validator = RelationalValidator()
+
+    valid_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE_A", "BENE_B"],
+            "entlmt_rsn_orig": ["10", "0"],
+            "entlmt_rsn_curr": ["20", None],  # NULL is valid
+        }
+    )
+    findings = validator.check_mbsf_entitlement_reason_code_constraints(valid_df)
+    assert len(findings) == 0
+
+
+def test_check_mbsf_entitlement_reason_code_constraints_invalid():
+    """Tests ENR-004: invalid entitlement reason code produces exactly one ENR-004 finding."""
+    validator = RelationalValidator()
+
+    invalid_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE_Z"],
+            "entlmt_rsn_orig": ["999"],  # Invalid: not in CCW valid set
+            "entlmt_rsn_curr": ["10"],
+        }
+    )
+    findings = validator.check_mbsf_entitlement_reason_code_constraints(invalid_df)
+    assert len(findings) == 1
+    assert findings[0].rule_id == "ENR-004"
+    assert findings[0].count == 1
+
+
+def test_check_mbsf_entitlement_reason_code_constraints_no_columns():
+    """Tests ENR-004: empty column set returns no findings (early-exit path)."""
+    validator = RelationalValidator()
+
+    df_no_cols = pl.DataFrame({"bene_id": ["BENE_A"], "rfrnc_yr": [2021]})
+    findings = validator.check_mbsf_entitlement_reason_code_constraints(df_no_cols)
+    assert len(findings) == 0
+
+
+def test_check_mbsf_entitlement_reason_code_constraints_all_null():
+    """Tests ENR-004: all-null column DataFrame returns no findings."""
+    validator = RelationalValidator()
+
+    df_null = pl.DataFrame(
+        {"bene_id": ["BENE_A"], "entlmt_rsn_orig": [None]},
+        schema={"bene_id": pl.String, "entlmt_rsn_orig": pl.Null},
+    )
+    findings = validator.check_mbsf_entitlement_reason_code_constraints(df_null)
+    assert len(findings) == 0

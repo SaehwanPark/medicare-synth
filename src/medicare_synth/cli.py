@@ -716,6 +716,13 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify MBSF NDI ndi_diuse_cd values match ICD-10 format before commit/push",
     )
+    auto_wf_parser.add_argument(
+        "--mbsf-entitlement-reason-check",
+        "--mbsf-entlmt-rsn-check",
+        dest="mbsf_entitlement_reason_check",
+        action="store_true",
+        help="Verify MBSF Entitlement Reason Codes are in valid CCW set before commit/push",
+    )
 
     auto_wf_parser.add_argument(
         "--rev-center-check",
@@ -1224,6 +1231,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             mbsf_enrollment_buyin_check=args.mbsf_enrollment_buyin_check,
             mbsf_dual_status_check=args.mbsf_dual_status_check,
             mbsf_ndi_cause_of_death_check=args.mbsf_ndi_cause_of_death_check,
+            mbsf_entitlement_reason_check=args.mbsf_entitlement_reason_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,
