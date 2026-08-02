@@ -200,3 +200,26 @@ Exit criteria:
 - Validator has at least one passing and one failing fixture test [Completed]
 - Check is individually activatable via CLI flag and `all_checks` shortcut [Completed]
 - Full test suite and linter remain green after addition [Completed]
+
+## 11. MBSF Entitlement Reason Code Validation
+
+Status: Complete
+
+Outputs:
+
+- Additive MBSF Base validator for Medicare Entitlement Reason Codes
+  (`ENR-004`: `entlmt_rsn_orig`, `entlmt_rsn_curr`, `bene_entlmt_rsn_orig`,
+  `bene_entlmt_rsn_curr`, `entlmt_rsn_orig_cd`, `entlmt_rsn_curr_cd` when present
+  and non-null must be in CCW valid set `{"0","1","2","3","00","10","20","30"}`) [Completed]
+- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI
+  sub-command via `--mbsf-entitlement-reason-check` (`--mbsf-entlmt-rsn-check`)
+  flag; included in `all_checks` shortcut [Completed]
+- Focused behavioral tests for valid codes (including null skip), invalid codes,
+  pure null-value DataFrame, no-column early exit, and empty DataFrame early exit
+  [Completed]
+
+Exit criteria:
+
+- Validator has at least one passing and one failing fixture test [Completed]
+- Check is individually activatable via CLI flag and `all_checks` shortcut [Completed]
+- Full test suite and linter remain green after addition [Completed]
