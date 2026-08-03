@@ -1481,6 +1481,70 @@ class RelationalValidator:
             ]
         return []
 
+    @staticmethod
+    def check_mbsf_hmo_indicator_constraints(
+        mbsf_base_df: pl.DataFrame,
+    ) -> list[Finding]:
+        """Identifies MBSF Base records with invalid monthly HMO Indicator Codes outside CCW valid set {'0','1','2','A','B','C','4','N'}.
+
+        Per CMS CCW MBSF Base codebook, each monthly code (hmo_ind_01–12) when non-null
+        must belong to the valid CCW HMO indicator set.
+        """
+        if mbsf_base_df.is_empty():
+            return []
+
+        hmo_cols = [f"hmo_ind_{i:02d}" for i in range(1, 13)]
+        upper_hmo_cols = [f"HMO_IND_{i:02d}" for i in range(1, 13)]
+        present_cols = [
+            c for c in hmo_cols + upper_hmo_cols if c in mbsf_base_df.columns
+        ]
+        if not present_cols:
+            return []
+
+        valid_codes = {"0", "1", "2", "A", "B", "C", "4", "N"}
+        invalid_conditions = []
+        for col in present_cols:
+            if mbsf_base_df.schema[col] == pl.Null:
+                continue
+            invalid_conditions.append(
+                pl.col(col).is_not_null()
+                & ~pl.col(col).cast(pl.String).is_in(list(valid_codes))
+            )
+
+        if not invalid_conditions:
+            return []
+
+        combined_condition = invalid_conditions[0]
+        for cond in invalid_conditions[1:]:
+            combined_condition = combined_condition | cond
+
+        invalid = mbsf_base_df.filter(combined_condition)
+        invalid_count = invalid.height
+
+        if invalid_count > 0:
+            sample_ids = (
+                invalid.select("bene_id").slice(0, 5).to_series().to_list()
+                if "bene_id" in invalid.columns
+                else []
+            )
+            return [
+                Finding(
+                    rule_id="ENR-005",
+                    category=FindingCategory.ADMINISTRATIVE,
+                    severity=Severity.HIGH,
+                    message=(
+                        f"Found {invalid_count} MBSF Base records with invalid monthly HMO "
+                        f"Indicator Code outside CCW valid set {{'0','1','2','A','B','C','4','N'}}."
+                    ),
+                    count=invalid_count,
+                    details={
+                        "table_name": "MBSF Base Enrollment",
+                        "sample_bene_ids": sample_ids,
+                    },
+                )
+            ]
+        return []
+
 
     @staticmethod
     def check_provider_npi_constraints(
@@ -5779,6 +5843,9 @@ class RelationalValidator:
             )
             findings.extend(
                 self.check_mbsf_entitlement_reason_code_constraints(mbsf_base_df)
+            )
+            findings.extend(
+                self.check_mbsf_hmo_indicator_constraints(mbsf_base_df)
             )
             findings.extend(
                 self.check_record_uniqueness(

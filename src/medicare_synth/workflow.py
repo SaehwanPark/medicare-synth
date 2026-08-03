@@ -144,6 +144,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
     mbsf_dual_status_check = data.get("mbsf_dual_status_check", False)
     mbsf_ndi_cause_of_death_check = data.get("mbsf_ndi_cause_of_death_check", False)
     mbsf_entitlement_reason_check = data.get("mbsf_entitlement_reason_check", False)
+    mbsf_hmo_indicator_check = data.get("mbsf_hmo_indicator_check", False)
     dme_check = data.get("dme_check", False)
     hospice_check = data.get("hospice_check", False)
     pde_check = data.get("pde_check", False)
@@ -259,6 +260,7 @@ def _write_md_report(path: str, data: dict[str, object]) -> None:
 | **MBSF Dual Eligibility Status Code Verified** | {mbsf_dual_status_check} |
 | **MBSF NDI Cause-of-Death Code Verified** | {mbsf_ndi_cause_of_death_check} |
 | **MBSF Entitlement Reason Code Verified** | {mbsf_entitlement_reason_check} |
+| **MBSF Base HMO Monthly Indicator Verified** | {mbsf_hmo_indicator_check} |
 
 | **Revenue Center Code Format Verified** | {rev_center_check} |
 | **Demographic Code Format Verified** | {demographic_check} |
@@ -384,6 +386,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
     mbsf_dual_status_check = data.get("mbsf_dual_status_check", False)
     mbsf_ndi_cause_of_death_check = data.get("mbsf_ndi_cause_of_death_check", False)
     mbsf_entitlement_reason_check = data.get("mbsf_entitlement_reason_check", False)
+    mbsf_hmo_indicator_check = data.get("mbsf_hmo_indicator_check", False)
 
     rev_center_check = data.get("rev_center_check", False)
     demographic_check = data.get("demographic_check", False)
@@ -514,6 +517,7 @@ def _write_html_report(path: str, data: dict[str, object]) -> None:
             <tr><td><strong>MBSF Dual Eligibility Status Code Verified</strong></td><td>{mbsf_dual_status_check}</td></tr>
             <tr><td><strong>MBSF NDI Cause-of-Death Code Verified</strong></td><td>{mbsf_ndi_cause_of_death_check}</td></tr>
             <tr><td><strong>MBSF Entitlement Reason Code Verified</strong></td><td>{mbsf_entitlement_reason_check}</td></tr>
+            <tr><td><strong>MBSF Base HMO Monthly Indicator Verified</strong></td><td>{mbsf_hmo_indicator_check}</td></tr>
 
             <tr><td><strong>Revenue Center Code Format Verified</strong></td><td>{rev_center_check}</td></tr>
             <tr><td><strong>Demographic Code Format Verified</strong></td><td>{demographic_check}</td></tr>
@@ -641,6 +645,7 @@ def run_autonomous_workflow(
     mbsf_dual_status_check: bool = False,
     mbsf_ndi_cause_of_death_check: bool = False,
     mbsf_entitlement_reason_check: bool = False,
+    mbsf_hmo_indicator_check: bool = False,
     rev_center_check: bool = False,
     demographic_check: bool = False,
     mbsf_check: bool = False,
@@ -751,6 +756,7 @@ def run_autonomous_workflow(
         mbsf_dual_status_check = True
         mbsf_ndi_cause_of_death_check = True
         mbsf_entitlement_reason_check = True
+        mbsf_hmo_indicator_check = True
 
         rev_center_check = True
         demographic_check = True
@@ -3148,6 +3154,22 @@ def run_autonomous_workflow(
             f"✓ MBSF Entitlement Reason Code constraints verified ({violating_count} Entitlement Reason Code constraint findings)."
         )
 
+    if mbsf_hmo_indicator_check:
+        print(
+            "\n=== Verification Step: Executing MBSF Base HMO Monthly Indicator Verification Check ==="
+        )
+        from medicare_synth.scenarios import ScenarioCompiler
+        from medicare_synth.validation import RelationalValidator
+
+        scenario_slice = ScenarioCompiler.get_scenario("valid_baseline_cohort")
+        hmo_findings = RelationalValidator.check_mbsf_hmo_indicator_constraints(
+            scenario_slice.mbsf_base_df
+        )
+        violating_count = sum(f.count for f in hmo_findings)
+        print(
+            f"✓ MBSF Base HMO Monthly Indicator constraints verified ({violating_count} HMO Monthly Indicator constraint findings)."
+        )
+
     if pde_check:
         print(
             "\n=== Verification Step: Executing Part D Prescription Drug Event Field Constraint Verification Check ==="
@@ -3286,6 +3308,7 @@ def run_autonomous_workflow(
             "mbsf_dual_status_check": mbsf_dual_status_check,
             "mbsf_ndi_cause_of_death_check": mbsf_ndi_cause_of_death_check,
             "mbsf_entitlement_reason_check": mbsf_entitlement_reason_check,
+            "mbsf_hmo_indicator_check": mbsf_hmo_indicator_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,
@@ -3441,6 +3464,7 @@ def run_autonomous_workflow(
             "mbsf_dual_status_check": mbsf_dual_status_check,
             "mbsf_ndi_cause_of_death_check": mbsf_ndi_cause_of_death_check,
             "mbsf_entitlement_reason_check": mbsf_entitlement_reason_check,
+            "mbsf_hmo_indicator_check": mbsf_hmo_indicator_check,
             "rev_center_check": rev_center_check,
             "demographic_check": demographic_check,
             "mbsf_check": mbsf_check,

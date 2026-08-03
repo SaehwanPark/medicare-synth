@@ -723,6 +723,13 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Verify MBSF Entitlement Reason Codes are in valid CCW set before commit/push",
     )
+    auto_wf_parser.add_argument(
+        "--mbsf-hmo-indicator-check",
+        "--mbsf-hmo-check",
+        dest="mbsf_hmo_indicator_check",
+        action="store_true",
+        help="Verify MBSF Base HMO Monthly Indicator Codes are in valid CCW set before commit/push",
+    )
 
     auto_wf_parser.add_argument(
         "--rev-center-check",
@@ -1232,6 +1239,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             mbsf_dual_status_check=args.mbsf_dual_status_check,
             mbsf_ndi_cause_of_death_check=args.mbsf_ndi_cause_of_death_check,
             mbsf_entitlement_reason_check=args.mbsf_entitlement_reason_check,
+            mbsf_hmo_indicator_check=args.mbsf_hmo_indicator_check,
             rev_center_check=args.rev_center_check,
             demographic_check=args.demographic_check,
             mbsf_check=args.mbsf_check,

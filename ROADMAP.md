@@ -223,3 +223,26 @@ Exit criteria:
 - Validator has at least one passing and one failing fixture test [Completed]
 - Check is individually activatable via CLI flag and `all_checks` shortcut [Completed]
 - Full test suite and linter remain green after addition [Completed]
+
+## 12. MBSF Base HMO Monthly Indicator Code Domain Validation
+
+Status: Complete
+
+Outputs:
+
+- Additive MBSF Base validator for monthly HMO coverage indicators
+  (`ENR-005`: `hmo_ind_01`–`_12` when present and non-null must be in CCW valid set
+  `{"0","1","2","A","B","C","4","N"}`) [Completed]
+- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI
+  sub-command via `--mbsf-hmo-indicator-check` (`--mbsf-hmo-check`) flag;
+  included in `all_checks` shortcut [Completed]
+- Focused behavioral tests for valid codes (including null skip), invalid codes,
+  pure null-value DataFrame, no-column early exit, and empty DataFrame early exit
+  [Completed]
+
+Exit criteria:
+
+- Validator has at least one passing and one failing fixture test [Completed]
+- Check is individually activatable via CLI flag and `all_checks` shortcut [Completed]
+- Full test suite and linter remain green after addition [Completed]
+
