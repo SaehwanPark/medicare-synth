@@ -301,3 +301,57 @@ def test_check_mbsf_entitlement_reason_code_constraints_all_null():
     )
     findings = validator.check_mbsf_entitlement_reason_code_constraints(df_null)
     assert len(findings) == 0
+
+
+def test_check_mbsf_hmo_indicator_constraints_valid():
+    """Tests ENR-005: valid monthly HMO indicator codes produce no findings."""
+    validator = RelationalValidator()
+
+    valid_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE_A", "BENE_B"],
+            "hmo_ind_01": ["0", "A"],
+            "hmo_ind_02": ["1", None],  # NULL is valid
+            "hmo_ind_12": ["C", "N"],
+        }
+    )
+    findings = validator.check_mbsf_hmo_indicator_constraints(valid_df)
+    assert len(findings) == 0
+
+
+def test_check_mbsf_hmo_indicator_constraints_invalid():
+    """Tests ENR-005: invalid monthly HMO indicator code produces exactly one ENR-005 finding."""
+    validator = RelationalValidator()
+
+    invalid_df = pl.DataFrame(
+        {
+            "bene_id": ["BENE_Z"],
+            "hmo_ind_01": ["X"],  # Invalid: not in CCW valid set
+            "hmo_ind_02": ["0"],
+        }
+    )
+    findings = validator.check_mbsf_hmo_indicator_constraints(invalid_df)
+    assert len(findings) == 1
+    assert findings[0].rule_id == "ENR-005"
+    assert findings[0].count == 1
+
+
+def test_check_mbsf_hmo_indicator_constraints_no_columns():
+    """Tests ENR-005: empty column set returns no findings (early-exit path)."""
+    validator = RelationalValidator()
+
+    df_no_cols = pl.DataFrame({"bene_id": ["BENE_A"], "rfrnc_yr": [2021]})
+    findings = validator.check_mbsf_hmo_indicator_constraints(df_no_cols)
+    assert len(findings) == 0
+
+
+def test_check_mbsf_hmo_indicator_constraints_all_null():
+    """Tests ENR-005: all-null column DataFrame returns no findings."""
+    validator = RelationalValidator()
+
+    df_null = pl.DataFrame(
+        {"bene_id": ["BENE_A"], "hmo_ind_01": [None]},
+        schema={"bene_id": pl.String, "hmo_ind_01": pl.Null},
+    )
+    findings = validator.check_mbsf_hmo_indicator_constraints(df_null)
+    assert len(findings) == 0
