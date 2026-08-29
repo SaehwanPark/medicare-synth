@@ -46,7 +46,8 @@ to inspect an intentional failure and call the Python API.
 - **Expand connected data:** vertical feature synthesis and horizontal
   connected-subgraph scaling preserve relationships and deterministic keys.
 - **Export portable artifacts:** release bundles contain CSV/Parquet tables,
-  SHA-256 manifests, validation/fidelity/limitations reports, and SQL DDL.
+  SHA-256 manifests, validation/fidelity reports, and SQL DDL; a limitations
+  profile can be generated alongside them.
 - **Exercise the 2022 boundary:** the source-aware PUF importer is limited to
   the 2022 beneficiary and carrier files; the default workflow remains on the
   2021 CMS Synthetic Claims baseline.
@@ -77,7 +78,7 @@ uv run medicare-synth auto-workflow --all-checks --dry-run
 ```
 
 See the [CLI reference](https://saehwanpark.github.io/medicare-synth/guides/cli/)
-for all 11 subcommands and the [release workflow](https://saehwanpark.github.io/medicare-synth/guides/release-workflow/)
+for all 12 subcommands and the [release workflow](https://saehwanpark.github.io/medicare-synth/guides/release-workflow/)
 for manifest-verified source handling.
 
 ## Python API
