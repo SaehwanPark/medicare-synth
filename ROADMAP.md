@@ -246,3 +246,29 @@ Exit criteria:
 - Check is individually activatable via CLI flag and `all_checks` shortcut [Completed]
 - Full test suite and linter remain green after addition [Completed]
 
+## 13. Newcomer Documentation Portal and GitHub Pages Publication
+
+Status: Complete
+
+Outputs:
+
+- Refined the root README into a concise orientation, accurate Python 3.13+
+  quickstart, capability summary, source boundary, and documentation links.
+- Added a Jekyll documentation portal under `docs/` with a fixed-header/sidebar
+  layout, responsive navigation, accessible focus/skip behavior, first-run
+  guides, CLI/scenario/release workflows, data-model and provenance references,
+  limitations, contributor guidance, and canonical-document map.
+- Added a standard-library documentation link/currentness check and a GitHub
+  Actions Pages build/deploy workflow sourced from `docs/`.
+
+Exit criteria:
+
+- A new user can install the package, run a valid fixture, and understand an
+  intentional validation failure from the portal without consulting source
+  code [Completed]
+- Maintained portal links and required pages pass the local documentation check
+  [Completed]
+- The site builds from `docs/` through GitHub Pages workflow and publishes at
+  the repository Pages URL after merge [Completed]
+- README, architecture, roadmap, and changelog describe the same public surface
+  [Completed]

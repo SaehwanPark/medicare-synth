@@ -1,6 +1,6 @@
 # ARCHITECTURE
 
-Last Reviewed: 2026-07-20
+Last Reviewed: 2026-08-29
 Status: Active Implementation
 
 ## Current Repository
@@ -81,3 +81,4 @@ These are responsibility boundaries, not an approved Python package layout.
 - **Licensing**: Codebase licensed under Apache License 2.0 (`Apache-2.0`).
 - **Data Redistribution**: Raw CMS synthetic data is public domain, acquired via CLI manifest checksum verification into ignored `data/` directories.
 - **Artifact Publication**: Release bundles publish versioned Parquet/CSV tables, Pydantic schemas, SHA256 manifests, validation reports, and fidelity profiles.
+- **Documentation Publication**: The newcomer-facing documentation portal is authored as Markdown under `docs/`, rendered by GitHub Pages/Jekyll, and deployed by `.github/workflows/pages.yml`; `scripts/check_documentation_site.py` verifies the maintained page set and local links before deployment.

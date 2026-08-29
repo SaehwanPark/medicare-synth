@@ -1,0 +1,23 @@
+title: "Medicare-Synth"
+tagline: "Provenance-backed Medicare fixtures"
+description: "A local, deterministic workspace for building and testing Medicare data pipelines before restricted CMS access."
+url: "https://saehwanpark.github.io"
+baseurl: "/medicare-synth"
+repository: "SaehwanPark/medicare-synth"
+markdown: kramdown
+permalink: pretty
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - harness
+  - medicare-synth-project-proposal_20260720.md
