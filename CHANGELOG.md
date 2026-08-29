@@ -4,6 +4,14 @@
 
 ### Added
 
+- Added a newcomer-focused GitHub Pages documentation portal under `docs/`,
+  matching the Vital Margin indigo header/sidebar design language. Added
+  install/first-run, CLI, scenario/validation, release, data-model,
+  provenance, limitations, contributor, and canonical-document guides; rewrote
+  the root README as a concise orientation; added accessible responsive
+  navigation; and added `scripts/check_documentation_site.py` plus
+  `.github/workflows/pages.yml` for link-checked Jekyll deployment.
+
 - Closed Milestone 12 (MBSF Base HMO Monthly Indicator Code Domain Validation): added additive MBSF Base validator (`ENR-005`: `hmo_ind_01`–`_12` monthly HMO coverage indicator code domain check when non-null), wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI sub-command via `--mbsf-hmo-indicator-check` flag (included in `all_checks` shortcut). Updated `ROADMAP.md` status to Complete (450 total passing unit tests, ruff and basedpyright clean).
 
 - Added `check_mbsf_hmo_indicator_constraints` (`ENR-005`) to `RelationalValidator` in `src/medicare_synth/validation.py` to verify non-null monthly HMO coverage indicators (`hmo_ind_01`–`_12`) are in CCW valid set `{"0","1","2","A","B","C","4","N"}`. Wired into `validate_slice`. Added `--mbsf-hmo-indicator-check` (`--mbsf-hmo-check`) parameter to `auto-workflow` subcommand in `src/medicare_synth/cli.py` and `mbsf_hmo_indicator_check` parameter to `run_autonomous_workflow` in `src/medicare_synth/workflow.py`. Updated markdown and HTML workflow report templates.
