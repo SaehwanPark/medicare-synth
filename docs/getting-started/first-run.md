@@ -68,14 +68,14 @@ workflow. Use the CLI when you need a repeatable shell step or a CI fixture.
 <div class="card-grid">
   <div class="card">
     <h3>Need command syntax?</h3>
-    <p>The <a href="../guides/cli/">CLI reference</a> lists every subcommand, defaults, and output artifact.</p>
+    <p>The <a href="../../guides/cli/">CLI reference</a> lists every subcommand, defaults, and output artifact.</p>
   </div>
   <div class="card">
     <h3>Need bigger or custom data?</h3>
-    <p>The <a href="../guides/scenarios-and-validation/">scenario guide</a> covers catalog, audit, and expansion workflows.</p>
+    <p>The <a href="../../guides/scenarios-and-validation/">scenario guide</a> covers catalog, audit, and expansion workflows.</p>
   </div>
   <div class="card">
     <h3>Need a shareable bundle?</h3>
-    <p>The <a href="../guides/release-workflow/">release guide</a> explains manifests, checksums, and formats.</p>
+    <p>The <a href="../../guides/release-workflow/">release guide</a> explains manifests, checksums, and formats.</p>
   </div>
 </div>

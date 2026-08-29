@@ -62,9 +62,9 @@ uv run ruff check .
 | `uv: command not found` | Install `uv` from its [official installation guide](https://docs.astral.sh/uv/getting-started/installation/), reopen the shell, and rerun `uv sync`. |
 | Python version is too old | Install Python 3.13+ and use `uv python pin 3.13` before `uv sync`. |
 | CLI cannot be found | Run it through the project environment with `uv run medicare-synth ...`; do not rely on a global install. |
-| You expected source files after sync | Source acquisition is a separate, manifest-verified step. Start with the [release workflow](../guides/release-workflow/). |
+| You expected source files after sync | Source acquisition is a separate, manifest-verified step. Start with the [release workflow](../../guides/release-workflow/). |
 
 ## Next step
 
-Continue with the [first useful run](first-run/) to inspect a valid fixture,
+Continue with the [first useful run](../first-run/) to inspect a valid fixture,
 exercise an intentional failure, and call the Python API.

@@ -48,7 +48,7 @@ contract:
 - `CHANGELOG.md` — user-visible history; and
 - `LESSONS.md` — verified recurring setup or debugging traps only.
 
-The [documentation portal](./) is the newcomer-facing layer. Prefer a
+The [documentation portal]({{ '/' | relative_url }}) is the newcomer-facing layer. Prefer a
 short guide there over making new users reconstruct a workflow from changelog
 entries or source code.
 
@@ -77,6 +77,6 @@ merge authorization are understood.
 Changes to schemas, normalization, validation, generation, scenarios, release
 artifacts, or public CLI/API behavior need evidence, focused behavioral tests,
 and a review of relational and provenance boundaries. Read
-[Data model &amp; grains](concepts/data-model/),
-[Provenance &amp; validation](concepts/provenance-and-validation/), and the
-[canonical project documents](reference/project-documents/) first.
+[Data model &amp; grains](../concepts/data-model/),
+[Provenance &amp; validation](../concepts/provenance-and-validation/), and the
+[canonical project documents](../reference/project-documents/) first.

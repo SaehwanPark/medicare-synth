@@ -88,4 +88,4 @@ new feature would change a table's grain or relationship, it needs an explicit
 schema decision rather than a convenience join.
 
 For the public boundary and unsupported interpretations, read
-[Limitations &amp; scope](../reference/limitations/).
+[Limitations &amp; scope](../../reference/limitations/).
