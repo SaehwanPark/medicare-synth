@@ -83,5 +83,5 @@ uv run medicare-synth expand \
 ```
 
 Use vertical expansion when the goal is to add evidence-graded attributes to
-existing rows. Read [Data model &amp; grains](../concepts/data-model/) before
+existing rows. Read [Data model &amp; grains](../../concepts/data-model/) before
 joining or expanding tables so one-to-many relationships remain visible.

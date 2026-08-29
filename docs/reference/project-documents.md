@@ -23,7 +23,7 @@ truth. Use this map when you need the full contract or historical context.
 ## Evidence and source records
 
 Source manifests and RKB evidence snapshots live under `data/` and are tracked
-without raw CMS data. The [release workflow](../guides/release-workflow/)
+without raw CMS data. The [release workflow](../../guides/release-workflow/)
 explains how to acquire, verify, normalize, and export a bounded slice.
 
 ## Current versus historical context

@@ -77,4 +77,4 @@ baseline.
 4. Verify checksums after copying or publishing artifacts.
 5. State what the bundle does **not** claim in the accompanying release note.
 
-See [Limitations &amp; scope](../reference/limitations/) for the claims boundary.
+See [Limitations &amp; scope](../../reference/limitations/) for the claims boundary.

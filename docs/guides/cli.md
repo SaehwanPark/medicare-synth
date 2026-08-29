@@ -88,4 +88,4 @@ flags are useful when debugging one domain; `--all-checks` is the broad gate.
   downloaded CMS source files to the repository.
 
 For the validator’s finding categories and provenance statuses, read
-[Provenance &amp; validation](../concepts/provenance-and-validation/).
+[Provenance &amp; validation](../../concepts/provenance-and-validation/).

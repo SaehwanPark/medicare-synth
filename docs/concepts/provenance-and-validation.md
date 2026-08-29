@@ -67,5 +67,5 @@ representativeness, causal validity, clinical realism, or formal privacy.
 
 When documenting a release, name the source year, evidence snapshot, methods,
 provenance statuses, checks run, known deviations, and unmodeled behavior. The
-[release workflow](../guides/release-workflow/) shows where those disclosures
+[release workflow](../../guides/release-workflow/) shows where those disclosures
 are written.
