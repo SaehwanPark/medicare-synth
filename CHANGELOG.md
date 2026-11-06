@@ -4,6 +4,10 @@
 
 ### Added
 
+- Tightened the root `README.md` orientation around today’s structural toolkit
+  and the evidence-calibrated playground direction, with pointers to
+  `docs/goal.md` and `ROADMAP.md`.
+
 - Adopted the evidence-calibrated research playground program: tracked
   [`docs/medicare_synth_evidence_calibrated_playground_proposal.md`](docs/medicare_synth_evidence_calibrated_playground_proposal.md),
   added agent goal prompt [`docs/goal.md`](docs/goal.md), and realigned root
