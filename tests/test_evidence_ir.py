@@ -312,6 +312,7 @@ def test_execute_refuses_draft_without_override() -> None:
 
 def test_execute_lit02_errors_explicitly() -> None:
   finding = load_finding(LIT02)
+  assert finding.role == EvidenceRole.EXCLUDED
   world = generate_diabetes_ip_world(
     ConditionalWorldParams(
       n_beneficiaries=200,
@@ -325,7 +326,10 @@ def test_execute_lit02_errors_explicitly() -> None:
   assert report.executable is False
   assert report.synthetic_estimate is None
   assert report.errors
-  assert any("Planned-admission" in e or "planned" in e.lower() for e in report.errors)
+  # Excluded findings short-circuit before estimator execution.
+  assert any("excluded" in e.lower() for e in report.errors)
+  compiled = compile_finding(finding)
+  assert any(i.code == "PLANNED-ADMISSION" for i in compiled.compatibility.errors)
 
 
 def test_execute_missing_table_errors() -> None:

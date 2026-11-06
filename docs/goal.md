@@ -19,23 +19,22 @@ which assumptions remain free; run the same analysis across a few plausible
 worlds; and carry **code and design**—not synthetic conclusions—into authorized
 real-data work.
 
-## Current objective (Phase 3 → corpus freeze)
+## Current objective (Phase 4 → calibration)
 
-Phases 0–2 are **complete** (`docs/phase0/`, `docs/phase1/`, `docs/phase2/`).
-Pinned context: `mvp-2021-om-ffs-diabetes-ip`. Conditional synthesizer recovers
-known-truth diabetes→IP relationships. Evidence IR v0.1 formalizes and executes
-reviewed findings (LIT-03 diagnostic prevalence) with explicit compatibility
-gaps.
+Phases 0–3 are **complete**. Pinned context:
+`mvp-2021-om-ffs-diabetes-ip`. Conditional synthesizer, Evidence IR v0.1, and
+frozen corpus `mvp-2021-om-ffs-diabetes-ip-corpus-v1` (3 calibration + 1
+holdout + diagnostic/excluded retained) are in place.
 
 Next path:
 
 1. ~~**Pin MVP context**~~ / ~~**Audit**~~ / ~~**Scout evidence**~~ — Phase 0.
 2. ~~**Prove synthesizer controllability**~~ — Phase 1 (`docs/phase1/`).
 3. ~~**Formalize one finding end-to-end**~~ — Phase 2 (`docs/phase2/`).
-4. **Freeze a small evidence corpus** — train / holdout / diagnostic partitions
-   with checksums and exclusion rationales (Phase 3).
+4. ~~**Freeze a small evidence corpus**~~ — Phase 3 (`docs/phase3/`).
 5. **Calibrate lightly** — beneficiary reweighting before richer generators;
-   report ESS/support/infeasibility.
+   fit **calibration** partition only; report ESS/support/infeasibility; never
+   retune against holdout.
 6. **Emit 2–3 worlds** — shared supported targets; different documented weak
    assumptions; identical downstream analysis in each.
 7. **Freeze evaluation** — hard structural gates, graded evidence metrics,
@@ -68,5 +67,5 @@ the MVP context works end-to-end.
 | B | One human-reviewed external finding executes as a reproducible comparison against generated Medicare-like data — **done** (`docs/phase2/`, LIT-03) |
 | C | A calibrated path improves predeclared contextual metrics vs uncalibrated baseline on held-out compatible evidence, without breaking structural gates |
 
-Start Phase 3 corpus freeze toward Milestone C readiness; do not treat Phase 2
-diagnostic formalizations as silent calibration training targets.
+Start Phase 4 calibration toward Milestone C; holdout in corpus v1 stays
+untouched by fitting.

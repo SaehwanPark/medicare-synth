@@ -1,0 +1,68 @@
+{
+  "schema_version": "0.1",
+  "finding_id": "cms-agg03-diabetes-prev-ffs-2018",
+  "inventory_id": "CMS-AGG-03",
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "source": {
+    "type": "official_aggregate",
+    "identifier": "cms-omh-diabetes-disparities-highlight-2021",
+    "title": "Data Highlight on Diabetes Disparities in Medicare Fee-For-Service",
+    "url": "https://www.cms.gov/files/document/diabetes-disparities-data-highlight-2021.pdf",
+    "location": "Opening summary: Medicare FFS diabetes prevalence remained relatively steady from 2012–2018 (32.2% to 27.7%)",
+    "citation": "CMS Office of Minority Health. Data Highlight on Diabetes Disparities in Medicare FFS (2021).",
+    "retrieval_date": "2026-11-06"
+  },
+  "population": {
+    "program": "original_medicare_ffs",
+    "years": [2018],
+    "age": {"minimum": 65},
+    "geography": "national",
+    "ffs_rule": "option_b_full_year",
+    "enrollment_notes": "Source cites Medicare FFS population prevalence; MVP approximates with Option B full-year A+B and HMO months = 0."
+  },
+  "cohort": {
+    "index_date": "2018-01-01",
+    "observation_end": "2018-12-31",
+    "inclusion_notes": "National FFS diabetes prevalence cited for 2018 endpoint of 2012–2018 series."
+  },
+  "estimand": {
+    "type": "prevalence",
+    "numerator": {
+      "concept": "diabetes",
+      "algorithm": "mbsf_sp_diabetes_v1",
+      "table": "mbsf_chronic_conditions",
+      "field": "sp_diabetes"
+    },
+    "denominator": "eligible_beneficiaries",
+    "scale": 1.0
+  },
+  "analysis": {
+    "estimator": "crude_proportion",
+    "notes": "Unadjusted national prevalence."
+  },
+  "result": {
+    "estimate": 0.277,
+    "unit": "proportion",
+    "notes": "Published 27.7% for 2018 Medicare FFS diabetes prevalence."
+  },
+  "role": "calibration",
+  "comparability": {
+    "grade": "B",
+    "transport_required": true,
+    "assumptions": [
+      "Year transport from 2018 evidence to 2021 MVP context.",
+      "MBSF sp_diabetes approximates the source CCW/MMD diabetes definition."
+    ],
+    "gaps": [
+      "calendar_year_2018_vs_context_2021",
+      "source_age_mix_may_include_under_65_unless_filtered"
+    ]
+  },
+  "governance": {
+    "review_status": "accepted",
+    "reviewer": "phase3-corpus-freeze",
+    "reviewed_at": "2026-11-06",
+    "rationale": "Accepted as calibration target #1 (diabetes prevalence) for mvp corpus v1. Not a Medicare finding when compared on synthetic tables.",
+    "conflicts": []
+  }
+}
