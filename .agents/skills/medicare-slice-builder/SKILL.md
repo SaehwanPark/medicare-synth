@@ -1,65 +1,43 @@
 ---
 name: medicare-slice-builder
-description: Implement one evidence-approved Medicare-Synth vertical slice with behavioral tests, typed functional boundaries, deterministic outputs, and synchronized project documents.
+description: Implement one evidence-approved Medicare-Synth slice with behavioral tests, typed boundaries, deterministic outputs, and synced project docs.
 ---
 
 # Medicare Slice Builder
 
-## When to Use
+## When
 
-- Use after an approved evidence contract exists for one bounded behavior slice.
-- Use for schemas, normalization, validation, generation, scenarios, exports,
-  or public interface behavior covered by that contract.
-- Do not use for broad file-family implementation without a vertical acceptance
-  test or for unresolved domain semantics.
+After an approved `_workspace/01_evidence_contract.md` for one bounded
+behavior (schema, validation, synthesis, Evidence IR/compiler, calibration,
+worlds, evaluation, or release surface).
 
-## Required Inputs
+## Inputs
 
-- `_workspace/00_request.md` and `_workspace/01_evidence_contract.md`.
-- Relevant implementation, tests, fixtures, and canonical project documents.
-- An isolated task branch and available verification commands.
+`00_request.md`, `01_evidence_contract.md`; relevant code/tests/docs; task branch.
 
 ## Workflow
 
-1. Write `_workspace/02_test_spec.md` with success, boundary, invalid-input,
-  provenance, and deterministic-output cases.
-2. Add focused behavioral tests and record the expected failing command before
-  changing production behavior when a test surface exists.
-3. Model domain states with explicit types and recoverable errors; keep pure
-  transformations separate from source, filesystem, clock, and environment
-  effects.
-4. Implement the smallest complete slice required by the evidence contract.
-5. Preserve raw values and lineage where normalization changes representation;
-  never silently repair or discard a baseline anomaly.
-6. Run focused checks followed by applicable repository-wide checks.
-7. Reconcile `SPEC.md`, `ARCHITECTURE.md`, `ROADMAP.md`, and `CHANGELOG.md` only
-  where verified behavior changes their state.
-8. Write `_workspace/03_implementation_report.md` with changed files, commands,
-  results, deviations, document updates, and remaining risks.
+1. Write `_workspace/02_test_spec.md` (success, boundary, invalid, provenance,
+   determinism; holdout isolation if calibration-related).
+2. Add focused behavioral tests; record expected failure before production edits
+   when a test surface exists.
+3. Keep types and recoverable errors explicit; pure transforms vs I/O at edges.
+4. Implement the smallest complete slice; never silently repair baseline anomalies.
+5. Do not fit on held-out evidence or mutate approved evidence values.
+6. Run focused then repo checks (`pytest` / `basedpyright` / `ruff` / docs checks
+   as applicable).
+7. Sync `SPEC.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `CHANGELOG.md` only where
+   verified behavior changes state.
+8. Write `_workspace/03_implementation_report.md`.
 
-## Outputs
+## Done when
 
-- `_workspace/02_test_spec.md` and `_workspace/03_implementation_report.md`.
-- Focused tests and one complete implementation slice.
-- Synchronized canonical documents where applicable.
+Tests assert observable, evidence-backed behavior; seeds/provenance explicit;
+no unrelated family or fidelity claim changes; report separates passed /
+unavailable / unrelated failures.
 
-## Validation
+## Stop
 
-- Tests assert observable behavior and evidence-backed constraints rather than
-  internal implementation details.
-- State, side effects, failures, ordering, seeds, and provenance are explicit at
-  boundaries.
-- No unrelated file family, dependency, public contract, or release claim
-  changes.
-- The implementation report distinguishes passed checks, unavailable checks,
-  unrelated failures, and unverified behavior.
-
-## Stop Conditions
-
-- Stop if the evidence contract is incomplete or contradicted by repository
-  reality.
-- Stop before adding an unapproved dependency, public incompatibility, hidden
-  nondeterminism, or broad abstraction.
-- Stop if more than one vertical slice must change unexpectedly.
-- Stop if validation is blocked by unrelated failures that prevent trustworthy
-  evidence.
+Incomplete/contradicted contract; unapproved dependency or public break;
+hidden nondeterminism; multi-slice sprawl; validation blocked by unrelated
+failures.

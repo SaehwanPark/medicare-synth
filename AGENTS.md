@@ -1,43 +1,39 @@
 # Repository Agents Guide
 
-Keep this file short and repo-wide. Use the linked documents and harness for
-task-specific detail.
+Keep this file short. Task detail lives in linked docs and skills.
 
 ## What
 
-- Medicare-Synth builds provenance-backed, contemporary Medicare synthetic data
-  and deterministic research fixtures.
-- Canonical project state lives in `SPEC.md`, `ARCHITECTURE.md`, `ROADMAP.md`,
-  and `CHANGELOG.md`.
-- Repository-local skills live in `.agents/skills/`; inspectable harness
-  handoffs live in ignored `_workspace/`.
-- Temporary or archived datasets and related artifacts belong in ignored
-  `data/`.
+- Medicare-Synth: provenance-backed, structurally valid Medicare synthetic data
+  and fixtures, expanding into an **evidence-calibrated research playground**.
+- Canonical state: `SPEC.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `CHANGELOG.md`.
+- Program design:
+  `docs/medicare_synth_evidence_calibrated_playground_proposal.md`.
+- Active agent goal: `docs/goal.md`.
+- Repo skills: `.agents/skills/`; harness:
+  `docs/harness/medicare-synth/team-spec.md`; handoffs: ignored `_workspace/`.
+- Raw/temp data: ignored `data/`.
 
 ## Why
 
-- Preserve official synthetic records and source evidence before deriving or
-  generating data.
-- Make Medicare file grain, provenance, relationships, and limitations explicit
-  so synthetic fixtures do not create unsupported inferential confidence.
-- Keep implementation reviewable through typed boundaries, pure transforms,
-  deterministic outputs, and validation-first development.
+- Preserve official synthetic sources and evidence before deriving or generating.
+- Make grain, provenance, relationships, and limitations explicit—no unsupported
+  inferential confidence from fixtures or literature matches.
+- Calibration improves contextual plausibility for a declared research purpose;
+  it does not recover real beneficiaries or authorize synthetic estimates as
+  Medicare findings.
+- Agents assist; humans approve evidence, estimands, holdouts, and calibrated
+  releases. Engines must run without the harness.
 
 ## How
 
-- Use `uv` for Python runtime and dependency workflows; use `uv add` rather than
-  editing dependency declarations manually.
-- Prefer static types, immutable values where practical, return-oriented error
-  handling, and side effects at system boundaries.
-- Use 2-space indentation unless a file format requires otherwise.
-- For domain or release-affecting work, follow
-  `docs/harness/medicare-synth/team-spec.md` and reconcile durable decisions into
-  the canonical project documents.
-- Keep comments focused on domain rationale, provenance, constraints, and other
-  non-obvious invariants.
-- Run `uv sync --dry-run` and `git diff --check` for the current documentation
-  foundation. Add and run `pytest`, `basedpyright`, and `ruff` checks when those
-  tools and source surfaces are configured.
-- Record only verified recurring setup or debugging traps in `LESSONS.md`.
-- If a required CLI is not found, use `command -v <tool>` before concluding it
-  is unavailable.
+- `uv` for Python; `uv add` for dependencies.
+- Prefer types, immutable values, return-oriented errors, effects at boundaries.
+- 2-space indent unless a format requires otherwise.
+- Domain/release work: follow the harness team-spec; reconcile durable decisions
+  into canonical docs.
+- Comments: domain rationale, provenance, constraints, non-obvious invariants.
+- Verify: `uv sync --dry-run`, `git diff --check`; when code changes, also
+  `pytest`, `basedpyright`, `ruff` as configured.
+- Record only verified recurring traps in `LESSONS.md`.
+- Missing CLI: `command -v <tool>` before concluding unavailable.

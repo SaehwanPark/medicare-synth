@@ -2,132 +2,96 @@
 
 ## Past
 
-### Project proposal
-
 - Defined Medicare-Synth as a provenance-backed compiler for contemporary
-  Medicare synthetic datasets and research fixtures.
-- Established the official CMS synthetic collection as the intended empirical
-  baseline and structural validity as the initial quality priority.
-- Recommended beneficiary enrollment, carrier, and outpatient files as the
-  first release boundary.
+  Medicare synthetic datasets and research fixtures, with official CMS synthetic
+  claims as the empirical baseline and structural validity as the first quality
+  bar.
+- Completed the validation-first foundation: pinned CMS 2021 baseline and RKB
+  evidence snapshots; Pydantic v2 + Polars/PyArrow contracts; relational,
+  temporal, administrative, and accounting validators; deterministic scenarios;
+  release export; vertical/horizontal expansion; scenario catalog; schema diff;
+  limitations/audit profiles; bounded 2022 PUF beneficiary/carrier path; and a
+  newcomer docs portal. Detail lives in `CHANGELOG.md`.
+- Adopted the
+  [evidence-calibrated research playground proposal](docs/medicare_synth_evidence_calibrated_playground_proposal.md)
+  as the next program direction (2026-11-06).
 
 ## Present
 
-### Foundation
+### Structural foundation
 
 Status: Complete
 
-The current repository provides contributor guidance, a reusable domain harness,
-project bookkeeping, pinned baseline specifications, canonical validation stack decisions, minimum constraint sets, deterministic scenario definitions, and licensing policies.
+Active contracts agents and contributors must respect:
 
-Completed Foundation Decisions:
+- **Baseline:** CMS 2021 Synthetic Claims (`CMS-2021-SYN-CLAIMS`), schema year
+  2021; additive 2022 PUF path limited to beneficiary + carrier.
+- **Provenance statuses:** preserved, normalized, re-keyed, derived, imputed,
+  synthesized, externally calibrated, scenario-generated.
+- **Evidence snapshots:** immutable RKB JSON under `data/rkb_snapshots/`.
+- **Validation:** field/record (Pydantic), relational/temporal/administrative/
+  accounting (Polars); findings never silently repair baseline anomalies.
+- **Determinism:** pinned manifests and seeds reproduce releases; no hidden
+  wall-clock or environment state in the functional core.
+- **Licensing:** Apache-2.0 code; CMS synthetic data acquired via checksummed
+  manifests into ignored `data/`, not stored in git.
 
-- **Canonical Baseline Pinned**: CMS 2021 Synthetic Claims collection (`CMS-2021-SYN-CLAIMS`) with target schema year **2021** (CCW contemporary file layout).
-- **First Release Scope**: Beneficiary Summary File (Beneficiary-Year grain), Carrier Claims File (Claim Line/Header grain), and Outpatient Claims File (Claim Line/Header grain).
-- **Provenance Status Taxonomy**: Preserved, normalized, re-keyed, derived, imputed, synthesized, externally calibrated, and scenario-generated.
-- **RKB Evidence Contract**: Immutable versioned JSON snapshots (`data/rkb_snapshots/rkb-v{MAJOR}.{MINOR}-{YYYYMMDD}.json`) capturing CCW variable definitions, data types, valid value sets, source URLs, and SHA256 checksums.
-- **Canonical Schema & Validation Stack**: Hybrid approach using **Pydantic v2** (`pydantic`) for record-level contracts and scalar validation + **Polars** (`polars`) & **PyArrow** (`pyarrow`) for high-performance tabular relational validation, file I/O, and Parquet export.
-- **Minimum Validation Constraint Set**: Formalized 5 validation categories: Field-level (type/format/value set), Record-level (uniqueness/nullability), Relational (foreign key `CLM_ID` -> `BENE_ID`), Temporal (`CLM_FROM_DT` <= `CLM_THRU_DT` <= Death Date), and Administrative (enrollment compatibility).
-- **First Five Deterministic Scenarios**: Specified 3 valid baseline scenarios (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`) and 2 intentional anomaly scenarios (`invalid_orphaned_claim`, `invalid_temporal_inversion`) with expected validator findings.
-- **Licensing & Artifact Policy**: Codebase licensed under **Apache-2.0**. CMS synthetic data is public domain, acquired via manifest-based checksums rather than stored in git. Release artifacts package Parquet/CSV tables, Pydantic schemas, SHA256 manifests, validation reports, and fidelity profiles.
+Out of scope for the foundation (still true):
 
-### Baseline and Evidence
-
-Status: Complete
-
-Completed Baseline and Evidence Deliverables:
-
-- **Checksummed Source Manifest**: Defined `data/manifests/cms_2021_syn_claims_manifest.json` for CMS 2021 Synthetic Claims spanning Beneficiary Summary, Carrier Claims, and Outpatient Claims files.
-- **Pinned RKB Evidence Snapshot**: Created `data/rkb_snapshots/rkb-v1.0-20211231.json` capturing CCW variable definitions, data types, formats, constraints, and valid value contracts.
-- **Python Core Package**: Established `src/medicare_synth/` with Pydantic v2 validation models (`SourceManifest`, `FileManifest`, `RKBEvidenceSnapshot`, `VariableContract`, domain entity records).
-- **Behavioral Test Suite**: Added 10 passing unit tests under `tests/` for manifest validation, checksum verification logic, evidence snapshot lookups, and domain record constraints.
-
-### Executable Model and Validation
-
-Status: Complete
-
-Completed Executable Model & Validation Deliverables:
-
-- **Validation Core Framework**: Created `src/medicare_synth/validation.py` establishing `Severity`, `FindingCategory`, `Finding`, and `ValidationReport` Pydantic models.
-- **High-Performance Relational Validator**: Implemented Polars-backed `RelationalValidator` performing foreign key constraint checks (`CLM_ID` -> `BENE_ID`), temporal inversion detection (`CLM_FROM_DT` <= `CLM_THRU_DT`), and record key uniqueness (`REC-001`).
-- **Provenance Status Taxonomy**: Added `ProvenanceStatus` enum (8 lineage statuses) in `src/medicare_synth/models.py`.
-- **Deterministic Scenario Compiler**: Created `ScenarioCompiler` in `src/medicare_synth/scenarios.py` compiling 5 named scenarios (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`, `invalid_orphaned_claim`, `invalid_temporal_inversion`).
-- **Baseline Normalizer**: Implemented `BaselineNormalizer` in `src/medicare_synth/normalizer.py` for type-casting raw records to Polars DataFrames and tagging provenance.
-- **Unified Release CLI**: Implemented `medicare-synth` CLI entry point in `src/medicare_synth/cli.py` with `validate`, `scenario`, `manifest` commands.
-- **Comprehensive Unit Tests**: Added unit tests in `tests/test_scenarios.py`, `tests/test_normalizer.py`, and `tests/test_cli.py` (26 passing tests total).
-
-### Validation-First Release
-
-Status: Complete
-
-Completed Validation-First Release Deliverables:
-
-- **Release Bundle Exporter Framework**: Implemented `src/medicare_synth/release.py` providing `ReleaseExporter`, `ReleaseManifest`, `FileReleaseEntry`, and `FidelityProfile` Pydantic models.
-- **Multi-Format Export Pipeline**: Added support for exporting normalized baseline tables and scenario fixtures to versioned CSV and Parquet files with automatic SHA256 checksum tracking.
-- **Integrity & Fidelity Reporting**: Added automated generation of `release_manifest.json`, `validation_report.json`, `fidelity_profile.json`, and SQL DDL reference schema (`sql_reference_schema.sql`).
-- **CLI Export Subcommand**: Expanded `medicare-synth` CLI entry point with `export` subcommand (`medicare-synth export --scenario <name> --output-dir <path> --format <csv|parquet|all>`).
-- **Package API Integration**: Exposed `ReleaseExporter`, `ReleaseManifest`, and `FidelityProfile` at package top level in `src/medicare_synth/__init__.py`.
-- **Release Test Suite**: Added 3 unit tests in `tests/test_release.py` covering multi-format exports, fidelity metrics, and CLI export command (29 passing unit tests total).
-
-### Expansion and Scenarios
-
-Status: Complete
-
-Completed Expansion and Scenarios Deliverables:
-
-- **TabDat-Synth Adapter & Vertical Expansion**: Implemented `TabDatSynthAdapter` and `VerticalExpander` in `src/medicare_synth/expansion.py` providing evidence-graded feature synthesis for within-table attributes with `SYNTHESIZED` provenance status while preserving relational keys and temporal invariants.
-- **Connected-Subgraph Horizontal Expansion**: Implemented `HorizontalExpander` in `src/medicare_synth/expansion.py` performing deterministic connected-subgraph scaling and re-keying across beneficiary, carrier, and outpatient tables with `REKEYED` provenance status.
-- **CLI Expansion Subcommand**: Added `expand` subcommand to `medicare-synth` CLI (`medicare-synth expand --mode <vertical|horizontal> --scenario <name> --scale <factor>`).
-- **Expansion Unit Test Suite**: Added 4 unit tests in `tests/test_expansion.py` covering feature synthesis, horizontal scaling, relational validator compatibility, and CLI commands (33 total passing unit tests).
-
-### Adoption and Maintenance
-
-Status: Complete
-
-Completed Adoption and Maintenance Deliverables:
-
-- **Scenario Catalog & CI Fixture Exporter**: Created `src/medicare_synth/catalog.py` providing `ScenarioCatalog` and automated CI fixture export (`medicare-synth export-ci`).
-- **Schema & Evidence Snapshot Diff Engine**: Created `src/medicare_synth/diff.py` establishing `SchemaDiffer` and `DiffReport` for comparing RKB evidence snapshots and preventing breaking schema changes during annual updates (`medicare-synth diff`).
-- **Explicit Dataset Limitations Disclosure Profile**: Created `src/medicare_synth/profile.py` formalizing structural, relational, temporal, accounting, distributional, and inferential boundaries (`medicare-synth profile`).
-- **Cross-Language Reference Examples**: Added `examples/python_reference.py` and `examples/sql_reference.sql` illustrating downstream Polars/DuckDB analytical queries on synthetic release artifacts.
-- **Data Quality & Privacy Audit Suite**: Created `src/medicare_synth/audit.py` establishing `AuditEngine` and `AuditReport` for join coverage, k-anonymity privacy scoring, and column metrics. Extended `AuditEngine` to compute k-anonymity privacy scores for all 19 clinical and MBSF tables.
-- **Part D Prescription Drug Event (PDE) Domain Extension**: Implemented `PrescriptionDrugEventRecord` domain model, updated source manifest and RKB evidence snapshot with Part D variables/constraints (`PDE_ID`, `SRVC_DT`, `PROD_SRVC_ID`, `QTY_DSPNSD_NUM`, `DAYS_SUPLY_NUM`, `PTNT_PAY_AMT`, `TOT_RX_CST_AMT`, `VAL_NUM_01`), extended `RelationalValidator` with `check_pde_field_constraints`, updated `ScenarioCompiler` and added `invalid_pde_days_supply` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **Skilled Nursing Facility (SNF) Claims Domain Extension**: Implemented `SkilledNursingFacilityClaimRecord` domain model, updated source manifest and RKB evidence snapshot with SNF variables/constraints (`CLM_ADMSN_DT`, `NCH_BENE_DSCHRG_DT`, `CLM_UTLZTN_DAY_CNT`, `NCVD_DAYS_CNT`, `CLM_PMT_AMT`, `VAL_SNF_01`), extended `RelationalValidator` with `check_snf_field_constraints`, updated `ScenarioCompiler` and added `invalid_snf_utilization_days` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **Home Health Agency (HHA) Claims Domain Extension**: Implemented `HomeHealthAgencyClaimRecord` domain model, updated source manifest and RKB evidence snapshot with HHA variables/constraints (`CLM_ADMSN_DT`, `NCH_BENE_DSCHRG_DT`, `CLM_UTLZTN_DAY_CNT`, `CLM_HHA_LUPA_IND`, `VAL_HHA_01`), extended `RelationalValidator` with `check_hha_field_constraints`, updated `ScenarioCompiler` and added `invalid_hha_utilization_days` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **Durable Medical Equipment (DME) Claims Domain Extension**: Implemented `DurableMedicalEquipmentClaimRecord` domain model, updated source manifest and RKB evidence snapshot with DME variables/constraints (`DME_LINE_ITEM_COUNT`, `LINE_CMS_TYPE_SRVC_CD`, `VAL_DME_01`), extended `RelationalValidator` with `check_dme_field_constraints`, updated `ScenarioCompiler` and added `invalid_dme_line_item_count` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **Hospice Claims Domain Extension**: Implemented `HospiceClaimHeaderRecord` domain model, updated source manifest and RKB evidence snapshot with Hospice variables/constraints (`HOSPICE_TERMINAL_DIAG_CD`, `VAL_HOSPICE_01`), extended `RelationalValidator` with `check_hospice_field_constraints`, updated `ScenarioCompiler` and added `invalid_hospice_utilization_days` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **MBSF Chronic Conditions Segment Domain Extension**: Implemented `MBSFChronicConditionsRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF CC variables/constraints (`SP_ALZHMD`, `SP_CHF`, `SP_CHRNKIDN`, `SP_CNCR`, `SP_DIABETES`, `SP_ISCHDMT`, `SP_STRKETIA`, `VAL_MBSF_01`), extended `RelationalValidator` with `check_mbsf_cc_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_chronic_condition_indicator` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **MBSF Cost & Use Segment Domain Extension**: Implemented `MBSFCostAndUseRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF Cost & Use variables/constraints (`BENE_MDCR_PAY_AMT`, `BENE_TOT_PAY_AMT`, `BENE_IP_DDCTBL_AMT`, `BENE_CVRD_DYS_CNT`, `VAL_MBSF_CU_01`), extended `RelationalValidator` with `check_mbsf_cu_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_cost_use_payment` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **MBSF Part D Characteristics Segment Domain Extension**: Implemented `MBSFPartDRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF Part D variables/constraints (`PTD_CNTRCT_ID_01`, `PTD_PBP_ID_01`, `PTD_SGNT_CD_01`, `RDS_IND_01`, `LI_COST_SHRH_GRP_CD_01`, `BENE_PTD_TRCC_AMT`, `BENE_PTD_MOOP_AMT`, `VAL_MBSF_D_01`), extended `RelationalValidator` with `check_mbsf_d_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_part_d_contract` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **MBSF Base / Enrollment Segment Domain Extension**: Implemented `MBSFBaseEnrollmentRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF Base variables/constraints (`BENE_HI_CVRAGE_TOT_MONS`, `BENE_SMI_CVRAGE_TOT_MONS`, `BENE_HMO_CVRAGE_TOT_MONS`, `BENE_PTD_CVRAGE_TOT_MONS`, `MDCR_ENTLMT_BUYIN_IND_01`, `DUAL_STUS_CD_01`, `VAL_MBSF_BASE_01`), extended `RelationalValidator` with `check_mbsf_base_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_base_coverage_months` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **MBSF Other Chronic Conditions Segment Domain Extension**: Implemented `MBSFOtherChronicConditionsRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF Other Chronic variables/constraints (`SP_ARTHGLAU`, `SP_ASTHMA`, `SP_ATRIALF`, `SP_HYPERL`, `SP_HYPERT`, `SP_HYPOT`, `SP_OSTEOP`, `VAL_MBSF_OC_01`), extended `RelationalValidator` with `check_mbsf_oc_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_other_chronic_condition_indicator` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **MBSF National Death Index (NDI) Segment Domain Extension**: Implemented `MBSFNDIRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF NDI variables/constraints (`NDI_MATCH_IND`, `NDI_DIUSE_CD`, `VAL_MBSF_NDI_01`), extended `RelationalValidator` with `check_mbsf_ndi_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_ndi_match_indicator` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **MBSF Risk Adjustment Segment Domain Extension**: Implemented `MBSFRiskAdjustmentRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF Risk Adjustment variables/constraints (`CMS_HCC_RISK_SCORE`, `RXHCC_RISK_SCORE`, `PAYMENT_COUNT`, `VAL_MBSF_RA_01`), extended `RelationalValidator` with `check_mbsf_ra_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_risk_adjustment_score` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **MBSF Part C / Medicare Advantage Segment Domain Extension**: Implemented `MBSFPartCRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF Part C variables/constraints (`PTC_CNTRCT_ID_01`, `PTC_PBP_ID_01`, `PTC_PLAN_TYPE_CD_01`, `BENE_MA_CVRAGE_TOT_MONS`, `VAL_MBSF_C_01`), extended `RelationalValidator` with `check_mbsf_c_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_part_c_contract` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **MBSF Fee-For-Service (FFS) Utilization Segment Domain Extension**: Implemented `MBSFFFSUtilizationRecord` domain model, updated source manifest and RKB evidence snapshot with MBSF FFS Utilization variables/constraints (`IP_ADM_CNT`, `OP_VIST_CNT`, `SNF_STAY_CNT`, `CAR_SRVC_CNT`, `HHA_VIST_CNT`, `HOSP_STAY_CNT`, `DME_SRVC_CNT`, `VAL_MBSF_FFS_01`), extended `RelationalValidator` with `check_mbsf_ffs_field_constraints`, updated `ScenarioCompiler` and added `invalid_mbsf_ffs_utilization_count` scenario fixture, and updated `BaselineNormalizer`, `ReleaseExporter`, `VerticalExpander`, `HorizontalExpander`, `ScenarioCatalog`, `AuditEngine`, and CLI subcommands.
-- **Autonomous Workflow Automation Subcommand**: Added `auto-workflow` subcommand in CLI and `run_autonomous_workflow` engine in `src/medicare_synth/workflow.py` to automate verification checks (linter, type checker, tests, changelog, git clean, audit, relational validation, export, schema diff, limitations profile, scenario catalog, dataset expansion, dataset provenance, benchmark throughput, summary matrix, CMS baseline manifest, DAG topology contract, temporal integrity, RKB evidence snapshot, claim accounting constraints, primary key uniqueness, provider NPI format, ICD diagnosis code format, HCPCS procedure code format, NDC drug code format, DRG code format, provider taxonomy code format, Place of Service (POS) code format, Revenue Center Code (REV_CNTR) format, demographic sex/race code format, MBSF domain constraints, Inpatient claim field constraints, SNF claim field constraints, HHA claim field constraints, DME claim field constraints, Hospice claim field constraints, Part D PDE Utilization field constraints, Carrier claim field constraints, Outpatient claim field constraint verification, Claim pass-through per diem format verification, Claim non-payment reason code format verification, Claim Type of Bill code format verification, Claim Coinsurance Day Count verification, Claim Blood Deductible and Pints Count format verification, Claim Coinsurance Amount non-negativity verification, Claim Beneficiary Deductible Amount non-negativity verification, Claim Primary Payer Paid Amount non-negativity verification, Claim Outlier Payment Amount non-negativity verification, Claim Line Non-Covered Charge Amount non-negativity verification, Claim Line Beneficiary Payment Amount non-negativity verification, Claim Line Service Count non-negativity verification, Claim Line Processing Indicator Code format verification, Claim Line Place of Service Code format verification, Claim Line Type of Service Code format verification, Claim Line Performing Physician NPI format verification, Claim Line Rendering/Ordering/Referring Physician NPI format verification, Claim Line HCPCS Initial Modifier Code format verification, Claim Line Service Date Temporal Inversion format verification, Claim Line Revenue Center Unit Count non-negativity verification, Claim Line Revenue Center Rate Amount non-negativity verification, Claim PPS Capital Federal Payment Amount verification, Claim PPS Capital Outlier Amount verification, Claim PPS Capital IME Amount verification, Claim PPS Capital DSH Amount verification, Claim PPS Capital FSP Amount verification, Claim PPS Capital Exception Amount verification, Claim PPS Operating Federal Payment Amount verification, Claim PPS Operating Outlier Amount verification, Claim PPS Operating HSP Payment Amount verification, Claim PPS Operating IME Amount verification, and Claim PPS Operating Disproportionate Share Hospital (DSH) Adjustment Amount verification), git staging/commits, pushing, PR creation via GitHub CLI, and autonomous merging.
-- **2022 CMS Synthetic Claims PUF Slice**: Added a source-verified, additive
-  beneficiary/carrier importer and release path. The tracked manifest records
-  CMS URLs, pipe-delimited file grain, row counts, and SHA-256 digests; raw
-  files remain ignored under `data/`. The 2021 defaults are unchanged, and
-  other claim families remain out of scope.
-- **Adoption & Maintenance Test Suite**: Extended comprehensive unit test suite in `tests/test_validation.py`, `tests/test_autonomous_workflow.py`, and `tests/test_cli.py` (426 total passing unit tests).
-
-Verification requires each decision to cite evidence, state assumptions, and be
-reflected in `ARCHITECTURE.md` and `ROADMAP.md`. No synthesis or release may be
-presented as verified before its applicable constraints and tests exist.
-
-Out of scope for the current milestone:
-
-- broad coverage of historical CCW layouts prior to 2021
+- historical CCW layouts before 2021 as a supported default
 - claims of population representativeness or clinical validity
-- opaque generative models where rules or transparent conditional methods are
-  sufficient
-- production-scale cohort generation outside validation-first constraints
+- opaque generative models where transparent methods suffice
+- production-scale cohorts outside validation-first constraints
+
+### Evidence-calibrated research playground
+
+Status: Active — Phase 0 (feasibility and evidence scouting)
+
+**Mission:** generate structurally valid, contextually plausible synthetic
+Medicare worlds so researchers can prototype and stress-test methods before
+restricted-data access. Published CMS aggregates and Medicare-only study
+findings are **contextual constraints**, not a license to reconstruct real
+beneficiaries or publish synthetic estimates as Medicare findings.
+
+**MVP research context (proposed):** 2021 Original Medicare FFS, age 65+,
+explicit Parts A/B enrollment and managed-care handling, chronic
+disease → hospitalization (diabetes and/or heart failure as candidate
+condition families). Exact cohort, algorithms, and table subset are Phase 0
+decisions.
+
+**Near-term capability targets:**
+
+| Capability | Intent |
+| --- | --- |
+| Evidence IR | Typed, reviewed finding objects: population, time, eligibility, variables, estimand, uncertainty, role, governance |
+| Estimand compiler | Eligibility → derivation → estimator → compatibility report → comparison |
+| Synthesis contract | Coherent beneficiary subgraphs with controllable conditional relationships (beyond index/seed fixtures) |
+| Calibration ladder | A none → B reweight → C conditional generation; prove A–C before hierarchical methods |
+| Multi-world releases | Shared evidence constraints; documented variation in underidentified dimensions |
+| Evaluation | Hard structural gates + graded evidence agreement + held-out + research-utility benchmarks |
+| Agent assist | Discovery/extraction/formalization help with human approval gates; engines run without agents |
+
+**Non-goals (program-wide):** recover individuals or the full real joint;
+treat literature match as representativeness; autonomous adoption of extracted
+facts; MA/FFS silent conflation; one universal synthetic Medicare distribution.
+
+Verification rule unchanged: every decision cites evidence, states assumptions,
+and is reflected in `ARCHITECTURE.md` and `ROADMAP.md`. No synthesis or release
+may claim calibrated fidelity before applicable constraints and tests exist.
 
 ## Future
 
-- Ingest and validate future annual CMS baseline releases (2022+ CCW file layouts) using schema diff workflows.
-- Expand transparent conditional generative models and privacy-preserving synthesis benchmarks.
-- Enhance cross-language reference analytical suites for longitudinal multi-year episode tracking.
-- Extend CLI automation with remote CI pipeline runners and automated release artifact distribution.
+Ordered program (see `ROADMAP.md` for exit gates):
+
+0. Feasibility memo, MVP context, initial evidence inventory.
+1. Verified synthesizer with genuine conditional support and known-truth tests.
+2. Evidence IR + executable estimand language.
+3. Frozen, reviewed MVP evidence corpus (train / holdout / diagnostic).
+4. Calibration engine + reviewable agent orchestration (engines independent of agents).
+5. Calibrated MVP worlds and release manifests.
+6. Held-out and research-utility evaluation; go/no-go.
+7. Incremental context and literature expansion with regression of prior worlds.
+
+Open product decisions (do not invent silently): exact 2021 FFS cohort rules;
+minimal table/algorithm set; primary outcome family; Evidence IR v0.1 estimand
+breadth; transport rules for older-year studies; workflow-utility benchmark.

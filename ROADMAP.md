@@ -1,274 +1,159 @@
 # ROADMAP
 
-This is the canonical source for implementation milestones, ordering, outputs,
-and exit criteria. The dated
-[project proposal](docs/medicare-synth-project-proposal_20260720.md) remains the
-source for strategic motivation and broader product analysis.
+Canonical milestones, ordering, outputs, and exit criteria.
 
-## 0. Repository Foundation
+- Strategic design for the next program:
+  [`docs/medicare_synth_evidence_calibrated_playground_proposal.md`](docs/medicare_synth_evidence_calibrated_playground_proposal.md)
+- Earlier product motivation:
+  [`docs/medicare-synth-project-proposal_20260720.md`](docs/medicare-synth-project-proposal_20260720.md)
+- Agent goal prompt: [`docs/goal.md`](docs/goal.md)
+
+## Completed foundation (milestones 0–13)
 
 Status: Complete
+
+Delivered: repository harness and bookkeeping; pinned CMS 2021 baseline and RKB
+snapshots; Pydantic/Polars validation stack; scenarios, normalizer, release
+export; vertical/horizontal expansion; catalog/diff/profile/audit; Part D and
+institutional claim families plus MBSF segments with field validators; bounded
+2022 PUF beneficiary/carrier slice; claim-line and enrollment indicator
+expansions; newcomer docs portal and GitHub Pages.
+
+Those remain the structural substrate. They do **not** imply that the current
+generator has learned realistic conditional distributions or that every listed
+table is ready for a calibrated longitudinal research context.
+
+## Evidence-calibrated playground
+
+### Phase 0 — Feasibility and evidence scouting
+
+Status: Active
 
 Outputs:
 
-- contributor guidance and reusable foundation-slice harness
-- specification, architecture, changelog, roadmap, and lessons bookkeeping
-- contributor-first README and aligned package description
+- generator/capability gap notes for the MVP context
+- candidate 2021 Original Medicare FFS cohort and required fields
+- initial inventory of CMS aggregates and Medicare-only findings
+- feasibility memo and draft MVP specification
 
 Exit criteria:
 
-- harness roles, handoffs, review outcomes, and failure policy agree across all
-  repository guidance
-- current capabilities are distinguished from proposed capabilities
-- repository structure and metadata checks pass
+- at least one population/condition/utilization analysis is expressible with
+  available or reasonably implementable fields
+- no known fatal comparability issue is ignored
 
-## 1. Foundation Decisions
+### Phase 1 — Establish and verify the synthesizer
 
-Status: Complete
+Status: Planned
 
 Outputs:
 
-- pinned official CMS synthetic baseline (CMS 2021 Synthetic Claims) and target schema year (2021) [Completed]
-- RKB evidence-bundle contract and snapshot policy [Completed]
-- canonical schema language and runtime validation decision (Pydantic v2 + Polars / PyArrow) [Completed]
-- minimum validation constraint set (Field, Record, Relational, Temporal, Administrative) [Completed]
-- first five scenarios with expected analytic outputs (3 valid, 2 invalid) [Completed]
-- licensing, redistribution, and artifact publication policy (Apache-2.0 / manifest-based redistribution) [Completed]
+- synthesizer contract with independently testable conditional generation
+- baseline benchmark suite and known-truth reference worlds
+- generator capability report and limitations
 
 Exit criteria:
 
-- each decision cites its evidence and records unresolved assumptions
-- component boundaries and public contracts are reflected in the specification
-  and architecture
-- one representative vertical slice has concrete acceptance tests
+- pinned inputs/seeds reproduce outputs; structural checks pass
+- held-out synthetic ground-truth relationships recover within declared tolerances
+- generated data show genuine statistical support (not clone-only variation)
 
-## 2. Baseline and Evidence
+### Phase 2 — Evidence IR and executable study language
 
-Status: Complete
+Status: Planned (may parallel Phase 3 scouting)
 
 Outputs:
 
-- checksummed source manifest and immutable raw baseline inventory [Completed]
-- pinned evidence snapshot for beneficiary, carrier, and outpatient files [Completed]
-- coverage and conflict report for required fields and relationships [Completed]
+- Evidence IR schema/versioning; vocabulary for concepts and estimands
+- parser/validator/compiler with compatibility reports
+- source-to-estimand tests and sample fixtures
+- optional AI-assisted extraction with source anchors (review required)
 
 Exit criteria:
 
-- every required input has source, retrieval, version, and checksum provenance
-- missing or conflicting evidence is explicit and blocks unsupported semantics
+- a human-reviewed real Medicare-only finding formalizes, executes against a
+  compatible synthetic dataset, and compares reproducibly; errors are explicit
 
-## 3. Executable Model and Validation
+### Phase 3 — Curate and freeze the MVP evidence corpus
 
-Status: Complete
+Status: Planned
 
 Outputs:
 
-- executable file-year schemas and provenance statuses [Completed]
-- canonical beneficiary, enrollment, claim, line, provider, and event model [Completed]
-- relation-level and column-level DAG contracts [Completed]
-- field, record, relational, temporal, administrative, and accounting validators [Completed]
-- scenario compiler and normalizer pipeline [Completed]
+- versioned evidence registry with eligibility/compatibility grades
+- train / held-out / diagnostic partitions and checksums
+- exclusion/conflict rationales retained (not deleted)
 
 Exit criteria:
 
-- selected baseline files normalize and round-trip preserved values [Completed]
-- validator findings distinguish invalid output, known baseline exceptions, and
-  evidence ambiguity [Completed]
-- beneficiary, carrier, and outpatient relationships pass focused integration
-  tests [Completed]
+- active findings are executable or transparently approximated
+- partitions are frozen and reviewer-approved before calibration tuning
 
-## 4. Validation-First Release
+### Phase 4 — Calibration engine and agent harness
 
-Status: Complete
+Status: Planned
 
 Outputs:
 
-- versioned normalized baseline release in CSV and Parquet [Completed]
-- focused CLI and Python API for acquisition, inspection, normalization,
-  validation, and export [Completed]
-- release manifest, validation report, fidelity profile, and known deviations [Completed]
+- reweighting + generator-parameter calibration APIs with diagnostics
+- synthetic known-truth calibration experiments
+- agent role contracts and review gates; deterministic run manifests
 
 Exit criteria:
 
-- fixed manifests and seeds reproduce checksummed outputs [Completed]
-- release claims are limited to properties supported by recorded validation [Completed]
-- reference workflows run in Python and SQL [Completed]
+- controlled simulations improve predeclared targets without invalidating records
+- pipeline runs fully without agents; dependence/uncertainty assumptions visible
 
-## 5. Expansion and Scenarios
+### Phase 5 — MVP calibration
 
-Status: Complete
+Status: Planned
 
 Outputs:
 
-- one evidence-graded vertical expansion proving `tabdat-synth` integration [Completed]
-- connected-subgraph horizontal expansion with deterministic re-keying [Completed]
-- five named valid and invalid scenarios with expected analytic results [Completed]
+- reference world plus a few controlled alternative worlds
+- training fit / discrepancy reports, manifests, limitations, examples
 
 Exit criteria:
 
-- expansion preserves keys, temporal order, enrollment compatibility, and event
-  coherence [Completed]
-- scenarios reproduce expected results and intentional failures deterministically [Completed]
+- hard structural gates pass; no known degenerate statistical behavior
+- meaningful improvement on predeclared contextual metrics
+- underidentified dimensions documented honestly
 
-## 6. Adoption and Maintenance
+### Phase 6 — Independent evaluation
 
-Status: Complete
+Status: Planned
 
 Outputs:
 
-- curated teaching and CI fixtures, scenario catalog, and cross-language examples [Completed]
-- schema and evidence diff workflows for annual updates [Completed]
-- optional calibration and known-truth methods profiles where evidence supports
-  them [Completed]
+- held-out evaluation protocol and report
+- research-workflow and synthetic-truth benchmarks
+- go / no-go release decision and issue backlog
 
 Exit criteria:
 
-- annual changes can be reviewed without silently changing prior releases [Completed]
-- every published profile states structural, relational, temporal, accounting,
-  distributional, and inferential limitations [Completed]
+- predefined thresholds met, or limitations + no-go recorded
+- no indefinite retuning against the same holdout set
 
-## 7. 2022 CMS PUF beneficiary/carrier slice
+### Phase 7 — Expand contexts
 
-Status: Complete
-
-The separate CMS Synthetic Medicare Claims PUF is bounded to
-`beneficiary_2022.csv` and `carrier.csv`; other claim families and MBSF
-segments are deferred. The importer, validator, release path, and CLI are
-implemented. Official CMS files are retained under ignored `data/`, while
-tracked manifest and evidence snapshot files record the source URLs, row
-counts, delimiter, grain, and real SHA-256 checksums. Sentinel digests are not
-acceptable release metadata.
-
-## 8. Claim Line Field Validation Expansion
-
-Status: Complete
+Status: Planned
 
 Outputs:
 
-- Additive claim line constraint validators for performing physician NPI (`LINE-NPI-001`), rendering physician NPI (`LINE-NPI-002`), ordering physician NPI (`LINE-NPI-003`), referring physician NPI (`LINE-NPI-004`), HCPCS initial modifier (`MDFR-001`), HCPCS second modifier (`MDFR-002`), HCPCS third modifier (`MDFR-003`), HCPCS fourth modifier (`MDFR-004`), line service date temporal inversions (`LINE-TMP-001`), revenue center unit count (`REV-UNIT-001`), revenue center rate amount (`REV-RATE-001`), place of service (`POS-002`), type of service (`TOS-001`), processing indicator (`PRCSG-001`), service count (`LINE-SRVC-CNT-001`), and all line-level amount fields (`LINE-ALLOWD-AMT-001`, `LINE-COINSRNC-AMT-001`, `LINE-PMT-AMT-001`, `LINE-DDCTBL-AMT-001`, `LINE-SBMTD-CHRG-001`, `LINE-PRPAY-AMT-001`, `LINE-NCVD-CHRG-001`, `LINE-BENE-PMT-001`) [Completed]
-- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI sub-command [Completed]
-- Focused behavioral tests for each check [Completed]
+- additional estimands/domains/years as separate compatible contexts
+- regression of earlier worlds; versioned calibration profiles
 
 Exit criteria:
 
-- Each validator has at least one passing and one failing fixture test [Completed]
-- All checks are individually activatable via CLI flag and `all_checks` shortcut [Completed]
-- Full test suite and linter remain green after each addition [Completed]
+- new contexts pass the same gates; prior releases remain reproducible
 
-## 9. Beneficiary Enrollment Indicator Validation Expansion
+## Near-term vertical slice (before full parallelization)
 
-Status: Complete
-
-Outputs:
-
-- Additive MBSF Base validators for monthly Medicare Entitlement/Buy-In Indicator
-  (`ENR-002`: `mdcr_entlmt_buyin_ind_01`–`_12` must be in CCW 2021 valid set
-  `{"0","1","2","3","A","B","C"}`) and monthly Dual Eligibility Status Code
-  (`ENR-003`: `dual_stus_cd_01`–`_12` must be in CMS-MIS valid set
-  `{"00","02","04","06","08","09","10","99"}`) [Completed]
-- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI
-  sub-command via `--mbsf-enrollment-buyin-check` and `--mbsf-dual-status-check`
-  flags; included in `all_checks` shortcut [Completed]
-- Focused behavioral tests for valid, invalid, null-skip, and no-column-present
-  cases for each check [Completed]
-
-Exit criteria:
-
-- Each validator has at least one passing and one failing fixture test [Completed]
-- Both checks are individually activatable via CLI flag and `all_checks` shortcut [Completed]
-- Full test suite and linter remain green after all additions [Completed]
-
-## 10. MBSF NDI Cause-of-Death Code Format Validation
-
-Status: Complete
-
-Outputs:
-
-- Additive MBSF NDI validator for Underlying Cause of Death ICD-10 Code
-  (`NDI-002`: `ndi_diuse_cd` when non-null must match ICD-10 format
-  `^[A-Za-z]\d{2}([A-Za-z0-9]{1,4}|\.[A-Za-z0-9]{1,4})?$`, accepting both
-  period-less CMS representation and period form; max 7 chars per RKB) [Completed]
-- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI
-  sub-command via `--mbsf-ndi-cause-of-death-check` flag; included in
-  `all_checks` shortcut [Completed]
-- Focused behavioral tests for valid codes (including null skip), invalid codes,
-  pure null-value DataFrame, no-column early exit, and empty DataFrame early exit
-  [Completed]
-
-Exit criteria:
-
-- Validator has at least one passing and one failing fixture test [Completed]
-- Check is individually activatable via CLI flag and `all_checks` shortcut [Completed]
-- Full test suite and linter remain green after addition [Completed]
-
-## 11. MBSF Entitlement Reason Code Validation
-
-Status: Complete
-
-Outputs:
-
-- Additive MBSF Base validator for Medicare Entitlement Reason Codes
-  (`ENR-004`: `entlmt_rsn_orig`, `entlmt_rsn_curr`, `bene_entlmt_rsn_orig`,
-  `bene_entlmt_rsn_curr`, `entlmt_rsn_orig_cd`, `entlmt_rsn_curr_cd` when present
-  and non-null must be in CCW valid set `{"0","1","2","3","00","10","20","30"}`) [Completed]
-- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI
-  sub-command via `--mbsf-entitlement-reason-check` (`--mbsf-entlmt-rsn-check`)
-  flag; included in `all_checks` shortcut [Completed]
-- Focused behavioral tests for valid codes (including null skip), invalid codes,
-  pure null-value DataFrame, no-column early exit, and empty DataFrame early exit
-  [Completed]
-
-Exit criteria:
-
-- Validator has at least one passing and one failing fixture test [Completed]
-- Check is individually activatable via CLI flag and `all_checks` shortcut [Completed]
-- Full test suite and linter remain green after addition [Completed]
-
-## 12. MBSF Base HMO Monthly Indicator Code Domain Validation
-
-Status: Complete
-
-Outputs:
-
-- Additive MBSF Base validator for monthly HMO coverage indicators
-  (`ENR-005`: `hmo_ind_01`–`_12` when present and non-null must be in CCW valid set
-  `{"0","1","2","A","B","C","4","N"}`) [Completed]
-- Wired into `validate_slice`, `run_autonomous_workflow`, and `auto-workflow` CLI
-  sub-command via `--mbsf-hmo-indicator-check` (`--mbsf-hmo-check`) flag;
-  included in `all_checks` shortcut [Completed]
-- Focused behavioral tests for valid codes (including null skip), invalid codes,
-  pure null-value DataFrame, no-column early exit, and empty DataFrame early exit
-  [Completed]
-
-Exit criteria:
-
-- Validator has at least one passing and one failing fixture test [Completed]
-- Check is individually activatable via CLI flag and `all_checks` shortcut [Completed]
-- Full test suite and linter remain green after addition [Completed]
-
-## 13. Newcomer Documentation Portal and GitHub Pages Publication
-
-Status: Complete
-
-Outputs:
-
-- Refined the root README into a concise orientation, accurate Python 3.13+
-  quickstart, capability summary, source boundary, and documentation links.
-- Added a Jekyll documentation portal under `docs/` with a fixed-header/sidebar
-  layout, responsive navigation, accessible focus/skip behavior, first-run
-  guides, CLI/scenario/release workflows, data-model and provenance references,
-  limitations, contributor guidance, and canonical-document map.
-- Added a standard-library documentation link/currentness check and a GitHub
-  Actions Pages build/deploy workflow sourced from `docs/`.
-
-Exit criteria:
-
-- A new user can install the package, run a valid fixture, and understand an
-  intentional validation failure from the portal without consulting source
-  code [Completed]
-- Maintained portal links and required pages pass the local documentation check
-  [Completed]
-- The site builds from `docs/` through GitHub Pages workflow and publishes at
-  the repository Pages URL after merge [Completed]
-- README, architecture, roadmap, and changelog describe the same public surface
-  [Completed]
+1. Select one 2021 FFS 65+ chronic → hospitalization context.
+2. Audit the minimal dependency graph of tables/fields.
+3. Prepare ~3 public calibration targets + 1 independent diagnostic/holdout.
+4. Formalize one finding end-to-end (source → IR → execution → report).
+5. Prove generator controllability on synthetic ground truth.
+6. Implement reweighting before advanced calibration.
+7. Produce 2–3 worlds with shared targets and different weak assumptions.
+8. Freeze evaluation gates before iterative fitting.

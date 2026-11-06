@@ -4,6 +4,14 @@
 
 ### Added
 
+- Adopted the evidence-calibrated research playground program: tracked
+  [`docs/medicare_synth_evidence_calibrated_playground_proposal.md`](docs/medicare_synth_evidence_calibrated_playground_proposal.md),
+  added agent goal prompt [`docs/goal.md`](docs/goal.md), and realigned root
+  canonical docs (`README.md`, `SPEC.md`, `ARCHITECTURE.md`, `ROADMAP.md`),
+  `AGENTS.md`, harness team-spec, and `.agents/skills/` for Evidence IR,
+  calibration, multi-world releases, and human review gates. Document-only;
+  no runtime code changes.
+
 - Added a newcomer-focused GitHub Pages documentation portal under `docs/`,
   matching the Vital Margin indigo header/sidebar design language. Added
   install/first-run, CLI, scenario/validation, release, data-model,

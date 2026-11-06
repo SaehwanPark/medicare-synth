@@ -1,84 +1,118 @@
 # ARCHITECTURE
 
-Last Reviewed: 2026-08-29
-Status: Active Implementation
+Last Reviewed: 2026-11-06
+Status: Active — structural core implemented; evidence-calibration components planned
 
 ## Current Repository
 
-The repository contains core Pydantic v2 domain schemas, source/evidence manifests,
-and a Polars-backed relational validator framework (`src/medicare_synth/validation.py`).
-The component model below records the implemented and planned boundaries.
+Implemented: Pydantic v2 domain schemas, checksummed source/evidence manifests,
+Polars-backed validators, deterministic scenarios, normalizer, release export,
+vertical/horizontal expansion, catalog/diff/profile/audit, bounded 2022 PUF
+importer, CLI, and docs portal.
 
+Planned (evidence-calibrated playground): Evidence IR, estimand compiler,
+parameterized synthesis, calibration, multi-world configs, and evaluation.
+Prefer narrow modules consistent with existing conventions; do not introduce a
+large framework before Phase 1–2 experiments justify it.
 
-## Proposed Components
+## Component Boundaries
 
-- **Source and evidence adapters** acquire pinned `CMS-2021-SYN-CLAIMS` baseline material
-  and consume versioned RKB evidence snapshots (`data/rkb_snapshots/rkb-v{MAJOR}.{MINOR}-{YYYYMMDD}.json`)
-  without duplicating archival tools.
-- **Executable specifications** own file-year schemas (defined via Pydantic v2 models), grains, types, keys,
-  null semantics, provenance statuses, and documented constraints.
-- **Canonical model** represents beneficiaries, enrollment, providers, plans,
-  claims, lines, prescriptions, and care events independently of export layout.
-- **Normalization** preserves recoverable raw values and lineage while converting
-  official baseline records into canonical typed entities.
-- **Validation** evaluates field (Pydantic), record, relational (Polars lazy frames), administrative, scenario,
-  and distributional properties and reports findings without silently repairing
-  baseline anomalies.
-- **Generation and Expansion** applies deterministic rules, `TabDatSynthAdapter` vertical feature synthesis, and `HorizontalExpander` connected-subgraph scaling with deterministic re-keying after validation gates pass.
-- **Scenario catalog & CI exporter** provides `ScenarioCatalog` for inspecting named fixtures (`valid_baseline_cohort`, `valid_chronic_subgroup`, `valid_carrier_line_item`, `invalid_orphaned_claim`, `invalid_temporal_inversion`, `invalid_inpatient_admission`, `invalid_pde_days_supply`, `invalid_snf_utilization_days`, `invalid_hha_utilization_days`, `invalid_dme_line_item_count`, `invalid_hospice_utilization_days`, `invalid_mbsf_chronic_condition_indicator`, `invalid_mbsf_cost_use_payment`, `invalid_mbsf_part_d_contract`, `invalid_mbsf_base_coverage_months`, `invalid_mbsf_other_chronic_condition_indicator`, `invalid_mbsf_ndi_match_indicator`, `invalid_mbsf_risk_adjustment_score`, `invalid_mbsf_part_c_contract`, `invalid_mbsf_ffs_utilization_count`) and automated `export-ci` generation.
+### Implemented
 
+- **Source and evidence adapters** — pinned `CMS-2021-SYN-CLAIMS` and versioned
+  RKB snapshots; additive 2022 PUF beneficiary/carrier path.
+- **Executable specifications** — file-year schemas, grains, keys, null
+  semantics, provenance statuses, documented constraints.
+- **Canonical model** — beneficiaries, enrollment, providers, claims, lines,
+  prescriptions, care events independent of export layout.
+- **Normalization** — recoverable raw values and lineage into typed entities.
+- **Validation** — field/record/relational/administrative/scenario findings;
+  never silently repairs baseline anomalies.
+- **Generation and expansion** — `TabDatSynthAdapter` / `VerticalExpander` and
+  `HorizontalExpander` (deterministic re-keying). Treat current vertical path as
+  structural/fixture synthesis until a conditional synthesizer contract is
+  proven.
+- **Scenario catalog, schema diff, limitations profile, audit** — teaching/CI
+  fixtures, annual snapshot diffs, six-category limitation disclosures,
+  join/privacy metrics.
+- **Interfaces** — Python API and `medicare-synth` CLI emitting versioned
+  tables, manifests, and reports.
 
+### Planned
 
-- **Schema & evidence snapshot diff engine** (`SchemaDiffer`) compares RKB evidence snapshots or schema models to detect added, removed, and breaking field modifications (`medicare-synth diff`).
-- **2022 CMS PUF boundary** (`PufImporter`) is an additive source-verified path for beneficiary and carrier files only. It consumes pipe-delimited files declared by a manifest, preserves carrier `(CLM_ID, LINE_NUM)` grain, and leaves the 2021 default unchanged.
-- **Limitations & dataset boundary profiler** (`LimitationsProfiler`) generates explicit 6-category disclosures covering structural, relational, temporal, accounting, distributional, and inferential boundaries (`limitations_profile.json`).
-- **Data Quality & Privacy Audit Suite** (`AuditEngine`) evaluates relational join coverage, k-anonymity scores over quasi-identifiers, and column-level nullity/uniqueness metrics (`audit_report.json`).
-- **Autonomous workflow automation** (`src/medicare_synth/workflow.py`, `medicare-synth auto-workflow`, `scripts/autonomous_workflow.py`) validates code state (linter, type checker, tests, changelog, git clean, audit, relational validation, export, schema diff, limitations profile, scenario catalog, dataset expansion, dataset provenance, benchmark throughput, summary matrix, CMS baseline manifest, DAG topology contract, temporal integrity, RKB evidence snapshot, claim accounting constraints, primary key uniqueness, provider NPI format, ICD diagnosis code format, HCPCS procedure code format, NDC drug code format, DRG code format, provider taxonomy code format, Place of Service (POS) code format, and Revenue Center Code (REV_CNTR) format verification), stages, commits, pushes, creates Pull Requests via the GitHub CLI, and autonomously merges branches to main.
-- **Interfaces and exporters** expose a focused Python API and `medicare-synth` CLI (`validate`, `scenario`, `manifest`, `puf`, `export`, `expand`, `catalog`, `diff`, `profile`, `export-ci`, `audit`, `auto-workflow`) emitting versioned CSV, Parquet, SQL reference queries (`examples/sql_reference.sql`), manifests, fidelity reports, audit reports, limitations profiles, and automated workflow execution logs.
+Responsibility sketch only; package layout may differ:
 
-These are responsibility boundaries, not an approved Python package layout.
+| Boundary | Role |
+| --- | --- |
+| **Evidence IR & registry** | Typed findings with provenance, population/time/eligibility, estimand, uncertainty, calibration vs holdout role, review status |
+| **Estimand compiler** | IR → eligibility query, derivation plan, estimator, compatibility report, comparison result |
+| **Synthesis protocol** | Parameterized generation of coherent beneficiary subgraphs with controllable conditionals |
+| **Calibration** | Reweighting then generator-parameter fit; feasibility/ESS/support diagnostics; hard structural gate retained |
+| **Worlds** | Versioned context presets and explicit underidentified scenario labels |
+| **Evaluation** | Training/held-out evidence fit, synthetic known-truth, nondegeneracy, research-workflow utility |
+| **Agent harness** | Assist discovery → extraction → formalization → review → runs; never mutate evidence values or holdout partitions unilaterally |
+| **Release/provenance** | Package code, seeds, evidence-set hashes, calibration config, world assumptions, limitations |
 
+Numerical and validation engines must remain fully operable **without** the
+agent harness.
 
 ## Data Flow
 
-1. Pin source releases, evidence snapshots, schemas, assumptions, and checksums
-  in a release manifest.
-2. Translate source documentation into reviewed executable specifications while
-  preserving conflicts and unknowns.
-3. Normalize official synthetic records into canonical entities and events with
-  row- and field-level lineage.
-4. Validate the baseline before permitting vertical or horizontal expansion.
-5. Generate relation-level entities and events before dependent tables; generate
-  columns within each table in topological order.
-6. Validate generated data and scenarios against schemas, relationships,
-  temporal rules, accounting rules, and declared expected results.
-7. Export versioned artifacts with manifests, validation reports, fidelity
-  claims, and known deviations.
+### Structural path (implemented)
+
+1. Pin sources, evidence snapshots, schemas, assumptions, checksums.
+2. Translate documentation into reviewed executable specs; keep conflicts explicit.
+3. Normalize official synthetic records with row/field lineage.
+4. Validate before expansion.
+5. Generate relation-level entities before dependent tables; columns in DAG order.
+6. Validate generated data and scenarios.
+7. Export versioned artifacts with manifests and limitation claims.
+
+### Calibration path (planned)
+
+```text
+CMS baseline + schema evidence
+        → structural synthesizer → candidate worlds
+        → calibration engine ← reviewed Evidence IR ← CMS aggregates + studies
+        → calibrated worlds
+        → hard structural validation + evidence/held-out/utility reports
+        → versioned multi-world releases
+```
+
+Beneficiary histories stay coherent subgraphs. Calibration may reweight or
+adjust generator parameters; it must not independently corrupt enrollment,
+death, and claim relationships.
 
 ## Core Invariants
 
-- The official CMS synthetic collection is preserved as immutable source
-  material; normalized values remain traceable to recoverable raw values.
-- Every field has a declared provenance status: preserved, normalized, re-keyed,
-  derived, imputed, synthesized, externally calibrated, or scenario-generated.
-- Documentation establishes evidence, not automatically executable semantics;
-  unresolved conflicts remain explicit.
-- Relation-level generation precedes table-local column generation so keys,
-  cardinalities, and event coherence are not reconstructed from independent
-  rows.
-- Validation precedes broad synthesis and distinguishes errors, warnings,
-  informational findings, baseline exceptions, and unresolved assumptions.
-- Deterministic manifests and seeds reproduce a release; no hidden wall-clock,
-  environment, or global state belongs in the functional core.
-- Synthetic output supports development and testing, not unsupported inference
+- Official CMS synthetic material remains immutable source; normalized values
+  stay traceable to recoverable raw values.
+- Every field has a declared provenance status.
+- Documentation is evidence, not automatic executable semantics; unresolved
+  conflicts stay explicit.
+- Relation-level generation precedes table-local column generation.
+- Validation precedes broad synthesis; severities stay distinct.
+- Deterministic manifests and seeds reproduce a release.
+- Synthetic output supports development and testing—not unsupported inference
   about the Medicare population.
+- Evidence-calibrated releases additionally require: reviewed evidence IDs and
+  roles; frozen train/holdout partitions before fit; hard structural gates;
+  honest underidentification and non-representativeness labels.
+- Agents propose; humans approve evidence records, estimand implementations,
+  transport assumptions, calibration targets, holdout changes, and public
+  calibrated releases.
 
 ## External Boundaries
 
-- `rkb-rust` or `resdac-knowledge-base` supplies versioned evidence artifacts (`data/rkb_snapshots/`).
-- `tabdat-synth` may supply within-table conditional synthesis through a pinned,
-  stable interface after the validation-first core exists.
-- **Licensing**: Codebase licensed under Apache License 2.0 (`Apache-2.0`).
-- **Data Redistribution**: Raw CMS synthetic data is public domain, acquired via CLI manifest checksum verification into ignored `data/` directories.
-- **Artifact Publication**: Release bundles publish versioned Parquet/CSV tables, Pydantic schemas, SHA256 manifests, validation reports, and fidelity profiles.
-- **Documentation Publication**: The newcomer-facing documentation portal is authored as Markdown under `docs/`, rendered by GitHub Pages/Jekyll, and deployed by `.github/workflows/pages.yml`; `scripts/check_documentation_site.py` verifies the maintained page set and local links before deployment.
+- RKB / ResDAC evidence artifacts under `data/rkb_snapshots/`.
+- Optional `tabdat-synth` (or successor) behind a pinned synthesis interface
+  after the conditional synthesizer contract exists.
+- Public CMS aggregates and published Medicare-only literature enter only
+  through the reviewed Evidence IR registry—not as ad-hoc numeric targets.
+- Licensing: Apache-2.0 code; raw CMS data via manifest checksums into ignored
+  `data/`.
+- Docs portal: Markdown under `docs/`, GitHub Pages via
+  `.github/workflows/pages.yml`.
+
+Strategic design detail:
+[`docs/medicare_synth_evidence_calibrated_playground_proposal.md`](docs/medicare_synth_evidence_calibrated_playground_proposal.md).
