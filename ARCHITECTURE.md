@@ -1,25 +1,25 @@
 # ARCHITECTURE
 
 Last Reviewed: 2026-11-06
-Status: Active — structural core implemented; Phase 0 MVP context pinned;
-evidence-calibration components planned (Phase 1 synthesizer next)
+Status: Active — structural core + Phase 1 conditional synthesizer for MVP
+known-truth worlds; Evidence IR / calibration planned (Phase 2+)
 
 ## Current Repository
 
 Implemented: Pydantic v2 domain schemas, checksummed source/evidence manifests,
 Polars-backed validators, deterministic scenarios, normalizer, release export,
 vertical/horizontal expansion, catalog/diff/profile/audit, bounded 2022 PUF
-importer, CLI, and docs portal.
+importer, CLI, docs portal, and Phase 1 conditional synthesizer
+(`medicare_synth.synthesis`) for `mvp-2021-om-ffs-diabetes-ip` known-truth
+worlds.
 
-Phase 0 (`docs/phase0/`) pinned MVP context
-`mvp-2021-om-ffs-diabetes-ip` and documented that today's
-`TabDatSynthAdapter` / horizontal re-keying are structural fixtures only.
-Planned (evidence-calibrated playground): Evidence IR, estimand compiler,
-parameterized synthesis, calibration, multi-world configs, and evaluation.
-Prefer narrow modules consistent with existing conventions; do not introduce a
-large framework before Phase 1–2 experiments justify it. First synthesizer
-experiments should target beneficiary + MBSF base/CC + inpatient subgraphs for
-the pinned diabetes → all-cause IP analysis.
+Phase 0 (`docs/phase0/`) pinned the MVP context. Phase 1 (`docs/phase1/`)
+proved controllable diabetes → IP conditionals with reproducibility, structural
+gates, held-out recovery, and a clone-only negative control.
+`TabDatSynthAdapter` / horizontal re-keying remain structural fixtures only.
+Planned next: Evidence IR, estimand compiler, calibration, multi-world configs,
+and evaluation. Prefer narrow modules; do not introduce a large framework
+before Phase 2–4 experiments justify it.
 
 ## Component Boundaries
 
@@ -35,9 +35,9 @@ the pinned diabetes → all-cause IP analysis.
 - **Validation** — field/record/relational/administrative/scenario findings;
   never silently repairs baseline anomalies.
 - **Generation and expansion** — `TabDatSynthAdapter` / `VerticalExpander` and
-  `HorizontalExpander` (deterministic re-keying). Treat current vertical path as
-  structural/fixture synthesis until a conditional synthesizer contract is
-  proven.
+  `HorizontalExpander` (deterministic re-keying) for structural/fixture scaling;
+  `generate_diabetes_ip_world` (`synthesis.py`) for Phase 1 conditional
+  known-truth worlds (diabetes prevalence and O1 conditionals).
 - **Scenario catalog, schema diff, limitations profile, audit** — teaching/CI
   fixtures, annual snapshot diffs, six-category limitation disclosures,
   join/privacy metrics.
@@ -52,7 +52,7 @@ Responsibility sketch only; package layout may differ:
 | --- | --- |
 | **Evidence IR & registry** | Typed findings with provenance, population/time/eligibility, estimand, uncertainty, calibration vs holdout role, review status |
 | **Estimand compiler** | IR → eligibility query, derivation plan, estimator, compatibility report, comparison result |
-| **Synthesis protocol** | Parameterized generation of coherent beneficiary subgraphs with controllable conditionals |
+| **Synthesis protocol** | MVP diabetes→IP conditional path implemented; richer joint models / multi-table families still planned |
 | **Calibration** | Reweighting then generator-parameter fit; feasibility/ESS/support diagnostics; hard structural gate retained |
 | **Worlds** | Versioned context presets and explicit underidentified scenario labels |
 | **Evaluation** | Training/held-out evidence fit, synthetic known-truth, nondegeneracy, research-workflow utility |

@@ -4,6 +4,15 @@
 
 ### Added
 
+- Closed Phase 1 (synthesizer verification): added
+  `medicare_synth.synthesis` conditional generator for
+  `mvp-2021-om-ffs-diabetes-ip` known-truth worlds with controllable diabetes
+  prevalence and `P(O1|diabetes)` / `P(O1|no diabetes)`; deterministic
+  seed/stream draws; structural validation; held-out relationship recovery;
+  clone-only negative control. Docs under [`docs/phase1/`](docs/phase1/);
+  tests in `tests/test_synthesis.py`. Synced canonical docs; Phase 2 now
+  active.
+
 - Closed Phase 0 (feasibility and evidence scouting): added
   [`docs/phase0/`](docs/phase0/) with capability-gap notes, pinned 2021 OM FFS
   age-65+ diabetes → all-cause inpatient MVP cohort/field inventory, initial

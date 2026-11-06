@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import tempfile
+from unittest.mock import patch
 
 import polars as pl
 import pytest
@@ -238,16 +239,22 @@ def test_check_mbsf_dual_status_code_constraints_no_columns():
 
 def test_cli_auto_workflow_mbsf_buyin_and_dual_status_check():
     """Tests that --mbsf-enrollment-buyin-check and --mbsf-dual-status-check flags are accepted by the CLI."""
-    ret = main(
-        [
-            "auto-workflow",
-            "--dry-run",
-            "--mbsf-enrollment-buyin-check",
-            "--mbsf-dual-status-check",
-            "--mbsf-entitlement-reason-check",
-        ]
-    )
-    assert ret == 0
+    # Mock workflow: real dry-run runs full pytest/ruff and must not nest inside the suite.
+    with patch("medicare_synth.cli.run_autonomous_workflow", return_value=0) as mock_wf:
+        ret = main(
+            [
+                "auto-workflow",
+                "--dry-run",
+                "--mbsf-enrollment-buyin-check",
+                "--mbsf-dual-status-check",
+                "--mbsf-entitlement-reason-check",
+            ]
+        )
+        assert ret == 0
+        assert mock_wf.call_args.kwargs["dry_run"] is True
+        assert mock_wf.call_args.kwargs["mbsf_enrollment_buyin_check"] is True
+        assert mock_wf.call_args.kwargs["mbsf_dual_status_check"] is True
+        assert mock_wf.call_args.kwargs["mbsf_entitlement_reason_check"] is True
 
 
 def test_check_mbsf_entitlement_reason_code_constraints_valid():

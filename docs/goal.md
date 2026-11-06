@@ -19,21 +19,20 @@ which assumptions remain free; run the same analysis across a few plausible
 worlds; and carry **code and design**—not synthetic conclusions—into authorized
 real-data work.
 
-## Current objective (Phase 1 → first vertical slice)
+## Current objective (Phase 2 → first vertical slice)
 
-Phase 0 is **complete** (`docs/phase0/`; feasibility memo: proceed). Pinned
-context: `mvp-2021-om-ffs-diabetes-ip` (2021 OM FFS, age 65+, diabetes →
-all-cause IP hospitalization; HF stratifier).
+Phases 0–1 are **complete** (`docs/phase0/`, `docs/phase1/`). Pinned context:
+`mvp-2021-om-ffs-diabetes-ip`. Conditional synthesizer
+(`medicare_synth.synthesis`) recovers known-truth diabetes→IP relationships
+under pinned seeds with structural gates.
 
 Next path:
 
-1. ~~**Pin MVP context**~~ / ~~**Audit tables/fields**~~ / ~~**Scout evidence**~~
-   — done in Phase 0; keep open FFS Option B vs C and holdout choices explicit.
-2. **Prove synthesizer controllability** — on synthetic ground truth, recover a
-   declared conditional association while keeping linked records valid
-   (characterize today’s generator honestly first) — **Phase 1 active**.
+1. ~~**Pin MVP context**~~ / ~~**Audit**~~ / ~~**Scout evidence**~~ — Phase 0.
+2. ~~**Prove synthesizer controllability**~~ — Phase 1 (`docs/phase1/`).
 3. **Formalize one finding end-to-end** — source → reviewed Evidence IR →
-   execute on synthetic tables → comparison report with explicit gaps.
+   execute on synthetic tables → comparison report with explicit gaps —
+   **Phase 2 active**.
 4. **Calibrate lightly** — beneficiary reweighting before richer generators;
    report ESS/support/infeasibility.
 5. **Emit 2–3 worlds** — shared supported targets; different documented weak
@@ -68,5 +67,5 @@ the MVP context works end-to-end.
 | B | One human-reviewed external finding executes as a reproducible comparison against generated Medicare-like data |
 | C | A calibrated path improves predeclared contextual metrics vs uncalibrated baseline on held-out compatible evidence, without breaking structural gates |
 
-Start Phase 1 synthesizer work (toward later Milestone B); do not treat Phase 0
-scouting magnitudes as approved calibration targets.
+Start Phase 2 Evidence IR work toward Milestone B; do not treat Phase 0
+scouting magnitudes or Phase 1 known-truth params as Medicare findings.
