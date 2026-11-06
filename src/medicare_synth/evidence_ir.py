@@ -407,7 +407,11 @@ def _issue(code: str, severity: str, message: str) -> CompatibilityIssue:
 
 
 def _mentions_planned_admission(finding: FindingIR) -> bool:
-  """Detect planned-admission semantics across notes and comparability gaps."""
+  """Detect planned-admission semantics across notes and comparability gaps.
+
+  Scrubs the token ``unplanned`` first so phrases like \"unplanned acute
+  admissions\" do not false-positive on the substring ``planned``.
+  """
   texts: list[str] = [
     finding.estimand.notes or "",
     finding.cohort.inclusion_notes or "",
@@ -415,7 +419,11 @@ def _mentions_planned_admission(finding: FindingIR) -> bool:
     *finding.comparability.gaps,
     *finding.comparability.assumptions,
   ]
-  return any("planned" in t.lower() for t in texts)
+  for text in texts:
+    scrubbed = text.lower().replace("unplanned", "")
+    if "planned" in scrubbed:
+      return True
+  return False
 
 
 def _resolve_executable_algorithm(

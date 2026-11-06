@@ -119,6 +119,46 @@ def test_compile_lit02_refuses_planned_admission() -> None:
   assert finding.estimand.conditioning.concept == ConceptId.DIABETES
 
 
+def test_unplanned_only_text_does_not_trigger_planned_admission() -> None:
+  finding = load_finding(LIT03)
+  rate = finding.model_copy(
+    update={
+      "estimand": EstimandSpec(
+        type=EstimandType.RATE,
+        numerator=VariableRef(
+          concept=ConceptId.ALL_CAUSE_IP,
+          algorithm=AlgorithmId.IP_CLAIM_PRESENCE_V1,
+        ),
+        conditioning=VariableRef(
+          concept=ConceptId.DIABETES,
+          algorithm=AlgorithmId.MBSF_SP_DIABETES_V1,
+        ),
+        scale=100.0,
+        time_unit="person_years",
+        notes="Crude rate of unplanned acute admissions among diabetes.",
+      ),
+      "cohort": finding.cohort.model_copy(
+        update={
+          "exclusion_notes": None,
+          "inclusion_notes": "Unplanned acute admissions only.",
+        }
+      ),
+      "comparability": ComparabilityNotes(
+        grade=ComparabilityGrade.B,
+        transport_required=True,
+        gaps=("year_transport",),
+        assumptions=("Outcome described as unplanned; not an exclusion rule.",),
+      ),
+      "result": EstimateResult(estimate=40.0, unit="per_100_person_years"),
+    }
+  )
+  compiled = compile_finding(rate, context_year=2021)
+  assert not any(
+    i.code == "PLANNED-ADMISSION" for i in compiled.compatibility.issues
+  )
+  assert compiled.compatibility.executable is True
+
+
 def test_planned_admission_detected_from_exclusion_notes() -> None:
   """PLANNED-ADMISSION must not depend only on estimand.notes."""
   finding = load_finding(LIT03)
