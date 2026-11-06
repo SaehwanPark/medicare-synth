@@ -406,6 +406,18 @@ def _issue(code: str, severity: str, message: str) -> CompatibilityIssue:
   return CompatibilityIssue(code=code, severity=severity, message=message)
 
 
+def _mentions_planned_admission(finding: FindingIR) -> bool:
+  """Detect planned-admission semantics across notes and comparability gaps."""
+  texts: list[str] = [
+    finding.estimand.notes or "",
+    finding.cohort.inclusion_notes or "",
+    finding.cohort.exclusion_notes or "",
+    *finding.comparability.gaps,
+    *finding.comparability.assumptions,
+  ]
+  return any("planned" in t.lower() for t in texts)
+
+
 def _resolve_executable_algorithm(
   algorithm: AlgorithmId,
 ) -> tuple[AlgorithmId, list[CompatibilityIssue]]:
@@ -556,7 +568,16 @@ def compile_finding(
           "(no monthly censoring panel)",
         )
       )
-    if "planned" in (finding.estimand.notes or "").lower():
+    if finding.estimand.conditioning is None:
+      issues.append(
+        _issue(
+          "RATE-COHORT",
+          "warning",
+          "rate estimand has no conditioning stratum; events counted among "
+          "all eligible beneficiaries",
+        )
+      )
+    if _mentions_planned_admission(finding):
       issues.append(
         _issue(
           "PLANNED-ADMISSION",
@@ -848,12 +869,32 @@ def execute_finding(
       n_eligible = denom
       est = n_num / float(denom)
     elif compiled.estimator.estimand_type == EstimandType.RATE:
-      out = _flag_from_algorithm(
-        compiled.derivation.numerator_algorithm, tables
-      )
-      # Count IP claims (events) among eligible; person-time ≈ n_eligible years.
+      # Rates count inpatient claim rows (events) in the analysis stratum.
+      # Presence algorithms are not used as binary flags here; conditioning
+      # (when present) defines the cohort (e.g. diabetes+).
+      stratum = eligible
+      if compiled.derivation.conditioning_algorithm is not None:
+        cond = _flag_from_algorithm(
+          compiled.derivation.conditioning_algorithm, tables
+        )
+        stratum = (
+          eligible.join(cond, on="bene_id", how="left")
+          .with_columns(pl.col("flag").fill_null(False))
+          .filter(pl.col("flag"))
+          .select("bene_id")
+        )
+      n_eligible = stratum.height
+      if n_eligible == 0:
+        raise EvidenceIRError("rate stratum is empty")
+      if compiled.derivation.numerator_algorithm not in {
+        AlgorithmId.IP_CLAIM_PRESENCE_V1,
+      }:
+        raise EvidenceIRError(
+          "v0.1 rate execution supports inpatient claim-row events only "
+          f"(got {compiled.derivation.numerator_algorithm.value})"
+        )
       ip = tables["inpatient_claims"]
-      events = eligible.join(ip, on="bene_id", how="inner").height
+      events = stratum.join(ip, on="bene_id", how="inner").height
       person_time = float(n_eligible)  # 1.0 year approx under Option B
       est = compiled.estimator.scale * (events / person_time)
       n_num = events

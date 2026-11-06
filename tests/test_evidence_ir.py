@@ -115,6 +115,93 @@ def test_compile_lit02_refuses_planned_admission() -> None:
   compiled = compile_finding(finding, context_year=2021)
   assert compiled.compatibility.executable is False
   assert any(i.code == "PLANNED-ADMISSION" for i in compiled.compatibility.errors)
+  assert finding.estimand.conditioning is not None
+  assert finding.estimand.conditioning.concept == ConceptId.DIABETES
+
+
+def test_planned_admission_detected_from_exclusion_notes() -> None:
+  """PLANNED-ADMISSION must not depend only on estimand.notes."""
+  finding = load_finding(LIT03)
+  rate = finding.model_copy(
+    update={
+      "estimand": EstimandSpec(
+        type=EstimandType.RATE,
+        numerator=VariableRef(
+          concept=ConceptId.ALL_CAUSE_IP,
+          algorithm=AlgorithmId.IP_CLAIM_PRESENCE_V1,
+        ),
+        conditioning=VariableRef(
+          concept=ConceptId.DIABETES,
+          algorithm=AlgorithmId.MBSF_SP_DIABETES_V1,
+        ),
+        scale=100.0,
+        time_unit="person_years",
+        notes="Crude all-cause IP rate among diabetes.",
+      ),
+      "cohort": finding.cohort.model_copy(
+        update={
+          "exclusion_notes": "Planned admissions excluded in the source study."
+        }
+      ),
+      "result": EstimateResult(estimate=40.0, unit="per_100_person_years"),
+    }
+  )
+  compiled = compile_finding(rate, context_year=2021)
+  assert any(i.code == "PLANNED-ADMISSION" for i in compiled.compatibility.errors)
+
+
+def test_executable_rate_counts_events_in_diabetes_stratum() -> None:
+  finding = load_finding(LIT03)
+  rate = finding.model_copy(
+    update={
+      "population": finding.population.model_copy(
+        update={
+          "years": (2021,),
+          "age": AgeSpec(minimum=65),
+          "ffs_rule": FfsRule.OPTION_B_FULL_YEAR,
+        }
+      ),
+      "estimand": EstimandSpec(
+        type=EstimandType.RATE,
+        numerator=VariableRef(
+          concept=ConceptId.ALL_CAUSE_IP,
+          algorithm=AlgorithmId.IP_CLAIM_PRESENCE_V1,
+        ),
+        conditioning=VariableRef(
+          concept=ConceptId.DIABETES,
+          algorithm=AlgorithmId.MBSF_SP_DIABETES_V1,
+        ),
+        scale=100.0,
+        time_unit="person_years",
+        notes="All-cause IP claim events per 100 person-years among diabetes.",
+      ),
+      "cohort": finding.cohort.model_copy(
+        update={"exclusion_notes": None, "inclusion_notes": None}
+      ),
+      "comparability": ComparabilityNotes(
+        grade=ComparabilityGrade.B,
+        transport_required=False,
+        gaps=(),
+        assumptions=(),
+      ),
+      "result": EstimateResult(estimate=20.0, unit="per_100_person_years"),
+    }
+  )
+  params = ConditionalWorldParams(
+    n_beneficiaries=2000,
+    seed=11,
+    diabetes_prevalence=0.40,
+    p_ip_given_diabetes=0.25,
+    p_ip_given_no_diabetes=0.05,
+  )
+  world = generate_diabetes_ip_world(params)
+  report = execute_finding(rate, world.tables(), context_year=2021)
+  assert report.executable is True
+  assert report.synthetic_estimate is not None
+  assert report.n_numerator is not None
+  # ~25 IP events per 100 diabetes person-years under one-claim-per-bene world.
+  assert report.synthetic_estimate == pytest.approx(25.0, abs=5.0)
+  assert report.n_eligible > 0
 
 
 def test_execute_lit03_on_synthetic_world_reproducible() -> None:
