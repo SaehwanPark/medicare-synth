@@ -19,6 +19,7 @@ truth. Use this map when you need the full contract or historical context.
 | [`LESSONS.md`](https://github.com/SaehwanPark/medicare-synth/blob/main/LESSONS.md) | Verified recurring setup and debugging lessons. |
 | [`docs/goal.md`](https://github.com/SaehwanPark/medicare-synth/blob/main/docs/goal.md) | Active agent/contributor goal prompt for the playground program. |
 | [`docs/phase0/`](https://github.com/SaehwanPark/medicare-synth/blob/main/docs/phase0/) | Phase 0 feasibility memo, capability gaps, cohort/fields, evidence inventory, draft MVP spec. |
+| [`docs/phase1/`](https://github.com/SaehwanPark/medicare-synth/blob/main/docs/phase1/) | Phase 1 synthesizer contract and generator capability report. |
 | [Evidence-calibrated playground proposal](https://github.com/SaehwanPark/medicare-synth/blob/main/docs/medicare_synth_evidence_calibrated_playground_proposal.md) | Strategic design for Evidence IR, calibration, and multi-world releases. |
 | [Original project proposal](https://github.com/SaehwanPark/medicare-synth/blob/main/docs/medicare-synth-project-proposal_20260720.md) | Earlier product motivation and intended user groups. |
 | [`AGENTS.md`](https://github.com/SaehwanPark/medicare-synth/blob/main/AGENTS.md) | Repository-wide instructions for contributors and agents. |

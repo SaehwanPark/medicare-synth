@@ -55,23 +55,29 @@ Exit criteria:
 
 ### Phase 1 — Establish and verify the synthesizer
 
-Status: Active
+Status: Complete (2026-11-06)
 
 Outputs:
 
 - synthesizer contract with independently testable conditional generation
+  ([synthesizer-contract.md](docs/phase1/synthesizer-contract.md);
+  `medicare_synth.synthesis`)
 - baseline benchmark suite and known-truth reference worlds
+  (`tests/test_synthesis.py`; `generate_diabetes_ip_world`)
 - generator capability report and limitations
+  ([capability-report.md](docs/phase1/capability-report.md))
 
 Exit criteria:
 
-- pinned inputs/seeds reproduce outputs; structural checks pass
-- held-out synthetic ground-truth relationships recover within declared tolerances
+- pinned inputs/seeds reproduce outputs; structural checks pass — **met**
+- held-out synthetic ground-truth relationships recover within declared
+  tolerances — **met** (R3 on holdout partition; tolerance 0.03 at n≥4000)
 - generated data show genuine statistical support (not clone-only variation)
+  — **met** (clone-only cannot retarget prevalence; conditional synthesizer can)
 
 ### Phase 2 — Evidence IR and executable study language
 
-Status: Planned (may parallel Phase 3 scouting)
+Status: Active
 
 Outputs:
 
@@ -163,8 +169,9 @@ Exit criteria:
 1. ~~Select one 2021 FFS 65+ chronic → hospitalization context.~~ **Done (Phase 0):**
    diabetes → all-cause IP; see `docs/phase0/`.
 2. ~~Audit the minimal dependency graph of tables/fields.~~ **Done (Phase 0).**
-3. Prove generator controllability on synthetic ground truth (**Phase 1 — active**).
-4. Formalize one finding end-to-end (source → IR → execution → report) (Phase 2).
+3. ~~Prove generator controllability on synthetic ground truth.~~ **Done (Phase 1).**
+4. Formalize one finding end-to-end (source → IR → execution → report)
+   (**Phase 2 — active**).
 5. Prepare ~3 public calibration targets + 1 independent diagnostic/holdout
    (Phase 3 freeze; candidates listed in evidence inventory).
 6. Implement reweighting before advanced calibration.

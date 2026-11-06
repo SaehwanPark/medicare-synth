@@ -23,6 +23,16 @@ from medicare_synth.expansion import (
     TabDatSynthAdapter,
     VerticalExpander,
 )
+from medicare_synth.synthesis import (
+    ConditionalWorld,
+    ConditionalWorldEstimates,
+    ConditionalWorldParams,
+    estimate_world_relationships,
+    generate_diabetes_ip_world,
+    relationships_within_tolerance,
+    split_bene_ids,
+    unique_support_ratio,
+)
 from medicare_synth.manifest import FileManifest, SourceManifest
 from medicare_synth.models import (
     BeneficiaryRecord,
@@ -65,8 +75,13 @@ __all__ = [
     "BeneficiaryRecord",
     "CarrierClaimLineRecord",
     "ColumnAuditMetric",
+    "ConditionalWorld",
+    "ConditionalWorldEstimates",
+    "ConditionalWorldParams",
     "DiffReport",
     "EvidenceSource",
+    "estimate_world_relationships",
+    "generate_diabetes_ip_world",
     "DurableMedicalEquipmentClaimRecord",
     "FidelityProfile",
     "FileManifest",
@@ -95,6 +110,7 @@ __all__ = [
     "ProvenanceStatus",
     "RKBEvidenceSnapshot",
     "RelationalValidator",
+    "relationships_within_tolerance",
     "ReleaseExporter",
     "ReleaseManifest",
     "run_autonomous_workflow",
@@ -105,7 +121,9 @@ __all__ = [
     "Severity",
     "SkilledNursingFacilityClaimRecord",
     "SourceManifest",
+    "split_bene_ids",
     "TabDatSynthAdapter",
+    "unique_support_ratio",
     "ValidationReport",
     "VariableContract",
     "VerticalExpander",

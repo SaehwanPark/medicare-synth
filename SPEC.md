@@ -45,7 +45,7 @@ Out of scope for the foundation (still true):
 
 ### Evidence-calibrated research playground
 
-Status: Active — Phase 0 complete; Phase 1 (synthesizer verification) next
+Status: Active — Phases 0–1 complete; Phase 2 (Evidence IR) next
 
 **Mission:** generate structurally valid, contextually plausible synthetic
 Medicare worlds so researchers can prototype and stress-test methods before
@@ -58,9 +58,15 @@ beneficiaries or publish synthetic estimates as Medicare findings.
 Parts A/B with annual HMO/MA months = 0 (**FFS Option B** default; monthly
 HMO panel / Option C is the fidelity upgrade), diabetes via `sp_diabetes` →
 all-cause inpatient hospitalization; heart failure (`sp_chf`) as stratifier.
-Detail: [`docs/phase0/`](docs/phase0/). Current expansion remains fixture/seed
-math, not conditional generation—Phase 1 must prove controllability before
-calibration claims.
+Detail: [`docs/phase0/`](docs/phase0/).
+
+**Synthesizer (Phase 1):** `medicare_synth.synthesis.generate_diabetes_ip_world`
+emits coherent MVP subgraphs with controllable diabetes prevalence and
+`P(O1|diabetes)` / `P(O1|no diabetes)` under pinned seeds; structural
+validators pass; held-out synthetic relationships recover within tolerance;
+clone-only horizontal expansion is characterized as insufficient statistical
+support. See [`docs/phase1/`](docs/phase1/). TabDat / horizontal expanders
+remain structural tools only.
 
 **Near-term capability targets:**
 
@@ -88,7 +94,8 @@ Ordered program (see `ROADMAP.md` for exit gates):
 
 0. ~~Feasibility memo, MVP context, initial evidence inventory.~~ **Complete**
    (`docs/phase0/`).
-1. Verified synthesizer with genuine conditional support and known-truth tests.
+1. ~~Verified synthesizer with genuine conditional support and known-truth
+   tests.~~ **Complete** (`docs/phase1/`, `medicare_synth.synthesis`).
 2. Evidence IR + executable estimand language.
 3. Frozen, reviewed MVP evidence corpus (train / holdout / diagnostic).
 4. Calibration engine + reviewable agent orchestration (engines independent of agents).
