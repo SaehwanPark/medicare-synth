@@ -4,6 +4,15 @@
 
 ### Added
 
+- Closed Phase 4 (calibration engine): added `medicare_synth.calibration` with
+  Level A baseline discrepancy, Level B beneficiary IPF reweighting
+  (ESS/weight/infeasibility diagnostics), Level C generator-parameter search
+  against the frozen calibration partition only (holdout fit refused),
+  deterministic `CalibrationRunManifest`, and typed `AGENT_ROLE_CONTRACTS`.
+  Known-truth experiment under [`reports/phase4/`](reports/phase4/). Docs under
+  [`docs/phase4/`](docs/phase4/); tests in `tests/test_calibration.py`. Synced
+  canonical docs; Phase 5 (MVP calibrated worlds) is now active.
+
 - Closed Phase 3 (evidence corpus freeze): added
   `medicare_synth.evidence_corpus` with versioned
   `mvp-2021-om-ffs-diabetes-ip-corpus-v1` (3 calibration + 1 women-stratum

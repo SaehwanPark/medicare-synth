@@ -19,26 +19,20 @@ which assumptions remain free; run the same analysis across a few plausible
 worlds; and carry **code and design**—not synthetic conclusions—into authorized
 real-data work.
 
-## Current objective (Phase 4 → calibration)
+## Current objective (Phase 5 → calibrated worlds)
 
-Phases 0–3 are **complete**. Pinned context:
-`mvp-2021-om-ffs-diabetes-ip`. Conditional synthesizer, Evidence IR v0.1, and
-frozen corpus `mvp-2021-om-ffs-diabetes-ip-corpus-v1` (3 calibration + 1
-holdout + diagnostic/excluded retained) are in place.
+Phases 0–4 are **complete**. Frozen corpus v1 and calibration ladder A–C
+(reweight + generator-parameter search) exist; holdout stays evaluate-only.
 
 Next path:
 
-1. ~~**Pin MVP context**~~ / ~~**Audit**~~ / ~~**Scout evidence**~~ — Phase 0.
-2. ~~**Prove synthesizer controllability**~~ — Phase 1 (`docs/phase1/`).
-3. ~~**Formalize one finding end-to-end**~~ — Phase 2 (`docs/phase2/`).
-4. ~~**Freeze a small evidence corpus**~~ — Phase 3 (`docs/phase3/`).
-5. **Calibrate lightly** — beneficiary reweighting before richer generators;
-   fit **calibration** partition only; report ESS/support/infeasibility; never
-   retune against holdout.
-6. **Emit 2–3 worlds** — shared supported targets; different documented weak
-   assumptions; identical downstream analysis in each.
-7. **Freeze evaluation** — hard structural gates, graded evidence metrics,
+1. ~~Phases 0–4~~ — context, synthesizer, Evidence IR, corpus freeze, calibration
+   engine (`docs/phase0/` … `docs/phase4/`).
+2. **Emit 2–3 worlds** — shared supported calibration targets; different
+   documented weak assumptions; identical downstream analysis in each.
+3. **Freeze evaluation** — hard structural gates, graded evidence metrics,
    untouched holdout/diagnostic set **before** iterative fitting.
+4. **Independent evaluation / expand** — Phases 6–7.
 
 ## Operating rules
 
@@ -51,6 +45,7 @@ Next path:
 - Prefer the simplest method that meets the exit gate (reweight before
   hierarchical Bayes; transparent conditionals before opaque nets).
 - Keep docs and claims synchronized with verified behavior only.
+- **Never fit on holdout.**
 
 ## Non-goals
 
@@ -63,9 +58,9 @@ the MVP context works end-to-end.
 
 | Milestone | Done when |
 | --- | --- |
-| A | Feasibility memo + capability gaps + initial evidence inventory land under `docs/` or reports, and Phase 0 exit criteria in `ROADMAP.md` are met — **done** (`docs/phase0/`) |
-| B | One human-reviewed external finding executes as a reproducible comparison against generated Medicare-like data — **done** (`docs/phase2/`, LIT-03) |
-| C | A calibrated path improves predeclared contextual metrics vs uncalibrated baseline on held-out compatible evidence, without breaking structural gates |
+| A | Feasibility memo + capability gaps + initial evidence inventory — **done** |
+| B | One human-reviewed external finding executes as reproducible comparison — **done** |
+| C | Calibrated path improves predeclared contextual metrics vs uncalibrated baseline on held-out compatible evidence, without breaking structural gates — **engine ready (Phase 4)**; Phase 5 worlds + Phase 6 holdout protocol complete the milestone |
 
-Start Phase 4 calibration toward Milestone C; holdout in corpus v1 stays
-untouched by fitting.
+Phase 5 packages multi-world releases on top of the Phase 4 engine without
+retuning against holdout.

@@ -1,0 +1,31 @@
+{
+  "schema_version": "0.1",
+  "run_id": "phase4-known-truth-A",
+  "level": "A_none",
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "corpus_id": "mvp-2021-om-ffs-diabetes-ip-corpus-v1",
+  "corpus_sha256": "dcbd7321be29fd38f0ce9bb54b517dee4f6df2dcbe690768fb7c1d4e0dc3fb0f",
+  "calibration_finding_ids": [
+    "cms-agg03-diabetes-prev-ffs-2018",
+    "cms-agg04-hf-prev-ffs-2022",
+    "lit07-avalere-ffs-diabetes-ip-risk"
+  ],
+  "holdout_finding_ids": [
+    "lit03-mmwr-diabetes-prev-2015-women"
+  ],
+  "seed": 42,
+  "method_hyperparameters": {},
+  "diagnostics": {
+    "level": "A"
+  },
+  "calibration_mae_before": 0.085773820537,
+  "calibration_mae_after": 0.085773820537,
+  "holdout_mae_before": 0.115833333333,
+  "holdout_mae_after": 0.115833333333,
+  "structural_valid": true,
+  "notes": [],
+  "assumptions": [
+    "Holdout findings are evaluation-only and must not enter the fit objective.",
+    "Synthetic agreement is not a Medicare finding."
+  ]
+}

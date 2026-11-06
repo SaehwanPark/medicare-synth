@@ -1,0 +1,130 @@
+{
+  "experiment": "phase4-known-truth-miscalibrated-start",
+  "baseline_params": {
+    "n_beneficiaries": 6000,
+    "seed": 42,
+    "diabetes_prevalence": 0.18,
+    "p_ip_given_diabetes": 0.05,
+    "p_ip_given_no_diabetes": 0.04,
+    "hf_prevalence": 0.04,
+    "reference_year": 2021,
+    "recovery_tolerance": 0.03
+  },
+  "level_A_calibration_mae": 0.085773820537,
+  "level_B_calibration_mae_before": 0.085773820537,
+  "level_B_calibration_mae_after": 0.000729402519,
+  "level_B_ess": 4606.031093638816,
+  "level_B_converged": true,
+  "level_C_calibration_mae_before": 0.085773820537,
+  "level_C_calibration_mae_after": 0.0025270954,
+  "level_C_holdout_mae_before": 0.115833333333,
+  "level_C_holdout_mae_after": 0.017833333333,
+  "level_C_fitted_params": {
+    "n_beneficiaries": 6000,
+    "seed": 42,
+    "diabetes_prevalence": 0.277,
+    "p_ip_given_diabetes": 0.13,
+    "p_ip_given_no_diabetes": 0.04,
+    "hf_prevalence": 0.12,
+    "reference_year": 2021,
+    "recovery_tolerance": 0.03
+  },
+  "improved_B": true,
+  "improved_C": true,
+  "manifest_sha256": {
+    "A": "12aa91c5744e454822778f4c04f6c3407cafab2c6d33a2d8332566157a1dfa85",
+    "B": "ddb8817696f7d213f3f53d6f8194e15e7bac73a5bbca2beb525cc07efed84da6",
+    "C": "5e177537ef3a67b5c4692fece451b2b3352327f69c519145cd4304b0545c0c16"
+  },
+  "agent_roles": [
+    {
+      "role": "discovery",
+      "may": [
+        "search candidate CMS aggregates and Medicare-only literature"
+      ],
+      "must_not": [
+        "claim eligibility/comparability without source inspection"
+      ],
+      "requires_human_approval": [
+        "screening inclusion into a corpus"
+      ]
+    },
+    {
+      "role": "extraction",
+      "may": [
+        "extract estimates, uncertainty, definitions, provenance anchors"
+      ],
+      "must_not": [
+        "invent missing SEs, eligibility rules, or covariates"
+      ],
+      "requires_human_approval": [
+        "new evidence record values"
+      ]
+    },
+    {
+      "role": "formalization",
+      "may": [
+        "propose Evidence IR and variable mappings"
+      ],
+      "must_not": [
+        "approve unsupported semantics or fabricate estimators"
+      ],
+      "requires_human_approval": [
+        "new estimand implementations"
+      ]
+    },
+    {
+      "role": "compatibility_reviewer",
+      "may": [
+        "flag cohort/year/program mismatch, overlap, contradictions"
+      ],
+      "must_not": [
+        "quietly discard inconsistent findings"
+      ],
+      "requires_human_approval": [
+        "transport assumption changes"
+      ]
+    },
+    {
+      "role": "calibration_operator",
+      "may": [
+        "execute approved configurations and reproducible calibration runs",
+        "write run manifests and diagnostics"
+      ],
+      "must_not": [
+        "change evidence values",
+        "mutate train/holdout partitions to improve metrics",
+        "fit on holdout findings"
+      ],
+      "requires_human_approval": [
+        "revised calibration targets",
+        "holdout partition changes"
+      ]
+    },
+    {
+      "role": "evaluation",
+      "may": [
+        "run discrepancy and robustness reports"
+      ],
+      "must_not": [
+        "declare evidence match without declared thresholds"
+      ],
+      "requires_human_approval": [
+        "public evaluation claims"
+      ]
+    },
+    {
+      "role": "release",
+      "may": [
+        "assemble manifests and limitations reports"
+      ],
+      "must_not": [
+        "publish unapproved representativeness claims"
+      ],
+      "requires_human_approval": [
+        "public evidence-calibrated releases"
+      ]
+    }
+  ],
+  "note": "Synthetic known-truth experiment only; not Medicare findings. Holdout never fit."
+}
