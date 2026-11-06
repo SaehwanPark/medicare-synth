@@ -4,6 +4,17 @@
 
 ### Added
 
+- Closed Phase 2 (Evidence IR): added `medicare_synth.evidence_ir` schema
+  `0.1` with concept/estimand vocabulary, JSON parse/validate, estimand
+  compiler (eligibility/derivation/estimator + compatibility reports), and
+  reproducible `execute_finding` comparisons against synthetic tables.
+  Formalized reviewed LIT-03 (Andes MMWR 2015 diabetes prevalence 31.6%) as a
+  diagnostic finding with explicit year/age/FFS/algorithm gaps; LIT-02-shaped
+  planned-admission rates refuse execution. Optional `draft_finding_from_fields`
+  never auto-accepts. Docs under [`docs/phase2/`](docs/phase2/); fixtures under
+  `medicare_synth/fixtures/evidence_ir/`; tests in `tests/test_evidence_ir.py`.
+  Synced canonical docs; Phase 3 (evidence corpus freeze) is now active.
+
 - Closed Phase 1 (synthesizer verification): added
   `medicare_synth.synthesis` conditional generator for
   `mvp-2021-om-ffs-diabetes-ip` known-truth worlds with controllable diabetes

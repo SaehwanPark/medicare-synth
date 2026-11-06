@@ -1,0 +1,73 @@
+{
+  "finding_id": "lit03-mmwr-diabetes-prevalence-2015",
+  "inventory_id": "LIT-03",
+  "evidence_estimate": 0.316,
+  "synthetic": {
+    "finding_id": "lit03-mmwr-diabetes-prevalence-2015",
+    "evidence_estimate": 0.316,
+    "synthetic_estimate": 0.318123848661,
+    "absolute_difference": 0.002123848661,
+    "relative_difference": 0.006721040066,
+    "n_eligible": 7057,
+    "n_numerator": 2245,
+    "executable": true,
+    "compatibility": {
+      "finding_id": "lit03-mmwr-diabetes-prevalence-2015",
+      "executable": true,
+      "issues": [
+        {
+          "code": "YEAR-TRANSPORT",
+          "severity": "warning",
+          "message": "Evidence years (2015,) \u2260 context year 2021; transport assumption required"
+        },
+        {
+          "code": "FFS-CUSTOM",
+          "severity": "warning",
+          "message": "Source-custom FFS/enrollment rule approximated by Option B filters"
+        },
+        {
+          "code": "AGE-FLOOR",
+          "severity": "warning",
+          "message": "Evidence age minimum 68 differs from MVP default 65; eligibility will use the evidence minimum"
+        },
+        {
+          "code": "ALG-APPROX",
+          "severity": "warning",
+          "message": "Source claims-diabetes algorithm approximated by mbsf_sp_diabetes_v1 on MBSF CC flags"
+        }
+      ],
+      "required_tables": [
+        "beneficiary_summary",
+        "mbsf_base_enrollment",
+        "mbsf_chronic_conditions"
+      ],
+      "approximating_algorithms": [
+        "claims_diabetes_andes_mmwr_v1->mbsf_sp_diabetes_v1"
+      ]
+    },
+    "errors": [],
+    "notes": [
+      "Evidence years (2015,) \u2260 context year 2021; transport assumption required",
+      "Source-custom FFS/enrollment rule approximated by Option B filters",
+      "Evidence age minimum 68 differs from MVP default 65; eligibility will use the evidence minimum",
+      "Source claims-diabetes algorithm approximated by mbsf_sp_diabetes_v1 on MBSF CC flags"
+    ]
+  },
+  "compatibility_codes": [
+    "YEAR-TRANSPORT",
+    "FFS-CUSTOM",
+    "AGE-FLOOR",
+    "ALG-APPROX"
+  ],
+  "world_params": {
+    "n_beneficiaries": 8000,
+    "seed": 42,
+    "diabetes_prevalence": 0.316,
+    "p_ip_given_diabetes": 0.2,
+    "p_ip_given_no_diabetes": 0.08,
+    "hf_prevalence": 0.0,
+    "reference_year": 2021,
+    "recovery_tolerance": 0.03
+  },
+  "note": "Synthetic comparison only; not a Medicare finding."
+}

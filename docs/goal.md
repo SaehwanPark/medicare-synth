@@ -19,25 +19,26 @@ which assumptions remain free; run the same analysis across a few plausible
 worlds; and carry **code and design**—not synthetic conclusions—into authorized
 real-data work.
 
-## Current objective (Phase 2 → first vertical slice)
+## Current objective (Phase 3 → corpus freeze)
 
-Phases 0–1 are **complete** (`docs/phase0/`, `docs/phase1/`). Pinned context:
-`mvp-2021-om-ffs-diabetes-ip`. Conditional synthesizer
-(`medicare_synth.synthesis`) recovers known-truth diabetes→IP relationships
-under pinned seeds with structural gates.
+Phases 0–2 are **complete** (`docs/phase0/`, `docs/phase1/`, `docs/phase2/`).
+Pinned context: `mvp-2021-om-ffs-diabetes-ip`. Conditional synthesizer recovers
+known-truth diabetes→IP relationships. Evidence IR v0.1 formalizes and executes
+reviewed findings (LIT-03 diagnostic prevalence) with explicit compatibility
+gaps.
 
 Next path:
 
 1. ~~**Pin MVP context**~~ / ~~**Audit**~~ / ~~**Scout evidence**~~ — Phase 0.
 2. ~~**Prove synthesizer controllability**~~ — Phase 1 (`docs/phase1/`).
-3. **Formalize one finding end-to-end** — source → reviewed Evidence IR →
-   execute on synthetic tables → comparison report with explicit gaps —
-   **Phase 2 active**.
-4. **Calibrate lightly** — beneficiary reweighting before richer generators;
+3. ~~**Formalize one finding end-to-end**~~ — Phase 2 (`docs/phase2/`).
+4. **Freeze a small evidence corpus** — train / holdout / diagnostic partitions
+   with checksums and exclusion rationales (Phase 3).
+5. **Calibrate lightly** — beneficiary reweighting before richer generators;
    report ESS/support/infeasibility.
-5. **Emit 2–3 worlds** — shared supported targets; different documented weak
+6. **Emit 2–3 worlds** — shared supported targets; different documented weak
    assumptions; identical downstream analysis in each.
-6. **Freeze evaluation** — hard structural gates, graded evidence metrics,
+7. **Freeze evaluation** — hard structural gates, graded evidence metrics,
    untouched holdout/diagnostic set **before** iterative fitting.
 
 ## Operating rules
@@ -64,8 +65,8 @@ the MVP context works end-to-end.
 | Milestone | Done when |
 | --- | --- |
 | A | Feasibility memo + capability gaps + initial evidence inventory land under `docs/` or reports, and Phase 0 exit criteria in `ROADMAP.md` are met — **done** (`docs/phase0/`) |
-| B | One human-reviewed external finding executes as a reproducible comparison against generated Medicare-like data |
+| B | One human-reviewed external finding executes as a reproducible comparison against generated Medicare-like data — **done** (`docs/phase2/`, LIT-03) |
 | C | A calibrated path improves predeclared contextual metrics vs uncalibrated baseline on held-out compatible evidence, without breaking structural gates |
 
-Start Phase 2 Evidence IR work toward Milestone B; do not treat Phase 0
-scouting magnitudes or Phase 1 known-truth params as Medicare findings.
+Start Phase 3 corpus freeze toward Milestone C readiness; do not treat Phase 2
+diagnostic formalizations as silent calibration training targets.

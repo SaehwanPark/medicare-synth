@@ -1,25 +1,28 @@
 # ARCHITECTURE
 
 Last Reviewed: 2026-11-06
-Status: Active — structural core + Phase 1 conditional synthesizer for MVP
-known-truth worlds; Evidence IR / calibration planned (Phase 2+)
+Status: Active — structural core + Phase 1 conditional synthesizer + Phase 2
+Evidence IR v0.1 / estimand compiler; calibration planned (Phase 4+)
 
 ## Current Repository
 
 Implemented: Pydantic v2 domain schemas, checksummed source/evidence manifests,
 Polars-backed validators, deterministic scenarios, normalizer, release export,
 vertical/horizontal expansion, catalog/diff/profile/audit, bounded 2022 PUF
-importer, CLI, docs portal, and Phase 1 conditional synthesizer
+importer, CLI, docs portal, Phase 1 conditional synthesizer
 (`medicare_synth.synthesis`) for `mvp-2021-om-ffs-diabetes-ip` known-truth
-worlds.
+worlds, and Phase 2 Evidence IR (`medicare_synth.evidence_ir`) with parse /
+validate / compile / execute against synthetic tables.
 
 Phase 0 (`docs/phase0/`) pinned the MVP context. Phase 1 (`docs/phase1/`)
 proved controllable diabetes → IP conditionals with reproducibility, structural
 gates, held-out recovery, and a clone-only negative control.
+Phase 2 (`docs/phase2/`) formalized LIT-03 as a reviewed diagnostic finding and
+refuses unsupported rate semantics (LIT-02 planned-admission) explicitly.
 `TabDatSynthAdapter` / horizontal re-keying remain structural fixtures only.
-Planned next: Evidence IR, estimand compiler, calibration, multi-world configs,
-and evaluation. Prefer narrow modules; do not introduce a large framework
-before Phase 2–4 experiments justify it.
+Planned next: frozen evidence corpus, calibration, multi-world configs, and
+evaluation. Prefer narrow modules; do not introduce a large framework before
+Phase 3–4 experiments justify it.
 
 ## Component Boundaries
 
@@ -38,6 +41,11 @@ before Phase 2–4 experiments justify it.
   `HorizontalExpander` (deterministic re-keying) for structural/fixture scaling;
   `generate_diabetes_ip_world` (`synthesis.py`) for Phase 1 conditional
   known-truth worlds (diabetes prevalence and O1 conditionals).
+- **Evidence IR & estimand compiler** — `evidence_ir.py` FindingIR v0.1,
+  vocabulary, load/validate, compile (eligibility/derivation/estimator +
+  compatibility), execute comparison reports; packaged fixtures under
+  `medicare_synth/fixtures/evidence_ir/`. Distinct from RKB snapshot contracts
+  in `evidence.py`.
 - **Scenario catalog, schema diff, limitations profile, audit** — teaching/CI
   fixtures, annual snapshot diffs, six-category limitation disclosures,
   join/privacy metrics.
@@ -50,8 +58,7 @@ Responsibility sketch only; package layout may differ:
 
 | Boundary | Role |
 | --- | --- |
-| **Evidence IR & registry** | Typed findings with provenance, population/time/eligibility, estimand, uncertainty, calibration vs holdout role, review status |
-| **Estimand compiler** | IR → eligibility query, derivation plan, estimator, compatibility report, comparison result |
+| **Evidence registry (corpus)** | Versioned train/holdout/diagnostic partitions over reviewed IR findings (Phase 3) |
 | **Synthesis protocol** | MVP diabetes→IP conditional path implemented; richer joint models / multi-table families still planned |
 | **Calibration** | Reweighting then generator-parameter fit; feasibility/ESS/support diagnostics; hard structural gate retained |
 | **Worlds** | Versioned context presets and explicit underidentified scenario labels |
@@ -73,6 +80,15 @@ agent harness.
 5. Generate relation-level entities before dependent tables; columns in DAG order.
 6. Validate generated data and scenarios.
 7. Export versioned artifacts with manifests and limitation claims.
+
+### Evidence IR path (implemented v0.1)
+
+```text
+Reviewed finding JSON
+        → parse / validate FindingIR
+        → compile → eligibility + derivation + estimator + compatibility
+        → execute on synthetic tables → ComparisonReport
+```
 
 ### Calibration path (planned)
 
