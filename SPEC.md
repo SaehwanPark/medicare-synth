@@ -45,7 +45,7 @@ Out of scope for the foundation (still true):
 
 ### Evidence-calibrated research playground
 
-Status: Active — Phases 0–1 complete; Phase 2 (Evidence IR) next
+Status: Active — Phases 0–2 complete; Phase 3 (evidence corpus freeze) next
 
 **Mission:** generate structurally valid, contextually plausible synthetic
 Medicare worlds so researchers can prototype and stress-test methods before
@@ -68,13 +68,21 @@ clone-only horizontal expansion is characterized as insufficient statistical
 support. See [`docs/phase1/`](docs/phase1/). TabDat / horizontal expanders
 remain structural tools only.
 
+**Evidence IR (Phase 2):** `medicare_synth.evidence_ir` provides schema
+`0.1` finding objects, vocabulary, parse/validate, compile (eligibility /
+derivation / estimator + compatibility), and execute (reproducible comparison
+reports). LIT-03 (Andes MMWR 2015 diabetes prevalence 31.6%) is formalized as a
+reviewed **diagnostic** finding with explicit transport gaps; LIT-02-shaped
+planned-admission rates are refused rather than silently approximated. See
+[`docs/phase2/`](docs/phase2/). Draft extraction never auto-accepts.
+
 **Near-term capability targets:**
 
 | Capability | Intent |
 | --- | --- |
-| Evidence IR | Typed, reviewed finding objects: population, time, eligibility, variables, estimand, uncertainty, role, governance |
-| Estimand compiler | Eligibility → derivation → estimator → compatibility report → comparison |
-| Synthesis contract | Coherent beneficiary subgraphs with controllable conditional relationships (beyond index/seed fixtures) |
+| Evidence IR | **Delivered (v0.1)** — typed findings with population/time/eligibility/estimand/uncertainty/role/governance |
+| Estimand compiler | **Delivered (v0.1 crude)** — eligibility → derivation → estimator → compatibility → comparison |
+| Evidence corpus | Freeze small train/holdout/diagnostic registry (Phase 3) |
 | Calibration ladder | A none → B reweight → C conditional generation; prove A–C before hierarchical methods |
 | Multi-world releases | Shared evidence constraints; documented variation in underidentified dimensions |
 | Evaluation | Hard structural gates + graded evidence agreement + held-out + research-utility benchmarks |
@@ -96,7 +104,8 @@ Ordered program (see `ROADMAP.md` for exit gates):
    (`docs/phase0/`).
 1. ~~Verified synthesizer with genuine conditional support and known-truth
    tests.~~ **Complete** (`docs/phase1/`, `medicare_synth.synthesis`).
-2. Evidence IR + executable estimand language.
+2. ~~Evidence IR + executable estimand language.~~ **Complete**
+   (`docs/phase2/`, `medicare_synth.evidence_ir`).
 3. Frozen, reviewed MVP evidence corpus (train / holdout / diagnostic).
 4. Calibration engine + reviewable agent orchestration (engines independent of agents).
 5. Calibrated MVP worlds and release manifests.

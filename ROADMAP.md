@@ -77,23 +77,32 @@ Exit criteria:
 
 ### Phase 2 — Evidence IR and executable study language
 
-Status: Active
+Status: Complete (2026-11-06)
 
 Outputs:
 
 - Evidence IR schema/versioning; vocabulary for concepts and estimands
+  ([evidence-ir-schema.md](docs/phase2/evidence-ir-schema.md);
+  `medicare_synth.evidence_ir`, `schema_version: "0.1"`)
 - parser/validator/compiler with compatibility reports
 - source-to-estimand tests and sample fixtures
-- optional AI-assisted extraction with source anchors (review required)
+  ([fixtures/](docs/phase2/fixtures/); `tests/test_evidence_ir.py`)
+- optional draft extraction with source anchors (review required;
+  `draft_finding_from_fields`)
+- end-to-end LIT-03 formalization
+  ([lit03-formalization.md](docs/phase2/lit03-formalization.md);
+  [capability-report.md](docs/phase2/capability-report.md))
 
 Exit criteria:
 
 - a human-reviewed real Medicare-only finding formalizes, executes against a
   compatible synthetic dataset, and compares reproducibly; errors are explicit
+  — **met** (LIT-03 Andes MMWR 2015 diabetes prevalence 31.6%; diagnostic role;
+  explicit year/age/FFS/algorithm gaps; LIT-02 planned-admission refusal)
 
 ### Phase 3 — Curate and freeze the MVP evidence corpus
 
-Status: Planned
+Status: Active
 
 Outputs:
 
@@ -170,8 +179,9 @@ Exit criteria:
    diabetes → all-cause IP; see `docs/phase0/`.
 2. ~~Audit the minimal dependency graph of tables/fields.~~ **Done (Phase 0).**
 3. ~~Prove generator controllability on synthetic ground truth.~~ **Done (Phase 1).**
-4. Formalize one finding end-to-end (source → IR → execution → report)
-   (**Phase 2 — active**).
+4. ~~Formalize one finding end-to-end (source → IR → execution → report).~~
+   **Done (Phase 2):** LIT-03 → Evidence IR → synthetic comparison; see
+   `docs/phase2/`.
 5. Prepare ~3 public calibration targets + 1 independent diagnostic/holdout
    (Phase 3 freeze; candidates listed in evidence inventory).
 6. Implement reweighting before advanced calibration.
