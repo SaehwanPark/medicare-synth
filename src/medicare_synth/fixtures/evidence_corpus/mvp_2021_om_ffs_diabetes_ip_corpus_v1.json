@@ -73,7 +73,7 @@
       "inventory_id": "LIT-02",
       "partition": "excluded",
       "relative_path": "evidence_ir/lit02_drye_admission_rate_unsupported.json",
-      "sha256": "3b91758580aefb20eacf8f5449acc8febd4fe3ee249723777225ba3d30ca0dab",
+      "sha256": "9d1c7dc5edaf045cd90c975d1bcd69a3ec64367997c7d614e4fa58e30363aae9",
       "comparability_grade": "B",
       "executability": "non_executable",
       "rationale": "Excluded: planned-admission rate unsupported on MVP schema."

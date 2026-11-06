@@ -9,7 +9,7 @@
 | --- | --- |
 | Versioned registry with eligibility/compatibility grades | **Met** (`EvidenceCorpus` + entry grades/executability) |
 | Train / held-out / diagnostic partitions + checksums | **Met** (3 / 1 / 2 + excluded 2; SHA-256) |
-| Exclusion/conflict rationales retained | **Met** (LIT-02, MMD condition-hosp; CMS-AGG-05 conflicts) |
+| Exclusion/conflict rationales retained | **Met** (excluded: LIT-02, MMD condition-hosp; diagnostic conflicts: CMS-AGG-05 HF 27→30) |
 | Active findings executable or transparently approximated | **Met** (`assert_active_partition_support`) |
 | Partitions frozen and reviewer-approved before calibration | **Met** (`frozen=true`, reviewer `phase3-corpus-freeze`) |
 

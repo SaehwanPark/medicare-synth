@@ -14,11 +14,15 @@
   },
   "population": {
     "program": "original_medicare_ffs",
-    "years": [2012],
-    "age": {"minimum": 65},
+    "years": [
+      2012
+    ],
+    "age": {
+      "minimum": 65
+    },
     "geography": "national",
     "ffs_rule": "option_b_full_year",
-    "enrollment_notes": "Medicare FFS ≥65 with diabetes; ACO-context framing in source."
+    "enrollment_notes": "Medicare FFS \u226565 with diabetes; ACO-context framing in source."
   },
   "cohort": {
     "inclusion_notes": "Diabetes cohort; unplanned acute admissions.",
@@ -29,7 +33,7 @@
     "numerator": {
       "concept": "all_cause_inpatient",
       "algorithm": "ip_claim_presence_v1",
-      "notes": "Source outcome is unplanned acute admissions — not equivalent to all-cause IP claim presence. Rate execution counts IP claim rows as events."
+      "notes": "Source outcome is unplanned acute admissions \u2014 not equivalent to all-cause IP claim presence. Rate execution counts IP claim rows as events."
     },
     "conditioning": {
       "concept": "diabetes",
@@ -50,13 +54,13 @@
     "unit": "per_100_person_years",
     "notes": "Scouting magnitude from Phase 0 inventory; re-verify primary table before Phase 3 freeze."
   },
-  "role": "diagnostic",
+  "role": "excluded",
   "comparability": {
     "grade": "B",
     "transport_required": true,
     "assumptions": [
       "Not equivalent to MVP O1 (all-cause claim presence).",
-      "Year transport 2012 → 2021 required."
+      "Year transport 2012 \u2192 2021 required."
     ],
     "gaps": [
       "planned_vs_all_cause_admissions",
@@ -68,7 +72,7 @@
     "review_status": "accepted",
     "reviewer": "phase2-milestone-b-formalization",
     "reviewed_at": "2026-11-06",
-    "rationale": "Accepted as a negative-control fixture: compiler must refuse planned-admission rate semantics rather than silently approximating O1.",
+    "rationale": "Excluded in corpus v1: planned-admission rate unsupported on MVP schema.",
     "conflicts": []
   }
 }

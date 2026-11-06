@@ -112,7 +112,7 @@ Outputs:
 - train / held-out / diagnostic partitions and checksums
   (`mvp-2021-om-ffs-diabetes-ip-corpus-v1`; 3 calibration + 1 holdout)
 - exclusion/conflict rationales retained (not deleted)
-  (LIT-02 planned-admission; MMD condition-hosp; CMS-AGG-05 HF algorithm shift)
+  (excluded: LIT-02, MMD condition-hosp; diagnostic: CMS-AGG-05 HF algorithm shift)
 
 Exit criteria:
 
