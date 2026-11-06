@@ -46,8 +46,8 @@ On fixtures or generated tables that preserve the same grains:
 1. Restrict to age ≥ 65 via `bene_birth_dt` vs reference year end (2021-12-31).
 2. Restrict to Original Medicare FFS-like enrollment via
    `bene_hi_cvrage_tot_mons`, `bene_smi_cvrage_tot_mons`,
-   `bene_hmo_cvrage_tot_mons` / `bene_ma_cvrage_tot_mons` (exact rule TBD in
-   draft MVP spec; annual totals are available).
+   `bene_hmo_cvrage_tot_mons` / `bene_ma_cvrage_tot_mons` (**Option B**
+   default in draft MVP: full-year A+B and HMO/MA months == 0).
 3. Define diabetes / HF exposure from `sp_diabetes` / `sp_chf` (CCW-style
    indicators; treat code semantics as evidence-bound, not clinical truth).
 4. Define all-cause IP hospitalization as ≥1 `inpatient_claims` row with

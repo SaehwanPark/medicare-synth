@@ -45,14 +45,14 @@ Human review is required before freezing a calibrated corpus (Phase 3).
 
 | Option | Rule using available fields | Pros | Cons |
 | --- | --- | --- | --- |
-| **A (recommended for MVP v0)** | `bene_hmo_cvrage_tot_mons == 0` and `bene_ma_cvrage_tot_mons == 0` (when Part C table present) | Implementable now with annual totals | Weaker than “any MA month” monthly panel used in many CMS studies |
-| **B** | Full-year Parts A+B (`*_tot_mons == 12`) and HMO months == 0 | Matches many CCW “full-year FFS” denominators | Drops partial-year enrollees; may bias utilization |
+| **A** | `bene_hmo_cvrage_tot_mons == 0` and `bene_ma_cvrage_tot_mons == 0` (when Part C table present); Parts A/B months may be partial | Looser annual-total prototype | Weaker than CCW full-year and MMD “any MA month” rules |
+| **B (implementable default for MVP v0)** | Full-year Parts A+B (`bene_hi_cvrage_tot_mons == 12` and `bene_smi_cvrage_tot_mons == 12`) **and** HMO/MA annual months == 0 | Matches many CCW “full-year FFS” denominators; implementable now | Still weaker than monthly MA exclusion; drops partial-year enrollees |
 | **C** | Monthly `hmo_ind_*` never indicates MA for months with A/B buy-in | Closest to MMD/CCW practice | Requires modeling monthly HMO indicators (gap today) |
 
-**Phase 0 stance:** Document Option A as the **implementable default** for
-prototype estimands; treat Option C as the **preferred fidelity target** once
-monthly fields are first-class. Do not silently mix A/B/C across evidence
-records.
+**Phase 0 stance:** Document **Option B** as the **implementable default** for
+prevalence-style MVP estimands; treat Option C as the **preferred fidelity
+target** once monthly fields are first-class. Do not silently mix A/B/C across
+evidence records.
 
 ### 2.3 Parts A/B coverage threshold — open choice
 
@@ -147,18 +147,22 @@ sensitivity with explicit DRG list provenance.
 ## 6. Analysis expressibility checklist
 
 - [x] Population filter (age, program year) expressible
-- [x] FFS-like filter expressible under Option A
+- [x] FFS-like filter expressible under Option B
 - [x] Diabetes exposure expressible
 - [x] HF stratifier expressible
 - [x] All-cause hospitalization expressible
 - [ ] Monthly MA exclusion (Option C) without schema extension
 - [ ] Diagnosis-specific hospitalization without IP ICD fields
-- [ ] County-level MMD targets without geography fields
+- [ ] County-level MMD condition-hospitalization targets without geography + IP ICD
 
 ## 7. Decisions deferred (human gates)
 
-1. Final FFS rule (A vs B vs C) for the frozen MVP evidence corpus.
-2. Whether `sp_*` `1` vs `2` is collapsed.
-3. Whether person-time or full-year denominators are default for rate targets.
-4. Whether HF is co-primary exposure or only a stratifier.
+Shared with `SPEC.md` / draft MVP §10 (do not invent silently):
+
+1. Keep Option B vs upgrade to Option C as corpus default.
+2. Whether `sp_*` `1` vs `2` stays collapsed (implementable default: collapse).
+3. Person-time vs full-year denominators as default for **rate** targets
+   (prevalence-style keeps full-year under Option B).
+4. Whether HF is co-calibrated or diagnostic/stratifier-only.
 5. Transport rules when calibrating to evidence years ≠ 2021.
+6. Exact training targets and holdout partition (Phase 3).

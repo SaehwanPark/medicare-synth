@@ -28,11 +28,11 @@ approximation), **C** (diagnostic / conflict / year-skewed), **X** (ineligible).
 | ID | Source | What it offers | Year / pop | MVP use | Grade | Comparability notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | **CMS-AGG-01** | [Medicare Beneficiaries at a Glance DY2021](https://data.cms.gov/sites/default/files/2023-09/Medicare%20Beneficiaries%20at%20a%20Glance%20DY2021.pdf) | National chronic-condition prevalence ranks; diabetes and heart failure among top conditions; FFS vs MA enrollment split | 2021; FFS footnote for chronic prevalence | Context for prevalence order of magnitude; enrollment mix | **B** | Chart-level; exact diabetes/HF percentages need careful PDF extraction; prevalence based on FFS beneficiaries per footnote |
-| **CMS-AGG-02** | [Mapping Medicare Disparities (MMD) Tool](https://data.cms.gov/mmd-population/map.html) + [technical documentation](https://www.cms.gov/about-cms/agency-information/omh/downloads/mapping-technical-documentation.pdf) | County/state prevalence and **hospitalization rates** for chronic conditions including diabetes and heart failure; FFS vs MA views; age/sex/race/dual stratifiers | Multi-year; 2021+ uses updated CCW 30-condition algorithms; FFS excludes any MA enrollment during year | Primary official source for prevalence + hospitalization **rates** | **A** | Denominator includes under-65 disabled/ESRD unless filtered; geography needed for county targets (schema gap); download CSV for pinned extracts |
+| **CMS-AGG-02** | [Mapping Medicare Disparities (MMD) Tool](https://data.cms.gov/mmd-population/map.html) + [technical documentation](https://www.cms.gov/about-cms/agency-information/omh/downloads/mapping-technical-documentation.pdf) | County/state **prevalence** and condition-specific **hospitalization rates** for diabetes/HF etc.; FFS vs MA views; age/sex/race/dual stratifiers | Multi-year; 2021+ uses updated CCW 30-condition algorithms; FFS excludes any MA enrollment during year | **Prevalence:** primary official source (grade A). **Condition hospitalization:** DX-based — **not** an O1 (all-cause) target | **A** (prevalence) / **B–diagnostic** (condition hosp) | Condition-hosp rates need IP ICD (O4); quarantine for MVP O1. Denominator includes under-65 unless filtered; geography needed for county targets; download CSV for pinned extracts |
 | **CMS-AGG-03** | CMS OMH [Diabetes disparities data highlight (2021)](https://www.cms.gov/files/document/diabetes-disparities-data-highlight-2021.pdf) | Medicare FFS diabetes prevalence trends (~27.7% in 2018 cited); disparities; ED/IP utilization for diabetes complications | Mostly **2017** CCW FFS; ages 18–75 subsets for some measures | Train candidate for prevalence disparities; utilization needs algorithm match | **B** | Year ≠ 2021; HEDIS-ish diabetes defs for some measures; SDOH neighborhood covariates out of MVP schema |
 | **CMS-AGG-04** | CMS OMH [Heart Failure disparities snapshot](https://www.cms.gov/About-CMS/Agency-Information/OMH/Downloads/Data-Snapshot-Heart-Failure.pdf) (Jan 2024) | HF prevalence ~12% among Medicare FFS (2022 MMD, preliminary); hospitalization rate variation by demographics | **2022** FFS (preliminary in source) | HF prevalence / hosp rate orientation | **B** | Year ≠ 2021; preliminary flag; age-standardized for some strata |
 | **CMS-AGG-05** | [CCW 27→30 condition transition impact](https://www2.ccwdata.org/documents/10280/19002256/ccw-condition-categories-impact-of-transition-from-27-to-30.pdf) | Documents algorithm break: e.g. heart failure 14.4% (27-CCW) vs 12.1% (30-CCW) in **2017**; diabetes unchanged at 28.0% | 2017 FFS | **Mandatory comparability control** when mixing pre/post algorithm evidence | **A** (meta) | Not a calibration target; required when interpreting HF time series |
-| **CMS-AGG-06** | [CCW technical guidance: population statistics](https://www2.ccwdata.org/documents/10280/19002248/ccw-technical-guidance-calculating-medicare-population-statistics.pdf) | Official rules for prevalence denominators, FFS restrictions, lookbacks | Method | Cohort rule reference | **A** (method) | Align MVP Option B/C language to this guidance where possible |
+| **CMS-AGG-06** | [CCW technical guidance: population statistics](https://www2.ccwdata.org/documents/10280/19002248/ccw-technical-guidance-calculating-medicare-population-statistics.pdf) | Official rules for prevalence denominators, FFS restrictions, lookbacks | Method | Cohort rule reference | **A** (method) | Align MVP Option B default and Option C upgrade language to this guidance where possible |
 | **CMS-AGG-07** | Medicare Geographic Variation / Chronic Conditions public aggregates (CMS Research Statistics) | State/county spending, utilization, chronic condition prevalence for FFS | Multi-year (verify file vintage) | Secondary national/state marginals | **B** | Confirm exact 2021 file URL and dictionary before pinning; site paths change |
 | **CMS-AGG-08** | CMS Market Saturation & Utilization (referenced by MMD docs) | Provider density vs FFS beneficiaries | Recent releases | Out of MVP core | **C** | Provider-side; not needed for first estimand |
 
@@ -40,9 +40,10 @@ approximation), **C** (diagnostic / conflict / year-skewed), **X** (ineligible).
 
 1. **National FFS diabetes prevalence, age 65+** (MMD or Chronic Conditions
    extract for 2021, age-filtered) — population/condition.
-2. **National FFS all-cause or diabetes-associated hospitalization rate among
-   beneficiaries with diabetes, age 65+** (MMD hospitalization measure with
-   documented definition) — condition/utilization.
+2. **National FFS all-cause IP admission risk/rate among diabetes+**, age 65+
+   — utilization; prefer a source whose estimand matches **O1** (or document
+   transport). Do **not** substitute MMD diabetes-condition hospitalization
+   rates for O1 without an IP ICD path.
 3. **National FFS heart-failure prevalence, age 65+** (MMD 2021) — secondary
    condition marginal.
 
@@ -54,26 +55,27 @@ Hold out a disjoint demographic stratum or adjacent year for Phase 3/6 — do
 | ID | Citation | Estimand sketch | Population | MVP use | Grade | Issues |
 | --- | --- | --- | --- | --- | --- | --- |
 | **LIT-01** | CMS/AHRQ Data Points: [*Use of and access to health care by Medicare beneficiaries with diabetes… 2007–2011*](https://www.ncbi.nlm.nih.gov/books/NBK202115/) | Diabetes prevalence ~25% (2011); hospitalization rates per 100 beneficiaries by diabetes type/insulin (e.g. 43–111) | Medicare FFS, age ≥65, full-year A+B, no MA | Prototype rate-by-subgroup estimand; shows need for insulin/type detail we lack | **B** | Years old; type/insulin strata need PDE + DX we may not have |
-| **LIT-02** | Drye et al., *Med Care* — [Risk-standardized acute admission rates… diabetes and HF](https://pmc.ncbi.nlm.nih.gov/articles/PMC5356461/) | Crude national acute unplanned admission rate **41.4 per 100 person-years** (diabetes cohort, 2012); HF cohort parallel | Medicare FFS ≥65 with diabetes or HF; ACO context | Strong **all-cause acute admission** rate among diabetes — maps to outcome O1/O2 with person-time | **A** | 2012; ACO performance framing; planned-admission exclusions need coding rules |
+| **LIT-02** | Drye et al., *Med Care* — [Risk-standardized acute admission rates… diabetes and HF](https://pmc.ncbi.nlm.nih.gov/articles/PMC5356461/) | Crude national acute **unplanned** admission rate **41.4 per 100 person-years** (diabetes cohort, 2012); HF cohort parallel | Medicare FFS ≥65 with diabetes or HF; ACO context | Related person-time admission-rate prior for formalization; **not** equivalent to MVP O1 (all-cause claim presence) | **B** | 2012; year transport; planned-admission exclusions (~12% of stays) absent from O1; ACO framing |
 | **LIT-03** | CDC MMWR: [Diabetes prevalence and incidence among Medicare beneficiaries, 2001–2015](https://www.cdc.gov/mmwr/volumes/68/wr/mm6843a2.htm) | FFS diabetes prevalence trajectory to ~31.6% (2015); incidence | FFS A+B continuous enrollment; age ≥68 end of index year | Prevalence trend prior; age-68+ lookback rule differs from MVP 65+ | **B** | Age cutoff and 60-month enrollment window; year ≤2015 |
 | **LIT-04** | Schneider et al., *Health Qual Life Outcomes* 2009 — multiple chronic conditions in Medicare | Diabetes ~24.3%; HF ~18%; inpatient days by condition (2005) | Medicare FFS | Historical multi-morbidity context | **C** | Old year; HF def pre-algorithm shifts |
 | **LIT-05** | McBean et al., *Diabetes Care* 2004 — racial/ethnic diabetes prevalence/incidence/mortality | Prevalence per 1,000 by race among FFS ≥67 | FFS 5% sample | Disparity pattern prior | **C** | Very old; race coding changes |
 | **LIT-06** | Jencks et al., *NEJM* 2009 — rehospitalizations among Medicare FFS | Rehospitalization rates; HF among high-readmission conditions | Medicare FFS | Classic utilization; **readmission** estimand (episode logic) | **C** for MVP v0 | Needs 30-day episode construction beyond first-admission O1 |
-| **LIT-07** | Avalere white paper comparing MA vs FFS diabetes detection/treatment/outcomes | FFS chronic diabetes post-index IP ~13%; diabetes-principal IP rare (~0.6%) | Matched MA/FFS | Warns diabetes-principal admissions are rare; supports all-cause O1 over O4 for MVP | **B** (diagnostic) | Industry report; MA comparison; not peer-reviewed CMS |
+| **LIT-07** | Avalere white paper: [Comparing Detection, Treatment, Outcomes… MA vs FFS diabetes](https://advisory.avalerehealth.com/wp-content/uploads/2023/01/Diabetes-Progression-Whitepaper.pdf) | FFS chronic diabetes post-index IP ~13%; diabetes-principal IP rare (~0.6%) | Matched MA/FFS | Warns diabetes-principal admissions are rare; supports all-cause O1 over O4 for MVP | **B** (diagnostic) | Industry report; MA comparison; not peer-reviewed CMS |
 
 ## 4. Expressible MVP analysis (ties inventory → schema)
 
 **Candidate executable finding (Phase 2 target, not yet formalized):**
 
 > Among Medicare FFS beneficiaries aged ≥65 with CCW/MBSF diabetes indicator
-> present, the acute all-cause inpatient admission rate is on the order of
-> tens per 100 person-years (LIT-02 scale), and diabetes prevalence in FFS
-> elderly populations is on the order of ~25–32% depending on year and
-> algorithm (CMS-AGG / LIT-01 / LIT-03).
+> present, diabetes prevalence in FFS elderly populations is on the order of
+> ~25–32% depending on year and algorithm (CMS-AGG / LIT-01 / LIT-03). A
+> related—but not identical—person-time acute unplanned admission rate among
+> diabetes cohorts is on the order of tens per 100 person-years (LIT-02,
+> 2012; requires transport and planned-admission gap notes vs MVP O1).
 
 Implementation path on Medicare-Synth tables: cohort filters in
 [mvp-cohort-and-fields.md](mvp-cohort-and-fields.md) + outcome **O1** or
-person-time rate from claim counts. No IP principal diagnosis required.
+person-time rate from claim counts. No IP principal diagnosis required for O1.
 
 ## 5. Known comparability hazards (must not ignore)
 
@@ -107,12 +109,12 @@ flag, and no hospitalization signal — which is not the case.
 
 | Role | Candidate |
 | --- | --- |
-| Training / calibration | CMS-AGG-02 diabetes prevalence 65+ (2021); LIT-02-scale admission rate with transport note **or** MMD hospitalization 2021 age-filtered |
-| Held-out | Demographic stratum (e.g. sex-specific diabetes prevalence) or adjacent-year MMD slice — **choose at Phase 3 freeze** |
-| Diagnostic-only | CMS-AGG-05 algorithm impact; LIT-07 DX-specific rarity; LIT-06 readmissions |
+| Training / calibration | CMS-AGG-02 diabetes prevalence 65+ (2021); optional LIT-02-scale rate only with explicit estimand/transport notes — **not** MMD condition-hospitalization as O1 |
+| Held-out | Demographic stratum (e.g. sex-specific diabetes prevalence) or adjacent-year MMD **prevalence** slice — **choose at Phase 3 freeze** |
+| Diagnostic-only | CMS-AGG-05 algorithm impact; MMD condition-hospitalization; LIT-07 DX-specific rarity; LIT-06 readmissions |
 
 ## 8. Acquisition notes for `~/data/medicare-synth/phase0/`
 
-Persist downloaded CSVs/PDFs **outside git** under the home data directory with
-retrieval date and URL. Track only checksums / inventory metadata in-repo (this
-file + JSON sidecar). Do not commit CMS bulk extracts to the repository.
+Persist downloaded CSVs/PDFs and the JSON inventory sidecar **outside git**
+under the home data directory with retrieval date and URL. This markdown file
+is the in-repo inventory; do not commit CMS bulk extracts to the repository.

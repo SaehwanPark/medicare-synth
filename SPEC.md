@@ -55,11 +55,11 @@ beneficiaries or publish synthetic estimates as Medicare findings.
 
 **MVP research context (pinned in Phase 0):**
 `mvp-2021-om-ffs-diabetes-ip` — 2021 Original Medicare FFS, age 65+, full-year
-Parts A/B with annual HMO/MA months = 0 (Option A default; monthly HMO panel
-is the fidelity upgrade), diabetes via `sp_diabetes` → all-cause inpatient
-hospitalization; heart failure (`sp_chf`) as stratifier. Detail:
-[`docs/phase0/`](docs/phase0/). Current expansion remains fixture/seed math,
-not conditional generation—Phase 1 must prove controllability before
+Parts A/B with annual HMO/MA months = 0 (**FFS Option B** default; monthly
+HMO panel / Option C is the fidelity upgrade), diabetes via `sp_diabetes` →
+all-cause inpatient hospitalization; heart failure (`sp_chf`) as stratifier.
+Detail: [`docs/phase0/`](docs/phase0/). Current expansion remains fixture/seed
+math, not conditional generation—Phase 1 must prove controllability before
 calibration claims.
 
 **Near-term capability targets:**
@@ -96,8 +96,8 @@ Ordered program (see `ROADMAP.md` for exit gates):
 6. Held-out and research-utility evaluation; go/no-go.
 7. Incremental context and literature expansion with regression of prior worlds.
 
-Open product decisions (do not invent silently): FFS Option A vs monthly Option
-C as corpus default; whether to collapse `sp_*` codes `1`/`2`; exact training
-targets and holdout partition; HF co-calibration vs diagnostic-only; Evidence
-IR v0.1 estimand breadth; transport rules for older-year studies;
-workflow-utility benchmark.
+Open product decisions (do not invent silently): keep FFS Option B vs upgrade
+to monthly Option C; whether to collapse `sp_*` codes `1`/`2`; person-time vs
+full-year denominators for rate targets; exact training targets and holdout
+partition; HF co-calibration vs diagnostic-only; Evidence IR v0.1 estimand
+breadth; transport rules for older-year studies; workflow-utility benchmark.

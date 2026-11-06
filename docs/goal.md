@@ -68,5 +68,5 @@ the MVP context works end-to-end.
 | B | One human-reviewed external finding executes as a reproducible comparison against generated Medicare-like data |
 | C | A calibrated path improves predeclared contextual metrics vs uncalibrated baseline on held-out compatible evidence, without breaking structural gates |
 
-Start at Milestone B / Phase 1 synthesizer work; do not treat Phase 0 scouting
-magnitudes as approved calibration targets.
+Start Phase 1 synthesizer work (toward later Milestone B); do not treat Phase 0
+scouting magnitudes as approved calibration targets.

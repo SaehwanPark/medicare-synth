@@ -24,26 +24,27 @@ Specify the smallest evidence-calibrated playground MVP that can:
 | Year | 2021 |
 | Program | Original Medicare FFS (Parts A and B); MA excluded per §3 |
 | Age | ≥ 65 at end of year / death |
-| Exposure | Diabetes: `sp_diabetes ∈ {1,2}` (collapse); HF stratifier `sp_chf` |
+| Exposure | Diabetes: `sp_diabetes ∈ {1,2}` (**implementable default:** collapse `1`/`2`); HF stratifier `sp_chf` |
 | Outcome | All-cause IP hospitalization (**O1**): ≥1 inpatient claim with admission in 2021 |
 | Primary estimand (v0) | Risk or rate of O1 by diabetes status within the cohort |
 | Non-goals | MA inference; DX-specific admissions; provider networks; Part D insulin strata; causal effects as Medicare findings |
 
 ## 3. Cohort rules (implementable default)
 
-Until Phase 3 freezes alternatives:
+Until Phase 3 freezes alternatives (**FFS Option B** — not Option A):
 
 1. `age_end_ref_yr >= 65` from `bene_birth_dt` and reference date 2021-12-31
    (or death date if earlier).
 2. `bene_hi_cvrage_tot_mons == 12` and `bene_smi_cvrage_tot_mons == 12`
    (**full-year** A+B for prevalence-style denominators).
 3. `bene_hmo_cvrage_tot_mons == 0` and, when available,
-   `bene_ma_cvrage_tot_mons == 0` (**FFS Option A**).
+   `bene_ma_cvrage_tot_mons == 0`.
 4. Include decedents who meet enrollment rules until death when constructing
    person-time rates.
 
 **Documented upgrades (not silent):** monthly HMO panel (Option C); person-time
-denominators for rate estimands; distinguishing `sp_*` `1` vs `2`.
+denominators for rate estimands; distinguishing `sp_*` `1` vs `2` if an
+evidence item requires it.
 
 ## 4. Minimal schema contract
 
@@ -99,10 +100,12 @@ grade, and train/holdout/diagnostic role (assigned only after human review).
 
 See [evidence-inventory.md](evidence-inventory.md). Working intent:
 
-- Prefer **CMS MMD 2021** age-filtered FFS extracts for prevalence and
-  hospitalization marginals.
-- Use **LIT-02**-class admission rates as a formalization exercise with
-  explicit year-transport assumptions.
+- Prefer **CMS MMD 2021** age-filtered FFS extracts for **diabetes/HF
+  prevalence** marginals compatible with MBSF CC flags.
+- Do **not** treat MMD condition-specific hospitalization rates as O1 targets
+  (those need DX-coded admissions; quarantine until IP ICD fields exist).
+- Use **LIT-02**-class person-time admission rates as a formalization exercise
+  with explicit year-transport and planned-admission exclusion gaps vs O1.
 - Keep **CMS-AGG-05** as mandatory diagnostic for HF algorithm shifts.
 - Freeze train/holdout only in Phase 3.
 
@@ -134,13 +137,14 @@ Graded:
 
 ## 10. Open decisions (human)
 
-Copied from cohort note; blockers for Phase 3 freeze, not for Phase 1 start:
+Shared with `SPEC.md` / cohort §7; blockers for Phase 3 freeze, not Phase 1:
 
-1. FFS Option A vs C as corpus default.
-2. Collapse vs retain `sp_*` 1/2 distinction.
-3. Exact numeric training targets and holdout partition.
-4. Whether HF is co-calibrated or diagnostic-only.
-5. Transport policy for evidence years ≠ 2021.
+1. Keep Option B vs upgrade to Option C as corpus default.
+2. Collapse vs retain `sp_*` 1/2 distinction (default today: collapse).
+3. Person-time vs full-year denominators for rate targets.
+4. Exact numeric training targets and holdout partition.
+5. Whether HF is co-calibrated or diagnostic/stratifier-only.
+6. Transport policy for evidence years ≠ 2021.
 
 ## 11. Success for the overall MVP (Milestone C orientation)
 
