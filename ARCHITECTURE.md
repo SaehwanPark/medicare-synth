@@ -1,8 +1,8 @@
 # ARCHITECTURE
 
 Last Reviewed: 2026-11-06
-Status: Active — structural core + Phase 1 synthesizer + Phase 2 Evidence IR +
-Phase 3 frozen evidence corpus; calibration planned (Phase 4+)
+Status: Active — structural core through Phase 4 calibration engine (A/B/C);
+multi-world MVP packaging planned (Phase 5+)
 
 ## Current Repository
 
@@ -12,9 +12,11 @@ vertical/horizontal expansion, catalog/diff/profile/audit, bounded 2022 PUF
 importer, CLI, docs portal, Phase 1 conditional synthesizer
 (`medicare_synth.synthesis`) for `mvp-2021-om-ffs-diabetes-ip` known-truth
 worlds, Phase 2 Evidence IR (`medicare_synth.evidence_ir`) with parse /
-validate / compile / execute against synthetic tables, and Phase 3 frozen
+validate / compile / execute against synthetic tables, Phase 3 frozen
 evidence corpus (`medicare_synth.evidence_corpus`) with checksummed
-calibration / holdout / diagnostic / excluded partitions.
+calibration / holdout / diagnostic / excluded partitions, and Phase 4
+calibration engine (`medicare_synth.calibration`) with Level A/B/C APIs,
+run manifests, and agent role contracts.
 
 Phase 0 (`docs/phase0/`) pinned the MVP context. Phase 1 (`docs/phase1/`)
 proved controllable diabetes → IP conditionals with reproducibility, structural
@@ -22,10 +24,11 @@ gates, held-out recovery, and a clone-only negative control.
 Phase 2 (`docs/phase2/`) formalized LIT-03 as a reviewed diagnostic finding and
 refuses unsupported rate semantics (LIT-02 planned-admission) explicitly.
 Phase 3 (`docs/phase3/`) freezes corpus v1 before calibration tuning.
+Phase 4 (`docs/phase4/`) proves reweighting and generator-parameter search on
+calibration targets without fitting holdout.
 `TabDatSynthAdapter` / horizontal re-keying remain structural fixtures only.
-Planned next: calibration, multi-world configs, and evaluation. Prefer narrow
-modules; do not introduce a large framework before Phase 4 experiments justify
-it.
+Planned next: multi-world MVP packaging and evaluation. Prefer narrow modules;
+do not introduce a large hierarchical framework before Phase 5–6 justify it.
 
 ## Component Boundaries
 
@@ -53,6 +56,10 @@ it.
   `mvp-2021-om-ffs-diabetes-ip-corpus-v1` with SHA-256 checksums, partition
   execute helpers, and mutation refusal when frozen; fixtures under
   `medicare_synth/fixtures/evidence_corpus/`.
+- **Calibration engine** — `calibration.py` Level A baseline, Level B IPF
+  reweighting (ESS/weight/infeasibility), Level C generator-parameter grid
+  search; holdout fit refused; `CalibrationRunManifest`;
+  `AGENT_ROLE_CONTRACTS` for review gates (engines agent-independent).
 - **Scenario catalog, schema diff, limitations profile, audit** — teaching/CI
   fixtures, annual snapshot diffs, six-category limitation disclosures,
   join/privacy metrics.
@@ -66,10 +73,9 @@ Responsibility sketch only; package layout may differ:
 | Boundary | Role |
 | --- | --- |
 | **Synthesis protocol** | MVP diabetes→IP conditional path implemented; richer joint models / multi-table families still planned |
-| **Calibration** | Reweighting then generator-parameter fit against frozen calibration partition only; holdout reserved; feasibility/ESS/support diagnostics; hard structural gate retained |
-| **Worlds** | Versioned context presets and explicit underidentified scenario labels |
+| **Worlds** | Versioned context presets and explicit underidentified scenario labels (Phase 5) |
 | **Evaluation** | Training/held-out evidence fit, synthetic known-truth, nondegeneracy, research-workflow utility |
-| **Agent harness** | Assist discovery → extraction → formalization → review → runs; never mutate evidence values or holdout partitions unilaterally |
+| **Agent harness** | Contracts delivered in Phase 4; orchestration remains optional around engines |
 | **Release/provenance** | Package code, seeds, evidence-set hashes, calibration config, world assumptions, limitations |
 
 Numerical and validation engines must remain fully operable **without** the
@@ -96,20 +102,20 @@ Reviewed finding JSON
         → execute on synthetic tables → ComparisonReport
 ```
 
-### Calibration path (planned)
+### Calibration path (implemented A/B/C)
 
 ```text
-CMS baseline + schema evidence
-        → structural synthesizer → candidate worlds
-        → calibration engine ← reviewed Evidence IR ← CMS aggregates + studies
-        → calibrated worlds
-        → hard structural validation + evidence/held-out/utility reports
-        → versioned multi-world releases
+Frozen corpus (calibration partition)
+        → Level A discrepancy baseline
+        → Level B reweight (weights only) and/or
+          Level C generator-parameter search
+        → CalibrationRunManifest + diagnostics
+        → holdout evaluated, never fit
 ```
 
-Beneficiary histories stay coherent subgraphs. Calibration may reweight or
-adjust generator parameters; it must not independently corrupt enrollment,
-death, and claim relationships.
+Beneficiary histories stay coherent subgraphs. Level B does not mutate
+records; Level C regenerates whole worlds under pinned seeds. Neither path may
+use holdout findings as fit targets.
 
 ## Core Invariants
 

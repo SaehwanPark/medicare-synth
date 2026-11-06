@@ -1,0 +1,47 @@
+{
+  "schema_version": "0.1",
+  "run_id": "phase4-known-truth-B",
+  "level": "B_reweight",
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "corpus_id": "mvp-2021-om-ffs-diabetes-ip-corpus-v1",
+  "corpus_sha256": "dcbd7321be29fd38f0ce9bb54b517dee4f6df2dcbe690768fb7c1d4e0dc3fb0f",
+  "calibration_finding_ids": [
+    "cms-agg03-diabetes-prev-ffs-2018",
+    "cms-agg04-hf-prev-ffs-2022",
+    "lit07-avalere-ffs-diabetes-ip-risk"
+  ],
+  "holdout_finding_ids": [
+    "lit03-mmwr-diabetes-prev-2015-women"
+  ],
+  "seed": 42,
+  "method_hyperparameters": {
+    "max_iterations": 40,
+    "tolerance": 1e-6
+  },
+  "diagnostics": {
+    "n_beneficiaries": 6000,
+    "ess": 4606.031093638816,
+    "min_weight": 0.810665110084,
+    "max_weight": 11.614314609971,
+    "sum_weights": 6000.000000000001,
+    "iterations": 1,
+    "converged": true,
+    "infeasible": false,
+    "infeasibility_notes": [],
+    "dependence_notes": [
+      "Calibration targets may share overlapping CCW/FFS source populations; treat discrepancies as dependent, not independent likelihood terms."
+    ]
+  },
+  "calibration_mae_before": 0.085773820537,
+  "calibration_mae_after": 0.000729402519,
+  "holdout_mae_before": null,
+  "holdout_mae_after": null,
+  "structural_valid": true,
+  "notes": [
+    "Weights only; beneficiary records unchanged."
+  ],
+  "assumptions": [
+    "Holdout findings are evaluation-only and must not enter the fit objective.",
+    "Synthetic agreement is not a Medicare finding."
+  ]
+}

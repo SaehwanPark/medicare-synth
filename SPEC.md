@@ -45,7 +45,7 @@ Out of scope for the foundation (still true):
 
 ### Evidence-calibrated research playground
 
-Status: Active — Phases 0–3 complete; Phase 4 (calibration engine) next
+Status: Active — Phases 0–4 complete; Phase 5 (MVP calibrated worlds) next
 
 **Mission:** generate structurally valid, contextually plausible synthetic
 Medicare worlds so researchers can prototype and stress-test methods before
@@ -82,6 +82,13 @@ holdout (1; women diabetes prevalence stratum), diagnostic, and excluded
 partitions. Active findings are executable or transparently approximated;
 frozen corpora refuse mutation. See [`docs/phase3/`](docs/phase3/).
 
+**Calibration (Phase 4):** `medicare_synth.calibration` provides Level A
+baseline discrepancy, Level B beneficiary IPF reweighting (ESS/weight/
+infeasibility diagnostics; records unchanged), and Level C generator-parameter
+search against the **calibration** partition only. Holdout is evaluate-only.
+Deterministic `CalibrationRunManifest` and typed `AGENT_ROLE_CONTRACTS` encode
+review gates; engines run without agents. See [`docs/phase4/`](docs/phase4/).
+
 **Near-term capability targets:**
 
 | Capability | Intent |
@@ -89,7 +96,7 @@ frozen corpora refuse mutation. See [`docs/phase3/`](docs/phase3/).
 | Evidence IR | **Delivered (v0.1)** — typed findings with population/time/eligibility/estimand/uncertainty/role/governance |
 | Estimand compiler | **Delivered (v0.1 crude)** — eligibility → derivation → estimator → compatibility → comparison |
 | Evidence corpus | **Delivered (v1 freeze)** — train/holdout/diagnostic/excluded registry with checksums |
-| Calibration ladder | A none → B reweight → C conditional generation; prove A–C before hierarchical methods |
+| Calibration ladder | **Delivered A–C** — baseline / reweight / generator-param search; hierarchical methods still later |
 | Multi-world releases | Shared evidence constraints; documented variation in underidentified dimensions |
 | Evaluation | Hard structural gates + graded evidence agreement + held-out + research-utility benchmarks |
 | Agent assist | Discovery/extraction/formalization help with human approval gates; engines run without agents |
@@ -114,7 +121,8 @@ Ordered program (see `ROADMAP.md` for exit gates):
    (`docs/phase2/`, `medicare_synth.evidence_ir`).
 3. ~~Frozen, reviewed MVP evidence corpus (train / holdout / diagnostic).~~
    **Complete** (`docs/phase3/`, `medicare_synth.evidence_corpus`).
-4. Calibration engine + reviewable agent orchestration (engines independent of agents).
+4. ~~Calibration engine + reviewable agent orchestration (engines independent of
+   agents).~~ **Complete** (`docs/phase4/`, `medicare_synth.calibration`).
 5. Calibrated MVP worlds and release manifests.
 6. Held-out and research-utility evaluation; go/no-go.
 7. Incremental context and literature expansion with regression of prior worlds.

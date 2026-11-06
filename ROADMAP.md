@@ -122,22 +122,30 @@ Exit criteria:
 
 ### Phase 4 — Calibration engine and agent harness
 
-Status: Active
+Status: Complete (2026-11-06)
 
 Outputs:
 
 - reweighting + generator-parameter calibration APIs with diagnostics
+  (`medicare_synth.calibration`;
+  [calibration-engine.md](docs/phase4/calibration-engine.md))
 - synthetic known-truth calibration experiments
+  ([capability-report.md](docs/phase4/capability-report.md);
+  `reports/phase4/known_truth_experiment.json`)
 - agent role contracts and review gates; deterministic run manifests
+  ([agent-roles.md](docs/phase4/agent-roles.md); `CalibrationRunManifest`)
 
 Exit criteria:
 
-- controlled simulations improve predeclared targets without invalidating records
-- pipeline runs fully without agents; dependence/uncertainty assumptions visible
+- controlled simulations improve predeclared targets without invalidating
+  records — **met** (Level B weights-only IPF; Level C param search;
+  structural gates pass)
+- pipeline runs fully without agents; dependence/uncertainty assumptions
+  visible — **met**
 
 ### Phase 5 — MVP calibration
 
-Status: Planned
+Status: Active
 
 Outputs:
 
@@ -189,6 +197,8 @@ Exit criteria:
    `docs/phase2/`.
 5. ~~Prepare ~3 public calibration targets + 1 independent diagnostic/holdout.~~
    **Done (Phase 3):** corpus v1 frozen; see `docs/phase3/`.
-6. Implement reweighting before advanced calibration.
-7. Produce 2–3 worlds with shared targets and different weak assumptions.
+6. ~~Implement reweighting before advanced calibration.~~ **Done (Phase 4):**
+   Level B IPF reweight + Level C generator-param search; see `docs/phase4/`.
+7. Produce 2–3 worlds with shared targets and different weak assumptions
+   (Phase 5).
 8. Freeze evaluation gates before iterative fitting.

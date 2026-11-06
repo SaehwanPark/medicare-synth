@@ -1,0 +1,61 @@
+{
+  "schema_version": "0.1",
+  "run_id": "phase4-known-truth-C",
+  "level": "C_generator_params",
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "corpus_id": "mvp-2021-om-ffs-diabetes-ip-corpus-v1",
+  "corpus_sha256": "dcbd7321be29fd38f0ce9bb54b517dee4f6df2dcbe690768fb7c1d4e0dc3fb0f",
+  "calibration_finding_ids": [
+    "cms-agg03-diabetes-prev-ffs-2018",
+    "cms-agg04-hf-prev-ffs-2022",
+    "lit07-avalere-ffs-diabetes-ip-risk"
+  ],
+  "holdout_finding_ids": [
+    "lit03-mmwr-diabetes-prev-2015-women"
+  ],
+  "seed": 42,
+  "method_hyperparameters": {
+    "diabetes_values": [
+      0.18,
+      0.25,
+      0.277,
+      0.32
+    ],
+    "hf_values": [
+      0.04,
+      0.1,
+      0.12
+    ],
+    "ip_diab_values": [
+      0.05,
+      0.1,
+      0.13,
+      0.16
+    ]
+  },
+  "diagnostics": {
+    "n_search_points": 48,
+    "fitted_params": {
+      "n_beneficiaries": 6000,
+      "seed": 42,
+      "diabetes_prevalence": 0.277,
+      "p_ip_given_diabetes": 0.13,
+      "p_ip_given_no_diabetes": 0.04,
+      "hf_prevalence": 0.12,
+      "reference_year": 2021,
+      "recovery_tolerance": 0.03
+    }
+  },
+  "calibration_mae_before": 0.085773820537,
+  "calibration_mae_after": 0.0025270954,
+  "holdout_mae_before": 0.115833333333,
+  "holdout_mae_after": 0.017833333333,
+  "structural_valid": true,
+  "notes": [
+    "Holdout MAE reported only; not used in search objective."
+  ],
+  "assumptions": [
+    "Holdout findings are evaluation-only and must not enter the fit objective.",
+    "Synthetic agreement is not a Medicare finding."
+  ]
+}
