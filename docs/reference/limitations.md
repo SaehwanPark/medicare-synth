@@ -23,7 +23,10 @@ Medicare population.
 - national or subgroup-level population estimates;
 - clinical effectiveness, policy effects, or causal conclusions;
 - complete distributional, longitudinal, or provider-level fidelity;
-- formal privacy guarantees solely because records are synthetic; or
+- formal privacy guarantees solely because records are synthetic;
+- that matching published aggregates or study summaries recovers the real
+  Medicare joint distribution or legitimizes synthetic estimates as empirical
+  Medicare findings; or
 - availability of a field, file, or relationship in a restricted CMS product
   without checking that product's current documentation.
 

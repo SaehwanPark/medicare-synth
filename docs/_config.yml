@@ -20,4 +20,6 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - harness
+  - goal.md
   - medicare-synth-project-proposal_20260720.md
+  - medicare_synth_evidence_calibrated_playground_proposal.md

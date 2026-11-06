@@ -74,9 +74,11 @@ merge authorization are understood.
 
 ## Domain and provenance changes
 
-Changes to schemas, normalization, validation, generation, scenarios, release
-artifacts, or public CLI/API behavior need evidence, focused behavioral tests,
-and a review of relational and provenance boundaries. Read
+Changes to schemas, normalization, validation, generation, Evidence IR,
+calibration, scenarios, release artifacts, or public CLI/API behavior need
+evidence, focused behavioral tests, and a review of relational and provenance
+boundaries. Read
 [Data model &amp; grains](../concepts/data-model/),
-[Provenance &amp; validation](../concepts/provenance-and-validation/), and the
-[canonical project documents](../reference/project-documents/) first.
+[Provenance &amp; validation](../concepts/provenance-and-validation/),
+[`docs/goal.md`](https://github.com/SaehwanPark/medicare-synth/blob/main/docs/goal.md),
+and the [canonical project documents](../reference/project-documents/) first.
