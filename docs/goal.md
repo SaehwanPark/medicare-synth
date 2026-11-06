@@ -19,29 +19,26 @@ which assumptions remain free; run the same analysis across a few plausible
 worlds; and carry **code and design**—not synthetic conclusions—into authorized
 real-data work.
 
-## Current objective (Phase 0 → first vertical slice)
+## Current objective (Phase 1 → first vertical slice)
 
-Complete the smallest path that proves the program is feasible:
+Phase 0 is **complete** (`docs/phase0/`; feasibility memo: proceed). Pinned
+context: `mvp-2021-om-ffs-diabetes-ip` (2021 OM FFS, age 65+, diabetes →
+all-cause IP hospitalization; HF stratifier).
 
-1. **Pin MVP context** — 2021 Original Medicare FFS, age 65+, explicit
-   enrollment/managed-care rules; chronic condition → hospitalization
-   (diabetes and/or heart failure candidates). Record open cohort decisions;
-   do not invent them silently.
-2. **Audit minimal tables/fields** — beneficiary/enrollment, needed chronic
-   fields, claim families required for the example; mark present vs must-generate.
-3. **Scout evidence** — prefer CMS official aggregates, then Medicare-only
-   studies with clear estimands and uncertainty; inventory conflicts and
-   overlapping source populations.
-4. **Formalize one finding end-to-end** — source → reviewed Evidence IR →
-   execute on synthetic tables → comparison report with explicit gaps.
-5. **Prove synthesizer controllability** — on synthetic ground truth, recover a
+Next path:
+
+1. ~~**Pin MVP context**~~ / ~~**Audit tables/fields**~~ / ~~**Scout evidence**~~
+   — done in Phase 0; keep open FFS Option B vs C and holdout choices explicit.
+2. **Prove synthesizer controllability** — on synthetic ground truth, recover a
    declared conditional association while keeping linked records valid
-   (characterize today’s generator honestly first).
-6. **Calibrate lightly** — beneficiary reweighting before richer generators;
+   (characterize today’s generator honestly first) — **Phase 1 active**.
+3. **Formalize one finding end-to-end** — source → reviewed Evidence IR →
+   execute on synthetic tables → comparison report with explicit gaps.
+4. **Calibrate lightly** — beneficiary reweighting before richer generators;
    report ESS/support/infeasibility.
-7. **Emit 2–3 worlds** — shared supported targets; different documented weak
+5. **Emit 2–3 worlds** — shared supported targets; different documented weak
    assumptions; identical downstream analysis in each.
-8. **Freeze evaluation** — hard structural gates, graded evidence metrics,
+6. **Freeze evaluation** — hard structural gates, graded evidence metrics,
    untouched holdout/diagnostic set **before** iterative fitting.
 
 ## Operating rules
@@ -67,8 +64,9 @@ the MVP context works end-to-end.
 
 | Milestone | Done when |
 | --- | --- |
-| A | Feasibility memo + capability gaps + initial evidence inventory land under `docs/` or reports, and Phase 0 exit criteria in `ROADMAP.md` are met |
+| A | Feasibility memo + capability gaps + initial evidence inventory land under `docs/` or reports, and Phase 0 exit criteria in `ROADMAP.md` are met — **done** (`docs/phase0/`) |
 | B | One human-reviewed external finding executes as a reproducible comparison against generated Medicare-like data |
 | C | A calibrated path improves predeclared contextual metrics vs uncalibrated baseline on held-out compatible evidence, without breaking structural gates |
 
-Start at Milestone A unless `ROADMAP.md` shows Phase 0 already closed.
+Start Phase 1 synthesizer work (toward later Milestone B); do not treat Phase 0
+scouting magnitudes as approved calibration targets.
