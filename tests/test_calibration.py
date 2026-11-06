@@ -84,6 +84,7 @@ def test_reweight_improves_calibration_mae(corpus_and_path) -> None:
   # Records unchanged: weight frame is separate; row counts match.
   assert result.weights.height == world.beneficiary_summary.height
 
+  fitted_ids = tuple(t.finding_id for t in result.targets)
   manifest = build_run_manifest(
     run_id="test-reweight",
     level=CalibrationLevel.B_REWEIGHT,
@@ -95,7 +96,9 @@ def test_reweight_improves_calibration_mae(corpus_and_path) -> None:
     calibration_mae_before=result.before.mean_absolute_error,
     calibration_mae_after=result.after.mean_absolute_error,
     structural_valid_flag=structural_valid(world),
+    calibration_finding_ids=fitted_ids,
   )
+  assert manifest.calibration_finding_ids == fitted_ids
   assert manifest.sha256() == manifest.sha256()
   assert "holdout" in " ".join(manifest.assumptions).lower()
 

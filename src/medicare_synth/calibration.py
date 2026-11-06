@@ -493,7 +493,11 @@ def reweight_beneficiaries(
   max_iterations: int = 40,
   tolerance: float = 1e-6,
 ) -> ReweightResult:
-  """Level B: sequential IPF/raking to match calibration moments."""
+  """Level B: sequential IPF/raking to match calibration moments.
+
+  Prefer ``calibrate_reweight`` so fit targets are corpus calibration-partition
+  gated. This lower-level helper does not enforce partition membership.
+  """
   if not targets:
     raise CalibrationError("reweight requires at least one moment target")
   frame = beneficiary_feature_frame(tables)
@@ -799,14 +803,27 @@ def build_run_manifest(
   holdout_mae_after: float | None = None,
   structural_valid_flag: bool | None = None,
   notes: Sequence[str] = (),
+  calibration_finding_ids: Sequence[str] | None = None,
 ) -> CalibrationRunManifest:
+  """Build a run manifest.
+
+  ``calibration_finding_ids`` should list the moments actually used in the fit
+  when a subset was requested; defaults to the full calibration partition.
+  """
+  cal_ids = (
+    tuple(calibration_finding_ids)
+    if calibration_finding_ids is not None
+    else corpus.finding_ids(PartitionName.CALIBRATION)
+  )
+  if calibration_finding_ids is not None:
+    assert_calibration_partition_only(corpus, cal_ids)
   return CalibrationRunManifest(
     run_id=run_id,
     level=level,
     context_id=corpus.context_id,
     corpus_id=corpus.corpus_id,
     corpus_sha256=sha256_file(Path(corpus_path)),
-    calibration_finding_ids=corpus.finding_ids(PartitionName.CALIBRATION),
+    calibration_finding_ids=cal_ids,
     holdout_finding_ids=corpus.finding_ids(PartitionName.HOLDOUT),
     seed=seed,
     method_hyperparameters=dict(method_hyperparameters),
