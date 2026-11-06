@@ -28,7 +28,7 @@ all-cause IP hospitalization; HF stratifier).
 Next path:
 
 1. ~~**Pin MVP context**~~ / ~~**Audit tables/fields**~~ / ~~**Scout evidence**~~
-   — done in Phase 0; keep open FFS Option A vs C and holdout choices explicit.
+   — done in Phase 0; keep open FFS Option B vs C and holdout choices explicit.
 2. **Prove synthesizer controllability** — on synthetic ground truth, recover a
    declared conditional association while keeping linked records valid
    (characterize today’s generator honestly first) — **Phase 1 active**.
