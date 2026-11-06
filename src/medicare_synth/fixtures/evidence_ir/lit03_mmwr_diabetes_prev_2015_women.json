@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1",
+  "finding_id": "lit03-mmwr-diabetes-prev-2015-women",
+  "inventory_id": "LIT-03",
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "source": {
+    "type": "medicare_only_study",
+    "identifier": "mmwr-68-43-961",
+    "title": "Diabetes Prevalence and Incidence Among Medicare Beneficiaries — United States, 2001–2015",
+    "url": "https://www.cdc.gov/mmwr/volumes/68/wr/mm6843a2.htm",
+    "location": "Table: Prevalence (%) Women, index year 2015 = 29.6",
+    "citation": "Andes LJ, et al. MMWR. 2019;68(43):961-966.",
+    "retrieval_date": "2026-11-06"
+  },
+  "population": {
+    "program": "original_medicare_ffs",
+    "years": [2015],
+    "age": {"minimum": 68},
+    "geography": "national",
+    "ffs_rule": "source_custom",
+    "sex_codes": ["2"],
+    "enrollment_notes": "Source: women among Medicare FFS ≥68 with 60-month A+B window. MVP approximates Option B + sex filter; sex code '2' = female per CMS beneficiary sex identity."
+  },
+  "cohort": {
+    "index_date": "2015-01-01",
+    "observation_end": "2015-12-31",
+    "inclusion_notes": "Female stratum of LIT-03 table (2015)."
+  },
+  "estimand": {
+    "type": "prevalence",
+    "numerator": {
+      "concept": "diabetes",
+      "algorithm": "claims_diabetes_andes_mmwr_v1",
+      "notes": "Approximated by mbsf_sp_diabetes_v1 at compile time."
+    },
+    "denominator": "eligible_beneficiaries",
+    "scale": 1.0
+  },
+  "analysis": {
+    "stratification": ["sex"],
+    "estimator": "crude_proportion",
+    "notes": "Holdout demographic stratum — do not use for calibration fitting."
+  },
+  "result": {
+    "estimate": 0.296,
+    "standard_error": 0.0002,
+    "unit": "proportion",
+    "notes": "Table women 2015 prevalence 29.6%; MoE <0.02% in source text."
+  },
+  "role": "holdout",
+  "comparability": {
+    "grade": "B",
+    "transport_required": true,
+    "assumptions": [
+      "Demographic holdout independent of overall/train prevalence targets.",
+      "Sex code '2' maps to source women stratum."
+    ],
+    "gaps": [
+      "calendar_year_2015_vs_context_2021",
+      "age_68_vs_mvp_65",
+      "enrollment_60mo_window_vs_option_b_annual",
+      "claims_diabetes_algorithm_vs_mbsf_sp_diabetes"
+    ]
+  },
+  "governance": {
+    "review_status": "accepted",
+    "reviewer": "phase3-corpus-freeze",
+    "reviewed_at": "2026-11-06",
+    "rationale": "Frozen holdout for Phase 3/6. Must not be used to tune calibration. Distinct from Phase 2 diagnostic overall LIT-03 finding.",
+    "conflicts": []
+  }
+}

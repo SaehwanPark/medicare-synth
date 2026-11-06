@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "corpus_id": "mvp-2021-om-ffs-diabetes-ip-corpus-v1",
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "title": "MVP 2021 OM FFS diabetes→IP evidence corpus v1",
+  "frozen": true,
+  "frozen_at": "2026-11-06",
+  "reviewer": "phase3-corpus-freeze",
+  "review_rationale": "Freeze train/holdout/diagnostic/excluded partitions before Phase 4 calibration. Holdout must not be used for fitting.",
+  "entries": [
+    {
+      "finding_id": "cms-agg03-diabetes-prev-ffs-2018",
+      "inventory_id": "CMS-AGG-03",
+      "partition": "calibration",
+      "relative_path": "evidence_ir/cms_agg03_diabetes_prev_ffs_2018.json",
+      "sha256": "83aa0855e08013b7ed9b660ddca27967f07d433bb9f9dc98637287f476e14cfa",
+      "comparability_grade": "B",
+      "executability": "approximated",
+      "rationale": "Train #1: national FFS diabetes prevalence prior (2018)."
+    },
+    {
+      "finding_id": "cms-agg04-hf-prev-ffs-2022",
+      "inventory_id": "CMS-AGG-04",
+      "partition": "calibration",
+      "relative_path": "evidence_ir/cms_agg04_hf_prev_ffs_2022.json",
+      "sha256": "0c05deea87872183f73762a57ec099976016f5064feee4c5685de4dfbdbf930a",
+      "comparability_grade": "B",
+      "executability": "approximated",
+      "rationale": "Train #2: national FFS HF prevalence prior (2022 preliminary)."
+    },
+    {
+      "finding_id": "lit07-avalere-ffs-diabetes-ip-risk",
+      "inventory_id": "LIT-07",
+      "partition": "calibration",
+      "relative_path": "evidence_ir/lit07_avalere_ffs_diabetes_ip_risk.json",
+      "sha256": "257c236f5196ff9b4abf2d3b3dde0fe1444ef557ebaef54718498a308c0c64ea",
+      "comparability_grade": "B",
+      "executability": "executable",
+      "rationale": "Train #3: weak all-cause IP-among-diabetes utilization prior."
+    },
+    {
+      "finding_id": "lit03-mmwr-diabetes-prev-2015-women",
+      "inventory_id": "LIT-03",
+      "partition": "holdout",
+      "relative_path": "evidence_ir/lit03_mmwr_diabetes_prev_2015_women.json",
+      "sha256": "dcb2d6e6ea932dcc982514218092ad68915c93b7976a104fdfa55c2cf7917845",
+      "comparability_grade": "B",
+      "executability": "approximated",
+      "rationale": "Holdout: women diabetes prevalence stratum (2015); do not fit."
+    },
+    {
+      "finding_id": "lit03-mmwr-diabetes-prevalence-2015",
+      "inventory_id": "LIT-03",
+      "partition": "diagnostic",
+      "relative_path": "evidence_ir/lit03_mmwr_diabetes_prevalence_2015.json",
+      "sha256": "c196ebb3e609d98bf279dbfbc4af80ed382305180ddf23d5a6793711916449c6",
+      "comparability_grade": "B",
+      "executability": "approximated",
+      "rationale": "Phase 2 overall LIT-03 diagnostic transport prior."
+    },
+    {
+      "finding_id": "cms-agg05-hf-algorithm-shift-2017",
+      "inventory_id": "CMS-AGG-05",
+      "partition": "diagnostic",
+      "relative_path": "evidence_ir/cms_agg05_hf_algorithm_shift_2017.json",
+      "sha256": "5a10b08f2815c612f998ae4c13248110e6166aa383efc6052609735d59c60394",
+      "comparability_grade": "A",
+      "executability": "approximated",
+      "rationale": "Diagnostic meta: CCW 27→30 HF algorithm impact."
+    },
+    {
+      "finding_id": "lit02-drye-diabetes-unplanned-admission-rate-2012",
+      "inventory_id": "LIT-02",
+      "partition": "excluded",
+      "relative_path": "evidence_ir/lit02_drye_admission_rate_unsupported.json",
+      "sha256": "3b91758580aefb20eacf8f5449acc8febd4fe3ee249723777225ba3d30ca0dab",
+      "comparability_grade": "B",
+      "executability": "non_executable",
+      "rationale": "Excluded: planned-admission rate unsupported on MVP schema."
+    },
+    {
+      "finding_id": "excluded-mmd-diabetes-condition-hosp",
+      "inventory_id": "CMS-AGG-02",
+      "partition": "excluded",
+      "relative_path": "evidence_ir/excluded_mmd_diabetes_condition_hosp.json",
+      "sha256": "9d126c79b06ff1cb30faf4fce80a25ba114508e2ef7b1b4cd6e49ba69b2e88f0",
+      "comparability_grade": "X",
+      "executability": "non_executable",
+      "rationale": "Excluded: MMD diabetes-condition hospitalization ≠ O1."
+    }
+  ]
+}

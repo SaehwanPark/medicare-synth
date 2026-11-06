@@ -148,6 +148,13 @@ class PopulationSpec(BaseModel):
   geography: str = "national"
   ffs_rule: FfsRule = FfsRule.OPTION_B_FULL_YEAR
   enrollment_notes: str | None = None
+  sex_codes: tuple[str, ...] | None = Field(
+    default=None,
+    description=(
+      "Optional CMS sex codes to keep (e.g. ('2',) for women). "
+      "None means no sex filter."
+    ),
+  )
 
 
 class CohortSpec(BaseModel):
@@ -309,8 +316,8 @@ def validate_finding(finding: FindingIR) -> list[str]:
       "calibration role requires comparability.grade in {A,B,C}, not "
       f"{finding.comparability.grade.value}"
     )
-  if finding.estimand.numerator.algorithm == AlgorithmId.UNSUPPORTED:
-    errors.append("numerator algorithm is unsupported")
+  # Unsupported algorithms are compile-time compatibility errors, not schema
+  # parse failures — excluded/diagnostic fixtures may intentionally use them.
   if (
     finding.estimand.type == EstimandType.RATE
     and finding.estimand.time_unit not in {"person_years", "beneficiaries"}
@@ -362,6 +369,7 @@ class EligibilityPlan(BaseModel):
   require_full_year_ab: bool
   require_zero_hmo_months: bool
   ffs_rule: FfsRule
+  sex_codes: tuple[str, ...] | None = None
   notes: tuple[str, ...] = ()
 
 
@@ -606,6 +614,15 @@ def compile_finding(
 
   executable = not any(i.severity == "error" for i in issues)
 
+  if finding.population.sex_codes:
+    issues.append(
+      _issue(
+        "SEX-STRATUM",
+        "info",
+        f"Eligibility restricted to sex_codes={finding.population.sex_codes}",
+      )
+    )
+
   eligibility = EligibilityPlan(
     age_minimum=finding.population.age.minimum,
     reference_year=context_year,
@@ -613,6 +630,7 @@ def compile_finding(
     in {FfsRule.OPTION_B_FULL_YEAR, FfsRule.SOURCE_CUSTOM},
     require_zero_hmo_months=True,
     ffs_rule=finding.population.ffs_rule,
+    sex_codes=finding.population.sex_codes,
     notes=tuple(
       n
       for n in (
@@ -744,6 +762,12 @@ def _eligible_bene_ids(
       filtered = filtered.filter(
         pl.col(col).is_null() | (pl.col(col) == 0)
       )
+  if plan.sex_codes:
+    if "bene_sex_ident_cd" not in filtered.columns:
+      raise EvidenceIRError(
+        "sex_codes filter requires beneficiary_summary.bene_sex_ident_cd"
+      )
+    filtered = filtered.filter(pl.col("bene_sex_ident_cd").is_in(list(plan.sex_codes)))
   return filtered.select("bene_id").unique()
 
 

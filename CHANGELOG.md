@@ -4,6 +4,15 @@
 
 ### Added
 
+- Closed Phase 3 (evidence corpus freeze): added
+  `medicare_synth.evidence_corpus` with versioned
+  `mvp-2021-om-ffs-diabetes-ip-corpus-v1` (3 calibration + 1 women-stratum
+  holdout + diagnostic/excluded retained), SHA-256 checksums, freeze mutation
+  gate, and partition execution helpers. Extended Evidence IR with optional
+  `PopulationSpec.sex_codes`. Docs under [`docs/phase3/`](docs/phase3/); tests
+  in `tests/test_evidence_corpus.py`. Synced canonical docs; Phase 4
+  (calibration engine) is now active.
+
 - Closed Phase 2 (Evidence IR): added `medicare_synth.evidence_ir` schema
   `0.1` with concept/estimand vocabulary, JSON parse/validate, estimand
   compiler (eligibility/derivation/estimator + compatibility reports), and

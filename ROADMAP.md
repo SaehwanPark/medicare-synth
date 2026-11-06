@@ -102,22 +102,27 @@ Exit criteria:
 
 ### Phase 3 — Curate and freeze the MVP evidence corpus
 
-Status: Active
+Status: Complete (2026-11-06)
 
 Outputs:
 
 - versioned evidence registry with eligibility/compatibility grades
+  (`medicare_synth.evidence_corpus`;
+  [corpus-freeze.md](docs/phase3/corpus-freeze.md))
 - train / held-out / diagnostic partitions and checksums
+  (`mvp-2021-om-ffs-diabetes-ip-corpus-v1`; 3 calibration + 1 holdout)
 - exclusion/conflict rationales retained (not deleted)
+  (LIT-02 planned-admission; MMD condition-hosp; CMS-AGG-05 HF algorithm shift)
 
 Exit criteria:
 
-- active findings are executable or transparently approximated
-- partitions are frozen and reviewer-approved before calibration tuning
+- active findings are executable or transparently approximated — **met**
+- partitions are frozen and reviewer-approved before calibration tuning — **met**
+  (`frozen=true`, reviewer `phase3-corpus-freeze`)
 
 ### Phase 4 — Calibration engine and agent harness
 
-Status: Planned
+Status: Active
 
 Outputs:
 
@@ -182,8 +187,8 @@ Exit criteria:
 4. ~~Formalize one finding end-to-end (source → IR → execution → report).~~
    **Done (Phase 2):** LIT-03 → Evidence IR → synthetic comparison; see
    `docs/phase2/`.
-5. Prepare ~3 public calibration targets + 1 independent diagnostic/holdout
-   (Phase 3 freeze; candidates listed in evidence inventory).
+5. ~~Prepare ~3 public calibration targets + 1 independent diagnostic/holdout.~~
+   **Done (Phase 3):** corpus v1 frozen; see `docs/phase3/`.
 6. Implement reweighting before advanced calibration.
 7. Produce 2–3 worlds with shared targets and different weak assumptions.
 8. Freeze evaluation gates before iterative fitting.

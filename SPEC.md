@@ -45,7 +45,7 @@ Out of scope for the foundation (still true):
 
 ### Evidence-calibrated research playground
 
-Status: Active — Phases 0–2 complete; Phase 3 (evidence corpus freeze) next
+Status: Active — Phases 0–3 complete; Phase 4 (calibration engine) next
 
 **Mission:** generate structurally valid, contextually plausible synthetic
 Medicare worlds so researchers can prototype and stress-test methods before
@@ -76,13 +76,19 @@ reviewed **diagnostic** finding with explicit transport gaps; LIT-02-shaped
 planned-admission rates are refused rather than silently approximated. See
 [`docs/phase2/`](docs/phase2/). Draft extraction never auto-accepts.
 
+**Evidence corpus (Phase 3):** `medicare_synth.evidence_corpus` freezes
+`mvp-2021-om-ffs-diabetes-ip-corpus-v1` with checksummed calibration (3),
+holdout (1; women diabetes prevalence stratum), diagnostic, and excluded
+partitions. Active findings are executable or transparently approximated;
+frozen corpora refuse mutation. See [`docs/phase3/`](docs/phase3/).
+
 **Near-term capability targets:**
 
 | Capability | Intent |
 | --- | --- |
 | Evidence IR | **Delivered (v0.1)** — typed findings with population/time/eligibility/estimand/uncertainty/role/governance |
 | Estimand compiler | **Delivered (v0.1 crude)** — eligibility → derivation → estimator → compatibility → comparison |
-| Evidence corpus | Freeze small train/holdout/diagnostic registry (Phase 3) |
+| Evidence corpus | **Delivered (v1 freeze)** — train/holdout/diagnostic/excluded registry with checksums |
 | Calibration ladder | A none → B reweight → C conditional generation; prove A–C before hierarchical methods |
 | Multi-world releases | Shared evidence constraints; documented variation in underidentified dimensions |
 | Evaluation | Hard structural gates + graded evidence agreement + held-out + research-utility benchmarks |
@@ -106,7 +112,8 @@ Ordered program (see `ROADMAP.md` for exit gates):
    tests.~~ **Complete** (`docs/phase1/`, `medicare_synth.synthesis`).
 2. ~~Evidence IR + executable estimand language.~~ **Complete**
    (`docs/phase2/`, `medicare_synth.evidence_ir`).
-3. Frozen, reviewed MVP evidence corpus (train / holdout / diagnostic).
+3. ~~Frozen, reviewed MVP evidence corpus (train / holdout / diagnostic).~~
+   **Complete** (`docs/phase3/`, `medicare_synth.evidence_corpus`).
 4. Calibration engine + reviewable agent orchestration (engines independent of agents).
 5. Calibrated MVP worlds and release manifests.
 6. Held-out and research-utility evaluation; go/no-go.
@@ -114,6 +121,9 @@ Ordered program (see `ROADMAP.md` for exit gates):
 
 Open product decisions (do not invent silently): keep FFS Option B vs upgrade
 to monthly Option C; whether to collapse `sp_*` codes `1`/`2`; person-time vs
-full-year denominators for rate targets; exact training targets and holdout
-partition; HF co-calibration vs diagnostic-only; Evidence IR v0.1 estimand
-breadth; transport rules for older-year studies; workflow-utility benchmark.
+full-year denominators for rate targets; whether to replace LIT-07 industry
+utilization prior with an official O1-compatible aggregate in a **new** corpus
+version; HF co-calibration weight vs prevalence-only; Evidence IR estimand
+breadth beyond v0.1 crude; transport rules for older-year studies;
+workflow-utility benchmark. Corpus v1 training targets and women-stratum
+holdout are frozen in `docs/phase3/` — do not silently retarget holdout.

@@ -1,0 +1,66 @@
+{
+  "schema_version": "0.1",
+  "finding_id": "excluded-mmd-diabetes-condition-hosp",
+  "inventory_id": "CMS-AGG-02",
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "source": {
+    "type": "official_aggregate",
+    "identifier": "mmd-diabetes-condition-hospitalization",
+    "title": "Mapping Medicare Disparities — diabetes condition-specific hospitalization rates",
+    "url": "https://data.cms.gov/mmd-population/map.html",
+    "location": "Population view: condition hospitalization measures for diabetes (DX-based)",
+    "citation": "CMS Mapping Medicare Disparities Tool (condition hospitalization).",
+    "retrieval_date": "2026-11-06"
+  },
+  "population": {
+    "program": "original_medicare_ffs",
+    "years": [2021],
+    "age": {"minimum": 65},
+    "geography": "national",
+    "ffs_rule": "option_b_full_year"
+  },
+  "cohort": {
+    "exclusion_notes": "Condition-specific (diabetes-related) hospitalization — not all-cause O1."
+  },
+  "estimand": {
+    "type": "rate",
+    "numerator": {
+      "concept": "all_cause_inpatient",
+      "algorithm": "unsupported",
+      "notes": "Would require IP principal diagnosis / diabetes-related admission algorithms absent from MVP schema."
+    },
+    "conditioning": {
+      "concept": "diabetes",
+      "algorithm": "mbsf_sp_diabetes_v1"
+    },
+    "denominator": "eligible_beneficiaries",
+    "scale": 100.0,
+    "time_unit": "person_years",
+    "notes": "Excluded: DX-specific hospitalization ≠ MVP O1."
+  },
+  "analysis": {
+    "estimator": "events_per_time"
+  },
+  "result": {
+    "estimate": 0.0,
+    "unit": "per_100_person_years",
+    "notes": "No point estimate pinned; retained as excluded placeholder with rationale."
+  },
+  "role": "excluded",
+  "comparability": {
+    "grade": "X",
+    "transport_required": false,
+    "assumptions": [],
+    "gaps": [
+      "all_cause_vs_dx_specific_admission",
+      "ip_icd_fields_absent"
+    ]
+  },
+  "governance": {
+    "review_status": "accepted",
+    "reviewer": "phase3-corpus-freeze",
+    "reviewed_at": "2026-11-06",
+    "rationale": "Explicitly excluded and retained: never substitute MMD diabetes-condition hospitalization for all-cause O1.",
+    "conflicts": []
+  }
+}

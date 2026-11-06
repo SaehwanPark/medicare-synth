@@ -1,8 +1,8 @@
 # ARCHITECTURE
 
 Last Reviewed: 2026-11-06
-Status: Active — structural core + Phase 1 conditional synthesizer + Phase 2
-Evidence IR v0.1 / estimand compiler; calibration planned (Phase 4+)
+Status: Active — structural core + Phase 1 synthesizer + Phase 2 Evidence IR +
+Phase 3 frozen evidence corpus; calibration planned (Phase 4+)
 
 ## Current Repository
 
@@ -11,18 +11,21 @@ Polars-backed validators, deterministic scenarios, normalizer, release export,
 vertical/horizontal expansion, catalog/diff/profile/audit, bounded 2022 PUF
 importer, CLI, docs portal, Phase 1 conditional synthesizer
 (`medicare_synth.synthesis`) for `mvp-2021-om-ffs-diabetes-ip` known-truth
-worlds, and Phase 2 Evidence IR (`medicare_synth.evidence_ir`) with parse /
-validate / compile / execute against synthetic tables.
+worlds, Phase 2 Evidence IR (`medicare_synth.evidence_ir`) with parse /
+validate / compile / execute against synthetic tables, and Phase 3 frozen
+evidence corpus (`medicare_synth.evidence_corpus`) with checksummed
+calibration / holdout / diagnostic / excluded partitions.
 
 Phase 0 (`docs/phase0/`) pinned the MVP context. Phase 1 (`docs/phase1/`)
 proved controllable diabetes → IP conditionals with reproducibility, structural
 gates, held-out recovery, and a clone-only negative control.
 Phase 2 (`docs/phase2/`) formalized LIT-03 as a reviewed diagnostic finding and
 refuses unsupported rate semantics (LIT-02 planned-admission) explicitly.
+Phase 3 (`docs/phase3/`) freezes corpus v1 before calibration tuning.
 `TabDatSynthAdapter` / horizontal re-keying remain structural fixtures only.
-Planned next: frozen evidence corpus, calibration, multi-world configs, and
-evaluation. Prefer narrow modules; do not introduce a large framework before
-Phase 3–4 experiments justify it.
+Planned next: calibration, multi-world configs, and evaluation. Prefer narrow
+modules; do not introduce a large framework before Phase 4 experiments justify
+it.
 
 ## Component Boundaries
 
@@ -43,9 +46,13 @@ Phase 3–4 experiments justify it.
   known-truth worlds (diabetes prevalence and O1 conditionals).
 - **Evidence IR & estimand compiler** — `evidence_ir.py` FindingIR v0.1,
   vocabulary, load/validate, compile (eligibility/derivation/estimator +
-  compatibility), execute comparison reports; packaged fixtures under
-  `medicare_synth/fixtures/evidence_ir/`. Distinct from RKB snapshot contracts
-  in `evidence.py`.
+  compatibility), execute comparison reports; optional sex-stratum filters;
+  packaged fixtures under `medicare_synth/fixtures/evidence_ir/`. Distinct from
+  RKB snapshot contracts in `evidence.py`.
+- **Evidence corpus registry** — `evidence_corpus.py` frozen
+  `mvp-2021-om-ffs-diabetes-ip-corpus-v1` with SHA-256 checksums, partition
+  execute helpers, and mutation refusal when frozen; fixtures under
+  `medicare_synth/fixtures/evidence_corpus/`.
 - **Scenario catalog, schema diff, limitations profile, audit** — teaching/CI
   fixtures, annual snapshot diffs, six-category limitation disclosures,
   join/privacy metrics.
@@ -58,9 +65,8 @@ Responsibility sketch only; package layout may differ:
 
 | Boundary | Role |
 | --- | --- |
-| **Evidence registry (corpus)** | Versioned train/holdout/diagnostic partitions over reviewed IR findings (Phase 3) |
 | **Synthesis protocol** | MVP diabetes→IP conditional path implemented; richer joint models / multi-table families still planned |
-| **Calibration** | Reweighting then generator-parameter fit; feasibility/ESS/support diagnostics; hard structural gate retained |
+| **Calibration** | Reweighting then generator-parameter fit against frozen calibration partition only; holdout reserved; feasibility/ESS/support diagnostics; hard structural gate retained |
 | **Worlds** | Versioned context presets and explicit underidentified scenario labels |
 | **Evaluation** | Training/held-out evidence fit, synthetic known-truth, nondegeneracy, research-workflow utility |
 | **Agent harness** | Assist discovery → extraction → formalization → review → runs; never mutate evidence values or holdout partitions unilaterally |
