@@ -27,24 +27,35 @@ table is ready for a calibrated longitudinal research context.
 
 ### Phase 0 — Feasibility and evidence scouting
 
-Status: Active
+Status: Complete (2026-11-06)
 
-Outputs:
+Outputs (under [`docs/phase0/`](docs/phase0/)):
 
 - generator/capability gap notes for the MVP context
+  ([capability-gaps.md](docs/phase0/capability-gaps.md))
 - candidate 2021 Original Medicare FFS cohort and required fields
+  ([mvp-cohort-and-fields.md](docs/phase0/mvp-cohort-and-fields.md))
 - initial inventory of CMS aggregates and Medicare-only findings
+  ([evidence-inventory.md](docs/phase0/evidence-inventory.md))
 - feasibility memo and draft MVP specification
+  ([feasibility-memo.md](docs/phase0/feasibility-memo.md),
+  [draft-mvp-specification.md](docs/phase0/draft-mvp-specification.md))
+
+Pinned MVP context: `mvp-2021-om-ffs-diabetes-ip` — 2021 Original Medicare
+FFS, age 65+, diabetes (`sp_diabetes`) → all-cause inpatient hospitalization,
+HF (`sp_chf`) as stratifier. Decision: **proceed** to Phase 1.
 
 Exit criteria:
 
 - at least one population/condition/utilization analysis is expressible with
-  available or reasonably implementable fields
-- no known fatal comparability issue is ignored
+  available or reasonably implementable fields — **met**
+- no known fatal comparability issue is ignored — **met** (CCW 27→30, year
+  transport, MA exclusion options, all-cause vs DX-specific admissions, and
+  overlapping CCW sources documented)
 
 ### Phase 1 — Establish and verify the synthesizer
 
-Status: Planned
+Status: Active
 
 Outputs:
 
@@ -149,11 +160,13 @@ Exit criteria:
 
 ## Near-term vertical slice (before full parallelization)
 
-1. Select one 2021 FFS 65+ chronic → hospitalization context.
-2. Audit the minimal dependency graph of tables/fields.
-3. Prepare ~3 public calibration targets + 1 independent diagnostic/holdout.
+1. ~~Select one 2021 FFS 65+ chronic → hospitalization context.~~ **Done (Phase 0):**
+   diabetes → all-cause IP; see `docs/phase0/`.
+2. ~~Audit the minimal dependency graph of tables/fields.~~ **Done (Phase 0).**
+3. Prepare ~3 public calibration targets + 1 independent diagnostic/holdout
+   (Phase 3 freeze; candidates listed in evidence inventory).
 4. Formalize one finding end-to-end (source → IR → execution → report).
-5. Prove generator controllability on synthetic ground truth.
+5. Prove generator controllability on synthetic ground truth (**Phase 1**).
 6. Implement reweighting before advanced calibration.
 7. Produce 2–3 worlds with shared targets and different weak assumptions.
 8. Freeze evaluation gates before iterative fitting.

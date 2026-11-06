@@ -63,11 +63,13 @@ print(ms.RelationalValidator().validate_slice(data).is_valid)
 
 ## Next
 
-Phase 0+ program in [`ROADMAP.md`](ROADMAP.md); agent prompt in
-[`docs/goal.md`](docs/goal.md): Evidence IR → calibration → multiple plausible
-worlds → held-out / workflow evaluation. Structural validity stays a hard gate;
-literature match is contextual plausibility, not representativeness. Agents
-assist; humans approve evidence and calibrated releases (`AGENTS.md`).
+Phase 0 is complete ([`docs/phase0/`](docs/phase0/); pinned MVP
+`mvp-2021-om-ffs-diabetes-ip`). Phase 1+ program in [`ROADMAP.md`](ROADMAP.md);
+agent prompt in [`docs/goal.md`](docs/goal.md): verified synthesizer → Evidence
+IR → calibration → multiple plausible worlds → held-out / workflow evaluation.
+Structural validity stays a hard gate; literature match is contextual
+plausibility, not representativeness. Agents assist; humans approve evidence
+and calibrated releases (`AGENTS.md`).
 
 ## Scope
 

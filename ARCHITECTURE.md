@@ -1,7 +1,8 @@
 # ARCHITECTURE
 
 Last Reviewed: 2026-11-06
-Status: Active — structural core implemented; evidence-calibration components planned
+Status: Active — structural core implemented; Phase 0 MVP context pinned;
+evidence-calibration components planned (Phase 1 synthesizer next)
 
 ## Current Repository
 
@@ -10,10 +11,15 @@ Polars-backed validators, deterministic scenarios, normalizer, release export,
 vertical/horizontal expansion, catalog/diff/profile/audit, bounded 2022 PUF
 importer, CLI, and docs portal.
 
+Phase 0 (`docs/phase0/`) pinned MVP context
+`mvp-2021-om-ffs-diabetes-ip` and documented that today's
+`TabDatSynthAdapter` / horizontal re-keying are structural fixtures only.
 Planned (evidence-calibrated playground): Evidence IR, estimand compiler,
 parameterized synthesis, calibration, multi-world configs, and evaluation.
 Prefer narrow modules consistent with existing conventions; do not introduce a
-large framework before Phase 1–2 experiments justify it.
+large framework before Phase 1–2 experiments justify it. First synthesizer
+experiments should target beneficiary + MBSF base/CC + inpatient subgraphs for
+the pinned diabetes → all-cause IP analysis.
 
 ## Component Boundaries
 

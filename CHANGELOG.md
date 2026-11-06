@@ -4,6 +4,15 @@
 
 ### Added
 
+- Closed Phase 0 (feasibility and evidence scouting): added
+  [`docs/phase0/`](docs/phase0/) with capability-gap notes, pinned 2021 OM FFS
+  age-65+ diabetes → all-cause inpatient MVP cohort/field inventory, initial
+  CMS aggregate and Medicare-only evidence inventory, feasibility memo
+  (proceed), and draft MVP specification (`mvp-2021-om-ffs-diabetes-ip`).
+  Synced `SPEC.md`, `ARCHITECTURE.md`, `ROADMAP.md`, and `docs/goal.md`;
+  Phase 1 (synthesizer verification) is now active. Document-only; no runtime
+  code changes.
+
 - Tightened the root `README.md` orientation around today’s structural toolkit
   and the evidence-calibrated playground direction, with pointers to
   `docs/goal.md` and `ROADMAP.md`.
