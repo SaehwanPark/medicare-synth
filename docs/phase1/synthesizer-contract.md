@@ -37,9 +37,12 @@ Age ≥ 65 via DOB. Diabetes present coded as `sp_diabetes="1"` (collapse).
 | --- | --- |
 | `diabetes_prevalence` | R1 `P(diabetes)` |
 | `p_ip_given_diabetes` | R2 `P(O1\|diabetes)` |
-| `p_ip_given_no_diabetes` | R3 `P(O1\|no diabetes)` (held-out recovery target) |
+| `p_ip_given_no_diabetes` | R3 `P(O1\|no diabetes)` (held-out partition LLN target) |
+| `hf_prevalence` | Independent `P(sp_chf present)` (stratifier support; default 0) |
 
 O1 = ≥1 inpatient claim with admission in `reference_year`.
+Risk difference R2−R3 is reported by `estimate_world_relationships` but is
+not a separate recovery gate.
 
 ## Determinism
 
@@ -49,12 +52,17 @@ Polars frames. No wall-clock or global RNG.
 ## Hard gates
 
 Generated MVP tables must pass `RelationalValidator.validate_slice` for the
-provided frames. Provenance status is `SYNTHESIZED`.
+provided frames. Provenance status is `SYNTHESIZED`. Note: several IP
+chronology helpers only fire when `clm_from_dt`/`srvc_dt` exist; this MVP
+uses admission/discharge columns and relies on generator construction plus
+`check_admission_temporal_inversions`.
 
 ## Tolerances
 
-Default absolute recovery tolerance: **0.03** at `n_beneficiaries ≥ 4000`
-(overridable via `recovery_tolerance`).
+Effective absolute gate: `max(recovery_tolerance, 3.5 · binomial SE)` at the
+relevant stratum size (default base `recovery_tolerance=0.03`). Empty strata
+fail the corresponding conditional check (undefined estimand). Multi-seed
+recovery is required at `n≥8000` (see tests).
 
 ## Explicit non-claims
 

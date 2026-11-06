@@ -71,7 +71,7 @@ Exit criteria:
 
 - pinned inputs/seeds reproduce outputs; structural checks pass — **met**
 - held-out synthetic ground-truth relationships recover within declared
-  tolerances — **met** (R3 on holdout partition; tolerance 0.03 at n≥4000)
+  tolerances — **met** (R3 on holdout; `max(0.03, 3.5·SE)`; multi-seed at n≥8000)
 - generated data show genuine statistical support (not clone-only variation)
   — **met** (clone-only cannot retarget prevalence; conditional synthesizer can)
 

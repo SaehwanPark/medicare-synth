@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
-from medicare_synth.expansion import HorizontalExpander
+import pytest
+
+from medicare_synth.expansion import HorizontalExpander, TabDatSynthAdapter
 from medicare_synth.synthesis import (
+  ConditionalWorld,
   ConditionalWorldParams,
   estimate_world_relationships,
   generate_diabetes_ip_world,
@@ -16,11 +19,12 @@ from medicare_synth.validation import RelationalValidator
 
 def _mvp_params(**overrides: object) -> ConditionalWorldParams:
   base: dict[str, object] = {
-    "n_beneficiaries": 4000,
+    "n_beneficiaries": 8000,
     "seed": 2021,
     "diabetes_prevalence": 0.28,
     "p_ip_given_diabetes": 0.35,
     "p_ip_given_no_diabetes": 0.12,
+    "hf_prevalence": 0.1,
     "recovery_tolerance": 0.03,
   }
   base.update(overrides)
@@ -55,16 +59,27 @@ def test_generated_world_passes_structural_validation():
 
 
 def test_option_b_enrollment_and_age_floor():
-  world = generate_diabetes_ip_world(_mvp_params(n_beneficiaries=100, seed=3))
+  world = generate_diabetes_ip_world(
+    _mvp_params(n_beneficiaries=100, seed=3, reference_year=2021)
+  )
   base = world.mbsf_base_enrollment
   assert (base["bene_hi_cvrage_tot_mons"] == 12).all()
   assert (base["bene_smi_cvrage_tot_mons"] == 12).all()
   assert (base["bene_hmo_cvrage_tot_mons"] == 0).all()
   ages = (
-    2021
+    world.params.reference_year
     - world.beneficiary_summary["bene_birth_dt"].dt.year()
   )
   assert (ages >= 65).all()
+
+
+def test_hf_prevalence_controllable():
+  world = generate_diabetes_ip_world(
+    _mvp_params(n_beneficiaries=5000, seed=4, hf_prevalence=0.2)
+  )
+  cc = world.mbsf_chronic_conditions
+  rate = cc.filter(cc["sp_chf"].is_in(["1", "2"])).height / cc.height
+  assert abs(rate - 0.2) <= 0.03
 
 
 def test_primary_relationships_recover_within_tolerance():
@@ -74,19 +89,31 @@ def test_primary_relationships_recover_within_tolerance():
   checks = relationships_within_tolerance(
     estimates, params, check_held_out_no_diabetes=True
   )
-  assert checks["diabetes_prevalence"]
-  assert checks["p_ip_given_diabetes"]
-  assert checks["p_ip_given_no_diabetes"]
+  assert all(checks.values()), checks
+
+
+def test_recovery_across_multiple_seeds():
+  """Contract gate must hold across seeds, not a single lucky draw."""
+  failures = 0
+  for seed in range(20):
+    params = _mvp_params(seed=seed, n_beneficiaries=8000)
+    world = generate_diabetes_ip_world(params)
+    checks = relationships_within_tolerance(
+      estimate_world_relationships(world),
+      params,
+      check_held_out_no_diabetes=True,
+    )
+    if not all(checks.values()):
+      failures += 1
+  assert failures == 0, f"recovery failed for {failures}/20 seeds"
 
 
 def test_held_out_relationship_recovers_within_tolerance():
-  """R3 P(O1|no diabetes) recovered on holdout partition within tolerance."""
-  params = _mvp_params(n_beneficiaries=5000, seed=99)
+  """R3 recovered on holdout partition (LLN on known truth, not model fit)."""
+  params = _mvp_params(n_beneficiaries=10000, seed=99)
   world = generate_diabetes_ip_world(params)
   estimation_ids, holdout_ids = split_bene_ids(world, holdout_fraction=0.4)
-  assert len(estimation_ids) > 0 and len(holdout_ids) > 0
 
-  # Primary recovery on estimation partition (R1/R2).
   est_part = estimate_world_relationships(world, estimation_ids)
   primary = relationships_within_tolerance(
     est_part, params, check_held_out_no_diabetes=False
@@ -94,12 +121,40 @@ def test_held_out_relationship_recovers_within_tolerance():
   assert primary["diabetes_prevalence"]
   assert primary["p_ip_given_diabetes"]
 
-  # Held-out recovery of R3 on untouched holdout IDs.
   holdout_est = estimate_world_relationships(world, holdout_ids)
-  assert (
-    abs(holdout_est.p_ip_given_no_diabetes - params.p_ip_given_no_diabetes)
-    <= params.recovery_tolerance
+  holdout_checks = relationships_within_tolerance(
+    holdout_est, params, check_held_out_no_diabetes=True
   )
+  assert holdout_checks["p_ip_given_no_diabetes"]
+
+
+def test_empty_bene_ids_returns_zero_estimates():
+  world = generate_diabetes_ip_world(_mvp_params(n_beneficiaries=50, seed=1))
+  est = estimate_world_relationships(world, [])
+  assert est.n_beneficiaries == 0
+  assert est.diabetes_prevalence == 0.0
+
+
+def test_empty_stratum_fails_tolerance_not_false_pass():
+  params = _mvp_params(
+    n_beneficiaries=200,
+    seed=2,
+    diabetes_prevalence=1.0,
+    p_ip_given_no_diabetes=0.5,
+  )
+  world = generate_diabetes_ip_world(params)
+  checks = relationships_within_tolerance(
+    estimate_world_relationships(world),
+    params,
+    check_held_out_no_diabetes=True,
+  )
+  assert checks["p_ip_given_no_diabetes"] is False
+
+
+def test_split_requires_nonempty_partitions():
+  world = generate_diabetes_ip_world(_mvp_params(n_beneficiaries=2, seed=0))
+  with pytest.raises(ValueError, match="empty partition"):
+    split_bene_ids(world, holdout_fraction=0.4)
 
 
 def test_conditional_generator_has_full_unique_support():
@@ -108,11 +163,7 @@ def test_conditional_generator_has_full_unique_support():
 
 
 def test_horizontal_clone_fails_statistical_support_benchmark():
-  """Cloning preserves seed prevalence exactly and cannot retarget it.
-
-  A conditional synthesizer targeting a *different* prevalence recovers it;
-  clone-only expansion of a mismatched seed cannot.
-  """
+  """Cloning preserves seed prevalence exactly and cannot retarget it."""
   seed_world = generate_diabetes_ip_world(
     _mvp_params(
       n_beneficiaries=20,
@@ -120,14 +171,13 @@ def test_horizontal_clone_fails_statistical_support_benchmark():
       diabetes_prevalence=0.5,
       p_ip_given_diabetes=0.8,
       p_ip_given_no_diabetes=0.1,
+      hf_prevalence=0.0,
     )
   )
   seed_prev = estimate_world_relationships(seed_world).diabetes_prevalence
 
   expander = HorizontalExpander(seed=11)
   cloned_tables = expander.expand_subgraph(seed_world.tables(), scale_factor=50)
-  from medicare_synth.synthesis import ConditionalWorld
-
   cloned = ConditionalWorld(
     params=seed_world.params,
     beneficiary_summary=cloned_tables["beneficiary_summary"],
@@ -142,7 +192,7 @@ def test_horizontal_clone_fails_statistical_support_benchmark():
 
   controlled = generate_diabetes_ip_world(
     _mvp_params(
-      n_beneficiaries=1000,
+      n_beneficiaries=2000,
       seed=11,
       diabetes_prevalence=target,
       p_ip_given_diabetes=0.8,
@@ -154,19 +204,28 @@ def test_horizontal_clone_fails_statistical_support_benchmark():
   assert unique_support_ratio(controlled) == 1.0
 
 
-def test_tabdat_adapter_is_not_conditional_on_diabetes():
-  """Characterization: index/seed features ignore chronic flags."""
-  from medicare_synth.expansion import TabDatSynthAdapter
+def test_tabdat_adapter_ignores_diabetes_column_values():
+  """Builtin TabDat features are index/seed math even if CC flags are present."""
+  import polars as pl
 
   world = generate_diabetes_ip_world(_mvp_params(n_beneficiaries=40, seed=8))
+  with_flag = world.beneficiary_summary.join(
+    world.mbsf_chronic_conditions.select(["bene_id", "sp_diabetes"]),
+    on="bene_id",
+  )
   adapter = TabDatSynthAdapter()
   featured = adapter.synthesize_table(
-    world.beneficiary_summary, target_columns=["SYN_RISK_SCORE"], seed=8
+    with_flag, target_columns=["SYN_RISK_SCORE"], seed=8
   )
-  featured_again = adapter.synthesize_table(
-    world.beneficiary_summary, target_columns=["SYN_RISK_SCORE"], seed=8
+  flipped = with_flag.with_columns(
+    pl.when(pl.col("sp_diabetes") == "0")
+    .then(pl.lit("1"))
+    .otherwise(pl.lit("0"))
+    .alias("sp_diabetes")
   )
-  assert featured["SYN_RISK_SCORE"].to_list() == featured_again[
+  featured_flipped = adapter.synthesize_table(
+    flipped, target_columns=["SYN_RISK_SCORE"], seed=8
+  )
+  assert featured["SYN_RISK_SCORE"].to_list() == featured_flipped[
     "SYN_RISK_SCORE"
   ].to_list()
-  assert "sp_diabetes" not in featured.columns

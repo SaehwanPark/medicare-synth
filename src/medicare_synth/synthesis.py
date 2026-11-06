@@ -7,6 +7,7 @@ under pinned seeds. Not a Medicare fidelity claim.
 
 from __future__ import annotations
 
+import math
 from datetime import date, timedelta
 from hashlib import sha256
 from typing import Mapping
@@ -27,12 +28,21 @@ class ConditionalWorldParams(BaseModel):
   diabetes_prevalence: float = Field(..., ge=0.0, le=1.0)
   p_ip_given_diabetes: float = Field(..., ge=0.0, le=1.0)
   p_ip_given_no_diabetes: float = Field(..., ge=0.0, le=1.0)
+  hf_prevalence: float = Field(
+    default=0.0,
+    ge=0.0,
+    le=1.0,
+    description="Independent P(sp_chf present); default 0 stubs HF absent.",
+  )
   reference_year: int = Field(default=2021, ge=2000, le=2099)
   recovery_tolerance: float = Field(
     default=0.03,
     ge=0.0,
     le=1.0,
-    description="Absolute tolerance for recovering declared probabilities.",
+    description=(
+      "Base absolute tolerance; effective gate is max(this, 3.5·SE) "
+      "using binomial SE at the relevant stratum size."
+    ),
   )
 
 
@@ -119,6 +129,7 @@ def generate_diabetes_ip_world(params: ConditionalWorldParams) -> ConditionalWor
     has_diabetes = _bernoulli(
       params.seed, "diabetes", i, params.diabetes_prevalence
     )
+    has_hf = _bernoulli(params.seed, "hf", i, params.hf_prevalence)
     p_ip = (
       params.p_ip_given_diabetes
       if has_diabetes
@@ -159,7 +170,7 @@ def generate_diabetes_ip_world(params: ConditionalWorldParams) -> ConditionalWor
         "bene_id": bene_id,
         "rfrnc_yr": ref_year,
         "sp_alzhmd": "0",
-        "sp_chf": "0",
+        "sp_chf": "1" if has_hf else "0",
         "sp_chrnkidn": "0",
         "sp_cncr": "0",
         "sp_diabetes": "1" if has_diabetes else "0",
@@ -220,7 +231,9 @@ def estimate_world_relationships(
   cc = world.mbsf_chronic_conditions
   ip = world.inpatient_claims
   if bene_ids is not None:
-    id_frame = pl.DataFrame({"bene_id": bene_ids})
+    id_frame = pl.DataFrame(
+      {"bene_id": bene_ids}, schema={"bene_id": pl.Utf8}
+    )
     cc = cc.join(id_frame, on="bene_id", how="inner")
     ip = ip.join(id_frame, on="bene_id", how="inner")
 
@@ -284,7 +297,18 @@ def split_bene_ids(
       holdout.append(bene_id)
     else:
       estimation.append(bene_id)
+  if not estimation or not holdout:
+    raise ValueError(
+      "split_bene_ids produced an empty partition; increase n_beneficiaries "
+      "or adjust holdout_fraction"
+    )
   return estimation, holdout
+
+
+def _binomial_se_tolerance(p: float, n: int, z: float = 3.5) -> float:
+  if n <= 0:
+    return 1.0
+  return z * math.sqrt(max(p * (1.0 - p), 1e-6) / float(n))
 
 
 def relationships_within_tolerance(
@@ -293,28 +317,53 @@ def relationships_within_tolerance(
   *,
   check_held_out_no_diabetes: bool = True,
 ) -> Mapping[str, bool]:
-  """Compare estimates to known-truth params using the contract tolerance."""
-  tol = params.recovery_tolerance
-  result = {
+  """Compare estimates to known-truth using max(base tol, 3.5·binomial SE).
+
+  Skips conditional arms with empty strata (undefined estimands).
+  """
+  n = estimates.n_beneficiaries
+  n_diab = estimates.n_with_diabetes
+  n_no = n - n_diab
+  base = params.recovery_tolerance
+
+  prev_tol = max(
+    base, _binomial_se_tolerance(params.diabetes_prevalence, n)
+  )
+  result: dict[str, bool] = {
     "diabetes_prevalence": abs(
       estimates.diabetes_prevalence - params.diabetes_prevalence
     )
-    <= tol,
-    "p_ip_given_diabetes": abs(
-      estimates.p_ip_given_diabetes - params.p_ip_given_diabetes
-    )
-    <= tol,
+    <= prev_tol,
   }
-  if check_held_out_no_diabetes:
-    result["p_ip_given_no_diabetes"] = (
-      abs(estimates.p_ip_given_no_diabetes - params.p_ip_given_no_diabetes)
-      <= tol
+
+  if n_diab > 0:
+    diab_tol = max(
+      base, _binomial_se_tolerance(params.p_ip_given_diabetes, n_diab)
     )
+    result["p_ip_given_diabetes"] = (
+      abs(estimates.p_ip_given_diabetes - params.p_ip_given_diabetes)
+      <= diab_tol
+    )
+  else:
+    result["p_ip_given_diabetes"] = False
+
+  if check_held_out_no_diabetes:
+    if n_no > 0:
+      no_tol = max(
+        base,
+        _binomial_se_tolerance(params.p_ip_given_no_diabetes, n_no),
+      )
+      result["p_ip_given_no_diabetes"] = (
+        abs(estimates.p_ip_given_no_diabetes - params.p_ip_given_no_diabetes)
+        <= no_tol
+      )
+    else:
+      result["p_ip_given_no_diabetes"] = False
   return result
 
 
 def unique_support_ratio(world: ConditionalWorld) -> float:
-  """Fraction of beneficiaries that are unique IDs (1.0 for genuine draws)."""
+  """Fraction of unique ``bene_id`` values (ID hygiene; clones may also be 1.0)."""
   n = world.beneficiary_summary.height
   if n == 0:
     return 0.0
