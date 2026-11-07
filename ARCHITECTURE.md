@@ -63,7 +63,8 @@ Phase 6–7 justify it.
   execute helpers, and mutation refusal when frozen; fixtures under
   `medicare_synth/fixtures/evidence_corpus/`.
 - **Calibration engine** — `calibration.py` Level A baseline, Level B IPF
-  reweighting (ESS/weight/infeasibility), Level C generator-parameter grid
+  reweighting (ESS/weight/infeasibility), Level C generator-parameter grid;
+  discrepancy moments evaluate on each finding's Evidence IR eligible cohort
   search; holdout fit refused; `CalibrationRunManifest`;
   `AGENT_ROLE_CONTRACTS` for review gates (engines agent-independent).
 - **Worlds** — `worlds.py` versioned MVP family presets, emit API, identical

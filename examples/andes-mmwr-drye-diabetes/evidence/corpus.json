@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "corpus_id": "example-andes-mmwr-drye-v1",
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "title": "Example corpus: Andes MMWR (A) calibration + Drye (B) excluded",
+  "frozen": false,
+  "reviewer": "example-andes-mmwr-drye-diabetes",
+  "review_rationale": "Example-local corpus for researcher E2E workflow. Not a replacement for mvp-2021-om-ffs-diabetes-ip-corpus-v1.",
+  "entries": [
+    {
+      "finding_id": "lit03-mmwr-diabetes-prevalence-2015",
+      "inventory_id": "LIT-03",
+      "partition": "calibration",
+      "relative_path": "evidence_ir/lit03_mmwr_diabetes_prevalence_2015.json",
+      "sha256": "35b06981883e68e45a4e79ce378b60640daa1a156e5ab7068999dd79324f1d5d",
+      "comparability_grade": "B",
+      "executability": "approximated",
+      "rationale": "Paper A: Andes MMWR 2015 overall diabetes prevalence 31.6% (example calibration)."
+    },
+    {
+      "finding_id": "lit03-mmwr-diabetes-prev-2015-women",
+      "inventory_id": "LIT-03",
+      "partition": "holdout",
+      "relative_path": "evidence_ir/lit03_mmwr_diabetes_prev_2015_women.json",
+      "sha256": "c0d1d4cfcb9057e1e7e106d1c3af7290d7525b2cedad085101ca6def14601939",
+      "comparability_grade": "B",
+      "executability": "approximated",
+      "rationale": "Holdout stratum (women); evaluate-only \u2014 do not fit."
+    },
+    {
+      "finding_id": "lit02-drye-diabetes-unplanned-admission-rate-2012",
+      "inventory_id": "LIT-02",
+      "partition": "excluded",
+      "relative_path": "evidence_ir/lit02_drye_admission_rate_unsupported.json",
+      "sha256": "9d1c7dc5edaf045cd90c975d1bcd69a3ec64367997c7d614e4fa58e30363aae9",
+      "comparability_grade": "B",
+      "executability": "non_executable",
+      "rationale": "Paper B: Drye unplanned admission rate \u2014 excluded / non-executable on MVP schema."
+    }
+  ]
+}

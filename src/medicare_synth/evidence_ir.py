@@ -738,10 +738,11 @@ def _flag_from_algorithm(algo: AlgorithmId, tables: Mapping[str, pl.DataFrame]) 
   raise EvidenceIRError(f"cannot derive flag for algorithm {algo.value}")
 
 
-def _eligible_bene_ids(
+def eligible_bene_ids(
   tables: Mapping[str, pl.DataFrame],
   plan: EligibilityPlan,
 ) -> pl.DataFrame:
+  """Return distinct ``bene_id`` rows matching an eligibility plan."""
   bene = tables["beneficiary_summary"]
   enr = tables["mbsf_base_enrollment"]
   joined = bene.join(enr, on="bene_id", how="inner")
@@ -769,6 +770,10 @@ def _eligible_bene_ids(
       )
     filtered = filtered.filter(pl.col("bene_sex_ident_cd").is_in(list(plan.sex_codes)))
   return filtered.select("bene_id").unique()
+
+
+# Backward-compatible private alias.
+_eligible_bene_ids = eligible_bene_ids
 
 
 def execute_finding(
