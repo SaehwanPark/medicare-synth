@@ -45,7 +45,7 @@ Out of scope for the foundation (still true):
 
 ### Evidence-calibrated research playground
 
-Status: Active — Phases 0–4 complete; Phase 5 (MVP calibrated worlds) next
+Status: Active — Phases 0–5 complete; Phase 6 (independent evaluation) next
 
 **Mission:** generate structurally valid, contextually plausible synthetic
 Medicare worlds so researchers can prototype and stress-test methods before
@@ -89,6 +89,14 @@ search against the **calibration** partition only. Holdout is evaluate-only.
 Deterministic `CalibrationRunManifest` and typed `AGENT_ROLE_CONTRACTS` encode
 review gates; engines run without agents. See [`docs/phase4/`](docs/phase4/).
 
+**MVP calibrated worlds (Phase 5):** `medicare_synth.worlds` emits family
+`mvp-2021-om-ffs-diabetes-ip-worlds-v1` (reweight reference, generator
+reference, alternate free `P(IP|no diabetes)`) against shared frozen
+calibration targets. `medicare_synth.evaluation` freezes hard structural /
+holdout-isolation gates and graded metrics before further fitting. Identical
+`analyze_world_moments` analysis runs in each world. See
+[`docs/phase5/`](docs/phase5/).
+
 **Near-term capability targets:**
 
 | Capability | Intent |
@@ -97,8 +105,8 @@ review gates; engines run without agents. See [`docs/phase4/`](docs/phase4/).
 | Estimand compiler | **Delivered (v0.1 crude)** — eligibility → derivation → estimator → compatibility → comparison |
 | Evidence corpus | **Delivered (v1 freeze)** — train/holdout/diagnostic/excluded registry with checksums |
 | Calibration ladder | **Delivered A–C** — baseline / reweight / generator-param search; hierarchical methods still later |
-| Multi-world releases | Shared evidence constraints; documented variation in underidentified dimensions |
-| Evaluation | Hard structural gates + graded evidence agreement + held-out + research-utility benchmarks |
+| Multi-world releases | **Delivered (v1 family)** — shared targets; documented weak-assumption variation |
+| Evaluation | **Freeze delivered (Phase 5)** — hard gates + graded metrics; Phase 6 owns independent claims |
 | Agent assist | Discovery/extraction/formalization help with human approval gates; engines run without agents |
 
 **Non-goals (program-wide):** recover individuals or the full real joint;
@@ -123,7 +131,8 @@ Ordered program (see `ROADMAP.md` for exit gates):
    **Complete** (`docs/phase3/`, `medicare_synth.evidence_corpus`).
 4. ~~Calibration engine + reviewable agent orchestration (engines independent of
    agents).~~ **Complete** (`docs/phase4/`, `medicare_synth.calibration`).
-5. Calibrated MVP worlds and release manifests.
+5. ~~Calibrated MVP worlds and release manifests.~~ **Complete**
+   (`docs/phase5/`, `medicare_synth.worlds`, `medicare_synth.evaluation`).
 6. Held-out and research-utility evaluation; go/no-go.
 7. Incremental context and literature expansion with regression of prior worlds.
 

@@ -38,5 +38,6 @@ Artifact: [`reports/phase4/known_truth_experiment.json`](../../reports/phase4/kn
 
 ## Next (Phase 5)
 
-Emit reference + alternative worlds with shared calibration targets and
-documented weak-assumption variation; package manifests/limitations.
+~~Emit reference + alternative worlds with shared calibration targets and
+documented weak-assumption variation; package manifests/limitations.~~
+**Done** — see [`docs/phase5/`](../phase5/).

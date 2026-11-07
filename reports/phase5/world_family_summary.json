@@ -1,0 +1,293 @@
+{
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "corpus_id": "mvp-2021-om-ffs-diabetes-ip-corpus-v1",
+  "corpus_sha256": "dcbd7321be29fd38f0ce9bb54b517dee4f6df2dcbe690768fb7c1d4e0dc3fb0f",
+  "evaluation_freeze": {
+    "calibration_finding_ids": [
+      "cms-agg03-diabetes-prev-ffs-2018",
+      "cms-agg04-hf-prev-ffs-2022",
+      "lit07-avalere-ffs-diabetes-ip-risk"
+    ],
+    "context_id": "mvp-2021-om-ffs-diabetes-ip",
+    "corpus_id": "mvp-2021-om-ffs-diabetes-ip-corpus-v1",
+    "diagnostic_finding_ids": [
+      "lit03-mmwr-diabetes-prevalence-2015",
+      "cms-agg05-hf-algorithm-shift-2017"
+    ],
+    "evaluate_only_partitions": [
+      "holdout",
+      "diagnostic"
+    ],
+    "excluded_partitions": [
+      "excluded"
+    ],
+    "fit_allowed_partitions": [
+      "calibration"
+    ],
+    "freeze_id": "mvp-2021-om-ffs-diabetes-ip-eval-freeze-v1",
+    "frozen": true,
+    "gates": [
+      {
+        "description": "RelationalValidator passes on beneficiary, enrollment, chronic conditions, and inpatient claim linkage.",
+        "gate_id": "structural_validity",
+        "kind": "hard",
+        "partition_roles": []
+      },
+      {
+        "description": "Fit paths refuse holdout and diagnostic finding IDs.",
+        "gate_id": "holdout_isolation",
+        "kind": "hard",
+        "partition_roles": [
+          "holdout",
+          "diagnostic"
+        ]
+      },
+      {
+        "description": "Mean absolute error on frozen calibration moments (training diagnostic, not generalization proof).",
+        "gate_id": "calibration_mae",
+        "kind": "graded",
+        "partition_roles": [
+          "calibration"
+        ]
+      },
+      {
+        "description": "Holdout discrepancy may be reported for transparency; must not enter model selection or iterative retuning in Phase 5.",
+        "gate_id": "holdout_mae",
+        "kind": "reporting_only",
+        "partition_roles": [
+          "holdout"
+        ]
+      },
+      {
+        "description": "For Level B worlds: ESS > 0, positive weights, no declared infeasibility; extreme weight collapse is a warning.",
+        "gate_id": "reweight_nondegeneracy",
+        "kind": "graded",
+        "partition_roles": [
+          "calibration"
+        ]
+      }
+    ],
+    "holdout_finding_ids": [
+      "lit03-mmwr-diabetes-prev-2015-women"
+    ],
+    "notes": [
+      "Holdout and diagnostic findings are evaluate-only; never fit on them.",
+      "Structural validity is a hard release gate; evidence MAE is graded.",
+      "Synthetic agreement is not a Medicare finding."
+    ],
+    "schema_version": "0.1"
+  },
+  "evaluation_freeze_id": "mvp-2021-om-ffs-diabetes-ip-eval-freeze-v1",
+  "family_id": "mvp-2021-om-ffs-diabetes-ip-worlds-v1",
+  "family_sha256": "f2f0a381e515cab28c20b2c2e437a971877a5d0c455fac733b0c53299d4c4a87",
+  "limitations": [
+    "These are synthetic Medicare-like records for research development and stress testing\u2014not reconstructed beneficiaries.",
+    "Literature/CMS aggregate agreement provides contextual plausibility for selected moments only; do not publish synthetic estimates as Medicare findings.",
+    "Multiple worlds fit the same calibration moments by design; residual structure remains underidentified.",
+    "Holdout was not used for fitting; Phase 6 owns independent evaluation claims.",
+    "Worlds differ on calibration method and/or free P(IP|no diabetes); run the same analyze_world_moments API in each."
+  ],
+  "non_claims": [
+    "Synthetic agreement is not a Medicare finding.",
+    "Holdout was evaluate-only; not used for fitting or selection."
+  ],
+  "shared_calibration_finding_ids": [
+    "cms-agg03-diabetes-prev-ffs-2018",
+    "cms-agg04-hf-prev-ffs-2022",
+    "lit07-avalere-ffs-diabetes-ip-risk"
+  ],
+  "worlds": [
+    {
+      "calibration_level": "B_reweight",
+      "calibration_mae_after": 0.000729402519,
+      "calibration_mae_before": 0.085773820537,
+      "holdout_mae": 0.017615794805,
+      "improved_calibration": true,
+      "label": "reference_reweight",
+      "method": "reweight",
+      "nondegeneracy": {
+        "diabetes_prevalence": 0.180166666667,
+        "ess": 4606.031093638816,
+        "hf_prevalence": 0.042333333333,
+        "max_weight": 11.614314609971,
+        "min_weight": 0.810665110084,
+        "n_beneficiaries": 6000,
+        "n_inpatient_claims": 262,
+        "n_with_diabetes": 1081,
+        "n_with_hf": 254,
+        "warnings": [],
+        "weight_collapsed": false
+      },
+      "p_ip_given_no_diabetes": 0.04,
+      "params": {
+        "diabetes_prevalence": 0.18,
+        "hf_prevalence": 0.04,
+        "n_beneficiaries": 6000,
+        "p_ip_given_diabetes": 0.05,
+        "p_ip_given_no_diabetes": 0.04,
+        "recovery_tolerance": 0.03,
+        "reference_year": 2021,
+        "seed": 42
+      },
+      "run_manifest_sha256": "3b84f3fbc81a91131c942c459b281683ffff5c5c27b6ddab6242d094a29a558e",
+      "structural_valid": true,
+      "weak_assumptions": [
+        {
+          "assumption_id": "p_ip_given_no_diabetes_free",
+          "constrained_by_calibration": false,
+          "statement": "P(IP|no diabetes)=0.04 is not a frozen calibration target; treated as a free scenario knob."
+        },
+        {
+          "assumption_id": "diabetes_hf_independent_bernoulli",
+          "constrained_by_calibration": false,
+          "statement": "Generator draws diabetes and HF as independent Bernoullis; joint comorbidity structure is underidentified by the moment set."
+        },
+        {
+          "assumption_id": "year_transport_aggregates",
+          "constrained_by_calibration": true,
+          "statement": "CMS-AGG diabetes (2018) and HF (2022) moments are transported into the 2021 FFS context with explicit approximation grades."
+        },
+        {
+          "assumption_id": "lit07_industry_prior",
+          "constrained_by_calibration": true,
+          "statement": "LIT-07 P(IP|diabetes)=0.13 is a weak industry prior inside the frozen corpus, not a peer-reviewed prevalence estimand."
+        },
+        {
+          "assumption_id": "calibration_method",
+          "constrained_by_calibration": false,
+          "statement": "Method=reweight: Level B reweights existing support; Level C regenerates via discrete param search. Same targets, different underidentified residual structure."
+        }
+      ],
+      "world_id": "mvp-w1-reweight-v1",
+      "world_sha256": "c766dbdeb66aab2bfc7c84ae055fb2e4ea22c56d9dc20b280530befd90ff26af"
+    },
+    {
+      "calibration_level": "C_generator_params",
+      "calibration_mae_after": 0.0025270954,
+      "calibration_mae_before": 0.085773820537,
+      "holdout_mae": 0.017833333333,
+      "improved_calibration": true,
+      "label": "reference_generator",
+      "method": "generator_params",
+      "nondegeneracy": {
+        "diabetes_prevalence": 0.278166666667,
+        "ess": null,
+        "hf_prevalence": 0.116,
+        "max_weight": null,
+        "min_weight": null,
+        "n_beneficiaries": 6000,
+        "n_inpatient_claims": 404,
+        "n_with_diabetes": 1669,
+        "n_with_hf": 696,
+        "warnings": [],
+        "weight_collapsed": null
+      },
+      "p_ip_given_no_diabetes": 0.04,
+      "params": {
+        "diabetes_prevalence": 0.277,
+        "hf_prevalence": 0.12,
+        "n_beneficiaries": 6000,
+        "p_ip_given_diabetes": 0.13,
+        "p_ip_given_no_diabetes": 0.04,
+        "recovery_tolerance": 0.03,
+        "reference_year": 2021,
+        "seed": 42
+      },
+      "run_manifest_sha256": "33e32a39ae9c80900620efe5715771037c6df55d73f36a3098a24e7445f253db",
+      "structural_valid": true,
+      "weak_assumptions": [
+        {
+          "assumption_id": "p_ip_given_no_diabetes_free",
+          "constrained_by_calibration": false,
+          "statement": "P(IP|no diabetes)=0.04 is not a frozen calibration target; treated as a free scenario knob."
+        },
+        {
+          "assumption_id": "diabetes_hf_independent_bernoulli",
+          "constrained_by_calibration": false,
+          "statement": "Generator draws diabetes and HF as independent Bernoullis; joint comorbidity structure is underidentified by the moment set."
+        },
+        {
+          "assumption_id": "year_transport_aggregates",
+          "constrained_by_calibration": true,
+          "statement": "CMS-AGG diabetes (2018) and HF (2022) moments are transported into the 2021 FFS context with explicit approximation grades."
+        },
+        {
+          "assumption_id": "lit07_industry_prior",
+          "constrained_by_calibration": true,
+          "statement": "LIT-07 P(IP|diabetes)=0.13 is a weak industry prior inside the frozen corpus, not a peer-reviewed prevalence estimand."
+        },
+        {
+          "assumption_id": "calibration_method",
+          "constrained_by_calibration": false,
+          "statement": "Method=generator_params: Level B reweights existing support; Level C regenerates via discrete param search. Same targets, different underidentified residual structure."
+        }
+      ],
+      "world_id": "mvp-w2-generator-v1",
+      "world_sha256": "f17626a44f62047e26ee9d38dfd4874917b0abd4a354ed5089c72af9b7442b08"
+    },
+    {
+      "calibration_level": "C_generator_params",
+      "calibration_mae_after": 0.0025270954,
+      "calibration_mae_before": 0.085773820537,
+      "holdout_mae": 0.017833333333,
+      "improved_calibration": true,
+      "label": "alt_background_ip",
+      "method": "generator_params",
+      "nondegeneracy": {
+        "diabetes_prevalence": 0.278166666667,
+        "ess": null,
+        "hf_prevalence": 0.116,
+        "max_weight": null,
+        "min_weight": null,
+        "n_beneficiaries": 6000,
+        "n_inpatient_claims": 572,
+        "n_with_diabetes": 1669,
+        "n_with_hf": 696,
+        "warnings": [],
+        "weight_collapsed": null
+      },
+      "p_ip_given_no_diabetes": 0.08,
+      "params": {
+        "diabetes_prevalence": 0.277,
+        "hf_prevalence": 0.12,
+        "n_beneficiaries": 6000,
+        "p_ip_given_diabetes": 0.13,
+        "p_ip_given_no_diabetes": 0.08,
+        "recovery_tolerance": 0.03,
+        "reference_year": 2021,
+        "seed": 42
+      },
+      "run_manifest_sha256": "e1bf70015b63ff433e5dcd9ea2358d3de7a01dd56ef3c72d45ff132d17b5f0c8",
+      "structural_valid": true,
+      "weak_assumptions": [
+        {
+          "assumption_id": "p_ip_given_no_diabetes_free",
+          "constrained_by_calibration": false,
+          "statement": "P(IP|no diabetes)=0.08 is not a frozen calibration target; treated as a free scenario knob."
+        },
+        {
+          "assumption_id": "diabetes_hf_independent_bernoulli",
+          "constrained_by_calibration": false,
+          "statement": "Generator draws diabetes and HF as independent Bernoullis; joint comorbidity structure is underidentified by the moment set."
+        },
+        {
+          "assumption_id": "year_transport_aggregates",
+          "constrained_by_calibration": true,
+          "statement": "CMS-AGG diabetes (2018) and HF (2022) moments are transported into the 2021 FFS context with explicit approximation grades."
+        },
+        {
+          "assumption_id": "lit07_industry_prior",
+          "constrained_by_calibration": true,
+          "statement": "LIT-07 P(IP|diabetes)=0.13 is a weak industry prior inside the frozen corpus, not a peer-reviewed prevalence estimand."
+        },
+        {
+          "assumption_id": "calibration_method",
+          "constrained_by_calibration": false,
+          "statement": "Method=generator_params: Level B reweights existing support; Level C regenerates via discrete param search. Same targets, different underidentified residual structure."
+        }
+      ],
+      "world_id": "mvp-w3-generator-high-bg-ip-v1",
+      "world_sha256": "5ea2cedcf14a68641911f752ce4226550a8d858758293e48c09bf7d92417ffe4"
+    }
+  ]
+}

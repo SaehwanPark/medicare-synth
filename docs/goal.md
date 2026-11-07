@@ -19,20 +19,20 @@ which assumptions remain free; run the same analysis across a few plausible
 worlds; and carry **code and design**—not synthetic conclusions—into authorized
 real-data work.
 
-## Current objective (Phase 5 → calibrated worlds)
+## Current objective (Phase 6 → independent evaluation)
 
-Phases 0–4 are **complete**. Frozen corpus v1 and calibration ladder A–C
-(reweight + generator-parameter search) exist; holdout stays evaluate-only.
+Phases 0–5 are **complete**. Frozen corpus v1, calibration ladder A–C, and MVP
+world family v1 exist; evaluation freeze keeps holdout evaluate-only.
 
 Next path:
 
-1. ~~Phases 0–4~~ — context, synthesizer, Evidence IR, corpus freeze, calibration
-   engine (`docs/phase0/` … `docs/phase4/`).
-2. **Emit 2–3 worlds** — shared supported calibration targets; different
-   documented weak assumptions; identical downstream analysis in each.
-3. **Freeze evaluation** — hard structural gates, graded evidence metrics,
-   untouched holdout/diagnostic set **before** iterative fitting.
-4. **Independent evaluation / expand** — Phases 6–7.
+1. ~~Phases 0–5~~ — context, synthesizer, Evidence IR, corpus freeze, calibration
+   engine, multi-world packaging (`docs/phase0/` … `docs/phase5/`).
+2. **Independent evaluation** — held-out study comparisons without using them
+   for calibration tuning; research-workflow and synthetic-truth benchmarks.
+3. **Go / no-go** — predefined thresholds or documented limitations; no
+   indefinite retuning against the same holdout set.
+4. **Expand** — Phase 7 contexts / literature with regression of prior worlds.
 
 ## Operating rules
 
@@ -60,7 +60,7 @@ the MVP context works end-to-end.
 | --- | --- |
 | A | Feasibility memo + capability gaps + initial evidence inventory — **done** |
 | B | One human-reviewed external finding executes as reproducible comparison — **done** |
-| C | Calibrated path improves predeclared contextual metrics vs uncalibrated baseline on held-out compatible evidence, without breaking structural gates — **engine ready (Phase 4)**; Phase 5 worlds + Phase 6 holdout protocol complete the milestone |
+| C | Calibrated path improves predeclared contextual metrics vs uncalibrated baseline on held-out compatible evidence, without breaking structural gates — Phase 5 worlds + evaluation freeze **done**; Phase 6 independent holdout protocol completes the milestone |
 
-Phase 5 packages multi-world releases on top of the Phase 4 engine without
+Phase 6 evaluates the Phase 5 family against independent criteria without
 retuning against holdout.

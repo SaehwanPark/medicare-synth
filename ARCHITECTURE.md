@@ -1,8 +1,8 @@
 # ARCHITECTURE
 
-Last Reviewed: 2026-11-06
-Status: Active — structural core through Phase 4 calibration engine (A/B/C);
-multi-world MVP packaging planned (Phase 5+)
+Last Reviewed: 2026-11-07
+Status: Active — structural core through Phase 5 MVP calibrated worlds;
+independent evaluation planned (Phase 6+)
 
 ## Current Repository
 
@@ -16,7 +16,10 @@ validate / compile / execute against synthetic tables, Phase 3 frozen
 evidence corpus (`medicare_synth.evidence_corpus`) with checksummed
 calibration / holdout / diagnostic / excluded partitions, and Phase 4
 calibration engine (`medicare_synth.calibration`) with Level A/B/C APIs,
-run manifests, and agent role contracts.
+run manifests, and agent role contracts, Phase 5 multi-world packaging
+(`medicare_synth.worlds`) with shared-target family releases, and an
+evaluation freeze (`medicare_synth.evaluation`) that keeps holdout/diagnostic
+partitions evaluate-only.
 
 Phase 0 (`docs/phase0/`) pinned the MVP context. Phase 1 (`docs/phase1/`)
 proved controllable diabetes → IP conditionals with reproducibility, structural
@@ -26,9 +29,12 @@ refuses unsupported rate semantics (LIT-02 planned-admission) explicitly.
 Phase 3 (`docs/phase3/`) freezes corpus v1 before calibration tuning.
 Phase 4 (`docs/phase4/`) proves reweighting and generator-parameter search on
 calibration targets without fitting holdout.
+Phase 5 (`docs/phase5/`) packages reference + alternative worlds and freezes
+evaluation gates without retuning against holdout.
 `TabDatSynthAdapter` / horizontal re-keying remain structural fixtures only.
-Planned next: multi-world MVP packaging and evaluation. Prefer narrow modules;
-do not introduce a large hierarchical framework before Phase 5–6 justify it.
+Planned next: independent held-out / research-utility evaluation (Phase 6).
+Prefer narrow modules; do not introduce a large hierarchical framework before
+Phase 6–7 justify it.
 
 ## Component Boundaries
 
@@ -60,6 +66,12 @@ do not introduce a large hierarchical framework before Phase 5–6 justify it.
   reweighting (ESS/weight/infeasibility), Level C generator-parameter grid
   search; holdout fit refused; `CalibrationRunManifest`;
   `AGENT_ROLE_CONTRACTS` for review gates (engines agent-independent).
+- **Worlds** — `worlds.py` versioned MVP family presets, emit API, identical
+  downstream `analyze_world_moments`, release manifests/limitations;
+  configs under `configs/worlds/`.
+- **Evaluation freeze** — `evaluation.py` hard structural + holdout isolation
+  gates, graded calibration MAE, reporting-only holdout MAE; immutable freeze
+  before further fitting.
 - **Scenario catalog, schema diff, limitations profile, audit** — teaching/CI
   fixtures, annual snapshot diffs, six-category limitation disclosures,
   join/privacy metrics.
@@ -73,10 +85,9 @@ Responsibility sketch only; package layout may differ:
 | Boundary | Role |
 | --- | --- |
 | **Synthesis protocol** | MVP diabetes→IP conditional path implemented; richer joint models / multi-table families still planned |
-| **Worlds** | Versioned context presets and explicit underidentified scenario labels (Phase 5) |
-| **Evaluation** | Training/held-out evidence fit, synthetic known-truth, nondegeneracy, research-workflow utility |
+| **Evaluation (Phase 6)** | Independent held-out claims, synthetic known-truth, research-workflow utility, go/no-go |
 | **Agent harness** | Contracts delivered in Phase 4; orchestration remains optional around engines |
-| **Release/provenance** | Package code, seeds, evidence-set hashes, calibration config, world assumptions, limitations |
+| **Release/provenance** | Public calibrated release packaging still human-gated |
 
 Numerical and validation engines must remain fully operable **without** the
 agent harness.

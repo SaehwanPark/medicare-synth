@@ -63,14 +63,15 @@ print(ms.RelationalValidator().validate_slice(data).is_valid)
 
 ## Next
 
-Phases 0–4 are complete ([`docs/phase0/`](docs/phase0/) …
-[`docs/phase4/`](docs/phase4/); pinned MVP `mvp-2021-om-ffs-diabetes-ip` with a
-verified conditional synthesizer, Evidence IR v0.1, frozen corpus v1, and
-calibration ladder A–C). Phase 5+ program in [`ROADMAP.md`](ROADMAP.md); agent
-prompt in [`docs/goal.md`](docs/goal.md): multi-world packaging → held-out /
-workflow evaluation. Structural validity stays a hard gate; literature match is
-contextual plausibility, not representativeness. Agents assist; humans approve
-evidence and calibrated releases (`AGENTS.md`).
+Phases 0–5 are complete ([`docs/phase0/`](docs/phase0/) …
+[`docs/phase5/`](docs/phase5/); pinned MVP `mvp-2021-om-ffs-diabetes-ip` with a
+verified conditional synthesizer, Evidence IR v0.1, frozen corpus v1,
+calibration ladder A–C, and multi-world family v1 with evaluation freeze).
+Phase 6+ program in [`ROADMAP.md`](ROADMAP.md); agent prompt in
+[`docs/goal.md`](docs/goal.md): independent held-out / workflow evaluation.
+Structural validity stays a hard gate; literature match is contextual
+plausibility, not representativeness. Agents assist; humans approve evidence
+and calibrated releases (`AGENTS.md`).
 
 ## Scope
 
