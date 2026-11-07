@@ -2,6 +2,8 @@
 title: "What you can do"
 description: "Honest capability matrix for Medicare-Synth research tasks: available, limited prototype, planned, and not a valid use."
 permalink: /researchers/what-you-can-do/
+lang: en
+lang_alternate: /ko/researchers/what-you-can-do/
 ---
 
 # What you can do

@@ -2,6 +2,8 @@
 title: "Limitations and scope"
 description: "Read the non-goals, source boundaries, and claims that Medicare-Synth deliberately does not make."
 permalink: /researchers/limitations/
+lang: en
+lang_alternate: /ko/researchers/limitations/
 ---
 
 # Limitations and scope

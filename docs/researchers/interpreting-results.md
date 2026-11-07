@@ -2,6 +2,8 @@
 title: "Interpreting results"
 description: "Separate structural validity, match to selected published rates, methods realism, and real-world Medicare inference."
 permalink: /researchers/interpreting-results/
+lang: en
+lang_alternate: /ko/researchers/interpreting-results/
 ---
 
 # Interpreting results

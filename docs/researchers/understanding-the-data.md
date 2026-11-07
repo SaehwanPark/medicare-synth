@@ -2,6 +2,8 @@
 title: "Understanding the data"
 description: "Plain-language view of beneficiary, enrollment, condition, and claims-style records, and why patient count is not claim count."
 permalink: /researchers/understanding-the-data/
+lang: en
+lang_alternate: /ko/researchers/understanding-the-data/
 ---
 
 # Understanding the data

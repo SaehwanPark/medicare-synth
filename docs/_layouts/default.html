@@ -1,35 +1,82 @@
+{% assign doc_lang = page.lang | default: "en" %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ doc_lang }}">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ page.title | default: site.title }} · {{ site.title }}</title>
     <meta name="description" content="{{ page.description | default: site.description }}">
+    {% if page.lang_alternate %}
+      <link rel="alternate" hreflang="{{ doc_lang }}" href="{{ page.url | absolute_url }}">
+      <link rel="alternate" hreflang="{% if doc_lang == 'ko' %}en{% else %}ko{% endif %}" href="{{ page.lang_alternate | absolute_url }}">
+      <link rel="alternate" hreflang="x-default" href="{% if doc_lang == 'ko' %}{{ page.lang_alternate | absolute_url }}{% else %}{{ page.url | absolute_url }}{% endif %}">
+    {% endif %}
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    {% if doc_lang == "ko" %}
+      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    {% else %}
+      <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    {% endif %}
   </head>
   <body>
-    <a class="skip-link" href="#main-content">Skip to content</a>
+    {% if doc_lang == "ko" %}
+      <a class="skip-link" href="#main-content">본문으로 건너뛰기</a>
+    {% else %}
+      <a class="skip-link" href="#main-content">Skip to content</a>
+    {% endif %}
 
     <header class="site-header">
       <div class="header-start">
         <button class="nav-toggle-btn" type="button" aria-controls="site-nav" aria-expanded="false">
-          <span class="sr-only">Toggle navigation</span>
+          {% if doc_lang == "ko" %}
+            <span class="sr-only">탐색 메뉴 전환</span>
+          {% else %}
+            <span class="sr-only">Toggle navigation</span>
+          {% endif %}
           <span aria-hidden="true">☰</span>
         </button>
-        <a href="{{ '/' | relative_url }}" class="header-brand" aria-label="Medicare-Synth documentation home">
+        <a href="{% if doc_lang == 'ko' %}{{ '/ko/' | relative_url }}{% else %}{{ '/' | relative_url }}{% endif %}" class="header-brand" aria-label="{% if doc_lang == 'ko' %}Medicare-Synth 문서 홈{% else %}Medicare-Synth documentation home{% endif %}">
           <span class="logo-icon" aria-hidden="true">✚</span>
           <span>{{ site.title }}</span>
-          <span class="header-tagline">{{ site.tagline }}</span>
+          {% if doc_lang == "ko" %}
+            <span class="header-tagline">메디케어형 합성 데이터</span>
+          {% else %}
+            <span class="header-tagline">{{ site.tagline }}</span>
+          {% endif %}
         </a>
       </div>
       <div class="header-actions">
-        <nav class="top-nav" aria-label="Audience">
-          <a href="{{ '/' | relative_url }}" class="top-nav-link">Overview</a>
-          <a href="{{ '/researchers/' | relative_url }}" class="top-nav-link">For Researchers</a>
-          <a href="{{ '/developers/' | relative_url }}" class="top-nav-link">For Developers</a>
+        {% if doc_lang == "ko" %}
+          <nav class="top-nav" aria-label="독자">
+            <a href="{{ '/ko/' | relative_url }}" class="top-nav-link">개요</a>
+            <a href="{{ '/ko/researchers/' | relative_url }}" class="top-nav-link">연구자</a>
+            <a href="{{ '/developers/' | relative_url }}" class="top-nav-link">개발자</a>
+          </nav>
+        {% else %}
+          <nav class="top-nav" aria-label="Audience">
+            <a href="{{ '/' | relative_url }}" class="top-nav-link">Overview</a>
+            <a href="{{ '/researchers/' | relative_url }}" class="top-nav-link">For Researchers</a>
+            <a href="{{ '/developers/' | relative_url }}" class="top-nav-link">For Developers</a>
+          </nav>
+        {% endif %}
+        <nav class="lang-switch" aria-label="{% if doc_lang == 'ko' %}언어{% else %}Language{% endif %}">
+          {% if doc_lang == "ko" %}
+            {% if page.lang_alternate %}
+              <a href="{{ page.lang_alternate | relative_url }}" hreflang="en" lang="en">English</a>
+            {% else %}
+              <a href="{{ '/' | relative_url }}" hreflang="en" lang="en">English</a>
+            {% endif %}
+            <span lang="ko" aria-current="true">한국어</span>
+          {% else %}
+            <span lang="en" aria-current="true">English</span>
+            {% if page.lang_alternate %}
+              <a href="{{ page.lang_alternate | relative_url }}" hreflang="ko" lang="ko">한국어</a>
+            {% else %}
+              <a href="{{ '/ko/' | relative_url }}" hreflang="ko" lang="ko" title="Korean researcher pages">한국어</a>
+            {% endif %}
+          {% endif %}
         </nav>
         <a href="https://github.com/{{ site.repository }}" class="github-link" target="_blank" rel="noopener">
           <svg aria-hidden="true" height="18" width="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63 0 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
@@ -39,38 +86,71 @@
     </header>
 
     <div class="app-container">
-      <aside class="sidebar" id="site-nav" aria-label="Documentation navigation">
+      <aside class="sidebar" id="site-nav" aria-label="{% if doc_lang == 'ko' %}문서 탐색{% else %}Documentation navigation{% endif %}">
         <nav>
-          <div class="nav-section">
-            <div class="nav-section-title">For Researchers</div>
-            <ul class="nav-list">
-              <li class="nav-item"><a href="{{ '/' | relative_url }}" class="nav-link">Overview</a></li>
-              <li class="nav-item"><a href="{{ '/researchers/' | relative_url }}" class="nav-link">Choose your task</a></li>
-              <li class="nav-item"><a href="{{ '/researchers/what-you-can-do/' | relative_url }}" class="nav-link">What you can do</a></li>
-              <li class="nav-item"><a href="{{ '/researchers/diabetes-hospitalization-example/' | relative_url }}" class="nav-link">Worked example</a></li>
-              <li class="nav-item"><a href="{{ '/researchers/getting-started/' | relative_url }}" class="nav-link">Getting started</a></li>
-              <li class="nav-item"><a href="{{ '/researchers/understanding-the-data/' | relative_url }}" class="nav-link">Understanding the data</a></li>
-              <li class="nav-item"><a href="{{ '/researchers/interpreting-results/' | relative_url }}" class="nav-link">Interpreting results</a></li>
-              <li class="nav-item"><a href="{{ '/researchers/limitations/' | relative_url }}" class="nav-link">Limits &amp; scope</a></li>
-              <li class="nav-item"><a href="{{ '/researchers/faq/' | relative_url }}" class="nav-link">FAQ</a></li>
-            </ul>
-          </div>
+          {% if doc_lang == "ko" %}
+            <div class="nav-section">
+              <div class="nav-section-title">연구자</div>
+              <ul class="nav-list">
+                <li class="nav-item"><a href="{{ '/ko/' | relative_url }}" class="nav-link">개요</a></li>
+                <li class="nav-item"><a href="{{ '/ko/researchers/' | relative_url }}" class="nav-link">작업 선택</a></li>
+                <li class="nav-item"><a href="{{ '/ko/researchers/what-you-can-do/' | relative_url }}" class="nav-link">할 수 있는 일</a></li>
+                <li class="nav-item"><a href="{{ '/ko/researchers/diabetes-hospitalization-example/' | relative_url }}" class="nav-link">따라 해 보기</a></li>
+                <li class="nav-item"><a href="{{ '/ko/researchers/getting-started/' | relative_url }}" class="nav-link">시작하기</a></li>
+                <li class="nav-item"><a href="{{ '/ko/researchers/understanding-the-data/' | relative_url }}" class="nav-link">데이터 이해하기</a></li>
+                <li class="nav-item"><a href="{{ '/ko/researchers/interpreting-results/' | relative_url }}" class="nav-link">결과 해석</a></li>
+                <li class="nav-item"><a href="{{ '/ko/researchers/limitations/' | relative_url }}" class="nav-link">한계와 범위</a></li>
+                <li class="nav-item"><a href="{{ '/ko/researchers/faq/' | relative_url }}" class="nav-link">자주 묻는 질문</a></li>
+              </ul>
+            </div>
 
-          <div class="nav-section">
-            <div class="nav-section-title">For Developers</div>
-            <ul class="nav-list">
-              <li class="nav-item"><a href="{{ '/developers/' | relative_url }}" class="nav-link">Start developing</a></li>
-              <li class="nav-item"><a href="{{ '/developers/installation/' | relative_url }}" class="nav-link">Install &amp; verify</a></li>
-              <li class="nav-item"><a href="{{ '/developers/first-run/' | relative_url }}" class="nav-link">First useful run</a></li>
-              <li class="nav-item"><a href="{{ '/developers/cli/' | relative_url }}" class="nav-link">CLI reference</a></li>
-              <li class="nav-item"><a href="{{ '/developers/scenarios-and-validation/' | relative_url }}" class="nav-link">Scenarios &amp; validation</a></li>
-              <li class="nav-item"><a href="{{ '/developers/data-model/' | relative_url }}" class="nav-link">Data model</a></li>
-              <li class="nav-item"><a href="{{ '/developers/calibrated-worlds/' | relative_url }}" class="nav-link">Calibrated worlds</a></li>
-              <li class="nav-item"><a href="{{ '/developers/export-and-release/' | relative_url }}" class="nav-link">Export &amp; release</a></li>
-              <li class="nav-item"><a href="{{ '/developers/contributing/' | relative_url }}" class="nav-link">Contribute</a></li>
-              <li class="nav-item"><a href="{{ '/developers/project-documents/' | relative_url }}" class="nav-link">Technical reference</a></li>
-            </ul>
-          </div>
+            <div class="nav-section">
+              <div class="nav-section-title">개발자 문서 (영어)</div>
+              <ul class="nav-list">
+                <li class="nav-item"><a href="{{ '/developers/' | relative_url }}" class="nav-link">개발 시작</a></li>
+                <li class="nav-item"><a href="{{ '/developers/installation/' | relative_url }}" class="nav-link">설치와 확인</a></li>
+                <li class="nav-item"><a href="{{ '/developers/first-run/' | relative_url }}" class="nav-link">첫 실행</a></li>
+                <li class="nav-item"><a href="{{ '/developers/cli/' | relative_url }}" class="nav-link">CLI</a></li>
+                <li class="nav-item"><a href="{{ '/developers/scenarios-and-validation/' | relative_url }}" class="nav-link">시나리오와 검증</a></li>
+                <li class="nav-item"><a href="{{ '/developers/data-model/' | relative_url }}" class="nav-link">데이터 모형</a></li>
+                <li class="nav-item"><a href="{{ '/developers/calibrated-worlds/' | relative_url }}" class="nav-link">보정된 월드</a></li>
+                <li class="nav-item"><a href="{{ '/developers/export-and-release/' | relative_url }}" class="nav-link">내보내기와 릴리스</a></li>
+                <li class="nav-item"><a href="{{ '/developers/contributing/' | relative_url }}" class="nav-link">기여</a></li>
+                <li class="nav-item"><a href="{{ '/developers/project-documents/' | relative_url }}" class="nav-link">기술 참고</a></li>
+              </ul>
+            </div>
+          {% else %}
+            <div class="nav-section">
+              <div class="nav-section-title">For Researchers</div>
+              <ul class="nav-list">
+                <li class="nav-item"><a href="{{ '/' | relative_url }}" class="nav-link">Overview</a></li>
+                <li class="nav-item"><a href="{{ '/researchers/' | relative_url }}" class="nav-link">Choose your task</a></li>
+                <li class="nav-item"><a href="{{ '/researchers/what-you-can-do/' | relative_url }}" class="nav-link">What you can do</a></li>
+                <li class="nav-item"><a href="{{ '/researchers/diabetes-hospitalization-example/' | relative_url }}" class="nav-link">Worked example</a></li>
+                <li class="nav-item"><a href="{{ '/researchers/getting-started/' | relative_url }}" class="nav-link">Getting started</a></li>
+                <li class="nav-item"><a href="{{ '/researchers/understanding-the-data/' | relative_url }}" class="nav-link">Understanding the data</a></li>
+                <li class="nav-item"><a href="{{ '/researchers/interpreting-results/' | relative_url }}" class="nav-link">Interpreting results</a></li>
+                <li class="nav-item"><a href="{{ '/researchers/limitations/' | relative_url }}" class="nav-link">Limits &amp; scope</a></li>
+                <li class="nav-item"><a href="{{ '/researchers/faq/' | relative_url }}" class="nav-link">FAQ</a></li>
+              </ul>
+            </div>
+
+            <div class="nav-section">
+              <div class="nav-section-title">For Developers</div>
+              <ul class="nav-list">
+                <li class="nav-item"><a href="{{ '/developers/' | relative_url }}" class="nav-link">Start developing</a></li>
+                <li class="nav-item"><a href="{{ '/developers/installation/' | relative_url }}" class="nav-link">Install &amp; verify</a></li>
+                <li class="nav-item"><a href="{{ '/developers/first-run/' | relative_url }}" class="nav-link">First useful run</a></li>
+                <li class="nav-item"><a href="{{ '/developers/cli/' | relative_url }}" class="nav-link">CLI reference</a></li>
+                <li class="nav-item"><a href="{{ '/developers/scenarios-and-validation/' | relative_url }}" class="nav-link">Scenarios &amp; validation</a></li>
+                <li class="nav-item"><a href="{{ '/developers/data-model/' | relative_url }}" class="nav-link">Data model</a></li>
+                <li class="nav-item"><a href="{{ '/developers/calibrated-worlds/' | relative_url }}" class="nav-link">Calibrated worlds</a></li>
+                <li class="nav-item"><a href="{{ '/developers/export-and-release/' | relative_url }}" class="nav-link">Export &amp; release</a></li>
+                <li class="nav-item"><a href="{{ '/developers/contributing/' | relative_url }}" class="nav-link">Contribute</a></li>
+                <li class="nav-item"><a href="{{ '/developers/project-documents/' | relative_url }}" class="nav-link">Technical reference</a></li>
+              </ul>
+            </div>
+          {% endif %}
         </nav>
       </aside>
 
@@ -78,8 +158,13 @@
         {{ content }}
 
         <footer class="site-footer">
-          <div>Medicare-Synth is open source under Apache-2.0.</div>
-          <div>Synthetic outputs are for research preparation—not Medicare population estimates. See <a href="{{ '/researchers/limitations/' | relative_url }}">limitations</a>.</div>
+          {% if doc_lang == "ko" %}
+            <div>Medicare-Synth는 Apache-2.0 오픈소스입니다. 개발자 문서는 영어입니다.</div>
+            <div>합성 결과는 연구 준비용이며 메디케어 모집단 추정치가 아닙니다. <a href="{{ '/ko/researchers/limitations/' | relative_url }}">한계와 범위</a>를 보세요.</div>
+          {% else %}
+            <div>Medicare-Synth is open source under Apache-2.0.</div>
+            <div>Synthetic outputs are for research preparation—not Medicare population estimates. See <a href="{{ '/researchers/limitations/' | relative_url }}">limitations</a>.</div>
+          {% endif %}
         </footer>
       </main>
     </div>

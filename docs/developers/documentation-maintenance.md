@@ -16,6 +16,7 @@ calibration, or population inference.
 | Track | Leads with | Avoids as the opener |
 | --- | --- | --- |
 | Researchers (`docs/researchers/`, root README, homepage) | Tasks, worked example, plain-language limits | Library names, IR jargon, install-first flows |
+| Korean researcher mirror (`docs/ko/`, `README.ko.md`) | The same researcher tasks, in Korean | New claims, translated developer or canonical docs |
 | Developers (`docs/developers/`) | Commands, APIs, schema, reproducibility | Marketing promises without anchors |
 | Canonical / source-only | `SPEC.md`, `ARCHITECTURE.md`, `ROADMAP.md`, phase reports, harness | Jekyll publication |
 
@@ -65,6 +66,27 @@ Every user-facing “available now” claim must point at an anchor:
 | `/contributing/` | `/developers/contributing/` |
 
 Legacy paths keep human-readable forwarder pages. Do not strand public URLs.
+
+## Languages
+
+English is the default for the root `README.md` and for site URLs without a
+language prefix. Researcher-facing pages have an optional Korean mirror:
+
+| English | Korean |
+| --- | --- |
+| `README.md` | `README.ko.md` |
+| `docs/index.md` (`/`) | `docs/ko/index.md` (`/ko/`) |
+| `docs/researchers/` | `docs/ko/researchers/` (`/ko/researchers/`) |
+
+Each paired page sets `lang` and `lang_alternate`. The alternate must be the
+published URL of the other language and must point back. The docs checker
+rejects a researcher page that drops its pair. The header language switch uses
+that pair. Developer pages stay English; from those pages, 한국어 opens the
+Korean researcher home.
+
+Korean copy may sound natural, but it must not add capabilities, counts, or
+status labels the English researcher page does not claim. Technical filenames,
+context IDs, and commands stay as written.
 
 ## Publication excludes
 

@@ -4,6 +4,13 @@
 
 ### Added
 
+- Optional Korean mirror of the researcher-facing README and docs site.
+  English remains the default (`README.md`, unprefixed Pages URLs). Korean
+  copies are `README.ko.md` and `docs/ko/` (`/ko/`), with a header language
+  switch and reciprocal `lang` / `lang_alternate` pairs checked by
+  `scripts/check_documentation_site.py`. Developer and canonical docs stay
+  English. No generator or calibration behavior changes.
+
 - Researcher end-to-end example `examples/andes-mmwr-drye-diabetes/`: calibrate
   a synthetic MVP diabetes→IP world to Andes et al. MMWR 2019 diabetes
   prevalence (paper A), export Parquet, replicate in-domain A, and document
