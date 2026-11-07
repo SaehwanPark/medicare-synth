@@ -1,6 +1,6 @@
 title: "Medicare-Synth"
-tagline: "Provenance-backed Medicare fixtures"
-description: "A local, deterministic workspace for building and testing Medicare data pipelines before restricted CMS access."
+tagline: "Medicare-like synthetic data for research prep"
+description: "Explore artificial, Medicare-shaped datasets for methods testing before restricted CMS access—not for estimating the Medicare population."
 url: "https://saehwanpark.github.io"
 baseurl: "/medicare-synth"
 repository: "SaehwanPark/medicare-synth"
@@ -23,5 +23,10 @@ exclude:
   - goal.md
   - phase0
   - phase1
+  - phase2
+  - phase3
+  - phase4
+  - phase5
   - medicare-synth-project-proposal_20260720.md
   - medicare_synth_evidence_calibrated_playground_proposal.md
+  - medicare_synth_documentation_reorganization_plan.md

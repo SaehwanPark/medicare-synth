@@ -33,7 +33,13 @@ Keep this file short. Task detail lives in linked docs and skills.
 - Domain/release work: follow the harness team-spec; reconcile durable decisions
   into canonical docs.
 - Comments: domain rationale, provenance, constraints, non-obvious invariants.
+- Public docs are researcher-first (`README.md`, `docs/index.md`,
+  `docs/researchers/`); technical guides live under `docs/developers/`. Every
+  user-facing capability claim needs a code/test/report anchor; never present
+  synthetic results as Medicare findings. See
+  `docs/developers/documentation-maintenance.md`.
 - Verify: `uv sync --dry-run`, `git diff --check`; when code changes, also
-  `pytest`, `basedpyright`, `ruff` as configured.
+  `pytest`, `basedpyright`, `ruff` as configured; when docs/site pages change,
+  `python3 scripts/check_documentation_site.py`.
 - Record only verified recurring traps in `LESSONS.md`.
 - Missing CLI: `command -v <tool>` before concluding unavailable.

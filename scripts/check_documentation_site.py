@@ -17,6 +17,26 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "docs"
 REQUIRED_PAGES = {
     "index.md",
+    "researchers/index.md",
+    "researchers/what-you-can-do.md",
+    "researchers/diabetes-hospitalization-example.md",
+    "researchers/getting-started.md",
+    "researchers/understanding-the-data.md",
+    "researchers/interpreting-results.md",
+    "researchers/limitations.md",
+    "researchers/faq.md",
+    "developers/index.md",
+    "developers/installation.md",
+    "developers/first-run.md",
+    "developers/cli.md",
+    "developers/scenarios-and-validation.md",
+    "developers/export-and-release.md",
+    "developers/data-model.md",
+    "developers/provenance-and-validation.md",
+    "developers/calibrated-worlds.md",
+    "developers/contributing.md",
+    "developers/project-documents.md",
+    "developers/documentation-maintenance.md",
     "getting-started/installation.md",
     "getting-started/first-run.md",
     "guides/cli.md",
@@ -28,6 +48,26 @@ REQUIRED_PAGES = {
     "reference/project-documents.md",
     "contributing.md",
     "404.md",
+}
+PUBLISHED_ROOTS = (
+    "researchers",
+    "developers",
+    "getting-started",
+    "guides",
+    "concepts",
+    "reference",
+)
+LEGACY_FORWARDERS = {
+    "getting-started/installation.md": "/developers/installation/",
+    "getting-started/first-run.md": "/developers/first-run/",
+    "guides/cli.md": "/developers/cli/",
+    "guides/scenarios-and-validation.md": "/developers/scenarios-and-validation/",
+    "guides/release-workflow.md": "/developers/export-and-release/",
+    "concepts/data-model.md": "/developers/data-model/",
+    "concepts/provenance-and-validation.md": "/developers/provenance-and-validation/",
+    "reference/limitations.md": "/researchers/limitations/",
+    "reference/project-documents.md": "/developers/project-documents/",
+    "contributing.md": "/developers/contributing/",
 }
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 LIQUID_PATH = re.compile(r"relative_url\s*\}\}")
@@ -41,10 +81,16 @@ def page_paths() -> dict[str, Path]:
     site_roots = {Path(path) for path in REQUIRED_PAGES}
     site_roots.update(
         path
-        for root in ("getting-started", "guides", "concepts", "reference")
+        for root in PUBLISHED_ROOTS
         for path in (SITE / root).rglob("*.md")
         for path in (path.relative_to(SITE),)
     )
+    if (SITE / "index.md").exists():
+        site_roots.add(Path("index.md"))
+    if (SITE / "contributing.md").exists():
+        site_roots.add(Path("contributing.md"))
+    if (SITE / "404.md").exists():
+        site_roots.add(Path("404.md"))
     return {
         relative.as_posix(): SITE / relative
         for relative in site_roots
@@ -129,6 +175,20 @@ def published_target(
     return published.get(resolved)
 
 
+def layout_source_for(target: str) -> Path | None:
+    """Resolve a layout navigation URL to a Markdown source page."""
+    clean = target.strip("/")
+    if not clean:
+        candidate = SITE / "index.md"
+        return candidate if candidate.exists() else None
+    direct = SITE / f"{clean}.md"
+    indexed = SITE / clean / "index.md"
+    for candidate in (direct, indexed):
+        if candidate.exists():
+            return candidate
+    return None
+
+
 def check() -> list[str]:
     """Return human-readable documentation site failures."""
     failures: list[str] = []
@@ -137,6 +197,7 @@ def check() -> list[str]:
     missing = sorted(REQUIRED_PAGES - pages.keys())
     failures.extend(f"missing required page: docs/{path}" for path in missing)
 
+    seen_permalinks: dict[str, str] = {}
     for relative, page in sorted(pages.items()):
         text = page.read_text(encoding="utf-8")
         metadata = front_matter(page)
@@ -144,6 +205,28 @@ def check() -> list[str]:
             failures.append(f"{relative}: missing YAML front matter")
         elif not re.search(r"^title:\s*.+$", metadata, re.MULTILINE):
             failures.append(f"{relative}: front matter is missing title")
+
+        match = PERMALINK.search(metadata)
+        if match:
+            permalink = match.group(1).strip()
+            if permalink in seen_permalinks:
+                failures.append(
+                    f"{relative}: duplicate permalink {permalink} "
+                    f"(also {seen_permalinks[permalink]})"
+                )
+            else:
+                seen_permalinks[permalink] = relative
+
+        if relative in LEGACY_FORWARDERS:
+            expected = LEGACY_FORWARDERS[relative]
+            if expected not in text:
+                failures.append(
+                    f"{relative}: forwarder missing destination link {expected}"
+                )
+            if expected not in published:
+                failures.append(
+                    f"{relative}: forwarder destination has no published page {expected}"
+                )
 
         for target in MARKDOWN_LINK.findall(text):
             if is_external(target):
@@ -165,11 +248,17 @@ def check() -> list[str]:
         for target in LIQUID_TARGET.findall(layout_text):
             if target == "/" or target.startswith("/assets/"):
                 continue
-            candidate = SITE / f"{target.strip('/')}.md"
-            if not candidate.exists():
+            if layout_source_for(target) is None:
                 failures.append(f"layout: navigation target has no source page {target}")
         if not LIQUID_PATH.search(layout_text):
             failures.append("layout: expected relative_url navigation links")
+
+    config = SITE / "_config.yml"
+    if config.exists():
+        config_text = config.read_text(encoding="utf-8")
+        for phase in ("phase0", "phase1", "phase2", "phase3", "phase4", "phase5"):
+            if phase not in config_text:
+                failures.append(f"_config.yml: expected exclude entry for {phase}")
 
     return failures
 
