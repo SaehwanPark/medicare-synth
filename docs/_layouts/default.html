@@ -9,6 +9,7 @@
     {% if page.lang_alternate %}
       <link rel="alternate" hreflang="{{ doc_lang }}" href="{{ page.url | absolute_url }}">
       <link rel="alternate" hreflang="{% if doc_lang == 'ko' %}en{% else %}ko{% endif %}" href="{{ page.lang_alternate | absolute_url }}">
+      <link rel="alternate" hreflang="x-default" href="{% if doc_lang == 'ko' %}{{ page.lang_alternate | absolute_url }}{% else %}{{ page.url | absolute_url }}{% endif %}">
     {% endif %}
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +31,7 @@
       <div class="header-start">
         <button class="nav-toggle-btn" type="button" aria-controls="site-nav" aria-expanded="false">
           {% if doc_lang == "ko" %}
-            <span class="sr-only">메뉴 열기</span>
+            <span class="sr-only">탐색 메뉴 전환</span>
           {% else %}
             <span class="sr-only">Toggle navigation</span>
           {% endif %}
@@ -62,7 +63,11 @@
         {% endif %}
         <nav class="lang-switch" aria-label="{% if doc_lang == 'ko' %}언어{% else %}Language{% endif %}">
           {% if doc_lang == "ko" %}
-            <a href="{{ page.lang_alternate | relative_url }}" hreflang="en" lang="en">English</a>
+            {% if page.lang_alternate %}
+              <a href="{{ page.lang_alternate | relative_url }}" hreflang="en" lang="en">English</a>
+            {% else %}
+              <a href="{{ '/' | relative_url }}" hreflang="en" lang="en">English</a>
+            {% endif %}
             <span lang="ko" aria-current="true">한국어</span>
           {% else %}
             <span lang="en" aria-current="true">English</span>

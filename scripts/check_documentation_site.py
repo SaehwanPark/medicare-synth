@@ -263,6 +263,23 @@ def check_language_pairs(pages: dict[str, Path], published: dict[str, Path]) -> 
     return failures
 
 
+SHARED_CLAIM_ANCHORS = (
+    "404",
+    "572",
+    "6,000",
+    "27.7",
+)
+
+
+def strip_ko_prefix(path: str) -> str:
+    """Map a Korean site path onto its English counterpart."""
+    if path == "/ko/":
+        return "/"
+    if path.startswith("/ko/"):
+        return f"/{path[len('/ko/'):]}"
+    return path
+
+
 def check_readme_languages() -> list[str]:
     """Require the root README pair to point at each other and at the Korean portal."""
     failures: list[str] = []
@@ -278,6 +295,81 @@ def check_readme_languages() -> list[str]:
         failures.append("README.ko.md: missing link to README.md")
     if "/medicare-synth/ko/" not in korean:
         failures.append("README.ko.md: missing link to the Korean docs portal")
+    if "/medicare-synth/ko/researchers/" not in korean:
+        failures.append("README.ko.md: missing link to the Korean researcher hub")
+    for anchor in SHARED_CLAIM_ANCHORS:
+        if anchor in english and anchor not in korean:
+            failures.append(f"README.ko.md: missing shared claim anchor {anchor}")
+    return failures
+
+
+def check_shared_claim_anchors(
+    pages: dict[str, Path], published: dict[str, Path]
+) -> list[str]:
+    """Keep selected capability anchors identical across English/Korean pairs."""
+    failures: list[str] = []
+    published_by_source = {
+        relative: published_path_for(page, published) for relative, page in pages.items()
+    }
+    source_by_published = {
+        path: relative for relative, path in published_by_source.items() if path
+    }
+    for relative, page in sorted(pages.items()):
+        if expected_language(relative) != "en":
+            continue
+        metadata = front_matter(page)
+        alternate_match = LANG_ALTERNATE.search(metadata)
+        if alternate_match is None:
+            continue
+        alternate = normalize_site_path(alternate_match.group(1))
+        peer_relative = source_by_published.get(alternate)
+        if peer_relative is None:
+            continue
+        english = page.read_text(encoding="utf-8")
+        korean = pages[peer_relative].read_text(encoding="utf-8")
+        for anchor in SHARED_CLAIM_ANCHORS:
+            if anchor in english and anchor not in korean:
+                failures.append(
+                    f"{peer_relative}: missing shared claim anchor {anchor} "
+                    f"(present in {relative})"
+                )
+    return failures
+
+
+def check_layout_language_nav(layout_text: str) -> list[str]:
+    """Require Korean nav destinations to mirror the English path set."""
+    failures: list[str] = []
+    targets = LIQUID_TARGET.findall(layout_text)
+    english_paths = {
+        target
+        for target in targets
+        if target == "/" or target.startswith(("/researchers/", "/developers/"))
+    }
+    korean_mapped = {
+        strip_ko_prefix(target)
+        for target in targets
+        if target == "/ko/" or target.startswith("/ko/")
+    }
+    # Developer destinations appear in both shells without a /ko mirror.
+    english_without_developers = {
+        path for path in english_paths if not path.startswith("/developers/")
+    }
+    korean_without_developers = {
+        path for path in korean_mapped if not path.startswith("/developers/")
+    }
+    if english_without_developers != korean_without_developers:
+        missing_in_ko = sorted(english_without_developers - korean_without_developers)
+        missing_in_en = sorted(korean_without_developers - english_without_developers)
+        if missing_in_ko:
+            failures.append(
+                "layout: Korean nav is missing English researcher routes "
+                f"{missing_in_ko}"
+            )
+        if missing_in_en:
+            failures.append(
+                "layout: English nav is missing Korean-mapped researcher routes "
+                f"{missing_in_en}"
+            )
     return failures
 
 
@@ -348,6 +440,7 @@ def check() -> list[str]:
 
     failures.extend(check_language_pairs(pages, published))
     failures.extend(check_readme_languages())
+    failures.extend(check_shared_claim_anchors(pages, published))
 
     layout = SITE / "_layouts/default.html"
     if not layout.exists():
@@ -367,6 +460,7 @@ def check() -> list[str]:
             failures.append("layout: language switch must use page.lang_alternate")
         if "/ko/" not in layout_text:
             failures.append("layout: missing Korean researcher routes")
+        failures.extend(check_layout_language_nav(layout_text))
 
     config = SITE / "_config.yml"
     if config.exists():

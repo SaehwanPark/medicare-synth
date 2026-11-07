@@ -1,0 +1,23 @@
+name: Check documentation site
+
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "README.ko.md"
+      - "docs/**"
+      - "scripts/check_documentation_site.py"
+      - ".github/workflows/docs-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check documentation links
+        run: python3 scripts/check_documentation_site.py
