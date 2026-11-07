@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Added
+
+- Researcher end-to-end example `examples/andes-mmwr-drye-diabetes/`: calibrate
+  a synthetic MVP diabetes→IP world to Andes et al. MMWR 2019 diabetes
+  prevalence (paper A), export Parquet, replicate in-domain A, and document
+  Drye et al. Med Care unplanned admission rates (paper B) as out-of-domain
+  on the MVP schema. See `COMPARISON.md` in that directory.
+
+### Fixed
+
+- Calibration discrepancy moments now evaluate on each finding's Evidence IR
+  eligible cohort (age / Option-B / sex), matching `execute_finding` instead of
+  the unrestricted beneficiary frame. Public helper: `eligible_bene_ids`.
+
 ### Changed
 
 - Reorganized public documentation into researcher-first and developer tracks:

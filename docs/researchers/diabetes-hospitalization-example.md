@@ -90,8 +90,16 @@ summary programmatically:
 uv run python scripts/phase5_emit_worlds.py
 ```
 
+For a literature-paired walkthrough (Andes MMWR prevalence in-domain vs Drye
+admission rates out-of-domain), see the checked-in example:
+
+```shell
+uv run python examples/andes-mmwr-drye-diabetes/scripts/run_example.py
+```
+
 Details: [Calibrated worlds (developers)](../../developers/calibrated-worlds/) ·
-phase docs under [`docs/phase5/`](https://github.com/SaehwanPark/medicare-synth/tree/main/docs/phase5).
+phase docs under [`docs/phase5/`](https://github.com/SaehwanPark/medicare-synth/tree/main/docs/phase5) ·
+[`examples/andes-mmwr-drye-diabetes/`](https://github.com/SaehwanPark/medicare-synth/tree/main/examples/andes-mmwr-drye-diabetes).
 
 ## Next
 

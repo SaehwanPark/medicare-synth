@@ -158,6 +158,39 @@ def test_param_calibration_improves_without_using_holdout(corpus_and_path) -> No
   assert manifest.calibration_mae_after < manifest.calibration_mae_before
 
 
+def test_discrepancy_moments_respect_finding_eligibility() -> None:
+  """Calibration moments must match Evidence IR eligible-cohort estimates."""
+  from medicare_synth.calibration import discrepancy_for_findings
+  from medicare_synth.evidence_ir import execute_finding, load_finding, package_fixtures_dir
+
+  finding = load_finding(
+    package_fixtures_dir() / "lit03_mmwr_diabetes_prevalence_2015.json"
+  )
+  # Age correlates with nothing in the MVP generator, but eligibility still
+  # drops ages 65–67; moments must use that same cohort as execute_finding.
+  world = generate_diabetes_ip_world(
+    ConditionalWorldParams(
+      n_beneficiaries=8000,
+      seed=42,
+      diabetes_prevalence=0.316,
+      p_ip_given_diabetes=0.13,
+      p_ip_given_no_diabetes=0.04,
+      hf_prevalence=0.0,
+    )
+  )
+  tables = world.tables()
+  report = execute_finding(finding, tables)
+  assert report.executable is True
+  assert report.synthetic_estimate is not None
+
+  disc = discrepancy_for_findings(
+    tables, [finding], partition=PartitionName.CALIBRATION
+  )
+  assert len(disc.rows) == 1
+  assert disc.rows[0].synthetic_estimate is not None
+  assert abs(disc.rows[0].synthetic_estimate - report.synthetic_estimate) < 1e-12
+
+
 def test_manifest_deterministic_checksum(corpus_and_path) -> None:
   corpus, path = corpus_and_path
   kwargs = dict(

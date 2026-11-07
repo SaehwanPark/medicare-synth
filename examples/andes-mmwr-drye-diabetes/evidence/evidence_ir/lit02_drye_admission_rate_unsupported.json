@@ -1,0 +1,78 @@
+{
+  "schema_version": "0.1",
+  "finding_id": "lit02-drye-diabetes-unplanned-admission-rate-2012",
+  "inventory_id": "LIT-02",
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "source": {
+    "type": "medicare_only_study",
+    "identifier": "pmc5356461",
+    "title": "Risk-standardized acute admission rates among patients with diabetes and heart failure",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5356461/",
+    "location": "Results: crude national acute unplanned admission rate 41.4 per 100 person-years (diabetes cohort)",
+    "citation": "Drye EE, et al. Med Care. Risk-standardized acute admission rates among patients with diabetes and heart failure.",
+    "retrieval_date": "2026-11-06"
+  },
+  "population": {
+    "program": "original_medicare_ffs",
+    "years": [
+      2012
+    ],
+    "age": {
+      "minimum": 65
+    },
+    "geography": "national",
+    "ffs_rule": "option_b_full_year",
+    "enrollment_notes": "Medicare FFS \u226565 with diabetes; ACO-context framing in source."
+  },
+  "cohort": {
+    "inclusion_notes": "Diabetes cohort; unplanned acute admissions.",
+    "exclusion_notes": "Planned admissions excluded in source (~12% of stays)."
+  },
+  "estimand": {
+    "type": "rate",
+    "numerator": {
+      "concept": "all_cause_inpatient",
+      "algorithm": "ip_claim_presence_v1",
+      "notes": "Source outcome is unplanned acute admissions \u2014 not equivalent to all-cause IP claim presence. Rate execution counts IP claim rows as events."
+    },
+    "conditioning": {
+      "concept": "diabetes",
+      "algorithm": "mbsf_sp_diabetes_v1",
+      "notes": "Diabetes cohort stratum matching source diabetes cohort framing."
+    },
+    "denominator": "eligible_beneficiaries",
+    "scale": 100.0,
+    "time_unit": "person_years",
+    "notes": "Person-time acute unplanned admission rate among diabetes cohort."
+  },
+  "analysis": {
+    "estimator": "events_per_time",
+    "notes": "Crude national rate among diabetes cohort (not risk-standardized coefficient)."
+  },
+  "result": {
+    "estimate": 41.4,
+    "unit": "per_100_person_years",
+    "notes": "Scouting magnitude from Phase 0 inventory; re-verify primary table before Phase 3 freeze."
+  },
+  "role": "excluded",
+  "comparability": {
+    "grade": "B",
+    "transport_required": true,
+    "assumptions": [
+      "Not equivalent to MVP O1 (all-cause claim presence).",
+      "Year transport 2012 \u2192 2021 required."
+    ],
+    "gaps": [
+      "planned_vs_all_cause_admissions",
+      "person_time_vs_binary_risk",
+      "year_2012_vs_2021"
+    ]
+  },
+  "governance": {
+    "review_status": "accepted",
+    "reviewer": "phase2-milestone-b-formalization",
+    "reviewed_at": "2026-11-06",
+    "rationale": "Excluded in corpus v1: planned-admission rate unsupported on MVP schema.",
+    "conflicts": []
+  }
+}

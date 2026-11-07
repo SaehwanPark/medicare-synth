@@ -33,6 +33,7 @@ from medicare_synth.evidence_ir import (
   EvidenceIRError,
   FindingIR,
   compile_finding,
+  eligible_bene_ids,
 )
 from medicare_synth.synthesis import (
   ConditionalWorld,
@@ -399,21 +400,58 @@ def _uniform_weights(frame: pl.DataFrame) -> pl.DataFrame:
   return frame.select("bene_id").with_columns(pl.lit(1.0).alias("weight"))
 
 
+def feature_frame_for_finding(
+  tables: Mapping[str, pl.DataFrame],
+  finding: FindingIR,
+  *,
+  context_year: int = 2021,
+) -> pl.DataFrame:
+  """Beneficiary feature rows restricted to the finding's eligible cohort.
+
+  Aligns calibration moment evaluation with ``execute_finding`` eligibility
+  (age, Option-B enrollment, optional sex codes). Empty eligibility yields an
+  empty frame; callers treat the moment as missing.
+  """
+  compiled = compile_finding(finding, context_year=context_year)
+  if not compiled.compatibility.executable:
+    raise CalibrationError(
+      f"{finding.finding_id} is not executable for calibration moments"
+    )
+  eligible = eligible_bene_ids(tables, compiled.eligibility)
+  frame = beneficiary_feature_frame(tables)
+  return frame.join(eligible, on="bene_id", how="inner")
+
+
 def discrepancy_for_findings(
   tables: Mapping[str, pl.DataFrame],
   findings: Sequence[FindingIR],
   *,
   partition: PartitionName,
   weights: pl.DataFrame | None = None,
+  context_year: int = 2021,
 ) -> DiscrepancyReport:
-  frame = beneficiary_feature_frame(tables)
-  w = weights if weights is not None else _uniform_weights(frame)
-  framed = frame.join(w, on="bene_id", how="inner")
+  """Discrepancy on each finding's **eligible** cohort (Evidence IR aligned).
+
+  Weights (Level B) are joined after eligibility filtering. Beneficiaries
+  outside a finding's eligibility do not enter that finding's moment.
+  """
+  full = beneficiary_feature_frame(tables)
+  w_all = weights if weights is not None else _uniform_weights(full)
   rows: list[DiscrepancyRow] = []
   for finding in findings:
     try:
       target = moment_target_from_finding(finding)
-      est = evaluate_moment(framed, target)
+      framed = feature_frame_for_finding(
+        tables, finding, context_year=context_year
+      )
+      if framed.height == 0:
+        est = None
+      else:
+        framed_w = framed.join(w_all, on="bene_id", how="inner")
+        if framed_w.height == 0:
+          est = None
+        else:
+          est = evaluate_moment(framed_w, target)
     except CalibrationError:
       est = None
     abs_diff = None if est is None else est - finding.result.estimate
