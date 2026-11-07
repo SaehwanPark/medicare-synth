@@ -18,8 +18,8 @@ claims even if someone could run code that looks similar.
 | Export ordinary fixture-based CSV/Parquet bundles | **Available** through developer tooling | Someone to run export and share files | Not a calibrated research MVP download | [Export and release](../../developers/export-and-release/) |
 | Generate a 2021 FFS diabetes–any-inpatient MVP world | **Limited prototype** (Python API / Phase 5 scripts) | Developer familiar with the synthesis/worlds APIs | Selected moments only; independent evaluation still Phase 6 | [Worked example](../diabetes-hospitalization-example/); [calibrated worlds](../../developers/calibrated-worlds/); `reports/phase5/` |
 | Compare multiple worlds under alternative assumptions | **Limited prototype** | Same as above | Same targets can yield different free-structure outcomes | Phase 5 family summary (e.g. 404 vs 572 inpatient claims at n=6,000) |
-| Choose any disease, year, and outcome | **Not supported** as a calibrated product | — | MVP is pinned to one context | [ROADMAP](https://github.com/SaehwanPark/medicare-synth/blob/main/ROADMAP.md) |
-| Download calibrated datasets in one click from the website | **Not supported** | — | No hosted calibrated CSV product | This matrix; plan non-goals |
+| Choose any disease, year, and outcome | **Planned** (not a calibrated product today) | — | MVP is pinned to one context | [ROADMAP](https://github.com/SaehwanPark/medicare-synth/blob/main/ROADMAP.md) |
+| Download calibrated datasets in one click from the website | **Planned** (optional follow-on; not available now) | — | No hosted calibrated CSV product | This matrix; documentation-maintenance non-goals |
 | Make population, causal, clinical, or policy claims | **Not a valid use** | — | Synthetic outputs are not Medicare findings | [Limitations](../limitations/); [interpreting results](../interpreting-results/) |
 
 ## How to read “adjusted toward published statistics”

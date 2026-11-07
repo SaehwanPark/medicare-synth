@@ -256,7 +256,16 @@ def check() -> list[str]:
     config = SITE / "_config.yml"
     if config.exists():
         config_text = config.read_text(encoding="utf-8")
-        for phase in ("phase0", "phase1", "phase2", "phase3", "phase4", "phase5"):
+        phase_dirs = sorted(
+            path.name
+            for path in SITE.iterdir()
+            if path.is_dir() and path.name.startswith("phase")
+        )
+        for phase in phase_dirs:
+            if phase not in config_text:
+                failures.append(f"_config.yml: expected exclude entry for {phase}")
+        # Keep a forward cushion for the next few phase folders before they exist.
+        for phase in ("phase6", "phase7", "phase8", "phase9"):
             if phase not in config_text:
                 failures.append(f"_config.yml: expected exclude entry for {phase}")
 

@@ -27,6 +27,10 @@ exclude:
   - phase3
   - phase4
   - phase5
+  - phase6
+  - phase7
+  - phase8
+  - phase9
   - medicare-synth-project-proposal_20260720.md
   - medicare_synth_evidence_calibrated_playground_proposal.md
   - medicare_synth_documentation_reorganization_plan.md

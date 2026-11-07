@@ -1,6 +1,6 @@
 # Medicare-Synth Documentation Reorganization Plan
 
-**Status:** Accepted; implementation in progress on `docs/researcher-first-reorganization`
+**Status:** Implemented on `docs/researcher-first-reorganization` (plan PR1–PR4; PR5 deferred)
 **Repository:** <https://github.com/SaehwanPark/medicare-synth>  
 **Audit basis:** `main` at `1b91988510c39a4f1942bdb4af9496eef47cc48c` (reviewed November 7, 2026)  
 **Primary audiences:** Medicare investigators, clinical researchers, health services researchers, biostatisticians, research programmers, and project contributors  

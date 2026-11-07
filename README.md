@@ -87,10 +87,10 @@ acquiring upstream files.
 
 ## Status and contributing
 
-Phases 0–5 complete for the pinned MVP; Phase 6+ in
-[`ROADMAP.md`](ROADMAP.md). State docs: [`SPEC.md`](SPEC.md),
-[`ARCHITECTURE.md`](ARCHITECTURE.md), [`CHANGELOG.md`](CHANGELOG.md),
-[`LESSONS.md`](LESSONS.md). Contributor guide:
+Phases 0–5 are complete for the pinned MVP. Phase 6 independent evaluation is
+**active**; Phase 7 is planned ([`ROADMAP.md`](ROADMAP.md)). State docs:
+[`SPEC.md`](SPEC.md), [`ARCHITECTURE.md`](ARCHITECTURE.md),
+[`CHANGELOG.md`](CHANGELOG.md), [`LESSONS.md`](LESSONS.md). Contributor guide:
 [developers/contributing](https://saehwanpark.github.io/medicare-synth/developers/contributing/).
 
 ```shell

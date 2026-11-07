@@ -37,7 +37,7 @@ strength. Treat them as contextual targets with disclosed transport assumptions.
 
 ## MVP gaps that affect interpretation
 
-- Diabetes and heart failure drawn with limited dependence structure
+- Diabetes and heart failure drawn independently in the MVP (no robust comorbidity dependence)
 - No robust multiyear disease trajectories or provider effects
 - All-cause inpatient presence, not diagnosis-specific admission
 - No claim that subgroup performance or confounding structure is realistic

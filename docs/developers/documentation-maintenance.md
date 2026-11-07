@@ -68,9 +68,11 @@ Legacy paths keep human-readable forwarder pages. Do not strand public URLs.
 
 ## Publication excludes
 
-Jekyll must exclude source-only engineering records: all `phase*` directories,
-`goal.md`, `harness/`, proposal originals, and this reorganization plan when it
-is not intended as published content. Exclusion does **not** hide files from the
+Jekyll must exclude source-only engineering records: existing `phase*`
+directories plus a forward cushion (`phase6`–`phase9`), `goal.md`, `harness/`,
+proposal originals, and this reorganization plan when it is not intended as
+published content. The docs checker fails if a present `docs/phase*` folder is
+missing from `_config.yml` excludes. Exclusion does **not** hide files from the
 GitHub repository.
 
 ## PR documentation impact
