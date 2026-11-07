@@ -34,7 +34,7 @@
     }
 
     var currentPath = normalizedPath(window.location.pathname);
-    document.querySelectorAll(".nav-link").forEach(function (link) {
+    document.querySelectorAll(".nav-link, .top-nav-link").forEach(function (link) {
       var linkPath = normalizedPath(new URL(link.href, window.location.origin).pathname);
       if (linkPath === currentPath) {
         link.classList.add("active");

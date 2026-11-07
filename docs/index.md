@@ -1,129 +1,86 @@
 ---
 title: "Documentation portal"
-description: "Start here to install Medicare-Synth, run a deterministic fixture, and understand its evidence and validation boundaries."
+description: "Explore Medicare-like synthetic data for research preparation: what works today, the diabetes–hospitalization example, and clear limits on inference."
 permalink: /
 ---
 
 <section class="hero">
-  <div class="eyebrow">Open-source Medicare data infrastructure</div>
-  <h1>Build against Medicare-shaped data before restricted access.</h1>
-  <p class="lede">Medicare-Synth compiles provenance-backed synthetic datasets and deterministic research fixtures for schema work, pipeline development, methods testing, and teaching.</p>
+  <div class="eyebrow">Research preparation with Medicare-like synthetic data</div>
+  <h1>Explore ideas before restricted Medicare access.</h1>
+  <p class="lede">Medicare-Synth helps researchers work with artificial, Medicare-shaped datasets for structure checks and methods testing. For one limited study setting, it can adjust synthetic populations toward selected published statistics. It is not a source of Medicare population estimates.</p>
   <div class="hero-actions">
-    <a class="button" href="{{ '/getting-started/installation/' | relative_url }}">Install and run it</a>
-    <a class="button secondary" href="{{ '/getting-started/first-run/' | relative_url }}">See the first useful run</a>
+    <a class="button" href="{{ '/researchers/' | relative_url }}">Explore as a researcher</a>
+    <a class="button secondary" href="{{ '/researchers/diabetes-hospitalization-example/' | relative_url }}">See the worked example</a>
   </div>
 </section>
 
-<div class="callout callout-note">
-  <div class="callout-title">What this project promises</div>
-  The fixtures are deterministic, relationally checked, and explicit about their source lineage. They are for software and research workflow development—not estimates of the Medicare population.
+<div class="callout callout-warning">
+  <div class="callout-title">Not Medicare findings</div>
+  Structural validity and agreement with selected published rates do not authorize citing synthetic results as empirical Medicare statistics, clinical conclusions, or policy evidence.
 </div>
 
-## ⚡ First value in five minutes
+## What you can do today
 
-You do not need CMS files, a database, cloud credentials, or a service account to
-try the built-in scenarios:
+| Status | Meaning |
+| --- | --- |
+| **Works today** | Study file structure and joins; run fixture-based code exercises; export ordinary teaching CSV/Parquet with developer help |
+| **Limited prototype** | Generate and compare 2021 FFS-like diabetes / any-inpatient worlds adjusted toward three selected public targets |
+| **Not intended** | One-click calibrated website downloads; any disease/year as a calibrated product; population, causal, or clinical claims |
 
-1. Install Python 3.13+ and [`uv`](https://docs.astral.sh/uv/).
-2. Clone the repository and run `uv sync`.
-3. Validate the known-good baseline fixture:
+Full matrix: [What you can do](researchers/what-you-can-do/).
 
-   ```shell
-   uv run medicare-synth validate --scenario valid_baseline_cohort
-   ```
-
-4. Run the same validator against an intentional orphaned-claim fixture and
-   inspect the one expected finding:
-
-   ```shell
-   uv run medicare-synth validate --scenario invalid_orphaned_claim
-   ```
-
-You should see `Valid: True` for the first command and `Valid: False` with one
-`REL-001` finding for the second. The [first-run guide](getting-started/first-run/)
-explains what those results mean.
-
-## Choose a path
+## Three researcher tasks
 
 <div class="card-grid">
   <div class="card">
-    <h3>🚀 New to the repository?</h3>
-    <p>Install the package, run a fixture, and learn the source-to-validation flow.</p>
-    <p><a href="{{ '/getting-started/installation/' | relative_url }}">Start with installation →</a></p>
+    <h3>Explore available data</h3>
+    <p>Learn how person, enrollment, condition, and claims-style records connect—and why patient count is not claim count.</p>
+    <p><a href="{{ '/researchers/understanding-the-data/' | relative_url }}">Understanding the data →</a></p>
   </div>
   <div class="card">
-    <h3>⌨️ Building a pipeline?</h3>
-    <p>Use the CLI, Python API, scenario catalog, and focused validation checks.</p>
-    <p><a href="{{ '/guides/cli/' | relative_url }}">Open the CLI reference →</a></p>
+    <h3>Plan an analysis</h3>
+    <p>Walk the supported diabetes and any-inpatient example before you invest in restricted extracts.</p>
+    <p><a href="{{ '/researchers/diabetes-hospitalization-example/' | relative_url }}">Worked example →</a></p>
   </div>
   <div class="card">
-    <h3>📦 Need shareable artifacts?</h3>
-    <p>Export checksummed CSV, Parquet, manifests, reports, and SQL reference DDL.</p>
-    <p><a href="{{ '/guides/release-workflow/' | relative_url }}">Package a release →</a></p>
-  </div>
-  <div class="card">
-    <h3>🔍 Reviewing fidelity?</h3>
-    <p>Trace fields to evidence and separate structural validity from population claims.</p>
-    <p><a href="{{ '/concepts/provenance-and-validation/' | relative_url }}">Read the boundary →</a></p>
+    <h3>Compare assumptions</h3>
+    <p>Same selected calibration targets can still produce different outcomes when free assumptions change.</p>
+    <p><a href="{{ '/researchers/interpreting-results/' | relative_url }}">Interpreting results →</a></p>
   </div>
 </div>
 
-## At a glance
+## Flagship example (stored Phase 5 illustration)
 
-<div class="stats-grid">
-  <div class="stat"><span class="stat-number">19</span><p>implemented domain tables</p></div>
-  <div class="stat"><span class="stat-number">21</span><p>deterministic catalog scenarios</p></div>
-  <div class="stat"><span class="stat-number">2</span><p>supported release formats: CSV and Parquet</p></div>
-  <div class="stat"><span class="stat-number">0</span><p>population estimates claimed</p></div>
+Artificial **2021 Original Medicare FFS-like** adults aged 65+, with diabetes and
+heart-failure indicators and **any** inpatient admission (not
+diagnosis-specific). Selected anchors include approximate diabetes prevalence
+27.7% (2018 source), heart failure 12% (2022 source), and ~13% inpatient risk
+among people with diabetes (weaker industry prior).
+
+In the checked-in Phase 5 family at 6,000 simulated beneficiaries, two worlds
+that share those calibration targets show **404** versus **572** inpatient claim
+records under different free background-risk assumptions. Use that contrast to
+practice sensitivity—not to bound Medicare truth.
+
+→ [Diabetes–hospitalization example](researchers/diabetes-hospitalization-example/)
+
+## How to begin
+
+- **Reading path:** no install—start with [For researchers](researchers/) and the
+  [FAQ](researchers/faq/).
+- **Analyst path:** ask a collaborator to export fixture tables; import CSV/Parquet
+  into R, Stata, or Python ([getting started](researchers/getting-started/)).
+- **Developer path:** [install locally](developers/installation/) and use the CLI/API.
+
+## Building or extending the toolkit?
+
+<div class="callout callout-note">
+  <div class="callout-title">Developer documentation</div>
+  Installation, CLI, scenarios, data model, calibrated-world reproduction, and contribution guides live under <a href="{{ '/developers/' | relative_url }}">For developers</a>. Canonical technical state remains in the repository root (<code>SPEC.md</code>, <code>ARCHITECTURE.md</code>, <code>ROADMAP.md</code>).
 </div>
-
-| Boundary | Current contract |
-| --- | --- |
-| Default baseline | CMS 2021 Synthetic Claims (`CMS-2021-SYN-CLAIMS`) |
-| Additional source path | Bounded 2022 CMS Synthetic Medicare Claims PUF beneficiary/carrier slice |
-| Core stack | Python 3.13+, Pydantic v2, Polars, PyArrow |
-| License | Apache-2.0 for code; CMS synthetic source is acquired by checksummed manifest |
-| Primary outputs | Validated scenario slices, versioned release bundles, provenance and limitation profiles |
-
-## What the package does
-
-### Preserve a documented baseline
-
-The repository records source manifests and pinned ResDAC Knowledge Base (RKB)
-evidence snapshots. Raw CMS files are acquired into ignored `data/` directories;
-the tracked manifests preserve URLs, versions, grains, row counts, and checksums.
-
-### Validate relationships before expansion
-
-Pydantic models handle record-level contracts. Polars and PyArrow support table
-validation, foreign-key checks, temporal rules, code formats, accounting bounds,
-and release I/O. A validator finding is reported rather than silently repaired.
-
-### Generate reproducible fixtures
-
-Named scenarios cover valid workflows and intentional anomalies. Vertical
-expansion adds evidence-graded fields; horizontal expansion re-keys connected
-beneficiary subgraphs. Seeds, manifests, and explicit provenance keep results
-reproducible.
-
-## Documentation map
-
-- **Getting started:** [installation](getting-started/installation/) and the
-  [first useful run](getting-started/first-run/).
-- **Using the package:** [CLI reference](guides/cli/),
-  [scenarios and validation](guides/scenarios-and-validation/), and the
-  [release workflow](guides/release-workflow/).
-- **Understanding the data:** [data model and grains](concepts/data-model/),
-  [provenance and validation](concepts/provenance-and-validation/), and
-  [limitations](reference/limitations/).
-- **Contributing:** [contributor guide](contributing/) and the
-  [canonical project documents](reference/project-documents/).
 
 ## Scope notice
 
-Medicare-Synth supports development, testing, education, and feasibility work.
-Structural and relational validity does not establish clinical validity,
-distributional fidelity, formal privacy guarantees, or national
-representativeness. Do not cite synthetic outputs as empirical Medicare
-statistics. Read the complete [limitations and scope statement](reference/limitations/)
-before using a release.
+Phases 0–5 are complete for the pinned MVP; Phase 6 independent evaluation is
+**active**. Read [limitations](researchers/limitations/) before using any release
+or synthetic summary in a manuscript or proposal.

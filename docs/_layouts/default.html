@@ -26,6 +26,11 @@
         </a>
       </div>
       <div class="header-actions">
+        <nav class="top-nav" aria-label="Audience">
+          <a href="{{ '/' | relative_url }}" class="top-nav-link">Overview</a>
+          <a href="{{ '/researchers/' | relative_url }}" class="top-nav-link">For Researchers</a>
+          <a href="{{ '/developers/' | relative_url }}" class="top-nav-link">For Developers</a>
+        </nav>
         <a href="https://github.com/{{ site.repository }}" class="github-link" target="_blank" rel="noopener">
           <svg aria-hidden="true" height="18" width="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63 0 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
           <span>GitHub</span>
@@ -37,37 +42,33 @@
       <aside class="sidebar" id="site-nav" aria-label="Documentation navigation">
         <nav>
           <div class="nav-section">
-            <div class="nav-section-title">Getting Started</div>
+            <div class="nav-section-title">For Researchers</div>
             <ul class="nav-list">
-              <li class="nav-item"><a href="{{ '/' | relative_url }}" class="nav-link">🏠 Documentation portal</a></li>
-              <li class="nav-item"><a href="{{ '/getting-started/installation/' | relative_url }}" class="nav-link">🚀 Install &amp; verify</a></li>
-              <li class="nav-item"><a href="{{ '/getting-started/first-run/' | relative_url }}" class="nav-link">⚡ First useful run</a></li>
+              <li class="nav-item"><a href="{{ '/' | relative_url }}" class="nav-link">Overview</a></li>
+              <li class="nav-item"><a href="{{ '/researchers/' | relative_url }}" class="nav-link">Choose your task</a></li>
+              <li class="nav-item"><a href="{{ '/researchers/what-you-can-do/' | relative_url }}" class="nav-link">What you can do</a></li>
+              <li class="nav-item"><a href="{{ '/researchers/diabetes-hospitalization-example/' | relative_url }}" class="nav-link">Worked example</a></li>
+              <li class="nav-item"><a href="{{ '/researchers/getting-started/' | relative_url }}" class="nav-link">Getting started</a></li>
+              <li class="nav-item"><a href="{{ '/researchers/understanding-the-data/' | relative_url }}" class="nav-link">Understanding the data</a></li>
+              <li class="nav-item"><a href="{{ '/researchers/interpreting-results/' | relative_url }}" class="nav-link">Interpreting results</a></li>
+              <li class="nav-item"><a href="{{ '/researchers/limitations/' | relative_url }}" class="nav-link">Limits &amp; scope</a></li>
+              <li class="nav-item"><a href="{{ '/researchers/faq/' | relative_url }}" class="nav-link">FAQ</a></li>
             </ul>
           </div>
 
           <div class="nav-section">
-            <div class="nav-section-title">Use the project</div>
+            <div class="nav-section-title">For Developers</div>
             <ul class="nav-list">
-              <li class="nav-item"><a href="{{ '/guides/cli/' | relative_url }}" class="nav-link">⌨️ CLI reference</a></li>
-              <li class="nav-item"><a href="{{ '/guides/scenarios-and-validation/' | relative_url }}" class="nav-link">🧪 Scenarios &amp; validation</a></li>
-              <li class="nav-item"><a href="{{ '/guides/release-workflow/' | relative_url }}" class="nav-link">📦 Export a release</a></li>
-            </ul>
-          </div>
-
-          <div class="nav-section">
-            <div class="nav-section-title">Understand the data</div>
-            <ul class="nav-list">
-              <li class="nav-item"><a href="{{ '/concepts/data-model/' | relative_url }}" class="nav-link">🗂️ Data model &amp; grains</a></li>
-              <li class="nav-item"><a href="{{ '/concepts/provenance-and-validation/' | relative_url }}" class="nav-link">🔍 Provenance &amp; validation</a></li>
-              <li class="nav-item"><a href="{{ '/reference/limitations/' | relative_url }}" class="nav-link">⚠️ Limitations &amp; scope</a></li>
-            </ul>
-          </div>
-
-          <div class="nav-section">
-            <div class="nav-section-title">Contribute &amp; reference</div>
-            <ul class="nav-list">
-              <li class="nav-item"><a href="{{ '/contributing/' | relative_url }}" class="nav-link">🛠️ Contributor guide</a></li>
-              <li class="nav-item"><a href="{{ '/reference/project-documents/' | relative_url }}" class="nav-link">📚 Project documents</a></li>
+              <li class="nav-item"><a href="{{ '/developers/' | relative_url }}" class="nav-link">Start developing</a></li>
+              <li class="nav-item"><a href="{{ '/developers/installation/' | relative_url }}" class="nav-link">Install &amp; verify</a></li>
+              <li class="nav-item"><a href="{{ '/developers/first-run/' | relative_url }}" class="nav-link">First useful run</a></li>
+              <li class="nav-item"><a href="{{ '/developers/cli/' | relative_url }}" class="nav-link">CLI reference</a></li>
+              <li class="nav-item"><a href="{{ '/developers/scenarios-and-validation/' | relative_url }}" class="nav-link">Scenarios &amp; validation</a></li>
+              <li class="nav-item"><a href="{{ '/developers/data-model/' | relative_url }}" class="nav-link">Data model</a></li>
+              <li class="nav-item"><a href="{{ '/developers/calibrated-worlds/' | relative_url }}" class="nav-link">Calibrated worlds</a></li>
+              <li class="nav-item"><a href="{{ '/developers/export-and-release/' | relative_url }}" class="nav-link">Export &amp; release</a></li>
+              <li class="nav-item"><a href="{{ '/developers/contributing/' | relative_url }}" class="nav-link">Contribute</a></li>
+              <li class="nav-item"><a href="{{ '/developers/project-documents/' | relative_url }}" class="nav-link">Technical reference</a></li>
             </ul>
           </div>
         </nav>
@@ -78,7 +79,7 @@
 
         <footer class="site-footer">
           <div>Medicare-Synth is open source under Apache-2.0.</div>
-          <div><a href="https://github.com/{{ site.repository }}" target="_blank" rel="noopener">GitHub repository</a></div>
+          <div>Synthetic outputs are for research preparation—not Medicare population estimates. See <a href="{{ '/researchers/limitations/' | relative_url }}">limitations</a>.</div>
         </footer>
       </main>
     </div>

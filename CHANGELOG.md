@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Changed
+
+- Reorganized public documentation into researcher-first and developer tracks:
+  rewritten root `README.md` and GitHub Pages homepage; new
+  `docs/researchers/` guides (capability matrix, diabetes–hospitalization
+  example, interpretation, limits, FAQ); consolidated technical pages under
+  `docs/developers/` (including calibrated-worlds and documentation-maintenance);
+  legacy URL forwarders; consistent Jekyll excludes for phase/source-only
+  records; updated `scripts/check_documentation_site.py` and `AGENTS.md`.
+  Plan: `docs/medicare_synth_documentation_reorganization_plan.md`. No
+  generator or calibration behavior changes.
+
 ### Added
 
 - Closed Phase 5 (MVP calibrated worlds): added `medicare_synth.worlds` family

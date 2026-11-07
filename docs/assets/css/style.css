@@ -142,6 +142,27 @@ button:focus-visible {
   gap: 1rem;
 }
 
+.top-nav {
+  align-items: center;
+  display: flex;
+  gap: 0.35rem;
+}
+
+.top-nav-link {
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 0.38rem 0.65rem;
+  text-decoration: none;
+}
+
+.top-nav-link:hover,
+.top-nav-link.active {
+  background: rgba(255, 255, 255, 0.18);
+  text-decoration: none;
+}
+
 .github-link {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
@@ -544,6 +565,10 @@ tr:hover {
 }
 
 @media (max-width: 900px) {
+  .top-nav {
+    display: none;
+  }
+
   .nav-toggle-btn {
     display: block;
   }
