@@ -2,6 +2,8 @@
 title: "Documentation portal"
 description: "Explore Medicare-like synthetic data for research preparation: what works today, the diabetes–hospitalization example, and clear limits on inference."
 permalink: /
+lang: en
+lang_alternate: /ko/
 ---
 
 <section class="hero">

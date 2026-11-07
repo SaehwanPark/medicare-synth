@@ -2,6 +2,8 @@
 title: "Diabetes–hospitalization example"
 description: "End-to-end narrative of the 2021 Original Medicare FFS-like diabetes and any-inpatient MVP, including calibration anchors and what you may not infer."
 permalink: /researchers/diabetes-hospitalization-example/
+lang: en
+lang_alternate: /ko/researchers/diabetes-hospitalization-example/
 ---
 
 # Diabetes–hospitalization example

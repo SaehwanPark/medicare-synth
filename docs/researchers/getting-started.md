@@ -2,6 +2,8 @@
 title: "Getting started for researchers"
 description: "Honest access paths into Medicare-Synth: reading without install, analyst export handoff, or full developer setup."
 permalink: /researchers/getting-started/
+lang: en
+lang_alternate: /ko/researchers/getting-started/
 ---
 
 # Getting started for researchers

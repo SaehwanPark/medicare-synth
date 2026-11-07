@@ -2,6 +2,8 @@
 title: "Researcher FAQ"
 description: "Short answers about real patients, permissions, coding requirements, disease coverage, publication, realism, and where technical docs live."
 permalink: /researchers/faq/
+lang: en
+lang_alternate: /ko/researchers/faq/
 ---
 
 # Researcher FAQ

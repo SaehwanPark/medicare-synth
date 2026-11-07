@@ -25,6 +25,15 @@ REQUIRED_PAGES = {
     "researchers/interpreting-results.md",
     "researchers/limitations.md",
     "researchers/faq.md",
+    "ko/index.md",
+    "ko/researchers/index.md",
+    "ko/researchers/what-you-can-do.md",
+    "ko/researchers/diabetes-hospitalization-example.md",
+    "ko/researchers/getting-started.md",
+    "ko/researchers/understanding-the-data.md",
+    "ko/researchers/interpreting-results.md",
+    "ko/researchers/limitations.md",
+    "ko/researchers/faq.md",
     "developers/index.md",
     "developers/installation.md",
     "developers/first-run.md",
@@ -51,6 +60,7 @@ REQUIRED_PAGES = {
 }
 PUBLISHED_ROOTS = (
     "researchers",
+    "ko",
     "developers",
     "getting-started",
     "guides",
@@ -74,6 +84,8 @@ LIQUID_PATH = re.compile(r"relative_url\s*\}\}")
 LIQUID_TARGET = re.compile(r"href=\"\{\{\s*'([^']+)'\s*\|\s*relative_url")
 FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 PERMALINK = re.compile(r"^permalink:\s*[\"']?([^\"'\n]+)", re.MULTILINE)
+LANG = re.compile(r"^lang:\s*[\"']?([A-Za-z-]+)", re.MULTILINE)
+LANG_ALTERNATE = re.compile(r"^lang_alternate:\s*[\"']?([^\"'\s]+)", re.MULTILINE)
 
 
 def page_paths() -> dict[str, Path]:
@@ -175,6 +187,100 @@ def published_target(
     return published.get(resolved)
 
 
+def normalize_site_path(path: str) -> str:
+    """Return a site path with a leading slash and a trailing slash."""
+    path = path.strip()
+    if path in {"", "/"}:
+        return "/"
+    if not path.startswith("/"):
+        path = f"/{path}"
+    if not path.endswith("/") and not path.endswith(".html"):
+        path = f"{path}/"
+    return path
+
+
+def expected_language(relative: str) -> str | None:
+    """Return the required page language for researcher-facing mirrors."""
+    if relative == "index.md" or relative.startswith("researchers/"):
+        return "en"
+    if relative == "ko/index.md" or relative.startswith("ko/"):
+        return "ko"
+    return None
+
+
+def published_path_for(page: Path, published: dict[str, Path]) -> str | None:
+    """Return the generated URL path for a source page."""
+    return next((path for path, source in published.items() if source == page), None)
+
+
+def check_language_pairs(pages: dict[str, Path], published: dict[str, Path]) -> list[str]:
+    """Require reciprocal English/Korean alternates on researcher-facing pages.
+
+    English stays the default URL. Korean mirrors live under ``/ko/``. Developer
+    pages stay English-only and are not part of the pair contract.
+    """
+    failures: list[str] = []
+    published_by_source = {
+        relative: published_path_for(page, published) for relative, page in pages.items()
+    }
+    for relative, page in sorted(pages.items()):
+        required = expected_language(relative)
+        if required is None:
+            continue
+        metadata = front_matter(page)
+        lang_match = LANG.search(metadata)
+        alternate_match = LANG_ALTERNATE.search(metadata)
+        if lang_match is None:
+            failures.append(f"{relative}: researcher page is missing lang")
+            continue
+        lang = lang_match.group(1)
+        if lang != required:
+            failures.append(f"{relative}: expected lang {required}, found {lang}")
+        if alternate_match is None:
+            failures.append(f"{relative}: researcher page is missing lang_alternate")
+            continue
+        alternate = normalize_site_path(alternate_match.group(1))
+        if alternate not in published:
+            failures.append(f"{relative}: lang_alternate has no published page {alternate}")
+            continue
+        own_path = published_by_source.get(relative)
+        if own_path is None:
+            failures.append(f"{relative}: missing published path for language pair")
+            continue
+        peer = published[alternate]
+        peer_meta = front_matter(peer)
+        peer_lang = LANG.search(peer_meta)
+        peer_alternate = LANG_ALTERNATE.search(peer_meta)
+        expected_peer = "ko" if required == "en" else "en"
+        if peer_lang is None or peer_lang.group(1) != expected_peer:
+            failures.append(
+                f"{relative}: lang_alternate {alternate} is not a {expected_peer} page"
+            )
+        if peer_alternate is None or normalize_site_path(peer_alternate.group(1)) != own_path:
+            failures.append(
+                f"{relative}: lang_alternate {alternate} does not point back to {own_path}"
+            )
+    return failures
+
+
+def check_readme_languages() -> list[str]:
+    """Require the root README pair to point at each other and at the Korean portal."""
+    failures: list[str] = []
+    readme = ROOT / "README.md"
+    readme_ko = ROOT / "README.ko.md"
+    if not readme_ko.exists():
+        return ["missing README.ko.md"]
+    english = readme.read_text(encoding="utf-8")
+    korean = readme_ko.read_text(encoding="utf-8")
+    if "README.ko.md" not in english:
+        failures.append("README.md: missing link to README.ko.md")
+    if "README.md" not in korean:
+        failures.append("README.ko.md: missing link to README.md")
+    if "/medicare-synth/ko/" not in korean:
+        failures.append("README.ko.md: missing link to the Korean docs portal")
+    return failures
+
+
 def layout_source_for(target: str) -> Path | None:
     """Resolve a layout navigation URL to a Markdown source page."""
     clean = target.strip("/")
@@ -239,6 +345,9 @@ def check() -> list[str]:
                 failures.append(f"{relative}: broken local link {target}")
             elif published_page is None:
                 failures.append(f"{relative}: broken published link {target}")
+
+    failures.extend(check_language_pairs(pages, published))
+    failures.extend(check_readme_languages())
 
     layout = SITE / "_layouts/default.html"
     if not layout.exists():

@@ -2,6 +2,8 @@
 title: "For researchers"
 description: "Choose a research-oriented path into Medicare-Synth: explore structure, plan analyses, or compare assumptions—without treating synthetic outputs as Medicare findings."
 permalink: /researchers/
+lang: en
+lang_alternate: /ko/researchers/
 ---
 
 # For researchers
