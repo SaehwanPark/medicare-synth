@@ -34,7 +34,9 @@ Keep this file short. Task detail lives in linked docs and skills.
   into canonical docs.
 - Comments: domain rationale, provenance, constraints, non-obvious invariants.
 - Public docs are researcher-first (`README.md`, `docs/index.md`,
-  `docs/researchers/`); technical guides live under `docs/developers/`. Every
+  `docs/researchers/`); technical guides live under `docs/developers/`.
+  Researcher pages and the root README also have a Korean mirror
+  (`docs/ko/`, `README.ko.md`); English is the default. Every
   user-facing capability claim needs a code/test/report anchor; never present
   synthetic results as Medicare findings. See
   `docs/developers/documentation-maintenance.md`.

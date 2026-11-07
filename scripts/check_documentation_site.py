@@ -361,6 +361,12 @@ def check() -> list[str]:
                 failures.append(f"layout: navigation target has no source page {target}")
         if not LIQUID_PATH.search(layout_text):
             failures.append("layout: expected relative_url navigation links")
+        if 'class="lang-switch"' not in layout_text:
+            failures.append("layout: missing language switch")
+        if "page.lang_alternate" not in layout_text:
+            failures.append("layout: language switch must use page.lang_alternate")
+        if "/ko/" not in layout_text:
+            failures.append("layout: missing Korean researcher routes")
 
     config = SITE / "_config.yml"
     if config.exists():
