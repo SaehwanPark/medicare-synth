@@ -1,0 +1,75 @@
+{
+  "schema_version": "0.1",
+  "freeze_id": "mvp-2021-om-ffs-diabetes-ip-eval-freeze-v1",
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "corpus_id": "mvp-2021-om-ffs-diabetes-ip-corpus-v1",
+  "frozen": true,
+  "fit_allowed_partitions": [
+    "calibration"
+  ],
+  "evaluate_only_partitions": [
+    "holdout",
+    "diagnostic"
+  ],
+  "excluded_partitions": [
+    "excluded"
+  ],
+  "calibration_finding_ids": [
+    "cms-agg03-diabetes-prev-ffs-2018",
+    "cms-agg04-hf-prev-ffs-2022",
+    "lit07-avalere-ffs-diabetes-ip-risk"
+  ],
+  "holdout_finding_ids": [
+    "lit03-mmwr-diabetes-prev-2015-women"
+  ],
+  "diagnostic_finding_ids": [
+    "lit03-mmwr-diabetes-prevalence-2015",
+    "cms-agg05-hf-algorithm-shift-2017"
+  ],
+  "gates": [
+    {
+      "gate_id": "structural_validity",
+      "kind": "hard",
+      "description": "RelationalValidator passes on beneficiary, enrollment, chronic conditions, and inpatient claim linkage.",
+      "partition_roles": []
+    },
+    {
+      "gate_id": "holdout_isolation",
+      "kind": "hard",
+      "description": "Fit paths refuse holdout and diagnostic finding IDs.",
+      "partition_roles": [
+        "holdout",
+        "diagnostic"
+      ]
+    },
+    {
+      "gate_id": "calibration_mae",
+      "kind": "graded",
+      "description": "Mean absolute error on frozen calibration moments (training diagnostic, not generalization proof).",
+      "partition_roles": [
+        "calibration"
+      ]
+    },
+    {
+      "gate_id": "holdout_mae",
+      "kind": "reporting_only",
+      "description": "Holdout discrepancy may be reported for transparency; must not enter model selection or iterative retuning in Phase 5.",
+      "partition_roles": [
+        "holdout"
+      ]
+    },
+    {
+      "gate_id": "reweight_nondegeneracy",
+      "kind": "graded",
+      "description": "For Level B worlds: ESS > 0, positive weights, no declared infeasibility; extreme weight collapse is a warning.",
+      "partition_roles": [
+        "calibration"
+      ]
+    }
+  ],
+  "notes": [
+    "Holdout and diagnostic findings are evaluate-only; never fit on them.",
+    "Structural validity is a hard release gate; evidence MAE is graded.",
+    "Synthetic agreement is not a Medicare finding."
+  ]
+}

@@ -145,22 +145,29 @@ Exit criteria:
 
 ### Phase 5 — MVP calibration
 
-Status: Active
+Status: Complete — see `docs/phase5/`
 
 Outputs:
 
-- reference world plus a few controlled alternative worlds
-- training fit / discrepancy reports, manifests, limitations, examples
+- reference world plus controlled alternative worlds — **met**
+  (`mvp-2021-om-ffs-diabetes-ip-worlds-v1`: reweight + generator +
+  alternate free background IP)
+- training fit / discrepancy reports, manifests, limitations, examples —
+  **met** (`reports/phase5/`, `configs/worlds/`)
+- evaluation freeze (hard gates + graded metrics; holdout evaluate-only) —
+  **met** (`medicare_synth.evaluation`)
 
 Exit criteria:
 
-- hard structural gates pass; no known degenerate statistical behavior
-- meaningful improvement on predeclared contextual metrics
-- underidentified dimensions documented honestly
+- hard structural gates pass; no known degenerate statistical behavior —
+  **met**
+- meaningful improvement on predeclared contextual metrics — **met**
+  (calibration MAE improved on all three worlds)
+- underidentified dimensions documented honestly — **met**
 
 ### Phase 6 — Independent evaluation
 
-Status: Planned
+Status: Active
 
 Outputs:
 
@@ -199,6 +206,7 @@ Exit criteria:
    **Done (Phase 3):** corpus v1 frozen; see `docs/phase3/`.
 6. ~~Implement reweighting before advanced calibration.~~ **Done (Phase 4):**
    Level B IPF reweight + Level C generator-param search; see `docs/phase4/`.
-7. Produce 2–3 worlds with shared targets and different weak assumptions
-   (Phase 5).
-8. Freeze evaluation gates before iterative fitting.
+7. ~~Produce 2–3 worlds with shared targets and different weak assumptions.~~
+   **Done (Phase 5):** see `docs/phase5/`.
+8. ~~Freeze evaluation gates before iterative fitting.~~ **Done (Phase 5).**
+9. Independent held-out / research-utility evaluation and go/no-go (Phase 6).

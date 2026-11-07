@@ -1,0 +1,38 @@
+{
+  "family_id": "mvp-2021-om-ffs-diabetes-ip-worlds-v1",
+  "context_id": "mvp-2021-om-ffs-diabetes-ip",
+  "corpus_id": "mvp-2021-om-ffs-diabetes-ip-corpus-v1",
+  "evaluation_freeze_id": "mvp-2021-om-ffs-diabetes-ip-eval-freeze-v1",
+  "shared_calibration_targets": [
+    "cms-agg03-diabetes-prev-ffs-2018",
+    "cms-agg04-hf-prev-ffs-2022",
+    "lit07-avalere-ffs-diabetes-ip-risk"
+  ],
+  "holdout_evaluate_only": [
+    "lit03-mmwr-diabetes-prev-2015-women"
+  ],
+  "worlds": [
+    {
+      "world_id": "mvp-w1-reweight-v1",
+      "label": "reference_reweight",
+      "method": "reweight",
+      "p_ip_given_no_diabetes": 0.04
+    },
+    {
+      "world_id": "mvp-w2-generator-v1",
+      "label": "reference_generator",
+      "method": "generator_params",
+      "p_ip_given_no_diabetes": 0.04
+    },
+    {
+      "world_id": "mvp-w3-generator-high-bg-ip-v1",
+      "label": "alt_background_ip",
+      "method": "generator_params",
+      "p_ip_given_no_diabetes": 0.08
+    }
+  ],
+  "notes": [
+    "Authoritative emit path is medicare_synth.worlds.emit_world_family.",
+    "This JSON is a human-readable index, not a second runtime schema."
+  ]
+}

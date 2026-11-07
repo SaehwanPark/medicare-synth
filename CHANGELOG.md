@@ -4,6 +4,18 @@
 
 ### Added
 
+- Closed Phase 5 (MVP calibrated worlds): added `medicare_synth.worlds` family
+  `mvp-2021-om-ffs-diabetes-ip-worlds-v1` (Level B reweight reference, Level C
+  generator reference, Level C alternate free `P(IP|no diabetes)`), shared
+  frozen calibration targets, identical `analyze_world_moments` analysis, and
+  `medicare_synth.evaluation` freeze
+  (`mvp-2021-om-ffs-diabetes-ip-eval-freeze-v1`) with hard structural /
+  holdout-isolation gates and graded metrics. Artifacts under
+  [`reports/phase5/`](reports/phase5/); docs under
+  [`docs/phase5/`](docs/phase5/); tests in `tests/test_worlds.py` and
+  `tests/test_evaluation.py`. Synced canonical docs; Phase 6 (independent
+  evaluation) is now active.
+
 - Closed Phase 4 (calibration engine): added `medicare_synth.calibration` with
   Level A baseline discrepancy, Level B beneficiary IPF reweighting
   (ESS/weight/infeasibility diagnostics), Level C generator-parameter search
