@@ -2,6 +2,16 @@
 
 Canonical milestones, ordering, outputs, and exit criteria.
 
+## Realignment in progress (documentation only)
+
+The [November 8 audit](docs/audits/audit-for-project-realignement-20261108.md)
+sets the direction for a literature-constrained, continually calibrated shared
+population model, with reproducible materialized datasets and derived research
+worlds. This planning update preserves Phase 0–5 history and Phase 6 independent
+evaluation; it does not implement or validate any new model or calibration fix.
+The detailed ordering and acceptance gates below are being reconciled with
+`SPEC.md`, `ARCHITECTURE.md`, and `docs/goal.md`.
+
 - Strategic design for the next program:
   [`docs/medicare_synth_evidence_calibrated_playground_proposal.md`](docs/medicare_synth_evidence_calibrated_playground_proposal.md)
 - Earlier product motivation:
