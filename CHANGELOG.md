@@ -25,6 +25,19 @@
 
 ### Changed
 
+- Adopted the November 8 realignment audit as English canonical planning:
+  `SPEC.md`, `ARCHITECTURE.md`, `ROADMAP.md` and `docs/goal.md` now distinguish
+  the delivered MVP from a planned literature-constrained, continually
+  calibrated shared population model, reproducible datasets and derived worlds.
+  Retained Phase 6 independent evaluation; replaced generic Phase 7 expansion
+  with correctness hardening, inferential IR, richer joint synthesis, continual
+  calibration, base/world separation and gated scaling. Added a bounded joint +
+  adjusted-logistic MVP gate before bulk literature expansion, explicit audit
+  caveats and human approval boundaries. Clarified canonical precedence in the
+  historical proposal and contributor document map. Preserved the supplied audit
+  unchanged as a source record. Documentation only: no code, frozen evidence,
+  holdouts or stored reports changed; no tests run or new fidelity claims made.
+
 - Reorganized public documentation into researcher-first and developer tracks:
   rewritten root `README.md` and GitHub Pages homepage; new
   `docs/researchers/` guides (capability matrix, diabetes–hospitalization

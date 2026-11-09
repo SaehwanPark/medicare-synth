@@ -7,8 +7,11 @@ Keep this file short. Task detail lives in linked docs and skills.
 - Medicare-Synth: provenance-backed, structurally valid Medicare synthetic data
   and fixtures, expanding into an **evidence-calibrated research playground**.
 - Canonical state: `SPEC.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `CHANGELOG.md`.
-- Program design:
-  `docs/medicare_synth_evidence_calibrated_playground_proposal.md`.
+- Program direction: versioned, literature-constrained shared population model
+  and derived research worlds (planned; see `SPEC.md` and `ROADMAP.md`).
+  Audit: `docs/audits/audit-for-project-realignement-20261108.md`.
+  Earlier design: `docs/medicare_synth_evidence_calibrated_playground_proposal.md`;
+  current canonical state takes precedence.
 - Active agent goal: `docs/goal.md`.
 - Repo skills: `.agents/skills/`; harness:
   `docs/harness/medicare-synth/team-spec.md`; handoffs: ignored `_workspace/`.
