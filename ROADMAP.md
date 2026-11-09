@@ -18,7 +18,7 @@ release-fidelity claims. Static audit findings are tracked below; stored reports
 and frozen corpus v1 are not rewritten. Current canonical documents supersede
 the older proposal wherever strategy or ordering differs.
 
-- Strategic design for the next program:
+- Earlier strategic design (historical; realignment above takes precedence):
   [`docs/medicare_synth_evidence_calibrated_playground_proposal.md`](docs/medicare_synth_evidence_calibrated_playground_proposal.md)
 - Earlier product motivation:
   [`docs/medicare-synth-project-proposal_20260720.md`](docs/medicare-synth-project-proposal_20260720.md)
@@ -360,7 +360,7 @@ Required observable outcomes for 7B–7C:
    dimensions. This proves a bounded feasibility slice, not continual learning
    or general Medicare fidelity; parent-to-child preservation is the 7D gate.
 
-## Near-term vertical slice (before full parallelization)
+## MVP delivery checklist (historical foundation and active evaluation)
 
 1. ~~Select one 2021 FFS 65+ chronic → hospitalization context.~~ **Done (Phase 0):**
    diabetes → all-cause IP; see `docs/phase0/`.
@@ -376,4 +376,7 @@ Required observable outcomes for 7B–7C:
 7. ~~Produce 2–3 worlds with shared targets and different weak assumptions.~~
    **Done (Phase 5):** see `docs/phase5/`.
 8. ~~Freeze evaluation gates before iterative fitting.~~ **Done (Phase 5).**
-9. Independent held-out / research-utility evaluation and go/no-go (Phase 6).
+9. **Active:** independent held-out / research-utility evaluation and go/no-go
+   (Phase 6), with 7A correctness gates before affirmative release claims.
+10. **Planned next:** 7A–7F transition and the bounded joint + inferential
+    experiment above; completion of the earlier checklist does not complete it.

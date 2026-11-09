@@ -151,12 +151,13 @@ Reviewed evidence registry (immutable versions + relationships)
         → new frozen corpus + pinned parent model
         → joint generation + literature-analysis execution
         → continual calibration + all-prior-target regression checks
-        → immutable child base-model release (human promotion gate)
+        → immutable child base-model candidate (not yet a public release)
               ├─ general-population materialization
               ├─ cohort-conditioned world → materialization
               ├─ locally calibrated child world → materialization
               └─ scenario / alternative world → materialization
         → post-selection independent evaluation + workflow/sensitivity reports
+        → human promotion gate → approved model/world/dataset releases
 ```
 
 This path extends rather than replaces the structural validators, Evidence IR,

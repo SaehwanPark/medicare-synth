@@ -232,8 +232,9 @@ Open product decisions (do not invent silently): keep FFS Option B vs upgrade
 to monthly Option C; whether to collapse `sp_*` codes `1`/`2`; person-time vs
 full-year denominators for rate targets; whether to replace LIT-07 industry
 utilization prior with an official O1-compatible aggregate in a **new** corpus
-version; HF co-calibration weight vs prevalence-only; the first compatible adjusted-OR source and its coding/design contract;
-objective/uncertainty/dependence policy and preservation tolerances; transport
+version; HF co-calibration weight vs prevalence-only; the first compatible
+adjusted-OR source and its coding/design contract; objective/uncertainty/dependence
+policy and preservation tolerances; transport
 rules for older-year studies; workflow-utility benchmark. The staged inferential
 scope above is adopted, but individual estimands and implementation choices
 still require review. Corpus v1 training targets and women-stratum

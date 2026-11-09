@@ -106,7 +106,7 @@ Recover individuals or the full real joint; claim universal Medicare coverage;
 silent FFS/MA, year or algorithm conflation; autonomous evidence adoption;
 publishing synthetic effects or performance as Medicare results; collecting a
 large literature corpus or expanding every CMS family before the bounded joint
-+ inferential feasibility gate passes.
+and inferential feasibility gate passes.
 
 ## Risk and unresolved approvals
 
