@@ -2,7 +2,23 @@
 
 Canonical milestones, ordering, outputs, and exit criteria.
 
-- Strategic design for the next program:
+## Strategic realignment — 2026-11-08
+
+Adopt the [November 8 audit](docs/audits/audit-for-project-realignement-20261108.md)
+as planning input: evolve toward a **literature-constrained, continually
+calibrated shared Medicare-like population model**. Versioned model state is
+the central asset; datasets are reproducible materializations, and specialized
+worlds are explicit derivatives. A shared reference is not a uniquely identified
+or universally representative Medicare distribution.
+
+This is a documentation-only adoption, not implementation or fresh validation.
+Phases 0–5 remain historical deliveries. Phase 6 independent evaluation remains
+active, with correctness hardening required before renewed convergence or
+release-fidelity claims. Static audit findings are tracked below; stored reports
+and frozen corpus v1 are not rewritten. Current canonical documents supersede
+the older proposal wherever strategy or ordering differs.
+
+- Earlier strategic design (historical; realignment above takes precedence):
   [`docs/medicare_synth_evidence_calibrated_playground_proposal.md`](docs/medicare_synth_evidence_calibrated_playground_proposal.md)
 - Earlier product motivation:
   [`docs/medicare-synth-project-proposal_20260720.md`](docs/medicare-synth-project-proposal_20260720.md)
@@ -173,27 +189,178 @@ Outputs:
 
 - held-out evaluation protocol and report
 - research-workflow and synthetic-truth benchmarks
-- go / no-go release decision and issue backlog
+- go / no-go release decision and issue backlog, including audit caveats
 
 Exit criteria:
 
 - predefined thresholds met, or limitations + no-go recorded
 - no indefinite retuning against the same holdout set
+- Phase 7A correctness findings resolved before affirmative convergence or
+  calibrated-release claims; evaluate historical artifacts as historical, and
+  identify any corrected rerun separately rather than overwriting them
+- held-out measurements already exposed during candidate search are disclosed;
+  any fresh independent evaluation evidence or partition change requires human
+  approval, not relabeling the existing holdout as untouched
 
-### Phase 7 — Expand contexts
+### Phase 7 — Population-model transition
 
-Status: Planned
+Status: Planned — replaces generic context/literature expansion
 
-Outputs:
+Order: **A → B → C → D → E → F**. A can proceed alongside Phase 6 protocol
+work; it gates affirmative Phase 6 release claims. B and C culminate in the
+bounded joint + inferential MVP below. Do not collect a large literature corpus
+or promise a large calibrated download before that feasibility gate. D proves
+version-to-version updating; E generalizes derived worlds; F expands only after
+the earlier gates pass. Each stage requires a separately scoped implementation
+and human approval of evidence/estimands; this roadmap authorizes no code now.
 
-- additional estimands/domains/years as separate compatible contexts
-- regression of earlier worlds; versioned calibration profiles
+#### 7A — Correctness hardening
 
-Exit criteria:
+Likely boundaries: `calibration.py`, Evidence IR eligibility, evaluation and
+world manifests; existing `tests/test_calibration.py` / evaluation tests.
 
-- new contexts pass the same gates; prior releases remain reproducible
+Required outputs and acceptance:
 
-## Near-term vertical slice (before full parallelization)
+- **Full-sweep IPF convergence:** after each complete sweep, reevaluate every
+  approved target on the final weights; report convergence only when all
+  residuals satisfy the declared tolerance. Include coupled constraints where a
+  later rake disturbs an earlier one, iteration exhaustion, and infeasibility.
+- **No silent missing-target success:** unsupported/undefined approved targets,
+  empty eligible cohorts, or absent support produce explicit failure or unmet
+  status. A lower MAE on only the computable subset is not success; report target
+  coverage and per-target status alongside any aggregate score.
+- **Population alignment:** use each finding's executable eligibility and
+  denominator consistently in fitting, convergence, and reporting. Discrepancy
+  reporting already filters eligible cohorts; full-frame IPF is still a gap.
+  Verify restricted age/enrollment/sex cohorts and conditional denominators.
+- **Weighted artifact semantics:** Level B remains records + beneficiary weights
+  with ESS/weight diagnostics and weighted-analysis requirements. Do not label
+  unchanged tables as an ordinary calibrated sample. Any later resampling is a
+  separate, validated materialization with its own provenance.
+- **Holdout isolation:** remove candidate-by-candidate holdout evaluation; freeze
+  candidate selection on calibration evidence before reporting approved
+  evaluation results. Record prior exposure and forbid tuning from those results.
+- Preserve historical reports; issue versioned corrected runs with explicit
+  differences. Structural, determinism, and corpus-mutation gates still apply.
+
+Exit: all approved constraints are accounted for, no failure is hidden by a
+summary metric, and convergence agrees with final per-target residuals.
+
+#### 7B — Inferential Evidence IR and executable analyses
+
+Extend `evidence_ir.py` and its schema/compiler/report contracts, preserving
+v0.1 fixtures or providing an explicit versioned migration. Support crude RR,
+RD, and OR first, then one reviewed **adjusted logistic-regression** analysis.
+The estimator field must dispatch a supported analysis or refuse it explicitly,
+not merely store a label while executing a different calculation.
+
+Executable contracts must specify population/program/year/enrollment,
+eligibility, exposure/outcome algorithms and timing, follow-up, effect scale,
+covariate coding/reference levels/transformations/interactions, estimator,
+study-design requirements (including weights/matching/censoring where relevant),
+uncertainty, provenance, and exact/approximate/non-executable compatibility.
+Marginal and conditional effects and differing adjustment sets are not
+interchangeable (including OR/HR noncollapsibility). Unsupported designs and
+missing analysis variables must fail explicitly.
+
+Exit: a human-reviewed real Medicare finding executes the declared analysis
+reproducibly, with source anchors, compatibility gaps and uncertainty; known-truth
+and failure cases cover empty strata, separation/nonconvergence, and unsupported
+estimators. Literature adjusted ORs are compared with estimates fitted on
+synthetic data, never assigned directly as generator coefficients.
+
+#### 7C — Richer joint synthesizer and inferential calibration MVP
+
+Extend the transparent MVP generator (`synthesis.py`) to represent joint
+age/sex/diabetes/HF/inpatient relationships, including diabetes–HF comorbidity
+and declared interactions where supported. Prefer an interpretable modular
+conditional model to an opaque network. Do not invent relationships from absent
+evidence or assume coefficient equality across generating and analysis models.
+
+Exit: the bounded MVP below simultaneously evaluates marginal, conditional,
+and adjusted-association targets under deterministic seeds and hard structural
+gates. Capacity limits, conflicting constraints and Monte Carlo error are
+reported rather than concealed by optimization.
+
+#### 7D — Versioned continual calibration
+
+Add a reviewed evidence-registry update path and immutable population-model
+state: model ID/version, parent, parameters/structure, cohort definitions,
+source/compiler/generator versions, evidence checksums/roles, seeds, objective,
+calibration history and evaluation results. Preserve old corpus/model versions;
+warm-start a new model from its parent against a newly frozen evidence version.
+
+Before optimization, classify evidence relationships as compatible, overlapping,
+transport-dependent, contradictory, or superseded. Human review chooses shared
+constraints, context-only constraints, exclusions or alternative worlds; do not
+automatically average incompatible years, populations or algorithms.
+
+Use a declared evidence-discrepancy + preservation + structural objective:
+account for uncertainty and source dependence (e.g. covariance or source
+clusters), and keep structural invariants hard where appropriate. Missing
+uncertainty/dependence information needs an explicit approved policy, not an
+assumption of independent equally precise findings. Penalties and tolerances
+are predeclared; no tuning against holdout.
+
+Exit: adding reviewed evidence creates a reproducible child model, reevaluates
+**all** prior active constraints, and records per-target drift, conflict,
+supersession and justified regressions. Preservation does not mean satisfying
+obsolete evidence forever; unapproved degradation blocks promotion. Parent
+releases remain reproducible and a rejected child cannot mutate them.
+
+#### 7E — Shared base and derived worlds
+
+Separate immutable base-model releases from materialized datasets (pinned model,
+population, size, seed, export version) and derivative world versions:
+
+- **Cohort-conditioned world:** samples a declared conditional population from
+  the base without introducing new evidence or silently changing parameters.
+- **Locally calibrated world:** starts from a pinned base, adds approved
+  purpose-specific evidence, and records local parameter/constraint deltas.
+- **Scenario/alternative world:** labels weakly identified assumptions and
+  sensitivity departures explicitly, rather than implying new empirical facts.
+
+Exit: identical pins reproduce each artifact; local calibration cannot mutate
+the base or sibling worlds; lineage and weighted vs unweighted semantics survive
+export. Current MVP presets are retained, not relabeled as this general system.
+
+#### 7F — Scaling and independent evaluation across contexts
+
+Expand to Poisson/event-rate models, then survival/Cox, then matching,
+propensity-score weighting and subgroup interactions only as their time,
+censoring, sampling and analysis semantics become executable. Additional
+conditions, years, longitudinal paths, and large materializations are separate
+compatible contexts, not automatic transport of the 2021 MVP.
+
+Exit: context-specific independent evidence and workflow benchmarks meet
+predeclared gates, previous model/world versions remain reproducible, and
+multi-world sensitivity and limitations accompany scaled releases. Larger
+samples reduce simulation noise, not underidentification or evidence bias.
+
+## First implementation experiment after hardening: joint + inferential MVP
+
+Keep `mvp-2021-om-ffs-diabetes-ip` (2021 FFS, age 65+, Option B). First scope
+and approve one compatible adjusted-OR source and the required variables; stop
+if no source supports the declared analysis without unapproved transport or
+unavailable fields. The audit's illustrative OR/HR values are **not** targets.
+
+Required observable outcomes for 7B–7C:
+
+1. Retain and reevaluate existing diabetes/HF prevalence and diabetes inpatient
+   risk constraints from frozen corpus v1; any additions use a new reviewed
+   corpus version without changing the v1 holdout.
+2. Add supported diabetes–HF comorbidity and age/sex inpatient-risk relationships
+   with reviewed evidence or explicitly labeled simulation assumptions.
+3. Execute one real literature adjusted logistic analysis on generated data;
+   calibrate its estimated OR together with the approved earlier constraints.
+4. Compare before/after per-target coverage, discrepancy, structural validity,
+   uncertainty/Monte Carlo variation and all previous constraints under
+   predeclared tolerances; no unsupported target may disappear from success.
+5. Record go/no-go, model-capacity/estimator/conflict failures and remaining free
+   dimensions. This proves a bounded feasibility slice, not continual learning
+   or general Medicare fidelity; parent-to-child preservation is the 7D gate.
+
+## MVP delivery checklist (historical foundation and active evaluation)
 
 1. ~~Select one 2021 FFS 65+ chronic → hospitalization context.~~ **Done (Phase 0):**
    diabetes → all-cause IP; see `docs/phase0/`.
@@ -209,4 +376,7 @@ Exit criteria:
 7. ~~Produce 2–3 worlds with shared targets and different weak assumptions.~~
    **Done (Phase 5):** see `docs/phase5/`.
 8. ~~Freeze evaluation gates before iterative fitting.~~ **Done (Phase 5).**
-9. Independent held-out / research-utility evaluation and go/no-go (Phase 6).
+9. **Active:** independent held-out / research-utility evaluation and go/no-go
+   (Phase 6), with 7A correctness gates before affirmative release claims.
+10. **Planned next:** 7A–7F transition and the bounded joint + inferential
+    experiment above; completion of the earlier checklist does not complete it.

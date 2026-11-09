@@ -29,6 +29,31 @@ keywords:
 > **Boundary statement**  
 > The goal is **not** to reconstruct actual Medicare beneficiaries, reproduce individual claims or patient trajectories, or recover the full joint distribution of the real Medicare population. Synthetic results are not empirical Medicare estimates and do not substitute for analysis on authorized real data.
 
+## Canonical update — 2026-11-08
+
+This document preserves the November 6 proposal as design history; its
+repository snapshot and Phase 7 expansion outline are not current status.
+Following the [November 8 audit](audits/audit-for-project-realignement-20261108.md),
+[`SPEC.md`](../SPEC.md), [`ARCHITECTURE.md`](../ARCHITECTURE.md),
+[`ROADMAP.md`](../ROADMAP.md) and [`docs/goal.md`](goal.md) take precedence.
+
+The adopted long-term direction is a literature-constrained, continually
+calibrated **shared population model**, with immutable model/evidence versions,
+reproducible materialized datasets and derived research worlds. This replaces
+any implication that a shared reference model is itself a non-goal; it does
+**not** assert a unique, fully identified or representative Medicare joint
+distribution. Multiple worlds and all non-reconstruction/non-inference
+boundaries remain.
+
+Phase 6 independent evaluation is retained, with correctness hardening gating
+new convergence and calibrated-release claims. Planned Phase 7 now stages
+correctness → inferential IR → richer joint synthesis → continual calibration
+→ base/world separation → scaling. The first bounded experiment is joint +
+adjusted-logistic calibration in the existing 2021 FFS context, before bulk
+literature expansion. None of these new capabilities is implemented or validated
+by the documentation-only realignment; historical Phase 0–5 reports remain
+unchanged.
+
 ## Executive summary
 
 Medicare research often demands substantial up-front work: identifying appropriate Medicare data products, specifying beneficiary cohorts, understanding multiple claims grains and enrollment rules, developing code for longitudinal features and outcomes, and determining whether a methodological idea is feasible. Restricted data access, costly computing environments, governance procedures, and long setup cycles can prevent early experimentation. Public synthetic Medicare data reduce some barriers, but structural plausibility alone does not create a useful statistical environment for research.

@@ -1,8 +1,9 @@
 # ARCHITECTURE
 
-Last Reviewed: 2026-11-07
-Status: Active — structural core through Phase 5 MVP calibrated worlds;
-independent evaluation planned (Phase 6+)
+Last Reviewed: 2026-11-08 (static documentation realignment; no new test run)
+Status: Structural core through Phase 5 MVP worlds delivered; Phase 6 independent
+evaluation active; shared population-model architecture planned (Phase 7).
+Audit source: [November 8 realignment](docs/audits/audit-for-project-realignement-20261108.md).
 
 ## Current Repository
 
@@ -32,9 +33,15 @@ calibration targets without fitting holdout.
 Phase 5 (`docs/phase5/`) packages reference + alternative worlds and freezes
 evaluation gates without retuning against holdout.
 `TabDatSynthAdapter` / horizontal re-keying remain structural fixtures only.
-Planned next: independent held-out / research-utility evaluation (Phase 6).
-Prefer narrow modules; do not introduce a large hierarchical framework before
-Phase 6–7 justify it.
+Next: Phase 6 independent held-out / research-utility evaluation, with Phase 7A
+correctness hardening gating renewed convergence and calibrated-release claims.
+The audit identified full-sweep IPF convergence, missing-target success,
+fit/report population alignment and repeated holdout evaluation gaps. Existing
+reports remain historical artifacts, not validation of those fixes. The current
+generator does not encode joint age/sex/diabetes/HF effects, adjusted analysis,
+or a general parent-to-child calibrated model state.
+Prefer narrow modules and transparent conditional models; no large hierarchical
+framework or opaque network is required by this design.
 
 ## Component Boundaries
 
@@ -64,8 +71,9 @@ Phase 6–7 justify it.
   `medicare_synth/fixtures/evidence_corpus/`.
 - **Calibration engine** — `calibration.py` Level A baseline, Level B IPF
   reweighting (ESS/weight/infeasibility), Level C generator-parameter grid;
-  discrepancy moments evaluate on each finding's Evidence IR eligible cohort
-  search; holdout fit refused; `CalibrationRunManifest`;
+  discrepancy moments evaluate on each finding's Evidence IR eligible cohort,
+  but IPF fitting still uses the full beneficiary frame; holdout fit refused
+  (Level C nevertheless computes holdout per candidate); `CalibrationRunManifest`;
   `AGENT_ROLE_CONTRACTS` for review gates (engines agent-independent).
 - **Worlds** — `worlds.py` versioned MVP family presets, emit API, identical
   downstream `analyze_world_moments`, release manifests/limitations;
@@ -85,7 +93,12 @@ Responsibility sketch only; package layout may differ:
 
 | Boundary | Role |
 | --- | --- |
-| **Synthesis protocol** | MVP diabetes→IP conditional path implemented; richer joint models / multi-table families still planned |
+| **Correctness hardening (7A)** | Full-sweep residuals, approved-target coverage, fit/report cohort alignment, weights-only semantics and post-selection evaluation |
+| **Analysis compiler (7B)** | Executable effect/covariate/design contracts, supported estimator dispatch, compatibility/refusal; adjusted logistic MVP |
+| **Joint synthesis (7C)** | Transparent age/sex/diabetes/HF/IP conditionals, comorbidity and supported interactions |
+| **Evidence registry + model state (7D)** | Versioned evidence relationships, immutable parent/child models, warm starts, preservation/conflict/regression reports |
+| **Base/world/materialization (7E)** | Pinned shared base, cohort-conditioned/local/scenario derivatives, reproducible dataset sampling and lineage |
+| **Scaling (7F)** | Additional estimators, longitudinal contexts and sample sizes only behind independent evaluation gates |
 | **Evaluation (Phase 6)** | Independent held-out claims, synthetic known-truth, research-workflow utility, go/no-go |
 | **Agent harness** | Contracts delivered in Phase 4; orchestration remains optional around engines |
 | **Release/provenance** | Public calibrated release packaging still human-gated |
@@ -129,6 +142,72 @@ Beneficiary histories stay coherent subgraphs. Level B does not mutate
 records; Level C regenerates whole worlds under pinned seeds. Neither path may
 use holdout findings as fit targets.
 
+### Target population-model path (planned, not implemented)
+
+```text
+Reviewed evidence registry (immutable versions + relationships)
+        → Evidence IR + executable analysis compiler
+        → compatibility / conflict / transport approval
+        → new frozen corpus + pinned parent model
+        → joint generation + literature-analysis execution
+        → continual calibration + all-prior-target regression checks
+        → immutable child base-model candidate (not yet a public release)
+              ├─ general-population materialization
+              ├─ cohort-conditioned world → materialization
+              ├─ locally calibrated child world → materialization
+              └─ scenario / alternative world → materialization
+        → post-selection independent evaluation + workflow/sensitivity reports
+        → human promotion gate → approved model/world/dataset releases
+```
+
+This path extends rather than replaces the structural validators, Evidence IR,
+frozen corpus machinery, calibration ladder and MVP worlds. Package names and
+storage layout remain implementation choices, not APIs promised by this diagram.
+
+#### Ownership and version boundaries
+
+- **Evidence registry:** retain source anchors, extraction/review versions,
+  executable analysis definitions, uncertainty and dependence metadata. Record
+  compatible/overlapping/transport-dependent/contradictory/superseded links;
+  review determines base vs local applicability or alternative-world routing.
+  New evidence never mutates an already frozen corpus.
+- **Analysis compiler/executor:** owns eligibility, denominator, variables and
+  timing, scale, covariate coding/reference levels/interactions/transformations,
+  estimator dispatch, design requirements (sampling, weighting, matching,
+  censoring), and exact/approximate/non-executable compatibility. The fitting
+  and reporting paths must use the same semantics. A stored estimator name is
+  not sufficient; unsupported analyses are refused explicitly.
+- **Joint generator:** owns interpretable conditional relationships and coherent
+  beneficiary/claim subgraphs. It must express a relationship before calibration
+  can learn it. A fitted literature effect is not a generator parameter.
+- **Population-model state:** owns model ID/version/parent, structure/parameters,
+  cohort definitions, source/compiler/generator versions, corpus checksums and
+  roles, seeds, objective configuration, calibration history and evaluation.
+  Versions are immutable; rejected children do not overwrite parent releases.
+- **Continual calibrator:** warm-starts a child; executes declared analyses on
+  simulations (indirect inference / simulation-based minimum distance); compares
+  their estimates with evidence; reevaluates every prior active target. The
+  objective separates evidence discrepancy, preservation and structural terms.
+  Uncertainty and source dependence require an explicit policy; hard structural
+  invariants are not negotiable penalties. Coverage failures, conflict and
+  unapproved regression block success; justified supersession is recorded.
+- **World derivation:** cohort conditioning introduces no new constraints; local
+  calibration adds reviewed purpose-specific evidence to a pinned base; scenario
+  worlds expose weak assumptions. Each child owns its deltas and cannot mutate
+  the base or siblings. Current fixed presets are not yet this general layer.
+- **Materialization/export:** pins model/world, population, size, seed and export
+  version. Level B artifacts must retain weights and weighted-analysis semantics;
+  any unweighted resampling needs separate validation/provenance. Larger samples
+  reduce Monte Carlo noise, not uncertainty about unidentified relationships.
+- **Evaluation/promotion:** freeze selection before holdout measurement, disclose
+  prior exposure, and require human approval of new holdouts or released models.
+  Report target coverage, per-target residual/drift and uncertainty, structural
+  gates and workflow utility, not only aggregate MAE.
+
+See `ROADMAP.md` 7A–7F for ordering and exit gates; `SPEC.md` defines intended
+contracts. No schema, compiler, optimizer, model-state store or public API is
+changed by this documentation adoption.
+
 ## Core Invariants
 
 - Official CMS synthetic material remains immutable source; normalized values
@@ -144,6 +223,11 @@ use holdout findings as fit targets.
 - Evidence-calibrated releases additionally require: reviewed evidence IDs and
   roles; frozen train/holdout partitions before fit; hard structural gates;
   honest underidentification and non-representativeness labels.
+- A shared reference model is not a unique or representative real Medicare
+  joint distribution. Multiple compatible worlds and sensitivity analyses remain
+  necessary; additional literature need not monotonically improve realism.
+- Model updates preserve parent artifacts and disclose justified target drift;
+  local-world calibration cannot silently update the common base.
 - Agents propose; humans approve evidence records, estimand implementations,
   transport assumptions, calibration targets, holdout changes, and public
   calibrated releases.
