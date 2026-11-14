@@ -8,6 +8,7 @@ import hashlib
 import importlib.metadata
 import json
 import math
+import platform
 import subprocess
 import sys
 from pathlib import Path
@@ -161,6 +162,8 @@ def build_report() -> dict[str, Any]:
     "code_sha256": {path: _hash(ROOT / path) for path in files},
     "environment": {
       "python": sys.version.split()[0], "uv_lock_sha256": _hash(ROOT / "uv.lock"),
+      "uv_version": subprocess.check_output(["uv", "--version"], text=True).strip(),
+      "os": platform.system(), "os_release": platform.release(), "architecture": platform.machine(),
       "polars": importlib.metadata.version("polars"), "pydantic": importlib.metadata.version("pydantic"),
       "pyarrow": importlib.metadata.version("pyarrow"),
     },
