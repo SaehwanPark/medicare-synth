@@ -81,7 +81,8 @@ outcomes, not universal expected counts for every run configuration.
 - Validated predictive or risk-adjustment performance
 - Diagnosis-specific admission patterns
 - Causal effects, policy conclusions, or population-representative rates
-- That Phase 6 independent evaluation is finished (it remains active)
+- That the Phase 6 independent-fidelity question has been resolved (the
+  current disposition is no-go for lack of independent evidence)
 
 ## Reproduction (developer path)
 
@@ -89,7 +90,8 @@ There is no no-code calibrated download on the website. The Phase 5 summary is
 a historical record. Current code writes a separate v2 output with different
 evaluation semantics. Ask a developer to replay the original producer in a
 separate checkout; the [developer guide](../../developers/calibrated-worlds/)
-explains the boundary. A pinned Phase 6 evaluation report is still planned.
+explains the boundary. A [pinned Phase 6 report](https://github.com/SaehwanPark/medicare-synth/blob/main/docs/phase6/evaluation-v1.md)
+records a limited workflow check and an independent-fidelity no-go.
 
 For a literature-paired walkthrough (Andes MMWR prevalence in-domain vs Drye
 admission rates out-of-domain), see the checked-in example. Run it only in a

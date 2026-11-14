@@ -4,6 +4,11 @@
 
 ### Added
 
+- Frozen Phase 6 protocol and a versioned, replayed three-seed engineering and
+  workflow assessment (`docs/phase6/evaluation-v1.md`,
+  `reports/phase6/engineering-evaluation-v1.json`). Independent fidelity and
+  calibrated public release remain no-go; the prior holdout was exposed.
+
 - A Python pull-request and main-branch check installs the locked dependencies
   and runs the test suite, basedpyright, and ruff. Existing calibration tests
   retain their assertions while passing the configured type check. This gate

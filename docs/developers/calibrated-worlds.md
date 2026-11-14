@@ -42,8 +42,9 @@ The checked-in outputs below are historical artifacts, produced by commit
 output directory and uses different evaluation semantics. To replay the
 historical producer, use a separate detached worktree at `7673670` with its
 locked environment; that historical script overwrites its worktree's Phase 5
-reports. Do not treat a current-code recomputation as the same run. A pinned
-Phase 6 engineering/evaluation report remains planned.
+reports. Do not treat a current-code recomputation as the same run. The
+[Phase 6 evaluation report](https://github.com/SaehwanPark/medicare-synth/blob/main/docs/phase6/evaluation-v1.md)
+records the pinned replay and a no-go on independent fidelity.
 
 Historical artifacts (among others):
 
