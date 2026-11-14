@@ -137,6 +137,7 @@ def test_unplanned_only_text_does_not_trigger_planned_admission() -> None:
         time_unit="person_years",
         notes="Crude rate of unplanned acute admissions among diabetes.",
       ),
+      "analysis": finding.analysis.model_copy(update={"estimator": "events_per_time"}),
       "cohort": finding.cohort.model_copy(
         update={
           "exclusion_notes": None,
@@ -215,6 +216,7 @@ def test_executable_rate_counts_events_in_diabetes_stratum() -> None:
         time_unit="person_years",
         notes="All-cause IP claim events per 100 person-years among diabetes.",
       ),
+      "analysis": finding.analysis.model_copy(update={"estimator": "events_per_time"}),
       "cohort": finding.cohort.model_copy(
         update={"exclusion_notes": None, "inclusion_notes": None}
       ),

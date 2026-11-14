@@ -365,6 +365,7 @@ class EligibilityPlan(BaseModel):
   model_config = ConfigDict(frozen=True)
 
   age_minimum: int
+  age_maximum: int | None = None
   reference_year: int
   require_full_year_ab: bool
   require_zero_hmo_months: bool
@@ -517,6 +518,10 @@ def compile_finding(
       )
     )
 
+  if finding.population.age.minimum < 65:
+    issues.append(
+      _issue("AGE-UNSUPPORTED", "error", "The MVP context excludes beneficiaries under age 65")
+    )
   if finding.population.age.minimum != 65:
     issues.append(
       _issue(
@@ -603,6 +608,16 @@ def compile_finding(
         )
       )
 
+  if finding.analysis.estimator != estimator_method:
+    issues.append(
+      _issue(
+        "ESTIMATOR",
+        "error",
+        f"estimator {finding.analysis.estimator!r} is incompatible with "
+        f"{finding.estimand.type.value}; expected {estimator_method!r}",
+      )
+    )
+
   if finding.analysis.adjustment_set:
     issues.append(
       _issue(
@@ -625,6 +640,7 @@ def compile_finding(
 
   eligibility = EligibilityPlan(
     age_minimum=finding.population.age.minimum,
+    age_maximum=finding.population.age.maximum,
     reference_year=context_year,
     require_full_year_ab=finding.population.ffs_rule
     in {FfsRule.OPTION_B_FULL_YEAR, FfsRule.SOURCE_CUSTOM},
@@ -710,7 +726,20 @@ def _age_years(birth_col: str, year: int) -> pl.Expr:
   return (year - pl.col(birth_col).dt.year()).alias("age_end")
 
 
-def _flag_from_algorithm(algo: AlgorithmId, tables: Mapping[str, pl.DataFrame]) -> pl.DataFrame:
+def admissions_in_year(ip: pl.DataFrame, reference_year: int) -> pl.DataFrame:
+  """Select admissions in the pinned year; refuse unknown admission dates."""
+  if "clm_admsn_dt" not in ip.columns:
+    raise EvidenceIRError("inpatient_claims.clm_admsn_dt is required")
+  if ip.schema["clm_admsn_dt"] != pl.Date:
+    raise EvidenceIRError("inpatient_claims.clm_admsn_dt must be a date")
+  if ip["clm_admsn_dt"].null_count():
+    raise EvidenceIRError("inpatient_claims.clm_admsn_dt contains missing dates")
+  return ip.filter(pl.col("clm_admsn_dt").dt.year() == reference_year)
+
+
+def _flag_from_algorithm(
+  algo: AlgorithmId, tables: Mapping[str, pl.DataFrame], reference_year: int
+) -> pl.DataFrame:
   """Return DataFrame with bene_id + flag columns."""
   if algo == AlgorithmId.MBSF_SP_DIABETES_V1:
     cc = tables["mbsf_chronic_conditions"]
@@ -725,7 +754,7 @@ def _flag_from_algorithm(algo: AlgorithmId, tables: Mapping[str, pl.DataFrame]) 
       (pl.col("sp_chf").is_in(["1", "2"])).alias("flag"),
     )
   if algo == AlgorithmId.IP_CLAIM_PRESENCE_V1:
-    ip = tables["inpatient_claims"]
+    ip = admissions_in_year(tables["inpatient_claims"], reference_year)
     if ip.height == 0:
       return pl.DataFrame(
         {"bene_id": pl.Series([], dtype=pl.Utf8), "flag": pl.Series([], dtype=pl.Boolean)}
@@ -738,16 +767,102 @@ def _flag_from_algorithm(algo: AlgorithmId, tables: Mapping[str, pl.DataFrame]) 
   raise EvidenceIRError(f"cannot derive flag for algorithm {algo.value}")
 
 
+def validate_analysis_tables(
+  tables: Mapping[str, pl.DataFrame],
+  reference_year: int,
+  required_tables: tuple[str, ...],
+) -> None:
+  """Refuse ambiguous annual beneficiary grain and incomplete analysis inputs."""
+  required_columns: dict[str, tuple[str, ...]] = {
+    "beneficiary_summary": ("bene_id", "bene_birth_dt"),
+    "mbsf_base_enrollment": (
+      "bene_id", "rfrnc_yr", "bene_hi_cvrage_tot_mons",
+      "bene_smi_cvrage_tot_mons", "bene_hmo_cvrage_tot_mons",
+    ),
+    "mbsf_chronic_conditions": ("bene_id", "rfrnc_yr", "sp_diabetes", "sp_chf"),
+    "mbsf_part_c": ("bene_id", "rfrnc_yr", "bene_ma_cvrage_tot_mons"),
+    "inpatient_claims": ("bene_id", "clm_admsn_dt"),
+  }
+  for name in required_tables:
+    if name not in tables:
+      raise EvidenceIRError(f"missing required table: {name}")
+    table = tables[name]
+    for col in required_columns[name]:
+      if col not in table.columns:
+        raise EvidenceIRError(f"missing required field: {name}.{col}")
+      if table[col].null_count():
+        raise EvidenceIRError(f"missing values in {name}.{col}")
+    if name in {"beneficiary_summary", "mbsf_base_enrollment", "mbsf_chronic_conditions", "mbsf_part_c"}:
+      if table["bene_id"].n_unique() != table.height:
+        raise EvidenceIRError(f"ambiguous beneficiary-year grain in {name}")
+    if name in {"mbsf_base_enrollment", "mbsf_chronic_conditions", "mbsf_part_c"}:
+      if not table.schema["rfrnc_yr"].is_integer():
+        raise EvidenceIRError(f"{name}.rfrnc_yr must be an integer year")
+      if table.filter(pl.col("rfrnc_yr") != reference_year).height:
+        raise EvidenceIRError(f"{name}.rfrnc_yr must equal {reference_year}")
+  if "beneficiary_summary" in required_tables:
+    bene = tables["beneficiary_summary"]
+    if bene.schema["bene_birth_dt"] != pl.Date:
+      raise EvidenceIRError("beneficiary_summary.bene_birth_dt must be a date")
+    for name in ("mbsf_base_enrollment", "mbsf_chronic_conditions", "mbsf_part_c"):
+      if name in required_tables:
+        annual = tables[name]
+        if annual.height != bene.height or annual.join(
+          bene.select("bene_id"), on="bene_id", how="anti"
+        ).height:
+          raise EvidenceIRError(f"{name} beneficiary keys do not match beneficiary_summary")
+  if "mbsf_base_enrollment" in required_tables:
+    enrollment = tables["mbsf_base_enrollment"]
+    if "bene_ma_cvrage_tot_mons" in enrollment.columns and enrollment["bene_ma_cvrage_tot_mons"].null_count():
+      raise EvidenceIRError("missing values in mbsf_base_enrollment.bene_ma_cvrage_tot_mons")
+  for name, columns in (
+    ("mbsf_base_enrollment", ("bene_hi_cvrage_tot_mons", "bene_smi_cvrage_tot_mons", "bene_hmo_cvrage_tot_mons", "bene_ma_cvrage_tot_mons")),
+    ("mbsf_part_c", ("bene_ma_cvrage_tot_mons",)),
+  ):
+    if name not in required_tables:
+      continue
+    for col in columns:
+      if col not in tables[name].columns:
+        continue
+      if not tables[name].schema[col].is_integer() or tables[name].filter(
+        (pl.col(col) < 0) | (pl.col(col) > 12)
+      ).height:
+        raise EvidenceIRError(f"{name}.{col} must contain integer months in [0, 12]")
+  if "mbsf_chronic_conditions" in required_tables:
+    chronic = tables["mbsf_chronic_conditions"]
+    for col in ("sp_diabetes", "sp_chf"):
+      if chronic.filter(~pl.col(col).is_in(["0", "1", "2"])).height:
+        raise EvidenceIRError(f"unsupported chronic condition value in {col}")
+  if "inpatient_claims" in required_tables:
+    ip = tables["inpatient_claims"]
+    admissions_in_year(ip, reference_year)
+    if "beneficiary_summary" in required_tables and ip.join(
+      tables["beneficiary_summary"].select("bene_id"), on="bene_id", how="anti"
+    ).height:
+      raise EvidenceIRError("inpatient_claims contains unknown beneficiary keys")
+
+
 def eligible_bene_ids(
   tables: Mapping[str, pl.DataFrame],
   plan: EligibilityPlan,
 ) -> pl.DataFrame:
   """Return distinct ``bene_id`` rows matching an eligibility plan."""
+  required = ("beneficiary_summary", "mbsf_base_enrollment")
+  if "mbsf_part_c" in tables:
+    required += ("mbsf_part_c",)
+  validate_analysis_tables(tables, plan.reference_year, required)
   bene = tables["beneficiary_summary"]
   enr = tables["mbsf_base_enrollment"]
   joined = bene.join(enr, on="bene_id", how="inner")
+  if "mbsf_part_c" in tables:
+    part_c = tables["mbsf_part_c"].select(
+      "bene_id", pl.col("bene_ma_cvrage_tot_mons").alias("part_c_ma_months")
+    )
+    joined = joined.join(part_c, on="bene_id", how="inner")
   age = _age_years("bene_birth_dt", plan.reference_year)
   filtered = joined.with_columns(age).filter(pl.col("age_end") >= plan.age_minimum)
+  if plan.age_maximum is not None:
+    filtered = filtered.filter(pl.col("age_end") <= plan.age_maximum)
   if plan.require_full_year_ab:
     filtered = filtered.filter(
       (pl.col("bene_hi_cvrage_tot_mons") == 12)
@@ -756,7 +871,7 @@ def eligible_bene_ids(
   if plan.require_zero_hmo_months:
     hmo_cols = [
       c
-      for c in ("bene_hmo_cvrage_tot_mons", "bene_ma_cvrage_tot_mons")
+      for c in ("bene_hmo_cvrage_tot_mons", "bene_ma_cvrage_tot_mons", "part_c_ma_months")
       if c in filtered.columns
     ]
     for col in hmo_cols:
@@ -768,6 +883,8 @@ def eligible_bene_ids(
       raise EvidenceIRError(
         "sex_codes filter requires beneficiary_summary.bene_sex_ident_cd"
       )
+    if filtered["bene_sex_ident_cd"].null_count():
+      raise EvidenceIRError("sex_codes filter cannot use missing sex values")
     filtered = filtered.filter(pl.col("bene_sex_ident_cd").is_in(list(plan.sex_codes)))
   return filtered.select("bene_id").unique()
 
@@ -855,7 +972,22 @@ def execute_finding(
       errors=(f"missing required tables: {', '.join(missing)}",),
     )
 
-  eligible = _eligible_bene_ids(tables, compiled.eligibility)
+  try:
+    validate_analysis_tables(tables, context_year, compiled.compatibility.required_tables)
+    eligible = _eligible_bene_ids(tables, compiled.eligibility)
+  except EvidenceIRError as exc:
+    return ComparisonReport(
+      finding_id=finding.finding_id,
+      evidence_estimate=finding.result.estimate,
+      synthetic_estimate=None,
+      absolute_difference=None,
+      relative_difference=None,
+      n_eligible=0,
+      n_numerator=None,
+      executable=False,
+      compatibility=compiled.compatibility,
+      errors=(str(exc),),
+    )
   n_eligible = eligible.height
   if n_eligible == 0:
     return ComparisonReport(
@@ -875,7 +1007,7 @@ def execute_finding(
   try:
     if compiled.estimator.estimand_type == EstimandType.PREVALENCE:
       flags = _flag_from_algorithm(
-        compiled.derivation.numerator_algorithm, tables
+        compiled.derivation.numerator_algorithm, tables, context_year
       )
       joined = eligible.join(flags, on="bene_id", how="left").with_columns(
         pl.col("flag").fill_null(False)
@@ -885,10 +1017,10 @@ def execute_finding(
     elif compiled.estimator.estimand_type == EstimandType.BINARY_RISK:
       assert compiled.derivation.conditioning_algorithm is not None
       cond = _flag_from_algorithm(
-        compiled.derivation.conditioning_algorithm, tables
+        compiled.derivation.conditioning_algorithm, tables, context_year
       )
       out = _flag_from_algorithm(
-        compiled.derivation.numerator_algorithm, tables
+        compiled.derivation.numerator_algorithm, tables, context_year
       )
       joined = (
         eligible.join(cond.rename({"flag": "cond"}), on="bene_id", how="left")
@@ -912,7 +1044,7 @@ def execute_finding(
       stratum = eligible
       if compiled.derivation.conditioning_algorithm is not None:
         cond = _flag_from_algorithm(
-          compiled.derivation.conditioning_algorithm, tables
+          compiled.derivation.conditioning_algorithm, tables, context_year
         )
         stratum = (
           eligible.join(cond, on="bene_id", how="left")
@@ -930,7 +1062,7 @@ def execute_finding(
           "v0.1 rate execution supports inpatient claim-row events only "
           f"(got {compiled.derivation.numerator_algorithm.value})"
         )
-      ip = tables["inpatient_claims"]
+      ip = admissions_in_year(tables["inpatient_claims"], context_year)
       events = stratum.join(ip, on="bene_id", how="inner").height
       person_time = float(n_eligible)  # 1.0 year approx under Option B
       est = compiled.estimator.scale * (events / person_time)
