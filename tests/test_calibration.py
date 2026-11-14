@@ -155,6 +155,7 @@ def test_param_calibration_improves_without_using_holdout(corpus_and_path) -> No
   )
   assert manifest.holdout_finding_ids
   assert manifest.calibration_mae_after is not None
+  assert manifest.calibration_mae_before is not None
   assert manifest.calibration_mae_after < manifest.calibration_mae_before
 
 
@@ -193,18 +194,20 @@ def test_discrepancy_moments_respect_finding_eligibility() -> None:
 
 def test_manifest_deterministic_checksum(corpus_and_path) -> None:
   corpus, path = corpus_and_path
-  kwargs = dict(
-    run_id="det",
-    level=CalibrationLevel.A_NONE,
-    corpus=corpus,
-    corpus_path=path,
-    seed=0,
-    method_hyperparameters={},
-    diagnostics={"ok": True},
-    calibration_mae_before=0.1,
-    calibration_mae_after=0.1,
-  )
-  a = build_run_manifest(**kwargs)
-  b = build_run_manifest(**kwargs)
+  def make_manifest():
+    return build_run_manifest(
+      run_id="det",
+      level=CalibrationLevel.A_NONE,
+      corpus=corpus,
+      corpus_path=path,
+      seed=0,
+      method_hyperparameters={},
+      diagnostics={"ok": True},
+      calibration_mae_before=0.1,
+      calibration_mae_after=0.1,
+    )
+
+  a = make_manifest()
+  b = make_manifest()
   assert a.model_dump() == b.model_dump()
   assert a.sha256() == b.sha256()
