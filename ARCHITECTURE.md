@@ -36,10 +36,10 @@ evaluation gates without retuning against holdout.
 Next: Phase 6 independent held-out / research-utility evaluation, with Phase 7A
 correctness hardening gating renewed convergence and calibrated-release claims.
 The audit identified full-sweep IPF convergence, missing-target success,
-fit/report population alignment and repeated holdout evaluation gaps. Supported
-fit/report eligibility and reference-year alignment is now implemented, while
-the remaining gates are open. Existing reports remain historical artifacts, not
-validation of those fixes. The current
+fit/report population alignment and repeated holdout evaluation gaps. Current
+code implements those numerical and partition boundaries with versioned v2
+worlds; the Phase 6 replay and evidence disposition remain open. Existing
+reports remain historical artifacts, not validation of those fixes. The current
 generator does not encode joint age/sex/diabetes/HF effects, adjusted analysis,
 or a general parent-to-child calibrated model state.
 Prefer narrow modules and transparent conditional models; no large hierarchical
@@ -75,10 +75,12 @@ framework or opaque network is required by this design.
   reweighting (ESS/weight/infeasibility), Level C generator-parameter grid;
   versioned target plans bind IPF fitting and discrepancy moments to each
   finding's Evidence IR eligibility and reference year; annual grain and claim
-  dates are checked. Full-sweep convergence and complete-coverage gating remain
-  open; holdout fit refused (Level C nevertheless computes holdout per
-  candidate); `CalibrationRunManifest`;
-  `AGENT_ROLE_CONTRACTS` for review gates (engines agent-independent).
+  dates are checked. Final full-sweep residuals govern convergence, complete
+  coverage gates candidate ranking, and Level C evaluates holdout only after
+  its frozen fit is verified. Calibrated Level B worlds require validated
+  beneficiary weights and an explicitly labeled raw table path. Reports and
+  manifests retain per-target status and diagnostics; `AGENT_ROLE_CONTRACTS`
+  encode review gates (engines agent-independent).
 - **Worlds** — `worlds.py` versioned MVP family presets, emit API, identical
   downstream `analyze_world_moments`, release manifests/limitations;
   configs under `configs/worlds/`.
@@ -97,7 +99,7 @@ Responsibility sketch only; package layout may differ:
 
 | Boundary | Role |
 | --- | --- |
-| **Correctness hardening (7A)** | Full-sweep residuals, approved-target coverage, fit/report cohort alignment, weights-only semantics and post-selection evaluation |
+| **Correctness hardening (7A)** | Core residual, coverage, cohort, weight and holdout safeguards implemented; corrected replay and review still required |
 | **Analysis compiler (7B)** | Executable effect/covariate/design contracts, supported estimator dispatch, compatibility/refusal; adjusted logistic MVP |
 | **Joint synthesis (7C)** | Transparent age/sex/diabetes/HF/IP conditionals, comorbidity and supported interactions |
 | **Evidence registry + model state (7D)** | Versioned evidence relationships, immutable parent/child models, warm starts, preservation/conflict/regression reports |
@@ -137,9 +139,9 @@ Reviewed finding JSON
 Frozen corpus (calibration partition)
         → Level A discrepancy baseline
         → Level B reweight (weights only) and/or
-          Level C generator-parameter search
-        → CalibrationRunManifest + diagnostics
-        → holdout evaluated, never fit
+          Level C calibration-only generator-parameter search
+        → freeze selected candidate and verify complete targets
+        → separate holdout evaluation + CalibrationRunManifest + diagnostics
 ```
 
 Beneficiary histories stay coherent subgraphs. Level B does not mutate

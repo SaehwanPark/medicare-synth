@@ -165,6 +165,14 @@ class DiscrepancyRow(BaseModel):
   compatibility: str | None = None
 
 
+class TargetCoverageError(CalibrationError):
+  """Required target coverage failed; rows retain machine-readable reasons."""
+
+  def __init__(self, message: str, rows: tuple[DiscrepancyRow, ...]) -> None:
+    super().__init__(message)
+    self.rows = rows
+
+
 class DiscrepancyReport(BaseModel):
   model_config = ConfigDict(frozen=True)
 
@@ -513,7 +521,10 @@ def _target_row(
     absolute_difference=None if residual is None else round(residual, 12),
     partition=partition,
     status=status,
-    reason="empty denominator or zero denominator weight" if residual is None else None,
+    reason=(
+      "empty denominator or zero denominator weight" if residual is None else
+      "residual exceeds solver tolerance" if status == "outside_tolerance" else None
+    ),
     denominator_count=count,
     denominator_weight=round(weight_sum, 12),
     tolerance=tolerance,
@@ -541,9 +552,7 @@ def discrepancy_for_findings(
   for finding in findings:
     try:
       target = moment_target_from_finding(finding, context_year=context_year)
-      framed = _feature_frame_for_target(tables, target)
-      rows.append(_target_row(framed.join(w_all, on="bene_id", how="inner"), target, partition))
-    except CalibrationError as exc:
+    except EvidenceIRError as exc:
       rows.append(DiscrepancyRow(
         finding_id=finding.finding_id,
         evidence_estimate=finding.result.estimate,
@@ -554,6 +563,9 @@ def discrepancy_for_findings(
         reason=str(exc),
         compatibility=finding.comparability.grade.value,
       ))
+      continue
+    framed = _feature_frame_for_target(tables, target)
+    rows.append(_target_row(framed.join(w_all, on="bene_id", how="inner"), target, partition))
   return DiscrepancyReport.from_rows(rows)
 
 
@@ -778,7 +790,27 @@ def calibration_targets_from_corpus(
   findings = [
     load_corpus_finding(corpus, fid, fixtures_root=fixtures_root) for fid in ids
   ]
-  return tuple(moment_target_from_finding(f) for f in findings)
+  targets: list[MomentTarget] = []
+  coverage: list[DiscrepancyRow] = []
+  for finding in findings:
+    try:
+      targets.append(moment_target_from_finding(finding))
+      status, reason = "unassessed", "fit not run"
+    except EvidenceIRError as exc:
+      status, reason = "unsupported", str(exc)
+    coverage.append(DiscrepancyRow(
+      finding_id=finding.finding_id,
+      evidence_estimate=finding.result.estimate,
+      synthetic_estimate=None,
+      absolute_difference=None,
+      partition=PartitionName.CALIBRATION,
+      status=status,
+      reason=reason,
+      compatibility=finding.comparability.grade.value,
+    ))
+  if len(targets) != len(findings):
+    raise TargetCoverageError("required calibration target is unsupported", tuple(coverage))
+  return tuple(targets)
 
 
 def level_a_baseline(
@@ -957,17 +989,27 @@ def evaluate_frozen_params(
     or _findings_hash(cal_findings) != result.calibration_findings_sha256
   ):
     raise CalibrationError("evaluation calibration targets differ from frozen fit")
+  baseline_world = generate_diabetes_ip_world(result.baseline_params)
+  verified_baseline = discrepancy_for_findings(
+    baseline_world.tables(), cal_findings, partition=PartitionName.CALIBRATION
+  )
+  if verified_baseline != result.baseline:
+    raise CalibrationError("frozen baseline no longer matches its fit report")
+  frozen_world = generate_diabetes_ip_world(result.fitted_params)
+  verified_fit = discrepancy_for_findings(
+    frozen_world.tables(), cal_findings, partition=PartitionName.CALIBRATION
+  )
+  if verified_fit.mean_absolute_error is None or verified_fit != result.fitted:
+    raise CalibrationError("frozen candidate no longer matches its complete fit report")
   hold_findings = load_partition_findings(
     corpus, PartitionName.HOLDOUT, fixtures_root=fixtures_root
   )
   return ParamEvaluation(
     holdout_baseline=discrepancy_for_findings(
-      generate_diabetes_ip_world(result.baseline_params).tables(),
-      hold_findings, partition=PartitionName.HOLDOUT,
+      baseline_world.tables(), hold_findings, partition=PartitionName.HOLDOUT,
     ),
     holdout_fitted=discrepancy_for_findings(
-      generate_diabetes_ip_world(result.fitted_params).tables(),
-      hold_findings, partition=PartitionName.HOLDOUT,
+      frozen_world.tables(), hold_findings, partition=PartitionName.HOLDOUT,
     ),
   )
 

@@ -24,14 +24,25 @@
 
 ### Fixed
 
+- Level B now evaluates every target after each complete rake sweep, records
+  tolerance/status/support and refuses to package a nonconverged result. Level C
+  rejects incomplete candidates, retains partial MAE only as a diagnostic, and
+  evaluates holdout only after the calibration-only candidate is frozen and
+  verified. Level B v2 worlds require validated beneficiary weights with key,
+  method, ESS and hash; raw record access is explicitly labeled. Manifest schema
+  is 0.2 and corrected world IDs use v2. The historical reports, corpus and
+  exposed holdout remain unchanged; this is not an independent fidelity finding.
+  Regression coverage: `tests/test_calibration_safety.py`, `tests/test_worlds.py`.
+
 - Supported calibration target plans now carry the Evidence IR eligibility
   into fitting and reporting; inpatient flags and event counts use admissions
   in the reference year. Ambiguous annual grain, missing required fields and
   inconsistent estimator declarations are refused. `MomentTarget` now requires
   a version-1 eligibility plan; rebuild older unscoped targets from findings.
-  Full-sweep convergence, missing-target success, weights-only consumer safety
-  and candidate-by-candidate holdout evaluation remain open. Historical corpus
-  and reports are unchanged (`tests/test_target_contract.py`).
+  At that slice, full-sweep convergence, missing-target success, weights-only
+  consumer safety and candidate-by-candidate holdout evaluation remained open;
+  the subsequent fix above addresses them. Historical corpus and reports are
+  unchanged (`tests/test_target_contract.py`).
 
 - Calibration discrepancy moments now evaluate on each finding's Evidence IR
   eligible cohort (age / Option-B / sex), matching `execute_finding` instead of

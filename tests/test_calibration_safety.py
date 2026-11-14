@@ -11,6 +11,7 @@ from medicare_synth.calibration import (
   calibrate_generator_params,
   calibrate_reweight,
   discrepancy_for_findings,
+  evaluate_frozen_params,
   load_default_corpus,
 )
 from medicare_synth.evidence_corpus import PartitionName, load_partition_findings
@@ -112,6 +113,24 @@ def test_fit_never_loads_holdout_or_diagnostic(monkeypatch: pytest.MonkeyPatch) 
   assert result.fitted_params
 
 
+def test_changed_frozen_candidate_is_refused_before_holdout(monkeypatch: pytest.MonkeyPatch) -> None:
+  corpus, _ = load_default_corpus()
+  result = calibrate_generator_params(
+    default_baseline_params(n_beneficiaries=500, seed=42), corpus,
+    diabetes_values=(0.277,), hf_values=(0.12,), ip_diab_values=(0.13,),
+  )
+  changed = result.model_copy(update={"fitted_params": result.fitted_params.model_copy(
+    update={"diabetes_prevalence": 0.0}
+  )})
+  original = calibration.load_partition_findings
+  def no_holdout(corpus, partition, **kwargs):
+    assert partition == PartitionName.CALIBRATION
+    return original(corpus, partition, **kwargs)
+  monkeypatch.setattr(calibration, "load_partition_findings", no_holdout)
+  with pytest.raises(CalibrationError, match="frozen candidate"):
+    evaluate_frozen_params(changed, corpus)
+
+
 @pytest.mark.parametrize("defect", ["missing", "duplicate", "nan", "inf", "negative", "extra", "null", "overflow"])
 def test_invalid_weights_are_never_silently_joined(defect: str) -> None:
   corpus, _ = load_default_corpus()
@@ -134,6 +153,30 @@ def test_invalid_weights_are_never_silently_joined(defect: str) -> None:
     ).drop("index")
   with pytest.raises(CalibrationError, match="weight"):
     discrepancy_for_findings(tables, findings, partition=PartitionName.CALIBRATION, weights=weights)
+
+
+def test_unsupported_required_target_reports_complete_coverage(
+  monkeypatch: pytest.MonkeyPatch,
+) -> None:
+  from medicare_synth.calibration import TargetCoverageError
+
+  corpus, _ = load_default_corpus()
+  original = calibration.load_corpus_finding
+  target_id = corpus.finding_ids(PartitionName.CALIBRATION)[0]
+  def incompatible(corpus, finding_id, **kwargs):
+    finding = original(corpus, finding_id, **kwargs)
+    if finding_id == target_id:
+      return finding.model_copy(update={"analysis": finding.analysis.model_copy(
+        update={"estimator": "logistic_regression"}
+      )})
+    return finding
+  monkeypatch.setattr(calibration, "load_corpus_finding", incompatible)
+  world = generate_diabetes_ip_world(default_baseline_params(n_beneficiaries=100, seed=42))
+  with pytest.raises(TargetCoverageError) as error:
+    calibrate_reweight(world.tables(), corpus)
+  assert len(error.value.rows) == len(corpus.finding_ids(PartitionName.CALIBRATION))
+  bad = next(row for row in error.value.rows if row.finding_id == target_id)
+  assert bad.status == "unsupported" and bad.reason and "ESTIMATOR" in bad.reason
 
 
 def test_partial_score_is_diagnostic_only() -> None:

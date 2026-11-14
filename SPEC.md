@@ -105,13 +105,14 @@ search against the **calibration** partition only. Holdout is evaluate-only.
 Deterministic `CalibrationRunManifest` and typed `AGENT_ROLE_CONTRACTS` encode
 review gates; engines run without agents. See [`docs/phase4/`](docs/phase4/).
 
-**MVP calibrated worlds (Phase 5):** `medicare_synth.worlds` emits family
-`mvp-2021-om-ffs-diabetes-ip-worlds-v1` (reweight reference, generator
-reference, alternate free `P(IP|no diabetes)`) against shared frozen
-calibration targets. `medicare_synth.evaluation` freezes hard structural /
-holdout-isolation gates and graded metrics before further fitting. Identical
-`analyze_world_moments` analysis runs in each world. See
-[`docs/phase5/`](docs/phase5/).
+**MVP calibrated worlds (Phase 5):** historical family
+`mvp-2021-om-ffs-diabetes-ip-worlds-v1` remains preserved. The corrected
+`medicare_synth.worlds` family uses a distinct `...-worlds-v2` identity
+(reweight reference, generator reference, alternate free `P(IP|no diabetes)`)
+against the same frozen calibration targets. `WorldRelease.analyze` applies
+required weights; the previously exposed holdout is evaluated only after fit.
+`medicare_synth.evaluation` retains the historical freeze. See
+[`docs/phase5/`](docs/phase5/) and `tests/test_calibration_safety.py`.
 
 **Near-term capability targets:**
 
@@ -121,36 +122,35 @@ holdout-isolation gates and graded metrics before further fitting. Identical
 | Estimand compiler | **Delivered (v0.1 crude)** — eligibility → derivation → estimator → compatibility → comparison |
 | Evidence corpus | **Delivered (v1 freeze)** — train/holdout/diagnostic/excluded registry with checksums |
 | Calibration ladder | **Delivered A–C** — baseline / reweight / generator-param search; hierarchical methods still later |
-| Multi-world releases | **Delivered (v1 family)** — shared targets; documented weak-assumption variation |
+| Multi-world releases | **Historical v1; corrected v2 code** — shared targets; documented weak-assumption variation |
 | Evaluation | **Freeze delivered (Phase 5)** — hard gates + graded metrics; Phase 6 owns independent claims |
 | Agent assist | Discovery/extraction/formalization help with human approval gates; engines run without agents |
 
 ### Audit constraints on current claims
 
 The November 8 audit is static evidence, not a new test run. Phase 4/5 delivery
-history remains intact, but stored `converged` flags and MAE improvement do not
-resolve the following correctness and interpretation gaps:
+history remains intact; its stored `converged` flags and MAE improvement are not
+retroactively corrected. Current correctness and interpretation boundaries are:
 
-- IPF checks residuals immediately after each rake, not all targets after a
-  complete sweep. Final-weight residuals must govern convergence (planned 7A).
-- Missing/unsupported targets are counted but omitted from computable-only MAE;
-  approved-target coverage must gate success, not just the aggregate metric.
+- IPF now checks all target residuals on the final weights after each full
+  sweep; a nonconverged fit cannot become a Level B world.
+- Complete target coverage gates Level C selection; partial MAE is separately
+  identified as diagnostic and cannot drive selection.
 - Supported target plans now carry finding-specific eligibility into IPF and
   discrepancy reporting, with annual input grain and admission-year checks
-  (`tests/test_target_contract.py`). Complete-coverage and final-sweep checks
-  remain required before renewed calibration claims.
+  (`tests/test_target_contract.py`); `tests/test_calibration_safety.py` covers
+  complete-coverage and final-sweep checks.
 - Level B leaves records unchanged: calibrated use requires weights and weighted
   analyses; it is not an ordinary unweighted calibrated dataset.
-- Level C excludes holdout from its selection objective but computes it per
-  candidate. Defer evaluation until candidate selection is frozen and disclose
-  earlier exposure before asserting independent evaluation.
+- Level C freezes its calibration-only selected candidate before separate holdout
+  evaluation. Earlier holdout exposure remains; it is not independent evidence.
 - Current HF generation is independent of diabetes, and age/sex do not drive
   clinical outcomes. General adjusted relationships and parent-model updates
   are not implemented.
 
-These gaps gate renewed fidelity/convergence claims and any affirmative Phase 6
-calibrated-release decision; fixes and corrected reports need a separate code
-slice. No historical report or frozen corpus is silently repaired here.
+These checks do not establish population fidelity or an affirmative Phase 6
+calibrated-release decision. A pinned corrected evaluation report remains work
+for Phase 6. No historical report or frozen corpus is silently repaired.
 
 **Non-goals (program-wide):** recover individuals or the full real joint;
 treat literature match or increased literature volume as representativeness or
