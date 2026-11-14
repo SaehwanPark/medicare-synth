@@ -14,6 +14,7 @@ from medicare_synth.calibration import (
   build_run_manifest,
   calibrate_generator_params,
   calibrate_reweight,
+  evaluate_frozen_params,
   level_a_baseline,
   load_default_corpus,
   structural_valid,
@@ -133,7 +134,8 @@ def test_param_calibration_improves_without_using_holdout(corpus_and_path) -> No
 
   # Holdout is reported but was not an optimization target: search_trace MAEs
   # are calibration-only.
-  assert all(isinstance(p.calibration_mae, float) for p in result.search_trace)
+  assert all(isinstance(p.calibration_mae, float) for p in result.search_trace if p.eligible)
+  holdout = evaluate_frozen_params(result, corpus)
   manifest = build_run_manifest(
     run_id="test-params",
     level=CalibrationLevel.C_GENERATOR_PARAMS,
@@ -148,8 +150,8 @@ def test_param_calibration_improves_without_using_holdout(corpus_and_path) -> No
     diagnostics={"n_search_points": len(result.search_trace)},
     calibration_mae_before=result.baseline.mean_absolute_error,
     calibration_mae_after=result.fitted.mean_absolute_error,
-    holdout_mae_before=result.holdout_baseline.mean_absolute_error,
-    holdout_mae_after=result.holdout_fitted.mean_absolute_error,
+    holdout_mae_before=holdout.holdout_baseline.mean_absolute_error,
+    holdout_mae_after=holdout.holdout_fitted.mean_absolute_error,
     structural_valid_flag=True,
     notes=("Holdout MAE reported only; not used in search objective.",),
   )

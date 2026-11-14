@@ -221,26 +221,23 @@ world manifests; existing `tests/test_calibration.py` / evaluation tests.
 
 Required outputs and acceptance:
 
-- **Full-sweep IPF convergence:** after each complete sweep, reevaluate every
-  approved target on the final weights; report convergence only when all
-  residuals satisfy the declared tolerance. Include coupled constraints where a
-  later rake disturbs an earlier one, iteration exhaustion, and infeasibility.
-- **No silent missing-target success:** unsupported/undefined approved targets,
-  empty eligible cohorts, or absent support produce explicit failure or unmet
-  status. A lower MAE on only the computable subset is not success; report target
-  coverage and per-target status alongside any aggregate score.
+- **Full-sweep IPF convergence:** implemented in the current code: after each
+  sweep, every approved target is reevaluated on final weights. Regression tests
+  cover coupled constraints, iteration exhaustion and infeasibility.
+- **No silent missing-target success:** current code rejects incomplete candidates
+  and reports target status/reasons. Computable-subset MAE remains a diagnostic
+  and does not drive selection (`tests/test_calibration_safety.py`).
 - **Population alignment:** supported findings now carry executable eligibility
   into fitting and reporting, with admission-year filtering and refusal of
   ambiguous annual inputs (`tests/test_target_contract.py`). Restricted
   age/enrollment/sex cohorts and conditional denominators have regression
-  coverage. Final-sweep convergence on that same target plan remains open.
-- **Weighted artifact semantics:** Level B remains records + beneficiary weights
-  with ESS/weight diagnostics and weighted-analysis requirements. Do not label
-  unchanged tables as an ordinary calibrated sample. Any later resampling is a
-  separate, validated materialization with its own provenance.
-- **Holdout isolation:** remove candidate-by-candidate holdout evaluation; freeze
-  candidate selection on calibration evidence before reporting approved
-  evaluation results. Record prior exposure and forbid tuning from those results.
+  coverage. Final-sweep convergence uses that same target plan.
+- **Weighted artifact semantics:** v2 Level B packages unchanged raw records plus
+  validated beneficiary weights, key, method, weight hash and ESS diagnostics;
+  calibrated analysis requires those weights. No implicit resampling.
+- **Holdout isolation:** Level C freezes a calibration-only candidate before
+  separate holdout evaluation. Earlier exposure is documented and remains a
+  limitation; independent-evidence decisions remain Phase 6 work.
 - Preserve historical reports; issue versioned corrected runs with explicit
   differences. Structural, determinism, and corpus-mutation gates still apply.
 

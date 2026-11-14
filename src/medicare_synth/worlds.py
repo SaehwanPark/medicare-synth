@@ -10,25 +10,30 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from enum import Enum
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 import polars as pl
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from medicare_synth.calibration import (
   CalibrationLevel,
   CalibrationRunManifest,
   DiscrepancyReport,
+  _findings_hash,
   assert_calibration_partition_only,
   build_run_manifest,
   calibrate_generator_params,
   calibrate_reweight,
   discrepancy_for_findings,
+  effective_sample_size,
+  evaluate_frozen_params,
   level_a_baseline,
   load_default_corpus,
   structural_valid,
+  validate_beneficiary_weights,
 )
 from medicare_synth.evaluation import (
   EvaluationFreeze,
@@ -38,6 +43,7 @@ from medicare_synth.evaluation import (
 from medicare_synth.evidence_corpus import (
   EvidenceCorpus,
   PartitionName,
+  load_corpus,
   load_partition_findings,
   sha256_file,
 )
@@ -48,8 +54,8 @@ from medicare_synth.synthesis import (
   generate_diabetes_ip_world,
 )
 
-WORLDS_SCHEMA_VERSION = "0.1"
-MVP_WORLD_FAMILY_ID = "mvp-2021-om-ffs-diabetes-ip-worlds-v1"
+WORLDS_SCHEMA_VERSION = "0.2"
+MVP_WORLD_FAMILY_ID = "mvp-2021-om-ffs-diabetes-ip-worlds-v2"
 
 
 class WorldsError(EvidenceIRError):
@@ -101,6 +107,12 @@ class NondegeneracyReport(BaseModel):
   warnings: tuple[str, ...] = ()
 
 
+def _weights_sha256(weights: pl.DataFrame) -> str:
+  payload = weights.select("bene_id", "weight").sort("bene_id").to_dicts()
+  raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+  return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
 class WorldRelease(BaseModel):
   """One emitted calibrated (or baseline-packaged) world with provenance."""
 
@@ -122,6 +134,8 @@ class WorldRelease(BaseModel):
   params: ConditionalWorldParams
   world: ConditionalWorld
   weights: pl.DataFrame | None = None
+  weight_key: str | None = None
+  weight_method: str | None = None
   calibration_baseline: DiscrepancyReport
   calibration_fitted: DiscrepancyReport
   holdout_report: DiscrepancyReport
@@ -131,8 +145,82 @@ class WorldRelease(BaseModel):
   limitations: tuple[str, ...]
   improved_calibration: bool
 
-  def tables(self) -> dict[str, pl.DataFrame]:
+  @model_validator(mode="after")
+  def _validate_weight_contract(self) -> WorldRelease:
+    self._check_weight_contract()
+    return self
+
+  def _check_weight_contract(self) -> None:
+    expected_level = (
+      CalibrationLevel.B_REWEIGHT if self.method == WorldMethod.REWEIGHT
+      else CalibrationLevel.C_GENERATOR_PARAMS
+    )
+    if self.calibration_level != expected_level:
+      raise ValueError("world method and calibration level must agree")
+    if (
+      not self.calibration_finding_ids
+      or tuple(row.finding_id for row in self.calibration_fitted.rows) != self.calibration_finding_ids
+      or self.calibration_fitted.n_missing
+      or self.calibration_fitted.mean_absolute_error is None
+    ):
+      raise ValueError("calibrated release requires complete approved target coverage")
+    if self.calibration_level == CalibrationLevel.B_REWEIGHT:
+      if any(row.status != "matched" for row in self.calibration_fitted.rows):
+        raise ValueError("Level B calibrated release requires all final targets matched")
+      if self.weights is None or self.weight_key != "bene_id" or not self.weight_method:
+        raise ValueError("Level B calibrated release requires weights, key and method")
+      validate_beneficiary_weights(self.world.beneficiary_summary, self.weights)
+      ess = effective_sample_size(self.weights["weight"])
+      if self.nondegeneracy.ess is None or not math.isclose(self.nondegeneracy.ess, ess, rel_tol=1e-10):
+        raise ValueError("Level B calibrated release ESS must match its weights")
+      minimum = float(self.weights["weight"].min())  # type: ignore[arg-type]
+      maximum = float(self.weights["weight"].max())  # type: ignore[arg-type]
+      if (
+        self.nondegeneracy.min_weight is None or self.nondegeneracy.max_weight is None
+        or not math.isclose(self.nondegeneracy.min_weight, minimum, rel_tol=1e-10, abs_tol=1e-12)
+        or not math.isclose(self.nondegeneracy.max_weight, maximum, rel_tol=1e-10, abs_tol=1e-12)
+      ):
+        raise ValueError("Level B weight range must match its weights")
+      diagnostics = self.run_manifest.diagnostics
+      if diagnostics.get("converged") is not True:
+        raise ValueError("Level B calibrated release requires a converged solver")
+      if (
+        diagnostics.get("weight_key") != self.weight_key
+        or diagnostics.get("weight_method") != self.weight_method
+        or diagnostics.get("weights_sha256") != _weights_sha256(self.weights)
+      ):
+        raise ValueError("Level B weight metadata must match the packaged weights")
+
+  def tables(self, *, raw: bool = False) -> dict[str, pl.DataFrame]:
+    if self.calibration_level == CalibrationLevel.B_REWEIGHT and not raw:
+      raise WorldsError(
+        "Level B records are raw; request tables(raw=True) and use beneficiary weights"
+      )
     return self.world.tables()
+
+  def analyze(self, corpus: EvidenceCorpus, *, fixtures_root: Path | None = None) -> tuple[DiscrepancyReport, DiscrepancyReport]:
+    try:
+      self._check_weight_contract()
+    except ValueError as exc:
+      raise WorldsError(str(exc)) from exc
+    if (
+      corpus.corpus_id != self.corpus_id
+      or corpus.context_id != self.context_id
+      or corpus.finding_ids(PartitionName.CALIBRATION) != self.calibration_finding_ids
+      or corpus.finding_ids(PartitionName.HOLDOUT) != self.holdout_finding_ids
+    ):
+      raise WorldsError("analysis corpus and partitions must match the frozen world")
+    for partition, key in (
+      (PartitionName.CALIBRATION, "calibration_findings_sha256"),
+      (PartitionName.HOLDOUT, "holdout_findings_sha256"),
+    ):
+      findings = load_partition_findings(corpus, partition, fixtures_root=fixtures_root)
+      if _findings_hash(findings) != self.run_manifest.diagnostics.get(key):
+        raise WorldsError(f"analysis {partition.value} findings differ from the frozen world")
+    return analyze_world_moments(
+      self.world.tables(), corpus, weights=self.weights,
+      calibration_level=self.calibration_level, fixtures_root=fixtures_root,
+    )
 
   def sha256(self) -> str:
     payload = {
@@ -142,6 +230,9 @@ class WorldRelease(BaseModel):
       "evaluation_freeze_id": self.evaluation_freeze_id,
       "calibration_finding_ids": list(self.calibration_finding_ids),
       "method": self.method.value,
+      "weight_key": self.weight_key,
+      "weight_method": self.weight_method,
+      "weights_sha256": _weights_sha256(self.weights) if self.weights is not None else None,
       "params": self.params.model_dump(mode="json"),
       "calibration_mae_before": self.calibration_baseline.mean_absolute_error,
       "calibration_mae_after": self.calibration_fitted.mean_absolute_error,
@@ -235,7 +326,7 @@ def mvp_world_presets() -> tuple[WorldPreset, ...]:
   """Prespecified Phase 5 family: shared targets, distinct free assumptions."""
   return (
     WorldPreset(
-      world_id="mvp-w1-reweight-v1",
+      world_id="mvp-w1-reweight-v2",
       label="reference_reweight",
       method=WorldMethod.REWEIGHT,
       calibration_level=CalibrationLevel.B_REWEIGHT,
@@ -248,7 +339,7 @@ def mvp_world_presets() -> tuple[WorldPreset, ...]:
       ),
     ),
     WorldPreset(
-      world_id="mvp-w2-generator-v1",
+      world_id="mvp-w2-generator-v2",
       label="reference_generator",
       method=WorldMethod.GENERATOR_PARAMS,
       calibration_level=CalibrationLevel.C_GENERATOR_PARAMS,
@@ -259,7 +350,7 @@ def mvp_world_presets() -> tuple[WorldPreset, ...]:
       notes=("Discrete search over diabetes / HF / P(IP|diabetes).",),
     ),
     WorldPreset(
-      world_id="mvp-w3-generator-high-bg-ip-v1",
+      world_id="mvp-w3-generator-high-bg-ip-v2",
       label="alt_background_ip",
       method=WorldMethod.GENERATOR_PARAMS,
       calibration_level=CalibrationLevel.C_GENERATOR_PARAMS,
@@ -362,8 +453,11 @@ def analyze_world_moments(
   *,
   weights: pl.DataFrame | None = None,
   fixtures_root: Path | None = None,
+  calibration_level: CalibrationLevel | None = None,
 ) -> tuple[DiscrepancyReport, DiscrepancyReport]:
-  """Identical downstream analysis across worlds: calibration + holdout MAE."""
+  """Analyze records; Level B calibrated analysis requires beneficiary weights."""
+  if calibration_level == CalibrationLevel.B_REWEIGHT and weights is None:
+    raise WorldsError("Level B calibrated analysis requires beneficiary weights")
   cal_findings = load_partition_findings(
     corpus, PartitionName.CALIBRATION, fixtures_root=fixtures_root
   )
@@ -400,9 +494,20 @@ def emit_world(
   ip_diab_values: Sequence[float] | None = None,
 ) -> WorldRelease:
   """Emit one world from a preset against the frozen corpus + evaluation freeze."""
-  if corpus is None or corpus_path is None:
+  if corpus is None and corpus_path is None:
     corpus, corpus_path = load_default_corpus()
+  elif corpus is None or corpus_path is None:
+    raise WorldsError("supply both corpus and corpus_path, or neither")
+  if not corpus.frozen or load_corpus(corpus_path) != corpus:
+    raise WorldsError("world corpus must be frozen and match its provenance path")
   freeze = freeze or load_evaluation_freeze(corpus=corpus)
+  if (
+    freeze.context_id != corpus.context_id
+    or freeze.corpus_id != corpus.corpus_id
+    or freeze.holdout_finding_ids != corpus.finding_ids(PartitionName.HOLDOUT)
+    or freeze.diagnostic_finding_ids != corpus.finding_ids(PartitionName.DIAGNOSTIC)
+  ):
+    raise WorldsError("evaluation freeze must match the corpus and partitions")
   cal_ids = corpus.finding_ids(PartitionName.CALIBRATION)
   assert_calibration_partition_only(corpus, cal_ids)
   assert_fit_roles_allowed(freeze, cal_ids)
@@ -423,13 +528,14 @@ def emit_world(
 
   if preset.method == WorldMethod.REWEIGHT:
     world = generate_diabetes_ip_world(base)
-    before_cal, before_hold = level_a_baseline(world.tables(), corpus)
     result = calibrate_reweight(world.tables(), corpus)
-    if result.diagnostics.infeasible:
+    if not result.diagnostics.converged:
       raise WorldsError(
-        f"{preset.world_id}: reweight infeasible: "
+        f"{preset.world_id}: reweight did not converge ({result.diagnostics.solve_status}): "
         f"{result.diagnostics.infeasibility_notes}"
       )
+    before_cal = result.before
+    _, before_hold = level_a_baseline(world.tables(), corpus)
     _after_cal_check, after_hold = analyze_world_moments(
       world.tables(), corpus, weights=result.weights
     )
@@ -457,7 +563,7 @@ def emit_world(
       and after_cal.mean_absolute_error < before_cal.mean_absolute_error
     )
     manifest = build_run_manifest(
-      run_id=f"phase5-{preset.world_id}",
+      run_id=f"corrected-{preset.world_id}",
       level=CalibrationLevel.B_REWEIGHT,
       corpus=corpus,
       corpus_path=corpus_path,
@@ -467,7 +573,16 @@ def emit_world(
         "p_ip_given_no_diabetes": preset.p_ip_given_no_diabetes,
         "n_beneficiaries": base.n_beneficiaries,
       },
-      diagnostics=result.diagnostics.model_dump(mode="json"),
+      diagnostics={
+        **result.diagnostics.model_dump(mode="json"),
+        "weight_key": "bene_id",
+        "weight_method": "iterative_proportional_fitting",
+        "weights_sha256": _weights_sha256(result.weights),
+        "calibration_findings_sha256": _findings_hash(load_partition_findings(corpus, PartitionName.CALIBRATION)),
+        "holdout_findings_sha256": _findings_hash(load_partition_findings(corpus, PartitionName.HOLDOUT)),
+        "targets_before": [row.model_dump(mode="json") for row in result.before.rows],
+        "targets_after": [row.model_dump(mode="json") for row in result.after.rows],
+      },
       calibration_mae_before=before_cal.mean_absolute_error,
       calibration_mae_after=after_cal.mean_absolute_error,
       holdout_mae_before=before_hold.mean_absolute_error,
@@ -496,6 +611,8 @@ def emit_world(
       params=base,
       world=world,
       weights=result.weights,
+      weight_key="bene_id",
+      weight_method="iterative_proportional_fitting",
       calibration_baseline=before_cal,
       calibration_fitted=after_cal,
       holdout_report=after_hold,
@@ -519,11 +636,12 @@ def emit_world(
       p_ip_given_no_diabetes=preset.p_ip_given_no_diabetes,
     )
     fitted_world = generate_diabetes_ip_world(result.fitted_params)
-    after_cal, after_hold = analyze_world_moments(fitted_world.tables(), corpus)
+    evaluation = evaluate_frozen_params(result, corpus)
+    after_cal, after_hold = result.fitted, evaluation.holdout_fitted
     nondeg = _nondegeneracy(fitted_world)
     improved = result.improved_calibration
     manifest = build_run_manifest(
-      run_id=f"phase5-{preset.world_id}",
+      run_id=f"corrected-{preset.world_id}",
       level=CalibrationLevel.C_GENERATOR_PARAMS,
       corpus=corpus,
       corpus_path=corpus_path,
@@ -539,11 +657,17 @@ def emit_world(
       diagnostics={
         "n_search_points": len(result.search_trace),
         "fitted_params": result.fitted_params.model_dump(mode="json"),
+        "calibration_findings_sha256": result.calibration_findings_sha256,
+        "fit_sha256": result.fit_sha256,
+        "holdout_findings_sha256": evaluation.holdout_findings_sha256,
+        "targets_before": [row.model_dump(mode="json") for row in result.baseline.rows],
+        "targets_after": [row.model_dump(mode="json") for row in result.fitted.rows],
+        "search_trace": [point.model_dump(mode="json") for point in result.search_trace],
       },
       calibration_mae_before=result.baseline.mean_absolute_error,
       calibration_mae_after=result.fitted.mean_absolute_error,
-      holdout_mae_before=result.holdout_baseline.mean_absolute_error,
-      holdout_mae_after=result.holdout_fitted.mean_absolute_error,
+      holdout_mae_before=evaluation.holdout_baseline.mean_absolute_error,
+      holdout_mae_after=evaluation.holdout_fitted.mean_absolute_error,
       structural_valid_flag=structural_valid(fitted_world),
       notes=preset.notes
       + (
@@ -594,8 +718,10 @@ def emit_world_family(
   world_ids: Sequence[str] | None = None,
 ) -> WorldFamilyRelease:
   """Emit the MVP multi-world family with shared calibration targets."""
-  if corpus is None or corpus_path is None:
+  if corpus is None and corpus_path is None:
     corpus, corpus_path = load_default_corpus()
+  elif corpus is None or corpus_path is None:
+    raise WorldsError("supply both corpus and corpus_path, or neither")
   freeze = freeze or load_evaluation_freeze(corpus=corpus)
   presets = list_mvp_world_presets()
   if world_ids is not None:

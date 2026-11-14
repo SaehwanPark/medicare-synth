@@ -86,10 +86,10 @@ outcomes, not universal expected counts for every run configuration.
 ## Reproduction (developer path)
 
 There is no no-code calibrated download on the website. The Phase 5 summary is
-a historical record. Its script overwrites the stored reports, and current code
-has different evaluation semantics. Ask a developer to replay its original
-producer in a separate checkout; the [developer guide](../../developers/calibrated-worlds/)
-explains the boundary. A corrected, separately versioned run is still planned.
+a historical record. Current code writes a separate v2 output with different
+evaluation semantics. Ask a developer to replay the original producer in a
+separate checkout; the [developer guide](../../developers/calibrated-worlds/)
+explains the boundary. A pinned Phase 6 evaluation report is still planned.
 
 For a literature-paired walkthrough (Andes MMWR prevalence in-domain vs Drye
 admission rates out-of-domain), see the checked-in example. Run it only in a

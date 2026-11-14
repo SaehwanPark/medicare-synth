@@ -181,9 +181,9 @@ def test_age_maximum_applies_to_fit_and_reporting(tables: dict[str, pl.DataFrame
   report = execute_finding(finding, tables)
   disc = discrepancy_for_findings(tables, [finding], partition=PartitionName.CALIBRATION)
   assert report.executable
-  assert report.synthetic_estimate == disc.rows[0].synthetic_estimate
+  assert report.synthetic_estimate == pytest.approx(disc.rows[0].synthetic_estimate, abs=1e-12)
   fit = reweight_beneficiaries(tables, [moment_target_from_finding(finding)])
-  assert fit.before.rows[0].synthetic_estimate == report.synthetic_estimate
+  assert fit.before.rows[0].synthetic_estimate == pytest.approx(report.synthetic_estimate, abs=1e-12)
 
 
 def test_optional_part_c_ma_months_exclude_beneficiaries(

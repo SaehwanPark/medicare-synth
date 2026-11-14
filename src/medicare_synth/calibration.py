@@ -45,7 +45,7 @@ from medicare_synth.synthesis import (
 )
 from medicare_synth.validation import RelationalValidator
 
-CALIBRATION_SCHEMA_VERSION = "0.1"
+CALIBRATION_SCHEMA_VERSION = "0.2"
 
 
 class CalibrationLevel(str, Enum):
@@ -146,6 +146,7 @@ class MomentTarget(BaseModel):
   evidence_estimate: float
   feature: str  # diabetes | hf | ip_given_diabetes
   eligibility: EligibilityPlan
+  compatibility: str
 
 
 class DiscrepancyRow(BaseModel):
@@ -156,6 +157,20 @@ class DiscrepancyRow(BaseModel):
   synthetic_estimate: float | None
   absolute_difference: float | None
   partition: PartitionName
+  status: str = "defined"
+  reason: str | None = None
+  denominator_count: int | None = None
+  denominator_weight: float | None = None
+  tolerance: float | None = None
+  compatibility: str | None = None
+
+
+class TargetCoverageError(CalibrationError):
+  """Required target coverage failed; rows retain machine-readable reasons."""
+
+  def __init__(self, message: str, rows: tuple[DiscrepancyRow, ...]) -> None:
+    super().__init__(message)
+    self.rows = rows
 
 
 class DiscrepancyReport(BaseModel):
@@ -163,6 +178,7 @@ class DiscrepancyReport(BaseModel):
 
   rows: tuple[DiscrepancyRow, ...]
   mean_absolute_error: float | None
+  diagnostic_subset_mae: float | None = None
   n_missing: int = 0
 
   @staticmethod
@@ -176,7 +192,8 @@ class DiscrepancyReport(BaseModel):
     mae = (sum(diffs) / len(diffs)) if diffs else None
     return DiscrepancyReport(
       rows=tuple(rows),
-      mean_absolute_error=None if mae is None else round(mae, 12),
+      mean_absolute_error=None if mae is None or missing else mae,
+      diagnostic_subset_mae=mae,
       n_missing=missing,
     )
 
@@ -193,6 +210,8 @@ class ReweightDiagnostics(BaseModel):
   converged: bool
   infeasible: bool
   infeasibility_notes: tuple[str, ...] = ()
+  solve_status: str = "unknown"
+  solver_tolerance: float = 1e-6
   dependence_notes: tuple[str, ...] = (
     "Calibration targets may share overlapping CCW/FFS source populations; "
     "treat discrepancies as dependent, not independent likelihood terms.",
@@ -215,7 +234,11 @@ class ParamSearchPoint(BaseModel):
   diabetes_prevalence: float
   hf_prevalence: float
   p_ip_given_diabetes: float
-  calibration_mae: float
+  calibration_mae: float | None
+  eligible: bool
+  n_missing: int = 0
+  reason: str | None = None
+  targets: tuple[DiscrepancyRow, ...] = ()
 
 
 class ParamCalibrationResult(BaseModel):
@@ -225,10 +248,22 @@ class ParamCalibrationResult(BaseModel):
   fitted_params: ConditionalWorldParams
   baseline: DiscrepancyReport
   fitted: DiscrepancyReport
-  holdout_baseline: DiscrepancyReport
-  holdout_fitted: DiscrepancyReport
+  corpus_id: str
+  calibration_finding_ids: tuple[str, ...]
+  calibration_findings_sha256: str
+  fit_sha256: str
   search_trace: tuple[ParamSearchPoint, ...]
   improved_calibration: bool
+
+
+class ParamEvaluation(BaseModel):
+  model_config = ConfigDict(frozen=True)
+
+  holdout_baseline: DiscrepancyReport
+  holdout_fitted: DiscrepancyReport
+  holdout_finding_ids: tuple[str, ...]
+  holdout_findings_sha256: str
+  fit_sha256: str
 
 
 class CalibrationRunManifest(BaseModel):
@@ -320,16 +355,16 @@ def beneficiary_feature_frame(
       pl.col("ip").fill_null(False),
     )
   )
-  return frame
+  return frame.sort("bene_id").rechunk()
 
 
 def _weighted_mean(frame: pl.DataFrame, col: str, weight_col: str = "weight") -> float:
-  w = frame[weight_col]
-  x = frame[col].cast(pl.Float64)
-  sw = float(w.sum())
+  weights = frame[weight_col].cast(pl.Float64).to_list()
+  values = frame[col].cast(pl.Float64).to_list()
+  sw = math.fsum(weights)
   if sw <= 0.0:
     raise CalibrationError("sum of weights is non-positive")
-  return float((w * x).sum()) / sw
+  return math.fsum(w * x for w, x in zip(weights, values, strict=True)) / sw
 
 
 def _weighted_conditional(
@@ -339,7 +374,7 @@ def _weighted_conditional(
   weight_col: str = "weight",
 ) -> float | None:
   sub = frame.filter(pl.col(cond))
-  if sub.height == 0 or float(sub[weight_col].sum()) <= 0.0:
+  if sub.height == 0 or math.fsum(sub[weight_col].cast(pl.Float64).to_list()) <= 0.0:
     return None
   return _weighted_mean(sub, outcome, weight_col)
 
@@ -362,6 +397,11 @@ def moment_target_from_finding(
   finding: FindingIR, *, context_year: int = 2021
 ) -> MomentTarget:
   compiled = compile_finding(finding, context_year=context_year)
+  if not math.isfinite(finding.result.estimate) or not 0.0 <= finding.result.estimate <= 1.0:
+    raise CalibrationError(f"{finding.finding_id}: target must be a finite proportion in [0, 1]")
+  if not compiled.compatibility.executable:
+    issues = "; ".join(f"{issue.code}: {issue.message}" for issue in compiled.compatibility.errors)
+    raise CalibrationError(f"{finding.finding_id} is not executable: {issues}")
   et = finding.estimand.type
   if et == EstimandType.PREVALENCE:
     concept = finding.estimand.numerator.concept.value
@@ -396,16 +436,13 @@ def moment_target_from_finding(
       f"{finding.finding_id}: estimand type {et.value} not supported "
       "for Phase 4 moment calibration"
     )
-  if not compiled.compatibility.executable:
-    raise CalibrationError(
-      f"{finding.finding_id} is not executable for calibration moments"
-    )
   return MomentTarget(
     finding_id=finding.finding_id,
     estimand_type=et,
     evidence_estimate=finding.result.estimate,
     feature=feature,
     eligibility=compiled.eligibility,
+    compatibility=finding.comparability.grade.value,
   )
 
 
@@ -446,6 +483,65 @@ def _feature_frame_for_target(
   return frame.join(eligible, on="bene_id", how="inner")
 
 
+def validate_beneficiary_weights(frame: pl.DataFrame, weights: pl.DataFrame) -> None:
+  """Require exactly one finite nonnegative weight per beneficiary."""
+  if not {"bene_id", "weight"}.issubset(weights.columns):
+    raise CalibrationError("weights require bene_id and weight fields")
+  if weights.schema["bene_id"] != frame.schema["bene_id"]:
+    raise CalibrationError("weight beneficiary key type differs from records")
+  if weights["bene_id"].null_count() or weights["bene_id"].n_unique() != weights.height:
+    raise CalibrationError("weights contain missing or duplicate beneficiary keys")
+  if weights.height != frame.height or weights.join(
+    frame.select("bene_id"), on="bene_id", how="anti"
+  ).height:
+    raise CalibrationError("weights must cover exactly the beneficiary records")
+  if not weights.schema["weight"].is_numeric() or weights["weight"].null_count():
+    raise CalibrationError("weights must be non-null numeric values")
+  if weights.filter(~pl.col("weight").is_finite() | (pl.col("weight") < 0)).height:
+    raise CalibrationError("weights must be finite and nonnegative")
+  try:
+    total = math.fsum(weights["weight"].cast(pl.Float64).to_list())
+  except OverflowError as exc:
+    raise CalibrationError("weights must have a finite positive total") from exc
+  if not math.isfinite(total) or total <= 0:
+    raise CalibrationError("weights must have a finite positive total")
+
+
+def _target_row(
+  frame: pl.DataFrame,
+  target: MomentTarget,
+  partition: PartitionName,
+  *,
+  tolerance: float | None = None,
+) -> DiscrepancyRow:
+  frame = frame.sort("bene_id").rechunk()
+  denominator = frame.filter(pl.col("diabetes")) if target.feature == "ip_given_diabetes" else frame
+  count = denominator.height
+  weight_sum = math.fsum(denominator["weight"].cast(pl.Float64).to_list()) if count else 0.0
+  estimate = evaluate_moment(frame, target) if count and weight_sum > 0 else None
+  residual = None if estimate is None else estimate - target.evidence_estimate
+  status = "undefined" if residual is None else (
+    "defined" if tolerance is None else
+    "matched" if abs(residual) <= tolerance else "outside_tolerance"
+  )
+  return DiscrepancyRow(
+    finding_id=target.finding_id,
+    evidence_estimate=target.evidence_estimate,
+    synthetic_estimate=estimate,
+    absolute_difference=residual,
+    partition=partition,
+    status=status,
+    reason=(
+      "empty denominator or zero denominator weight" if residual is None else
+      "residual exceeds solver tolerance" if status == "outside_tolerance" else None
+    ),
+    denominator_count=count,
+    denominator_weight=weight_sum,
+    tolerance=tolerance,
+    compatibility=target.compatibility,
+  )
+
+
 def discrepancy_for_findings(
   tables: Mapping[str, pl.DataFrame],
   findings: Sequence[FindingIR],
@@ -461,40 +557,36 @@ def discrepancy_for_findings(
   """
   full = beneficiary_feature_frame(tables, reference_year=context_year)
   w_all = weights if weights is not None else _uniform_weights(full)
+  validate_beneficiary_weights(full, w_all)
   rows: list[DiscrepancyRow] = []
   for finding in findings:
     try:
       target = moment_target_from_finding(finding, context_year=context_year)
-      framed = _feature_frame_for_target(tables, target)
-      if framed.height == 0:
-        est = None
-      else:
-        framed_w = framed.join(w_all, on="bene_id", how="inner")
-        if framed_w.height == 0:
-          est = None
-        else:
-          est = evaluate_moment(framed_w, target)
-    except CalibrationError:
-      est = None
-    abs_diff = None if est is None else est - finding.result.estimate
-    rows.append(
-      DiscrepancyRow(
+    except EvidenceIRError as exc:
+      rows.append(DiscrepancyRow(
         finding_id=finding.finding_id,
         evidence_estimate=finding.result.estimate,
-        synthetic_estimate=None if est is None else round(est, 12),
-        absolute_difference=None if abs_diff is None else round(abs_diff, 12),
+        synthetic_estimate=None,
+        absolute_difference=None,
         partition=partition,
-      )
-    )
+        status="unsupported",
+        reason=str(exc),
+        compatibility=finding.comparability.grade.value,
+      ))
+      continue
+    framed = _feature_frame_for_target(tables, target)
+    rows.append(_target_row(framed.join(w_all, on="bene_id", how="inner"), target, partition))
   return DiscrepancyReport.from_rows(rows)
 
 
 def effective_sample_size(weights: pl.Series) -> float:
-  w = weights.cast(pl.Float64)
-  s1 = float(w.sum())
-  s2 = float((w * w).sum())
-  if s2 <= 0.0:
+  w = weights.cast(pl.Float64).to_list()
+  scale = max(w, default=0.0)
+  if scale <= 0.0:
     return 0.0
+  scaled = [value / scale for value in w]
+  s1 = math.fsum(scaled)
+  s2 = math.fsum(value * value for value in scaled)
   return (s1 * s1) / s2
 
 
@@ -505,12 +597,14 @@ def _rake_binary(
 ) -> tuple[list[float], str | None]:
   if not 0.0 <= target <= 1.0:
     return weights, f"target {target} outside [0,1]"
-  mass1 = sum(w for w, f in zip(weights, flag, strict=True) if f)
-  mass0 = sum(w for w, f in zip(weights, flag, strict=True) if not f)
+  mass1 = math.fsum(w for w, f in zip(weights, flag, strict=True) if f)
+  mass0 = math.fsum(w for w, f in zip(weights, flag, strict=True) if not f)
   total = mass1 + mass0
   if total <= 0.0:
     return weights, "non-positive total weight"
   if mass1 <= 0.0 or mass0 <= 0.0:
+    if (mass1 <= 0.0 and target == 0.0) or (mass0 <= 0.0 and target == 1.0):
+      return weights, None
     return weights, "empty support for binary rake stratum"
   want1 = target * total
   want0 = (1.0 - target) * total
@@ -560,11 +654,17 @@ def reweight_beneficiaries(
   """
   if not targets:
     raise CalibrationError("reweight requires at least one moment target")
+  if max_iterations < 1 or not math.isfinite(tolerance) or tolerance <= 0:
+    raise CalibrationError("reweight requires positive iterations and finite positive tolerance")
+  if len({t.finding_id for t in targets}) != len(targets):
+    raise CalibrationError("reweight target IDs must be unique")
   years = {target.eligibility.reference_year for target in targets}
   if len(years) != 1:
     raise CalibrationError("targets must use one reference year")
   frame = beneficiary_feature_frame(tables, reference_year=next(iter(years)))
   n = frame.height
+  if n == 0:
+    raise CalibrationError("empty beneficiary frame")
   weights = [1.0] * n
   diabetes = frame["diabetes"].to_list()
   hf = frame["hf"].to_list()
@@ -576,28 +676,21 @@ def reweight_beneficiaries(
   ids = frame["bene_id"].to_list()
   notes: list[str] = []
   infeasible = False
+  failed_target: tuple[str, str] | None = None
 
   framed0 = frame.with_columns(pl.lit(1.0).alias("weight"))
-  before_rows: list[DiscrepancyRow] = []
-  for t, eligible in zip(targets, eligible_ids, strict=True):
-    subset = framed0.filter(pl.col("bene_id").is_in(list(eligible)))
-    est = evaluate_moment(subset, t) if subset.height else None
-    abs_diff = None if est is None else est - t.evidence_estimate
-    before_rows.append(
-      DiscrepancyRow(
-        finding_id=t.finding_id,
-        evidence_estimate=t.evidence_estimate,
-        synthetic_estimate=None if est is None else round(est, 12),
-        absolute_difference=None if abs_diff is None else round(abs_diff, 12),
-        partition=PartitionName.CALIBRATION,
-      )
+  before_rows = [
+    _target_row(
+      framed0.filter(pl.col("bene_id").is_in(list(eligible))),
+      t, PartitionName.CALIBRATION, tolerance=tolerance,
     )
+    for t, eligible in zip(targets, eligible_ids, strict=True)
+  ]
   before_report = DiscrepancyReport.from_rows(before_rows)
 
   converged = False
   it = 0
   for it in range(1, max_iterations + 1):
-    max_err = 0.0
     for t, eligible in zip(targets, eligible_ids, strict=True):
       indexes = [i for i, bene_id in enumerate(ids) if bene_id in eligible]
       sub_weights = [weights[i] for i in indexes]
@@ -621,40 +714,42 @@ def reweight_beneficiaries(
       if note:
         infeasible = True
         notes.append(f"{t.finding_id}: {note}")
+        failed_target = (t.finding_id, note)
         break
-      # track error
-      tmp = frame.with_columns(pl.Series("weight", weights)).filter(
-        pl.col("bene_id").is_in(list(eligible))
-      )
-      est = evaluate_moment(tmp, t) if tmp.height else None
-      if est is None:
-        infeasible = True
-        notes.append(f"{t.finding_id}: moment undefined after rake")
-        break
-      max_err = max(max_err, abs(est - t.evidence_estimate))
     if infeasible:
       break
-    if max_err < tolerance:
+    final_frame = frame.with_columns(pl.Series("weight", weights))
+    final_rows = [
+      _target_row(
+        final_frame.filter(pl.col("bene_id").is_in(list(eligible))),
+        t, PartitionName.CALIBRATION, tolerance=tolerance,
+      )
+      for t, eligible in zip(targets, eligible_ids, strict=True)
+    ]
+    if any(row.status == "undefined" for row in final_rows):
+      infeasible = True
+      notes.extend(f"{row.finding_id}: {row.reason}" for row in final_rows if row.status == "undefined")
+      break
+    if all(row.status == "matched" for row in final_rows):
       converged = True
       break
 
   w_series = pl.Series("weight", weights)
   weight_frame = frame.select("bene_id").with_columns(w_series)
   framed1 = frame.join(weight_frame, on="bene_id", how="inner")
-  after_rows: list[DiscrepancyRow] = []
-  for t, eligible in zip(targets, eligible_ids, strict=True):
-    subset = framed1.filter(pl.col("bene_id").is_in(list(eligible)))
-    est = evaluate_moment(subset, t) if subset.height else None
-    abs_diff = None if est is None else est - t.evidence_estimate
-    after_rows.append(
-      DiscrepancyRow(
-        finding_id=t.finding_id,
-        evidence_estimate=t.evidence_estimate,
-        synthetic_estimate=None if est is None else round(est, 12),
-        absolute_difference=None if abs_diff is None else round(abs_diff, 12),
-        partition=PartitionName.CALIBRATION,
-      )
+  after_rows = [
+    _target_row(
+      framed1.filter(pl.col("bene_id").is_in(list(eligible))),
+      t, PartitionName.CALIBRATION, tolerance=tolerance,
     )
+    for t, eligible in zip(targets, eligible_ids, strict=True)
+  ]
+  if failed_target is not None:
+    after_rows = [
+      row.model_copy(update={"status": "infeasible", "reason": failed_target[1]})
+      if row.finding_id == failed_target[0] else row
+      for row in after_rows
+    ]
   after_report = DiscrepancyReport.from_rows(after_rows)
 
   ess = effective_sample_size(w_series)
@@ -663,11 +758,13 @@ def reweight_beneficiaries(
     ess=round(ess, 12),
     min_weight=round(float(w_series.min()), 12),  # type: ignore[arg-type]
     max_weight=round(float(w_series.max()), 12),  # type: ignore[arg-type]
-    sum_weights=round(float(w_series.sum()), 12),
+    sum_weights=round(math.fsum(weights), 12),
     iterations=it,
     converged=converged and not infeasible,
     infeasible=infeasible,
     infeasibility_notes=tuple(notes),
+    solve_status="infeasible" if infeasible else "converged" if converged else "exhausted",
+    solver_tolerance=tolerance,
   )
   return ReweightResult(
     weights=weight_frame,
@@ -684,15 +781,11 @@ def assert_calibration_partition_only(
 ) -> None:
   """Refuse any fit that includes non-calibration findings (esp. holdout)."""
   allowed = set(corpus.finding_ids(PartitionName.CALIBRATION))
-  holdout = set(corpus.finding_ids(PartitionName.HOLDOUT))
   for fid in finding_ids:
-    if fid in holdout:
-      raise CalibrationError(
-        f"refusing to fit on holdout finding {fid!r}"
-      )
     if fid not in allowed:
       raise CalibrationError(
-        f"finding {fid!r} is not in the calibration partition"
+        f"finding {fid!r} is not in the calibration partition; "
+        "holdout and diagnostic findings cannot be fit"
       )
 
 
@@ -709,7 +802,27 @@ def calibration_targets_from_corpus(
   findings = [
     load_corpus_finding(corpus, fid, fixtures_root=fixtures_root) for fid in ids
   ]
-  return tuple(moment_target_from_finding(f) for f in findings)
+  targets: list[MomentTarget] = []
+  coverage: list[DiscrepancyRow] = []
+  for finding in findings:
+    try:
+      targets.append(moment_target_from_finding(finding))
+      status, reason = "unassessed", "fit not run"
+    except EvidenceIRError as exc:
+      status, reason = "unsupported", str(exc)
+    coverage.append(DiscrepancyRow(
+      finding_id=finding.finding_id,
+      evidence_estimate=finding.result.estimate,
+      synthetic_estimate=None,
+      absolute_difference=None,
+      partition=PartitionName.CALIBRATION,
+      status=status,
+      reason=reason,
+      compatibility=finding.comparability.grade.value,
+    ))
+  if len(targets) != len(findings):
+    raise TargetCoverageError("required calibration target is unsupported", tuple(coverage))
+  return tuple(targets)
 
 
 def level_a_baseline(
@@ -742,6 +855,12 @@ def calibrate_reweight(
   max_iterations: int = 40,
   tolerance: float = 1e-6,
 ) -> ReweightResult:
+  required = corpus.finding_ids(PartitionName.CALIBRATION)
+  if finding_ids is not None and (
+    len(finding_ids) != len(required) or set(finding_ids) != set(required)
+  ):
+    assert_calibration_partition_only(corpus, finding_ids)
+    raise CalibrationError("reweight fit requires all approved calibration targets")
   targets = calibration_targets_from_corpus(
     corpus, finding_ids=finding_ids, fixtures_root=fixtures_root
   )
@@ -764,6 +883,30 @@ def _param_grid(
   return grid
 
 
+def _findings_hash(findings: Sequence[FindingIR]) -> str:
+  raw = json.dumps(
+    [f.model_dump(mode="json") for f in findings],
+    sort_keys=True, separators=(",", ":"),
+  )
+  return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _fit_hash(
+  baseline: ConditionalWorldParams,
+  fitted: ConditionalWorldParams,
+  target_ids: tuple[str, ...],
+  findings_hash: str,
+) -> str:
+  payload = {
+    "baseline": baseline.model_dump(mode="json"),
+    "fitted": fitted.model_dump(mode="json"),
+    "target_ids": target_ids,
+    "findings_sha256": findings_hash,
+  }
+  raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+  return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
 def calibrate_generator_params(
   baseline_params: ConditionalWorldParams,
   corpus: EvidenceCorpus,
@@ -774,41 +917,37 @@ def calibrate_generator_params(
   ip_diab_values: Sequence[float] | None = None,
   p_ip_given_no_diabetes: float | None = None,
 ) -> ParamCalibrationResult:
-  """Level C: discrete search over generator params; holdout not in objective."""
+  """Freeze a complete calibration-only Level C candidate; do not evaluate holdout."""
   cal_findings = load_partition_findings(
     corpus, PartitionName.CALIBRATION, fixtures_root=fixtures_root
   )
-  hold_findings = load_partition_findings(
-    corpus, PartitionName.HOLDOUT, fixtures_root=fixtures_root
-  )
-  # Ensure we never pass holdout ids into fit helpers.
-  assert_calibration_partition_only(
-    corpus, [f.finding_id for f in cal_findings]
-  )
+  ids = tuple(f.finding_id for f in cal_findings)
+  if not ids or ids != corpus.finding_ids(PartitionName.CALIBRATION) or len(set(ids)) != len(ids):
+    raise CalibrationError("calibration findings must cover the complete frozen target set")
+  assert_calibration_partition_only(corpus, ids)
+  target_hash = _findings_hash(cal_findings)
 
-  d_vals = diabetes_values or (0.20, 0.25, 0.277, 0.30, 0.35)
-  h_vals = hf_values or (0.05, 0.10, 0.12, 0.15)
-  p_vals = ip_diab_values or (0.08, 0.10, 0.13, 0.16, 0.20)
+  d_vals = diabetes_values if diabetes_values is not None else (0.20, 0.25, 0.277, 0.30, 0.35)
+  h_vals = hf_values if hf_values is not None else (0.05, 0.10, 0.12, 0.15)
+  p_vals = ip_diab_values if ip_diab_values is not None else (0.08, 0.10, 0.13, 0.16, 0.20)
+  if not d_vals or not h_vals or not p_vals:
+    raise CalibrationError("parameter search grid must not be empty")
   p_no = (
     baseline_params.p_ip_given_no_diabetes
     if p_ip_given_no_diabetes is None
     else p_ip_given_no_diabetes
   )
+  if any(not math.isfinite(v) or not 0.0 <= v <= 1.0 for v in (*d_vals, *h_vals, *p_vals, p_no)):
+    raise CalibrationError("parameter search values must be finite probabilities in [0, 1]")
 
   baseline_world = generate_diabetes_ip_world(baseline_params)
   baseline_cal = discrepancy_for_findings(
     baseline_world.tables(), cal_findings, partition=PartitionName.CALIBRATION
   )
-  baseline_hold = discrepancy_for_findings(
-    baseline_world.tables(), hold_findings, partition=PartitionName.HOLDOUT
-  )
-  if baseline_cal.mean_absolute_error is None:
-    raise CalibrationError("baseline calibration MAE undefined")
-
-  best_mae = baseline_cal.mean_absolute_error
-  best_params = baseline_params
-  best_cal = baseline_cal
-  best_hold = baseline_hold
+  baseline_is_candidate = baseline_params.p_ip_given_no_diabetes == p_no
+  best_mae = baseline_cal.mean_absolute_error if baseline_is_candidate else None
+  best_params: ConditionalWorldParams | None = baseline_params if best_mae is not None else None
+  best_cal: DiscrepancyReport | None = baseline_cal if best_mae is not None else None
   trace: list[ParamSearchPoint] = []
 
   for d, h, p in _param_grid(
@@ -826,35 +965,90 @@ def calibrate_generator_params(
     cal = discrepancy_for_findings(
       world.tables(), cal_findings, partition=PartitionName.CALIBRATION
     )
-    hold = discrepancy_for_findings(
-      world.tables(), hold_findings, partition=PartitionName.HOLDOUT
-    )
     mae = cal.mean_absolute_error
-    if mae is None:
-      continue
     trace.append(
       ParamSearchPoint(
         diabetes_prevalence=d,
         hf_prevalence=h,
         p_ip_given_diabetes=p,
-        calibration_mae=round(mae, 12),
+        calibration_mae=mae,
+        eligible=mae is not None,
+        n_missing=cal.n_missing,
+        reason="required target undefined or unsupported" if mae is None else None,
+        targets=cal.rows,
       )
     )
-    if mae < best_mae - 1e-15:
+    if mae is not None and (best_mae is None or mae < best_mae - 1e-15):
       best_mae = mae
       best_params = params
       best_cal = cal
-      best_hold = hold
 
+  if best_params is None or best_cal is None or best_mae is None:
+    raise CalibrationError("no candidate has complete calibration target coverage")
   return ParamCalibrationResult(
     baseline_params=baseline_params,
     fitted_params=best_params,
     baseline=baseline_cal,
     fitted=best_cal,
-    holdout_baseline=baseline_hold,
-    holdout_fitted=best_hold,
+    corpus_id=corpus.corpus_id,
+    calibration_finding_ids=ids,
+    calibration_findings_sha256=target_hash,
+    fit_sha256=_fit_hash(baseline_params, best_params, ids, target_hash),
     search_trace=tuple(trace),
-    improved_calibration=best_mae < (baseline_cal.mean_absolute_error or math.inf),
+    improved_calibration=(
+      baseline_cal.mean_absolute_error is not None
+      and best_mae < baseline_cal.mean_absolute_error
+    ),
+  )
+
+
+def evaluate_frozen_params(
+  result: ParamCalibrationResult,
+  corpus: EvidenceCorpus,
+  *,
+  fixtures_root: Path | None = None,
+) -> ParamEvaluation:
+  """Evaluate holdout only after a complete calibration candidate is frozen."""
+  if corpus.corpus_id != result.corpus_id:
+    raise CalibrationError("evaluation corpus differs from frozen fit corpus")
+  if result.fit_sha256 != _fit_hash(
+    result.baseline_params, result.fitted_params,
+    result.calibration_finding_ids, result.calibration_findings_sha256,
+  ):
+    raise CalibrationError("frozen candidate or baseline identity changed")
+  cal_findings = load_partition_findings(
+    corpus, PartitionName.CALIBRATION, fixtures_root=fixtures_root
+  )
+  if (
+    tuple(f.finding_id for f in cal_findings) != result.calibration_finding_ids
+    or _findings_hash(cal_findings) != result.calibration_findings_sha256
+  ):
+    raise CalibrationError("evaluation calibration targets differ from frozen fit")
+  baseline_world = generate_diabetes_ip_world(result.baseline_params)
+  verified_baseline = discrepancy_for_findings(
+    baseline_world.tables(), cal_findings, partition=PartitionName.CALIBRATION
+  )
+  if verified_baseline != result.baseline:
+    raise CalibrationError("frozen baseline no longer matches its fit report")
+  frozen_world = generate_diabetes_ip_world(result.fitted_params)
+  verified_fit = discrepancy_for_findings(
+    frozen_world.tables(), cal_findings, partition=PartitionName.CALIBRATION
+  )
+  if verified_fit.mean_absolute_error is None or verified_fit != result.fitted:
+    raise CalibrationError("frozen candidate no longer matches its complete fit report")
+  hold_findings = load_partition_findings(
+    corpus, PartitionName.HOLDOUT, fixtures_root=fixtures_root
+  )
+  return ParamEvaluation(
+    holdout_finding_ids=tuple(f.finding_id for f in hold_findings),
+    holdout_findings_sha256=_findings_hash(hold_findings),
+    fit_sha256=result.fit_sha256,
+    holdout_baseline=discrepancy_for_findings(
+      baseline_world.tables(), hold_findings, partition=PartitionName.HOLDOUT,
+    ),
+    holdout_fitted=discrepancy_for_findings(
+      frozen_world.tables(), hold_findings, partition=PartitionName.HOLDOUT,
+    ),
   )
 
 
