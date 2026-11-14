@@ -4,6 +4,11 @@
 
 ### Added
 
+- A Python pull-request and main-branch check installs the locked dependencies
+  and runs the test suite, basedpyright, and ruff. Existing calibration tests
+  retain their assertions while passing the configured type check. This gate
+  does not resolve the known calibration correctness findings.
+
 - Optional Korean mirror of the researcher-facing README and docs site.
   English remains the default (`README.md`, unprefixed Pages URLs). Korean
   copies are `README.ko.md` and `docs/ko/` (`/ko/`), with a header language
