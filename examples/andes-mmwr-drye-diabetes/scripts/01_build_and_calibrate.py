@@ -123,6 +123,8 @@ def main() -> int:
     diagnostics={
       "improved_calibration": result.improved_calibration,
       "fitted_params": result.fitted_params.model_dump(mode="json"),
+      "fit_sha256": result.fit_sha256,
+      "holdout_findings_sha256": evaluation.holdout_findings_sha256,
       "baseline_params": baseline_params.model_dump(mode="json"),
       "n_search_points": len(result.search_trace),
       "structural_valid": ok_struct,

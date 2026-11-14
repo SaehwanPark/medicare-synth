@@ -126,7 +126,7 @@ def test_reweight_records_require_explicit_raw_access_and_weights(family, corpus
     w.model_copy(update={"weights": None}).analyze(corpus)
   assert w.weights is not None
   changed_weights = w.weights.with_columns((pl.col("weight") * 2).alias("weight"))
-  with pytest.raises(WorldsError, match="metadata"):
+  with pytest.raises(WorldsError, match="weight"):
     w.model_copy(update={"weights": changed_weights}).analyze(corpus)
   weighted, _ = w.analyze(corpus)
   from medicare_synth.worlds import analyze_world_moments

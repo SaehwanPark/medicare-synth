@@ -155,12 +155,15 @@ class WorldRelease(BaseModel):
     )
     if self.calibration_level != expected_level:
       raise ValueError("world method and calibration level must agree")
+    if (
+      not self.calibration_finding_ids
+      or tuple(row.finding_id for row in self.calibration_fitted.rows) != self.calibration_finding_ids
+      or self.calibration_fitted.n_missing
+      or self.calibration_fitted.mean_absolute_error is None
+    ):
+      raise ValueError("calibrated release requires complete approved target coverage")
     if self.calibration_level == CalibrationLevel.B_REWEIGHT:
-      if (
-        self.calibration_fitted.n_missing
-        or not self.calibration_fitted.rows
-        or any(row.status != "matched" for row in self.calibration_fitted.rows)
-      ):
+      if any(row.status != "matched" for row in self.calibration_fitted.rows):
         raise ValueError("Level B calibrated release requires all final targets matched")
       if self.weights is None or self.weight_key != "bene_id" or not self.weight_method:
         raise ValueError("Level B calibrated release requires weights, key and method")
@@ -168,6 +171,14 @@ class WorldRelease(BaseModel):
       ess = effective_sample_size(self.weights["weight"])
       if self.nondegeneracy.ess is None or not math.isclose(self.nondegeneracy.ess, ess, rel_tol=1e-10):
         raise ValueError("Level B calibrated release ESS must match its weights")
+      minimum = float(self.weights["weight"].min())  # type: ignore[arg-type]
+      maximum = float(self.weights["weight"].max())  # type: ignore[arg-type]
+      if (
+        self.nondegeneracy.min_weight is None or self.nondegeneracy.max_weight is None
+        or not math.isclose(self.nondegeneracy.min_weight, minimum, rel_tol=1e-10, abs_tol=1e-12)
+        or not math.isclose(self.nondegeneracy.max_weight, maximum, rel_tol=1e-10, abs_tol=1e-12)
+      ):
+        raise ValueError("Level B weight range must match its weights")
       diagnostics = self.run_manifest.diagnostics
       if diagnostics.get("converged") is not True:
         raise ValueError("Level B calibrated release requires a converged solver")
@@ -618,6 +629,8 @@ def emit_world(
         "n_search_points": len(result.search_trace),
         "fitted_params": result.fitted_params.model_dump(mode="json"),
         "calibration_findings_sha256": result.calibration_findings_sha256,
+        "fit_sha256": result.fit_sha256,
+        "holdout_findings_sha256": evaluation.holdout_findings_sha256,
         "targets_before": [row.model_dump(mode="json") for row in result.baseline.rows],
         "targets_after": [row.model_dump(mode="json") for row in result.fitted.rows],
         "search_trace": [point.model_dump(mode="json") for point in result.search_trace],

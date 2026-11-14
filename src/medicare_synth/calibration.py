@@ -251,6 +251,7 @@ class ParamCalibrationResult(BaseModel):
   corpus_id: str
   calibration_finding_ids: tuple[str, ...]
   calibration_findings_sha256: str
+  fit_sha256: str
   search_trace: tuple[ParamSearchPoint, ...]
   improved_calibration: bool
 
@@ -260,6 +261,9 @@ class ParamEvaluation(BaseModel):
 
   holdout_baseline: DiscrepancyReport
   holdout_fitted: DiscrepancyReport
+  holdout_finding_ids: tuple[str, ...]
+  holdout_findings_sha256: str
+  fit_sha256: str
 
 
 class CalibrationRunManifest(BaseModel):
@@ -881,6 +885,22 @@ def _findings_hash(findings: Sequence[FindingIR]) -> str:
   return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def _fit_hash(
+  baseline: ConditionalWorldParams,
+  fitted: ConditionalWorldParams,
+  target_ids: tuple[str, ...],
+  findings_hash: str,
+) -> str:
+  payload = {
+    "baseline": baseline.model_dump(mode="json"),
+    "fitted": fitted.model_dump(mode="json"),
+    "target_ids": target_ids,
+    "findings_sha256": findings_hash,
+  }
+  raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+  return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
 def calibrate_generator_params(
   baseline_params: ConditionalWorldParams,
   corpus: EvidenceCorpus,
@@ -967,6 +987,7 @@ def calibrate_generator_params(
     corpus_id=corpus.corpus_id,
     calibration_finding_ids=ids,
     calibration_findings_sha256=target_hash,
+    fit_sha256=_fit_hash(baseline_params, best_params, ids, target_hash),
     search_trace=tuple(trace),
     improved_calibration=(
       baseline_cal.mean_absolute_error is not None
@@ -984,6 +1005,11 @@ def evaluate_frozen_params(
   """Evaluate holdout only after a complete calibration candidate is frozen."""
   if corpus.corpus_id != result.corpus_id:
     raise CalibrationError("evaluation corpus differs from frozen fit corpus")
+  if result.fit_sha256 != _fit_hash(
+    result.baseline_params, result.fitted_params,
+    result.calibration_finding_ids, result.calibration_findings_sha256,
+  ):
+    raise CalibrationError("frozen candidate or baseline identity changed")
   cal_findings = load_partition_findings(
     corpus, PartitionName.CALIBRATION, fixtures_root=fixtures_root
   )
@@ -1008,6 +1034,9 @@ def evaluate_frozen_params(
     corpus, PartitionName.HOLDOUT, fixtures_root=fixtures_root
   )
   return ParamEvaluation(
+    holdout_finding_ids=tuple(f.finding_id for f in hold_findings),
+    holdout_findings_sha256=_findings_hash(hold_findings),
+    fit_sha256=result.fit_sha256,
     holdout_baseline=discrepancy_for_findings(
       baseline_world.tables(), hold_findings, partition=PartitionName.HOLDOUT,
     ),
