@@ -16,6 +16,19 @@ or a log of routine changes.
 
 ## Entries
 
+### 2026-11-14: Weighted calibration reductions need canonical ordering
+
+- Context: Linux PR checks found fit and reporting estimates differed by roughly
+  1e-16 even though local exact-equality tests passed.
+- Cause: The paths joined the same beneficiaries without enforcing a shared row
+  order; floating-point reductions can differ with accumulation order.
+- Resolution: Sort beneficiary rows by key before evaluating targets and use
+  `math.fsum` for weighted reductions, without rounding away solver residuals.
+- Prevention: Compare full weight/report hashes with different Polars thread
+  counts and retain the overlapping-cohort fit/report regression.
+- Evidence: `tests/test_calibration_safety.py`, `tests/test_target_contract.py`,
+  GitHub Actions PR #163.
+
 ### 2026-07-21: Dev dependency registration for CLI static checkers in uv projects
 
 - Context: Running `uv run ruff check .` or `uv run basedpyright` failed with missing binary errors (`Failed to spawn: ruff`) during environment verification.
