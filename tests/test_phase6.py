@@ -1,6 +1,9 @@
 """Tests for the preregistered Phase 6 analyst workflow."""
 
 from datetime import date
+from pathlib import Path
+import subprocess
+import sys
 
 import polars as pl
 import pytest
@@ -40,3 +43,17 @@ def test_reference_year_and_weights() -> None:
   assert weighted["diabetes_prevalence"] > raw["diabetes_prevalence"]
   with pytest.raises(ValueError, match="weight"):
     analyze_workflow(tables, weights=weights.slice(1))
+
+
+def test_runner_refuses_overwrite_and_historical_destination(tmp_path: Path) -> None:
+  root = Path(__file__).resolve().parents[1]
+  script = root / "scripts/phase6_evaluate_v1.py"
+  existing = tmp_path / "existing.json"
+  existing.write_text("preserve me")
+  for output in (existing, root / "reports/phase5/not-a-new-run.json"):
+    result = subprocess.run(
+      [sys.executable, str(script), "--output", str(output)], capture_output=True, text=True
+    )
+    assert result.returncode != 0
+    assert "new file" in result.stderr
+  assert existing.read_text() == "preserve me"
