@@ -13,7 +13,7 @@ import json
 import math
 from enum import Enum
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Literal, Mapping, Sequence
 
 import polars as pl
 from pydantic import BaseModel, ConfigDict
@@ -29,11 +29,14 @@ from medicare_synth.evidence_corpus import (
 )
 from medicare_synth.evidence_ir import (
   AlgorithmId,
+  EligibilityPlan,
   EstimandType,
   EvidenceIRError,
   FindingIR,
+  admissions_in_year,
   compile_finding,
   eligible_bene_ids,
+  validate_analysis_tables,
 )
 from medicare_synth.synthesis import (
   ConditionalWorld,
@@ -137,10 +140,12 @@ class MomentTarget(BaseModel):
 
   model_config = ConfigDict(frozen=True)
 
+  plan_version: Literal["1"] = "1"
   finding_id: str
   estimand_type: EstimandType
   evidence_estimate: float
   feature: str  # diabetes | hf | ip_given_diabetes
+  eligibility: EligibilityPlan
 
 
 class DiscrepancyRow(BaseModel):
@@ -281,8 +286,8 @@ def _hf_flag(tables: Mapping[str, pl.DataFrame]) -> pl.DataFrame:
   )
 
 
-def _ip_flag(tables: Mapping[str, pl.DataFrame]) -> pl.DataFrame:
-  ip = tables["inpatient_claims"]
+def _ip_flag(tables: Mapping[str, pl.DataFrame], reference_year: int) -> pl.DataFrame:
+  ip = admissions_in_year(tables["inpatient_claims"], reference_year)
   if ip.height == 0:
     return pl.DataFrame(
       {
@@ -295,13 +300,20 @@ def _ip_flag(tables: Mapping[str, pl.DataFrame]) -> pl.DataFrame:
   )
 
 
-def beneficiary_feature_frame(tables: Mapping[str, pl.DataFrame]) -> pl.DataFrame:
+def beneficiary_feature_frame(
+  tables: Mapping[str, pl.DataFrame], *, reference_year: int = 2021
+) -> pl.DataFrame:
   """One row per beneficiary with diabetes / HF / IP flags."""
+  validate_analysis_tables(
+    tables,
+    reference_year,
+    ("beneficiary_summary", "mbsf_base_enrollment", "mbsf_chronic_conditions", "inpatient_claims"),
+  )
   bene = tables["beneficiary_summary"].select("bene_id")
   frame = (
     bene.join(_diabetes_flag(tables), on="bene_id", how="left")
     .join(_hf_flag(tables), on="bene_id", how="left")
-    .join(_ip_flag(tables), on="bene_id", how="left")
+    .join(_ip_flag(tables, reference_year), on="bene_id", how="left")
     .with_columns(
       pl.col("diabetes").fill_null(False),
       pl.col("hf").fill_null(False),
@@ -346,14 +358,16 @@ def evaluate_moment(
   raise CalibrationError(f"unknown moment feature {target.feature!r}")
 
 
-def moment_target_from_finding(finding: FindingIR) -> MomentTarget:
-  compiled = compile_finding(finding)
+def moment_target_from_finding(
+  finding: FindingIR, *, context_year: int = 2021
+) -> MomentTarget:
+  compiled = compile_finding(finding, context_year=context_year)
   et = finding.estimand.type
   if et == EstimandType.PREVALENCE:
     concept = finding.estimand.numerator.concept.value
-    if concept == "diabetes":
+    if concept == "diabetes" and compiled.derivation.numerator_algorithm == AlgorithmId.MBSF_SP_DIABETES_V1:
       feature = "diabetes"
-    elif concept == "heart_failure":
+    elif concept == "heart_failure" and compiled.derivation.numerator_algorithm == AlgorithmId.MBSF_SP_CHF_V1:
       feature = "hf"
     else:
       raise CalibrationError(
@@ -364,6 +378,7 @@ def moment_target_from_finding(finding: FindingIR) -> MomentTarget:
     if (
       finding.estimand.conditioning is None
       or finding.estimand.conditioning.concept.value != "diabetes"
+      or compiled.derivation.conditioning_algorithm != AlgorithmId.MBSF_SP_DIABETES_V1
     ):
       raise CalibrationError(
         f"{finding.finding_id}: binary_risk calibration requires "
@@ -390,6 +405,7 @@ def moment_target_from_finding(finding: FindingIR) -> MomentTarget:
     estimand_type=et,
     evidence_estimate=finding.result.estimate,
     feature=feature,
+    eligibility=compiled.eligibility,
   )
 
 
@@ -418,7 +434,15 @@ def feature_frame_for_finding(
       f"{finding.finding_id} is not executable for calibration moments"
     )
   eligible = eligible_bene_ids(tables, compiled.eligibility)
-  frame = beneficiary_feature_frame(tables)
+  frame = beneficiary_feature_frame(tables, reference_year=context_year)
+  return frame.join(eligible, on="bene_id", how="inner")
+
+
+def _feature_frame_for_target(
+  tables: Mapping[str, pl.DataFrame], target: MomentTarget
+) -> pl.DataFrame:
+  eligible = eligible_bene_ids(tables, target.eligibility)
+  frame = beneficiary_feature_frame(tables, reference_year=target.eligibility.reference_year)
   return frame.join(eligible, on="bene_id", how="inner")
 
 
@@ -435,15 +459,13 @@ def discrepancy_for_findings(
   Weights (Level B) are joined after eligibility filtering. Beneficiaries
   outside a finding's eligibility do not enter that finding's moment.
   """
-  full = beneficiary_feature_frame(tables)
+  full = beneficiary_feature_frame(tables, reference_year=context_year)
   w_all = weights if weights is not None else _uniform_weights(full)
   rows: list[DiscrepancyRow] = []
   for finding in findings:
     try:
-      target = moment_target_from_finding(finding)
-      framed = feature_frame_for_finding(
-        tables, finding, context_year=context_year
-      )
+      target = moment_target_from_finding(finding, context_year=context_year)
+      framed = _feature_frame_for_target(tables, target)
       if framed.height == 0:
         est = None
       else:
@@ -538,19 +560,28 @@ def reweight_beneficiaries(
   """
   if not targets:
     raise CalibrationError("reweight requires at least one moment target")
-  frame = beneficiary_feature_frame(tables)
+  years = {target.eligibility.reference_year for target in targets}
+  if len(years) != 1:
+    raise CalibrationError("targets must use one reference year")
+  frame = beneficiary_feature_frame(tables, reference_year=next(iter(years)))
   n = frame.height
   weights = [1.0] * n
   diabetes = frame["diabetes"].to_list()
   hf = frame["hf"].to_list()
   ip = frame["ip"].to_list()
+  eligible_ids = [
+    set(eligible_bene_ids(tables, t.eligibility)["bene_id"].to_list())
+    for t in targets
+  ]
+  ids = frame["bene_id"].to_list()
   notes: list[str] = []
   infeasible = False
 
   framed0 = frame.with_columns(pl.lit(1.0).alias("weight"))
   before_rows: list[DiscrepancyRow] = []
-  for t in targets:
-    est = evaluate_moment(framed0, t)
+  for t, eligible in zip(targets, eligible_ids, strict=True):
+    subset = framed0.filter(pl.col("bene_id").is_in(list(eligible)))
+    est = evaluate_moment(subset, t) if subset.height else None
     abs_diff = None if est is None else est - t.evidence_estimate
     before_rows.append(
       DiscrepancyRow(
@@ -567,24 +598,35 @@ def reweight_beneficiaries(
   it = 0
   for it in range(1, max_iterations + 1):
     max_err = 0.0
-    for t in targets:
+    for t, eligible in zip(targets, eligible_ids, strict=True):
+      indexes = [i for i, bene_id in enumerate(ids) if bene_id in eligible]
+      sub_weights = [weights[i] for i in indexes]
       if t.feature == "diabetes":
-        weights, note = _rake_binary(weights, diabetes, t.evidence_estimate)
+        adjusted, note = _rake_binary(
+          sub_weights, [diabetes[i] for i in indexes], t.evidence_estimate
+        )
       elif t.feature == "hf":
-        weights, note = _rake_binary(weights, hf, t.evidence_estimate)
+        adjusted, note = _rake_binary(
+          sub_weights, [hf[i] for i in indexes], t.evidence_estimate
+        )
       elif t.feature == "ip_given_diabetes":
-        weights, note = _rake_conditional(
-          weights, diabetes, ip, t.evidence_estimate
+        adjusted, note = _rake_conditional(
+          sub_weights, [diabetes[i] for i in indexes],
+          [ip[i] for i in indexes], t.evidence_estimate
         )
       else:
         raise CalibrationError(f"unsupported feature {t.feature}")
+      for i, value in zip(indexes, adjusted, strict=True):
+        weights[i] = value
       if note:
         infeasible = True
         notes.append(f"{t.finding_id}: {note}")
         break
       # track error
-      tmp = frame.with_columns(pl.Series("weight", weights))
-      est = evaluate_moment(tmp, t)
+      tmp = frame.with_columns(pl.Series("weight", weights)).filter(
+        pl.col("bene_id").is_in(list(eligible))
+      )
+      est = evaluate_moment(tmp, t) if tmp.height else None
       if est is None:
         infeasible = True
         notes.append(f"{t.finding_id}: moment undefined after rake")
@@ -600,8 +642,9 @@ def reweight_beneficiaries(
   weight_frame = frame.select("bene_id").with_columns(w_series)
   framed1 = frame.join(weight_frame, on="bene_id", how="inner")
   after_rows: list[DiscrepancyRow] = []
-  for t in targets:
-    est = evaluate_moment(framed1, t)
+  for t, eligible in zip(targets, eligible_ids, strict=True):
+    subset = framed1.filter(pl.col("bene_id").is_in(list(eligible)))
+    est = evaluate_moment(subset, t) if subset.height else None
     abs_diff = None if est is None else est - t.evidence_estimate
     after_rows.append(
       DiscrepancyRow(

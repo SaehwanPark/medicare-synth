@@ -33,13 +33,17 @@ one-click calibrated CSV product.
 - Identical analysis across worlds: `analyze_world_moments(tables, corpus,
   weights=...)`
 
-## Reproduce the Phase 5 summary
+## Inspect the historical Phase 5 summary
 
-```shell
-uv run python scripts/phase5_emit_worlds.py
-```
+The checked-in outputs below are historical artifacts, produced by commit
+`7673670`. Do not run `scripts/phase5_emit_worlds.py` in a checkout whose
+`reports/phase5/` must be preserved: it overwrites that directory, and current
+code has different evaluation semantics. To replay the historical producer,
+use a separate detached worktree at `7673670` with its locked environment; do
+not treat a current-code recomputation as the same run. A corrected, separately
+versioned run remains Phase 6 work.
 
-Expected artifacts (among others):
+Historical artifacts (among others):
 
 - `reports/phase5/world_family_summary.json`
 - `reports/phase5/evaluation_freeze.json`
@@ -53,7 +57,34 @@ Shared calibration targets (frozen corpus / evaluation freeze):
 | CMS-AGG-04 | HF prevalence 0.12 (2022 source framing) |
 | LIT-07 | P(IP \| diabetes) 0.13 (weak industry prior) |
 
-Holdout findings are evaluate-only and must not enter fitting.
+Holdout findings must not enter fitting or selection. The current Level C
+implementation still evaluates the holdout during candidate search; until that
+is corrected, its results are exposed diagnostics, not independent evaluation.
+
+## Target cohort and input contract
+
+`compile_finding` binds each supported finding to a reference-year eligibility
+plan. `moment_target_from_finding` carries that plan as `MomentTarget`
+`plan_version="1"`; older unscoped target objects must be rebuilt from their
+finding, not silently assigned a cohort. Reweighting and discrepancy reports
+use that target's eligible IDs; a binary-risk denominator additionally requires
+its conditioning flag. Admission flags and event counts use `clm_admsn_dt` in
+the context year. Evidence IR execution and calibration refuse ambiguous annual
+beneficiary rows, missing required values or fields, and inconsistent annual
+years. When supplied, Part C MA months also participate in eligibility.
+These boundaries are covered by `tests/test_target_contract.py`.
+
+The compiler requires the matching declared method: `crude_proportion` for
+prevalence, `conditional_proportion` for binary risk, and `events_per_time`
+for rates. Unsupported/inconsistent labels, unimplemented stratifications,
+non-unit proportion scales, and mismatched concepts/algorithms are refused;
+existing source-year transport and algorithm-approximation warnings remain.
+This is not a new estimator or validation of a real population. Per-target
+complete-coverage/status gating and final-sweep convergence remain open.
+For the next slice, the planned per-target status vocabulary is `matched`,
+`outside_tolerance`, `undefined`, `unsupported`, and `infeasible`; non-matched
+states need reasons, and a legitimate zero discrepancy is `matched`, not
+undefined. These statuses and their promotion gate are not implemented yet.
 
 ## Example: inspect one world in Python
 
@@ -101,9 +132,11 @@ against current tests before documenting it as a supported product workflow.
 ## Evaluation boundary
 
 Structural validity is a hard gate. Calibration MAE is graded on the training
-partition. Holdout isolation is enforced. **Phase 6** owns independent
-research-utility and held-out evaluation claims; do not advertise Phase 5
-calibration success as general clinical realism.
+partition, but incomplete-target selection and final-weight convergence are
+still being hardened. Holdout is not the selection objective, but it is
+currently evaluated during search. **Phase 6** owns independent research-utility
+and held-out evaluation claims; do not advertise Phase 5 calibration success as
+general clinical realism.
 
 Source records:
 
