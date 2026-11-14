@@ -145,7 +145,23 @@ class WorldRelease(BaseModel):
 
   @model_validator(mode="after")
   def _validate_weight_contract(self) -> WorldRelease:
+    self._check_weight_contract()
+    return self
+
+  def _check_weight_contract(self) -> None:
+    expected_level = (
+      CalibrationLevel.B_REWEIGHT if self.method == WorldMethod.REWEIGHT
+      else CalibrationLevel.C_GENERATOR_PARAMS
+    )
+    if self.calibration_level != expected_level:
+      raise ValueError("world method and calibration level must agree")
     if self.calibration_level == CalibrationLevel.B_REWEIGHT:
+      if (
+        self.calibration_fitted.n_missing
+        or not self.calibration_fitted.rows
+        or any(row.status != "matched" for row in self.calibration_fitted.rows)
+      ):
+        raise ValueError("Level B calibrated release requires all final targets matched")
       if self.weights is None or self.weight_key != "bene_id" or not self.weight_method:
         raise ValueError("Level B calibrated release requires weights, key and method")
       validate_beneficiary_weights(self.world.beneficiary_summary, self.weights)
@@ -161,7 +177,6 @@ class WorldRelease(BaseModel):
         or diagnostics.get("weights_sha256") != _weights_sha256(self.weights)
       ):
         raise ValueError("Level B weight metadata must match the packaged weights")
-    return self
 
   def tables(self, *, raw: bool = False) -> dict[str, pl.DataFrame]:
     if self.calibration_level == CalibrationLevel.B_REWEIGHT and not raw:
@@ -171,6 +186,10 @@ class WorldRelease(BaseModel):
     return self.world.tables()
 
   def analyze(self, corpus: EvidenceCorpus, *, fixtures_root: Path | None = None) -> tuple[DiscrepancyReport, DiscrepancyReport]:
+    try:
+      self._check_weight_contract()
+    except ValueError as exc:
+      raise WorldsError(str(exc)) from exc
     return analyze_world_moments(
       self.world.tables(), corpus, weights=self.weights,
       calibration_level=self.calibration_level, fixtures_root=fixtures_root,

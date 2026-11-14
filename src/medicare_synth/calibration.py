@@ -192,8 +192,8 @@ class DiscrepancyReport(BaseModel):
     mae = (sum(diffs) / len(diffs)) if diffs else None
     return DiscrepancyReport(
       rows=tuple(rows),
-      mean_absolute_error=None if mae is None or missing else round(mae, 12),
-      diagnostic_subset_mae=None if mae is None else round(mae, 12),
+      mean_absolute_error=None if mae is None or missing else mae,
+      diagnostic_subset_mae=mae,
       n_missing=missing,
     )
 
@@ -393,6 +393,8 @@ def moment_target_from_finding(
   finding: FindingIR, *, context_year: int = 2021
 ) -> MomentTarget:
   compiled = compile_finding(finding, context_year=context_year)
+  if not math.isfinite(finding.result.estimate) or not 0.0 <= finding.result.estimate <= 1.0:
+    raise CalibrationError(f"{finding.finding_id}: target must be a finite proportion in [0, 1]")
   if not compiled.compatibility.executable:
     issues = "; ".join(f"{issue.code}: {issue.message}" for issue in compiled.compatibility.errors)
     raise CalibrationError(f"{finding.finding_id} is not executable: {issues}")
@@ -517,8 +519,8 @@ def _target_row(
   return DiscrepancyRow(
     finding_id=target.finding_id,
     evidence_estimate=target.evidence_estimate,
-    synthetic_estimate=None if estimate is None else round(estimate, 12),
-    absolute_difference=None if residual is None else round(residual, 12),
+    synthetic_estimate=estimate,
+    absolute_difference=residual,
     partition=partition,
     status=status,
     reason=(
@@ -526,7 +528,7 @@ def _target_row(
       "residual exceeds solver tolerance" if status == "outside_tolerance" else None
     ),
     denominator_count=count,
-    denominator_weight=round(weight_sum, 12),
+    denominator_weight=weight_sum,
     tolerance=tolerance,
     compatibility=target.compatibility,
   )
@@ -916,7 +918,8 @@ def calibrate_generator_params(
   baseline_cal = discrepancy_for_findings(
     baseline_world.tables(), cal_findings, partition=PartitionName.CALIBRATION
   )
-  best_mae = baseline_cal.mean_absolute_error
+  baseline_is_candidate = baseline_params.p_ip_given_no_diabetes == p_no
+  best_mae = baseline_cal.mean_absolute_error if baseline_is_candidate else None
   best_params: ConditionalWorldParams | None = baseline_params if best_mae is not None else None
   best_cal: DiscrepancyReport | None = baseline_cal if best_mae is not None else None
   trace: list[ParamSearchPoint] = []

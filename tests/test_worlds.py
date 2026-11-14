@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import polars as pl
 import pytest
 
 from medicare_synth.calibration import load_default_corpus
@@ -123,6 +124,10 @@ def test_reweight_records_require_explicit_raw_access_and_weights(family, corpus
   assert w.run_manifest.diagnostics["weights_sha256"]
   with pytest.raises(WorldsError, match="weights"):
     w.model_copy(update={"weights": None}).analyze(corpus)
+  assert w.weights is not None
+  changed_weights = w.weights.with_columns((pl.col("weight") * 2).alias("weight"))
+  with pytest.raises(WorldsError, match="metadata"):
+    w.model_copy(update={"weights": changed_weights}).analyze(corpus)
   weighted, _ = w.analyze(corpus)
   from medicare_synth.worlds import analyze_world_moments
   unweighted, _ = analyze_world_moments(raw, corpus)

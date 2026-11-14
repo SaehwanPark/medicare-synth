@@ -55,6 +55,32 @@ def test_incomplete_candidate_cannot_win() -> None:
   assert any(row.status == "undefined" and row.reason for row in rejected.targets)
 
 
+def test_fixed_background_override_cannot_select_an_incompatible_baseline() -> None:
+  corpus, _ = load_default_corpus()
+  base = ConditionalWorldParams(
+    n_beneficiaries=1000, seed=42, diabetes_prevalence=0.277,
+    hf_prevalence=0.12, p_ip_given_diabetes=0.13, p_ip_given_no_diabetes=0.04,
+  )
+  result = calibrate_generator_params(
+    base, corpus, diabetes_values=(0.8,), hf_values=(0.8,), ip_diab_values=(0.8,),
+    p_ip_given_no_diabetes=0.8,
+  )
+  assert result.fitted_params.p_ip_given_no_diabetes == 0.8
+  assert result.fitted_params.diabetes_prevalence == 0.8
+
+
+def test_nonfinite_target_is_unsupported() -> None:
+  corpus, _ = load_default_corpus()
+  finding = load_partition_findings(corpus, PartitionName.CALIBRATION)[0]
+  bad = finding.model_copy(update={"result": finding.result.model_copy(update={"estimate": float("nan")})})
+  world = generate_diabetes_ip_world(default_baseline_params(n_beneficiaries=100, seed=42))
+  report = discrepancy_for_findings(world.tables(), [bad], partition=PartitionName.CALIBRATION)
+  assert report.n_missing == 1
+  assert report.mean_absolute_error is None
+  assert report.rows[0].status == "unsupported"
+  assert report.rows[0].reason and "finite" in report.rows[0].reason
+
+
 def test_no_complete_candidate_refuses_selection() -> None:
   corpus, _ = load_default_corpus()
   base = default_baseline_params(n_beneficiaries=100, seed=42).model_copy(
