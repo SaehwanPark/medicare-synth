@@ -49,8 +49,11 @@ Out of scope for the foundation (still true):
 
 ### Literature-constrained population modeling and research playground
 
-Status: Phases 0–5 historically delivered; Phase 6 independent evaluation active.
-Phase 7 population-model transition is planned, not available functionality.
+Status: Phases 0–5 historically delivered. Phase 6 has a pinned engineering and
+workflow evaluation with a no-go on independent fidelity; fresh independent
+evidence remains open. See `docs/phase6/evaluation-v1.md` and
+`reports/phase6/engineering-evaluation-v1.json`. Phase 7 population-model
+transition is planned, not available functionality.
 
 **Mission and intended direction:** Medicare-Synth is developing a
 literature-constrained synthetic population modeling system that incrementally

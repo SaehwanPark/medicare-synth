@@ -1,8 +1,8 @@
 # ARCHITECTURE
 
-Last Reviewed: 2026-11-08 (static documentation realignment; no new test run)
-Status: Structural core through Phase 5 MVP worlds delivered; Phase 6 independent
-evaluation active; shared population-model architecture planned (Phase 7).
+Last Reviewed: 2026-11-14 (Phase 6 evaluation v1)
+Status: Structural core and Phase 5 MVP worlds delivered; Phase 6 workflow
+assessment recorded, independent fidelity no-go; Phase 7 remains planned.
 Audit source: [November 8 realignment](docs/audits/audit-for-project-realignement-20261108.md).
 
 ## Current Repository
@@ -33,13 +33,13 @@ calibration targets without fitting holdout.
 Phase 5 (`docs/phase5/`) packages reference + alternative worlds and freezes
 evaluation gates without retuning against holdout.
 `TabDatSynthAdapter` / horizontal re-keying remain structural fixtures only.
-Next: Phase 6 independent held-out / research-utility evaluation, with Phase 7A
-correctness hardening gating renewed convergence and calibrated-release claims.
 The audit identified full-sweep IPF convergence, missing-target success,
 fit/report population alignment and repeated holdout evaluation gaps. Current
 code implements those numerical and partition boundaries with versioned v2
-worlds; the Phase 6 replay and evidence disposition remain open. Existing
-reports remain historical artifacts, not validation of those fixes. The current
+worlds. `medicare_synth.phase6` and `scripts/phase6_evaluate_v1.py` implement
+the frozen protocol; `docs/phase6/evaluation-v1.md` records a replay and
+conditional engineering/workflow go, but independent fidelity is no-go.
+Existing reports remain historical artifacts, not validation of those fixes. The current
 generator does not encode joint age/sex/diabetes/HF effects, adjusted analysis,
 or a general parent-to-child calibrated model state.
 Prefer narrow modules and transparent conditional models; no large hierarchical

@@ -12,9 +12,9 @@ worlds are explicit derivatives. A shared reference is not a uniquely identified
 or universally representative Medicare distribution.
 
 This is a documentation-only adoption, not implementation or fresh validation.
-Phases 0–5 remain historical deliveries. Phase 6 independent evaluation remains
-active, with correctness hardening required before renewed convergence or
-release-fidelity claims. Static audit findings are tracked below; stored reports
+Phases 0–5 remain historical deliveries. Phase 6 now has a versioned
+engineering/workflow assessment; independent fidelity remains no-go until
+fresh compatible evidence is approved and evaluated. Static audit findings are tracked below; stored reports
 and frozen corpus v1 are not rewritten. Current canonical documents supersede
 the older proposal wherever strategy or ordering differs.
 
@@ -183,7 +183,10 @@ Exit criteria:
 
 ### Phase 6 — Independent evaluation
 
-Status: Active
+Status: Engineering/workflow evaluation v1 recorded; independent fidelity no-go,
+so independent-evidence evaluation remains open. Protocol and report:
+`docs/phase6/protocol-v1.md`, `docs/phase6/evaluation-v1.md`, and
+`reports/phase6/engineering-evaluation-v1.json`.
 
 Outputs:
 
