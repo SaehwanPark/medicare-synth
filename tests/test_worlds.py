@@ -93,6 +93,18 @@ def test_calibrated_worlds_improve_and_differ_on_free_assumption(family) -> None
   assert w2.sha256() != w3.sha256()
 
 
+def test_world_rejects_corpus_path_or_freeze_identity_mismatch(corpus_and_path) -> None:
+  from medicare_synth.worlds import emit_world
+
+  corpus, path = corpus_and_path
+  preset = get_world_preset("mvp-w2-generator-v2")
+  with pytest.raises(WorldsError, match="provenance"):
+    emit_world(preset, corpus=corpus.model_copy(update={"corpus_id": "wrong"}), corpus_path=path)
+  freeze = load_evaluation_freeze(corpus=corpus).model_copy(update={"corpus_id": "wrong"})
+  with pytest.raises(WorldsError, match="freeze"):
+    emit_world(preset, corpus=corpus, corpus_path=path, freeze=freeze)
+
+
 def test_nonconverged_reweight_is_never_packaged(
   corpus_and_path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -124,6 +136,8 @@ def test_reweight_records_require_explicit_raw_access_and_weights(family, corpus
   assert w.run_manifest.diagnostics["weights_sha256"]
   with pytest.raises(WorldsError, match="weights"):
     w.model_copy(update={"weights": None}).analyze(corpus)
+  with pytest.raises(WorldsError, match="corpus"):
+    w.analyze(corpus.model_copy(update={"corpus_id": "different-corpus"}))
   assert w.weights is not None
   changed_weights = w.weights.with_columns((pl.col("weight") * 2).alias("weight"))
   with pytest.raises(WorldsError, match="weight"):

@@ -22,6 +22,7 @@ from medicare_synth.calibration import (
   CalibrationLevel,
   CalibrationRunManifest,
   DiscrepancyReport,
+  _findings_hash,
   assert_calibration_partition_only,
   build_run_manifest,
   calibrate_generator_params,
@@ -42,6 +43,7 @@ from medicare_synth.evaluation import (
 from medicare_synth.evidence_corpus import (
   EvidenceCorpus,
   PartitionName,
+  load_corpus,
   load_partition_findings,
   sha256_file,
 )
@@ -201,6 +203,20 @@ class WorldRelease(BaseModel):
       self._check_weight_contract()
     except ValueError as exc:
       raise WorldsError(str(exc)) from exc
+    if (
+      corpus.corpus_id != self.corpus_id
+      or corpus.context_id != self.context_id
+      or corpus.finding_ids(PartitionName.CALIBRATION) != self.calibration_finding_ids
+      or corpus.finding_ids(PartitionName.HOLDOUT) != self.holdout_finding_ids
+    ):
+      raise WorldsError("analysis corpus and partitions must match the frozen world")
+    for partition, key in (
+      (PartitionName.CALIBRATION, "calibration_findings_sha256"),
+      (PartitionName.HOLDOUT, "holdout_findings_sha256"),
+    ):
+      findings = load_partition_findings(corpus, partition, fixtures_root=fixtures_root)
+      if _findings_hash(findings) != self.run_manifest.diagnostics.get(key):
+        raise WorldsError(f"analysis {partition.value} findings differ from the frozen world")
     return analyze_world_moments(
       self.world.tables(), corpus, weights=self.weights,
       calibration_level=self.calibration_level, fixtures_root=fixtures_root,
@@ -478,9 +494,20 @@ def emit_world(
   ip_diab_values: Sequence[float] | None = None,
 ) -> WorldRelease:
   """Emit one world from a preset against the frozen corpus + evaluation freeze."""
-  if corpus is None or corpus_path is None:
+  if corpus is None and corpus_path is None:
     corpus, corpus_path = load_default_corpus()
+  elif corpus is None or corpus_path is None:
+    raise WorldsError("supply both corpus and corpus_path, or neither")
+  if not corpus.frozen or load_corpus(corpus_path) != corpus:
+    raise WorldsError("world corpus must be frozen and match its provenance path")
   freeze = freeze or load_evaluation_freeze(corpus=corpus)
+  if (
+    freeze.context_id != corpus.context_id
+    or freeze.corpus_id != corpus.corpus_id
+    or freeze.holdout_finding_ids != corpus.finding_ids(PartitionName.HOLDOUT)
+    or freeze.diagnostic_finding_ids != corpus.finding_ids(PartitionName.DIAGNOSTIC)
+  ):
+    raise WorldsError("evaluation freeze must match the corpus and partitions")
   cal_ids = corpus.finding_ids(PartitionName.CALIBRATION)
   assert_calibration_partition_only(corpus, cal_ids)
   assert_fit_roles_allowed(freeze, cal_ids)
@@ -551,6 +578,8 @@ def emit_world(
         "weight_key": "bene_id",
         "weight_method": "iterative_proportional_fitting",
         "weights_sha256": _weights_sha256(result.weights),
+        "calibration_findings_sha256": _findings_hash(load_partition_findings(corpus, PartitionName.CALIBRATION)),
+        "holdout_findings_sha256": _findings_hash(load_partition_findings(corpus, PartitionName.HOLDOUT)),
         "targets_before": [row.model_dump(mode="json") for row in result.before.rows],
         "targets_after": [row.model_dump(mode="json") for row in result.after.rows],
       },
@@ -689,8 +718,10 @@ def emit_world_family(
   world_ids: Sequence[str] | None = None,
 ) -> WorldFamilyRelease:
   """Emit the MVP multi-world family with shared calibration targets."""
-  if corpus is None or corpus_path is None:
+  if corpus is None and corpus_path is None:
     corpus, corpus_path = load_default_corpus()
+  elif corpus is None or corpus_path is None:
+    raise WorldsError("supply both corpus and corpus_path, or neither")
   freeze = freeze or load_evaluation_freeze(corpus=corpus)
   presets = list_mvp_world_presets()
   if world_ids is not None:
