@@ -552,6 +552,22 @@ def compile_finding(
         f"{finding.estimand.conditioning.algorithm.value}->{cond_algo.value}"
       )
 
+  algorithm_concepts = {
+    AlgorithmId.MBSF_SP_DIABETES_V1: ConceptId.DIABETES,
+    AlgorithmId.MBSF_SP_CHF_V1: ConceptId.HEART_FAILURE,
+    AlgorithmId.IP_CLAIM_PRESENCE_V1: ConceptId.ALL_CAUSE_IP,
+  }
+  for variable, algorithm in (
+    (finding.estimand.numerator, num_algo),
+    (finding.estimand.conditioning, cond_algo),
+  ):
+    if variable is not None and algorithm is not None and algorithm in algorithm_concepts:
+      if variable.concept != algorithm_concepts[algorithm]:
+        issues.append(_issue(
+          "CONCEPT-ALGORITHM", "error",
+          f"{variable.concept.value} does not match algorithm {algorithm.value}",
+        ))
+
   for algo in (num_algo, cond_algo):
     if algo is None:
       continue
@@ -567,6 +583,15 @@ def compile_finding(
           f"No table mapping for algorithm {algo.value}",
         )
       )
+
+  if finding.estimand.denominator != ConceptId.ELIGIBLE_BENEFICIARIES:
+    issues.append(_issue(
+      "DENOMINATOR", "error", "Only eligible-beneficiary denominators are supported"
+    ))
+  if finding.estimand.type == EstimandType.PREVALENCE and cond_algo is not None:
+    issues.append(_issue(
+      "CONDITIONING", "error", "Conditioned prevalence is not supported by v0.1"
+    ))
 
   estimator_method = "crude_proportion"
   time_unit = finding.estimand.time_unit
@@ -617,6 +642,19 @@ def compile_finding(
         f"{finding.estimand.type.value}; expected {estimator_method!r}",
       )
     )
+
+  if finding.analysis.stratification and not (
+    finding.analysis.stratification == ("sex",)
+    and finding.population.sex_codes is not None
+    and len(finding.population.sex_codes) == 1
+  ):
+    issues.append(_issue(
+      "STRATIFICATION", "error", "Unsupported analysis stratification for a single estimate"
+    ))
+  if finding.estimand.type != EstimandType.RATE and finding.estimand.scale != 1.0:
+    issues.append(_issue(
+      "SCALE", "error", "Prevalence and binary risk require proportion scale 1"
+    ))
 
   if finding.analysis.adjustment_set:
     issues.append(
@@ -792,6 +830,8 @@ def validate_analysis_tables(
         raise EvidenceIRError(f"missing required field: {name}.{col}")
       if table[col].null_count():
         raise EvidenceIRError(f"missing values in {name}.{col}")
+    if table.schema["bene_id"] != pl.String:
+      raise EvidenceIRError(f"{name}.bene_id must be a string")
     if name in {"beneficiary_summary", "mbsf_base_enrollment", "mbsf_chronic_conditions", "mbsf_part_c"}:
       if table["bene_id"].n_unique() != table.height:
         raise EvidenceIRError(f"ambiguous beneficiary-year grain in {name}")
@@ -831,6 +871,8 @@ def validate_analysis_tables(
   if "mbsf_chronic_conditions" in required_tables:
     chronic = tables["mbsf_chronic_conditions"]
     for col in ("sp_diabetes", "sp_chf"):
+      if chronic.schema[col] != pl.String:
+        raise EvidenceIRError(f"{col} must use string chronic-condition codes")
       if chronic.filter(~pl.col(col).is_in(["0", "1", "2"])).height:
         raise EvidenceIRError(f"unsupported chronic condition value in {col}")
   if "inpatient_claims" in required_tables:

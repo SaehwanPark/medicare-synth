@@ -229,10 +229,11 @@ Required outputs and acceptance:
   empty eligible cohorts, or absent support produce explicit failure or unmet
   status. A lower MAE on only the computable subset is not success; report target
   coverage and per-target status alongside any aggregate score.
-- **Population alignment:** use each finding's executable eligibility and
-  denominator consistently in fitting, convergence, and reporting. Discrepancy
-  reporting already filters eligible cohorts; full-frame IPF is still a gap.
-  Verify restricted age/enrollment/sex cohorts and conditional denominators.
+- **Population alignment:** supported findings now carry executable eligibility
+  into fitting and reporting, with admission-year filtering and refusal of
+  ambiguous annual inputs (`tests/test_target_contract.py`). Restricted
+  age/enrollment/sex cohorts and conditional denominators have regression
+  coverage. Final-sweep convergence on that same target plan remains open.
 - **Weighted artifact semantics:** Level B remains records + beneficiary weights
   with ESS/weight diagnostics and weighted-analysis requirements. Do not label
   unchanged tables as an ordinary calibrated sample. Any later resampling is a

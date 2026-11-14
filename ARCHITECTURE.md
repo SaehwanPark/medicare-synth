@@ -36,8 +36,10 @@ evaluation gates without retuning against holdout.
 Next: Phase 6 independent held-out / research-utility evaluation, with Phase 7A
 correctness hardening gating renewed convergence and calibrated-release claims.
 The audit identified full-sweep IPF convergence, missing-target success,
-fit/report population alignment and repeated holdout evaluation gaps. Existing
-reports remain historical artifacts, not validation of those fixes. The current
+fit/report population alignment and repeated holdout evaluation gaps. Supported
+fit/report eligibility and reference-year alignment is now implemented, while
+the remaining gates are open. Existing reports remain historical artifacts, not
+validation of those fixes. The current
 generator does not encode joint age/sex/diabetes/HF effects, adjusted analysis,
 or a general parent-to-child calibrated model state.
 Prefer narrow modules and transparent conditional models; no large hierarchical
@@ -71,9 +73,11 @@ framework or opaque network is required by this design.
   `medicare_synth/fixtures/evidence_corpus/`.
 - **Calibration engine** — `calibration.py` Level A baseline, Level B IPF
   reweighting (ESS/weight/infeasibility), Level C generator-parameter grid;
-  discrepancy moments evaluate on each finding's Evidence IR eligible cohort,
-  but IPF fitting still uses the full beneficiary frame; holdout fit refused
-  (Level C nevertheless computes holdout per candidate); `CalibrationRunManifest`;
+  versioned target plans bind IPF fitting and discrepancy moments to each
+  finding's Evidence IR eligibility and reference year; annual grain and claim
+  dates are checked. Full-sweep convergence and complete-coverage gating remain
+  open; holdout fit refused (Level C nevertheless computes holdout per
+  candidate); `CalibrationRunManifest`;
   `AGENT_ROLE_CONTRACTS` for review gates (engines agent-independent).
 - **Worlds** — `worlds.py` versioned MVP family presets, emit API, identical
   downstream `analyze_world_moments`, release manifests/limitations;

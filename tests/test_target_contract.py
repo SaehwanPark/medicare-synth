@@ -44,6 +44,39 @@ def test_unsupported_estimator_never_dispatches_as_crude() -> None:
   assert any(issue.code == "ESTIMATOR" for issue in compiled.compatibility.errors)
 
 
+@pytest.mark.parametrize("kind,code", [
+  ("wrong_estimator", "ESTIMATOR"),
+  ("wrong_algorithm", "CONCEPT-ALGORITHM"),
+  ("stratification", "STRATIFICATION"),
+  ("scale", "SCALE"),
+])
+def test_inconsistent_analysis_contract_is_refused(kind: str, code: str) -> None:
+  finding = load_finding(package_fixtures_dir() / "lit03_mmwr_diabetes_prevalence_2015.json")
+  if kind == "wrong_estimator":
+    finding = finding.model_copy(update={"analysis": finding.analysis.model_copy(
+      update={"estimator": "conditional_proportion"}
+    )})
+  elif kind == "wrong_algorithm":
+    from medicare_synth.evidence_ir import AlgorithmId
+    numerator = finding.estimand.numerator.model_copy(
+      update={"algorithm": AlgorithmId.MBSF_SP_CHF_V1}
+    )
+    finding = finding.model_copy(update={
+      "estimand": finding.estimand.model_copy(update={"numerator": numerator})
+    })
+  elif kind == "stratification":
+    finding = finding.model_copy(update={"analysis": finding.analysis.model_copy(
+      update={"stratification": ("age",)}
+    )})
+  else:
+    finding = finding.model_copy(update={"estimand": finding.estimand.model_copy(
+      update={"scale": 100.0}
+    )})
+  compiled = compile_finding(finding)
+  assert not compiled.compatibility.executable
+  assert any(issue.code == code for issue in compiled.compatibility.errors)
+
+
 def test_out_of_year_admissions_do_not_count(tables: dict[str, pl.DataFrame]) -> None:
   finding = load_finding(package_fixtures_dir() / "lit07_avalere_ffs_diabetes_ip_risk.json")
   tables["inpatient_claims"] = tables["inpatient_claims"].with_columns(
@@ -70,7 +103,9 @@ def test_reweight_does_not_use_ineligible_support(tables: dict[str, pl.DataFrame
   assert not result.diagnostics.converged
 
 
-@pytest.mark.parametrize("defect", ["duplicate", "wrong_year", "missing_year", "missing_date"])
+@pytest.mark.parametrize("defect", [
+  "duplicate", "wrong_year", "missing_year", "missing_date", "integer_flag", "wrong_id_type"
+])
 def test_ambiguous_analysis_inputs_are_refused(
   tables: dict[str, pl.DataFrame], defect: str
 ) -> None:
@@ -84,8 +119,16 @@ def test_ambiguous_analysis_inputs_are_refused(
     )
   elif defect == "missing_year":
     tables["mbsf_base_enrollment"] = tables["mbsf_base_enrollment"].drop("rfrnc_yr")
-  else:
+  elif defect == "missing_date":
     tables["inpatient_claims"] = tables["inpatient_claims"].drop("clm_admsn_dt")
+  elif defect == "integer_flag":
+    tables["mbsf_chronic_conditions"] = tables["mbsf_chronic_conditions"].with_columns(
+      pl.col("sp_diabetes").cast(pl.Int64)
+    )
+  else:
+    tables["mbsf_base_enrollment"] = tables["mbsf_base_enrollment"].with_columns(
+      pl.lit(1).alias("bene_id")
+    )
   report = execute_finding(finding, tables)
   assert not report.executable
   assert report.synthetic_estimate is None
@@ -126,6 +169,21 @@ def test_weighted_stratified_prevalence_and_ineligible_weights(
   fitted = reweight_beneficiaries(tables, [moment_target_from_finding(finding)])
   assert fitted.after.rows[0].synthetic_estimate == 0.25
   assert fitted.weights.filter(pl.col("bene_id").is_in(ids[2:]))["weight"].to_list() == [1.0] * 3
+
+
+def test_age_maximum_applies_to_fit_and_reporting(tables: dict[str, pl.DataFrame]) -> None:
+  from medicare_synth.evidence_ir import AgeSpec
+
+  finding = load_finding(package_fixtures_dir() / "lit03_mmwr_diabetes_prevalence_2015.json")
+  finding = finding.model_copy(update={
+    "population": finding.population.model_copy(update={"age": AgeSpec(minimum=68, maximum=70)})
+  })
+  report = execute_finding(finding, tables)
+  disc = discrepancy_for_findings(tables, [finding], partition=PartitionName.CALIBRATION)
+  assert report.executable
+  assert report.synthetic_estimate == disc.rows[0].synthetic_estimate
+  fit = reweight_beneficiaries(tables, [moment_target_from_finding(finding)])
+  assert fit.before.rows[0].synthetic_estimate == report.synthetic_estimate
 
 
 def test_optional_part_c_ma_months_exclude_beneficiaries(

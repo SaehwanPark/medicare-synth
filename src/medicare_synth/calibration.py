@@ -13,7 +13,7 @@ import json
 import math
 from enum import Enum
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Literal, Mapping, Sequence
 
 import polars as pl
 from pydantic import BaseModel, ConfigDict
@@ -140,6 +140,7 @@ class MomentTarget(BaseModel):
 
   model_config = ConfigDict(frozen=True)
 
+  plan_version: Literal["1"] = "1"
   finding_id: str
   estimand_type: EstimandType
   evidence_estimate: float
@@ -437,6 +438,14 @@ def feature_frame_for_finding(
   return frame.join(eligible, on="bene_id", how="inner")
 
 
+def _feature_frame_for_target(
+  tables: Mapping[str, pl.DataFrame], target: MomentTarget
+) -> pl.DataFrame:
+  eligible = eligible_bene_ids(tables, target.eligibility)
+  frame = beneficiary_feature_frame(tables, reference_year=target.eligibility.reference_year)
+  return frame.join(eligible, on="bene_id", how="inner")
+
+
 def discrepancy_for_findings(
   tables: Mapping[str, pl.DataFrame],
   findings: Sequence[FindingIR],
@@ -456,9 +465,7 @@ def discrepancy_for_findings(
   for finding in findings:
     try:
       target = moment_target_from_finding(finding, context_year=context_year)
-      framed = feature_frame_for_finding(
-        tables, finding, context_year=context_year
-      )
+      framed = _feature_frame_for_target(tables, target)
       if framed.height == 0:
         est = None
       else:

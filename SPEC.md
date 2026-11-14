@@ -87,8 +87,10 @@ reports). LIT-03 (Andes MMWR 2015 diabetes prevalence 31.6%) is formalized as a
 reviewed **diagnostic** finding with explicit transport gaps; LIT-02-shaped
 planned-admission rates are refused rather than silently approximated. See
 [`docs/phase2/`](docs/phase2/). Draft extraction never auto-accepts. v0.1 supports
-prevalence, binary risk and rate; nonempty adjustment sets are rejected. Stored
-estimator labels do not yet provide general executable analysis dispatch.
+prevalence, binary risk and rate; nonempty adjustment sets are rejected. The
+compiler checks declared estimator labels against those three supported crude
+methods and refuses inconsistent labels; general estimator dispatch remains
+unavailable.
 
 **Evidence corpus (Phase 3):** `medicare_synth.evidence_corpus` freezes
 `mvp-2021-om-ffs-diabetes-ip-corpus-v1` with checksummed calibration (3),
@@ -133,8 +135,10 @@ resolve the following correctness and interpretation gaps:
   complete sweep. Final-weight residuals must govern convergence (planned 7A).
 - Missing/unsupported targets are counted but omitted from computable-only MAE;
   approved-target coverage must gate success, not just the aggregate metric.
-- Discrepancy reporting already uses Evidence IR eligibility; IPF still rakes
-  the full beneficiary frame. Fit/report population alignment is incomplete.
+- Supported target plans now carry finding-specific eligibility into IPF and
+  discrepancy reporting, with annual input grain and admission-year checks
+  (`tests/test_target_contract.py`). Complete-coverage and final-sweep checks
+  remain required before renewed calibration claims.
 - Level B leaves records unchanged: calibrated use requires weights and weighted
   analyses; it is not an ordinary unweighted calibrated dataset.
 - Level C excludes holdout from its selection objective but computes it per

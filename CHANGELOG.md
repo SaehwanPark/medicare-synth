@@ -24,6 +24,15 @@
 
 ### Fixed
 
+- Supported calibration target plans now carry the Evidence IR eligibility
+  into fitting and reporting; inpatient flags and event counts use admissions
+  in the reference year. Ambiguous annual grain, missing required fields and
+  inconsistent estimator declarations are refused. `MomentTarget` now requires
+  a version-1 eligibility plan; rebuild older unscoped targets from findings.
+  Full-sweep convergence, missing-target success, weights-only consumer safety
+  and candidate-by-candidate holdout evaluation remain open. Historical corpus
+  and reports are unchanged (`tests/test_target_contract.py`).
+
 - Calibration discrepancy moments now evaluate on each finding's Evidence IR
   eligible cohort (age / Option-B / sex), matching `execute_finding` instead of
   the unrestricted beneficiary frame. Public helper: `eligible_bene_ids`.
