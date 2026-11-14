@@ -355,16 +355,16 @@ def beneficiary_feature_frame(
       pl.col("ip").fill_null(False),
     )
   )
-  return frame
+  return frame.sort("bene_id").rechunk()
 
 
 def _weighted_mean(frame: pl.DataFrame, col: str, weight_col: str = "weight") -> float:
-  w = frame[weight_col]
-  x = frame[col].cast(pl.Float64)
-  sw = float(w.sum())
+  weights = frame[weight_col].cast(pl.Float64).to_list()
+  values = frame[col].cast(pl.Float64).to_list()
+  sw = math.fsum(weights)
   if sw <= 0.0:
     raise CalibrationError("sum of weights is non-positive")
-  return float((w * x).sum()) / sw
+  return math.fsum(w * x for w, x in zip(weights, values, strict=True)) / sw
 
 
 def _weighted_conditional(
@@ -374,7 +374,7 @@ def _weighted_conditional(
   weight_col: str = "weight",
 ) -> float | None:
   sub = frame.filter(pl.col(cond))
-  if sub.height == 0 or float(sub[weight_col].sum()) <= 0.0:
+  if sub.height == 0 or math.fsum(sub[weight_col].cast(pl.Float64).to_list()) <= 0.0:
     return None
   return _weighted_mean(sub, outcome, weight_col)
 
@@ -499,7 +499,10 @@ def validate_beneficiary_weights(frame: pl.DataFrame, weights: pl.DataFrame) -> 
     raise CalibrationError("weights must be non-null numeric values")
   if weights.filter(~pl.col("weight").is_finite() | (pl.col("weight") < 0)).height:
     raise CalibrationError("weights must be finite and nonnegative")
-  total = float(weights["weight"].sum()) if weights.height else 0.0
+  try:
+    total = math.fsum(weights["weight"].cast(pl.Float64).to_list())
+  except OverflowError as exc:
+    raise CalibrationError("weights must have a finite positive total") from exc
   if not math.isfinite(total) or total <= 0:
     raise CalibrationError("weights must have a finite positive total")
 
@@ -511,9 +514,10 @@ def _target_row(
   *,
   tolerance: float | None = None,
 ) -> DiscrepancyRow:
+  frame = frame.sort("bene_id").rechunk()
   denominator = frame.filter(pl.col("diabetes")) if target.feature == "ip_given_diabetes" else frame
   count = denominator.height
-  weight_sum = float(denominator["weight"].sum()) if count else 0.0
+  weight_sum = math.fsum(denominator["weight"].cast(pl.Float64).to_list()) if count else 0.0
   estimate = evaluate_moment(frame, target) if count and weight_sum > 0 else None
   residual = None if estimate is None else estimate - target.evidence_estimate
   status = "undefined" if residual is None else (
@@ -576,11 +580,13 @@ def discrepancy_for_findings(
 
 
 def effective_sample_size(weights: pl.Series) -> float:
-  w = weights.cast(pl.Float64)
-  s1 = float(w.sum())
-  s2 = float((w * w).sum())
-  if s2 <= 0.0:
+  w = weights.cast(pl.Float64).to_list()
+  scale = max(w, default=0.0)
+  if scale <= 0.0:
     return 0.0
+  scaled = [value / scale for value in w]
+  s1 = math.fsum(scaled)
+  s2 = math.fsum(value * value for value in scaled)
   return (s1 * s1) / s2
 
 
@@ -591,8 +597,8 @@ def _rake_binary(
 ) -> tuple[list[float], str | None]:
   if not 0.0 <= target <= 1.0:
     return weights, f"target {target} outside [0,1]"
-  mass1 = sum(w for w, f in zip(weights, flag, strict=True) if f)
-  mass0 = sum(w for w, f in zip(weights, flag, strict=True) if not f)
+  mass1 = math.fsum(w for w, f in zip(weights, flag, strict=True) if f)
+  mass0 = math.fsum(w for w, f in zip(weights, flag, strict=True) if not f)
   total = mass1 + mass0
   if total <= 0.0:
     return weights, "non-positive total weight"
@@ -752,7 +758,7 @@ def reweight_beneficiaries(
     ess=round(ess, 12),
     min_weight=round(float(w_series.min()), 12),  # type: ignore[arg-type]
     max_weight=round(float(w_series.max()), 12),  # type: ignore[arg-type]
-    sum_weights=round(float(w_series.sum()), 12),
+    sum_weights=round(math.fsum(weights), 12),
     iterations=it,
     converged=converged and not infeasible,
     infeasible=infeasible,

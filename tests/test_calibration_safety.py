@@ -19,6 +19,34 @@ from medicare_synth.synthesis import ConditionalWorldParams, generate_diabetes_i
 from medicare_synth.worlds import default_baseline_params
 
 
+def test_reweight_is_deterministic_across_polars_thread_counts() -> None:
+  import os
+  import subprocess
+  import sys
+
+  code = """
+import hashlib, json
+from medicare_synth.calibration import calibrate_reweight, load_default_corpus
+from medicare_synth.synthesis import generate_diabetes_ip_world
+from medicare_synth.worlds import default_baseline_params
+corpus, _ = load_default_corpus()
+world = generate_diabetes_ip_world(default_baseline_params(n_beneficiaries=6000, seed=42))
+result = calibrate_reweight(world.tables(), corpus)
+payload = {'weights': result.weights.sort('bene_id').to_dicts(),
+           'after': result.after.model_dump(mode='json'),
+           'diagnostics': result.diagnostics.model_dump(mode='json')}
+print(hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest())
+"""
+  hashes = [
+    subprocess.check_output(
+      [sys.executable, "-c", code],
+      env={**os.environ, "POLARS_MAX_THREADS": str(threads)}, text=True,
+    ).strip()
+    for threads in (1, 4)
+  ]
+  assert hashes[0] == hashes[1]
+
+
 def test_one_sweep_does_not_claim_false_convergence() -> None:
   corpus, _ = load_default_corpus()
   world = generate_diabetes_ip_world(default_baseline_params(n_beneficiaries=6000, seed=42))
