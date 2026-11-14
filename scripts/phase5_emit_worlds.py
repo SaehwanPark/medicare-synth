@@ -14,7 +14,8 @@ from medicare_synth.evaluation import (
 from medicare_synth.worlds import emit_world_family, family_summary
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT_DIR = ROOT / "reports" / "phase5"
+# The historical Phase 5 directory is immutable; corrected semantics use v2.
+OUT_DIR = ROOT / "reports" / "phase5-corrected-v2"
 
 
 def main() -> None:

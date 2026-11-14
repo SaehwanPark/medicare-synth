@@ -23,7 +23,7 @@ from medicare_synth.calibration import (  # noqa: E402
   build_run_manifest,
   calibrate_generator_params,
   discrepancy_for_findings,
-  level_a_baseline,
+  evaluate_frozen_params,
   structural_valid,
 )
 from medicare_synth.evidence_corpus import (  # noqa: E402
@@ -83,10 +83,6 @@ def main() -> int:
   baseline_tables = baseline_world.tables()
   baseline_parquet = _write_parquet(baseline_tables, PARQUET_DIR / "baseline")
 
-  cal_before, hold_before = level_a_baseline(
-    baseline_tables, corpus, fixtures_root=FIXTURES_ROOT
-  )
-
   # Grid includes Andes 0.316; HF/IP free params stay near baseline (A is prevalence).
   result = calibrate_generator_params(
     baseline_params,
@@ -96,6 +92,9 @@ def main() -> int:
     hf_values=(0.10,),
     ip_diab_values=(0.08, 0.13),
   )
+  evaluation = evaluate_frozen_params(result, corpus, fixtures_root=FIXTURES_ROOT)
+  cal_before = result.baseline
+  hold_before = evaluation.holdout_baseline
   fitted_world = generate_diabetes_ip_world(result.fitted_params)
   fitted_tables = fitted_world.tables()
   calibrated_parquet = _write_parquet(fitted_tables, PARQUET_DIR / "calibrated_to_a")
@@ -103,15 +102,10 @@ def main() -> int:
   cal_findings = load_partition_findings(
     corpus, PartitionName.CALIBRATION, fixtures_root=FIXTURES_ROOT
   )
-  hold_findings = load_partition_findings(
-    corpus, PartitionName.HOLDOUT, fixtures_root=FIXTURES_ROOT
-  )
   cal_after = discrepancy_for_findings(
     fitted_tables, cal_findings, partition=PartitionName.CALIBRATION
   )
-  hold_after = discrepancy_for_findings(
-    fitted_tables, hold_findings, partition=PartitionName.HOLDOUT
-  )
+  hold_after = evaluation.holdout_fitted
 
   ok_struct = structural_valid(fitted_world)
   manifest = build_run_manifest(
